@@ -31,6 +31,7 @@ Configure the following environment variables in Vercel:
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `ADMIN_PASSWORD` | Password for admin access. Use a strong password with at least 16 characters. | `MySecureP@ssw0rd!2024` |
+| `SESSION_SECRET` | Secret for signing session tokens (independent of password). Generate with `openssl rand -base64 32` | `aB3dEf...` |
 | `GITHUB_TOKEN` | Personal access token for GitHub API | `ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
 | `GITHUB_OWNER` | Repository owner (username or org) | `AgentFoundryExamples` |
 | `GITHUB_REPO` | Repository name | `the-horizon` |
@@ -41,6 +42,8 @@ Configure the following environment variables in Vercel:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `NODE_ENV` | Environment mode | `production` |
+
+**Note on SESSION_SECRET**: If not provided, the system will fall back to using `ADMIN_PASSWORD` as the session secret (not recommended for production). For better security, always set a separate `SESSION_SECRET`.
 
 ### 3. Configure Environment Variables in Vercel
 
@@ -134,12 +137,15 @@ The admin interface includes multiple layers of security protection:
 - Session cookies use cryptographically signed random tokens
 - Prevents session forgery by validating HMAC-SHA256 signatures
 - Tokens are validated in middleware on every protected route
+- Uses dedicated SESSION_SECRET (or falls back to ADMIN_PASSWORD)
+- Changing SESSION_SECRET invalidates all existing sessions
 
 **Rate Limiting**
 - Maximum 5 failed login attempts per IP address
 - 15-minute lockout period after exceeding limit
 - Automatic reset on successful login
 - Helps prevent brute force attacks
+- **Limitations**: In-memory storage (resets on server restart, not suitable for multi-instance deployments)
 
 **Sanitized Error Logging**
 - No tokens or sensitive data exposed in error messages

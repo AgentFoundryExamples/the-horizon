@@ -19,6 +19,26 @@ import { createHash, timingSafeEqual } from 'crypto';
 const AUTH_COOKIE_NAME = 'admin-auth';
 
 /**
+ * Gets the session secret from environment variable
+ */
+function getSessionSecret(): string {
+  const SESSION_SECRET = process.env.SESSION_SECRET;
+  
+  if (SESSION_SECRET) {
+    return SESSION_SECRET;
+  }
+  
+  // Fallback to ADMIN_PASSWORD for backward compatibility
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+  
+  if (!ADMIN_PASSWORD) {
+    throw new Error('Neither SESSION_SECRET nor ADMIN_PASSWORD is configured');
+  }
+  
+  return ADMIN_PASSWORD;
+}
+
+/**
  * Validates a signed session token
  */
 function validateSessionToken(signedToken: string): boolean {
@@ -28,13 +48,14 @@ function validateSessionToken(signedToken: string): boolean {
   }
   
   const [token, signature] = parts;
-  const secret = process.env.ADMIN_PASSWORD || 'fallback-secret';
-  const expectedSignature = createHash('sha256')
-    .update(token + secret)
-    .digest('hex');
   
-  // Use timing-safe comparison
   try {
+    const secret = getSessionSecret();
+    const expectedSignature = createHash('sha256')
+      .update(token + secret)
+      .digest('hex');
+    
+    // Use timing-safe comparison
     const signatureBuffer = Buffer.from(signature, 'hex');
     const expectedSignatureBuffer = Buffer.from(expectedSignature, 'hex');
     return timingSafeEqual(signatureBuffer, expectedSignatureBuffer);

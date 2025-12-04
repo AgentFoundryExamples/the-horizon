@@ -24,9 +24,34 @@ const AUTH_COOKIE_NAME = 'admin-auth';
 const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
 
 // In-memory store for rate limiting (resets on server restart)
+// NOTE: This is not suitable for multi-instance deployments.
+// For production with multiple instances, use a shared cache like Redis.
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
+
+/**
+ * Gets the session secret from environment variable
+ * Falls back to ADMIN_PASSWORD for backward compatibility but logs warning
+ */
+function getSessionSecret(): string {
+  const SESSION_SECRET = process.env.SESSION_SECRET;
+  
+  if (SESSION_SECRET) {
+    return SESSION_SECRET;
+  }
+  
+  // Fallback to ADMIN_PASSWORD for backward compatibility
+  // Log warning that this is not recommended
+  console.warn('SESSION_SECRET not set, using ADMIN_PASSWORD as fallback. This is not recommended for production.');
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+  
+  if (!ADMIN_PASSWORD) {
+    throw new Error('Neither SESSION_SECRET nor ADMIN_PASSWORD is configured');
+  }
+  
+  return ADMIN_PASSWORD;
+}
 
 /**
  * Gets the admin password from environment variable
@@ -125,8 +150,8 @@ export async function createSession(): Promise<void> {
   // Generate a secure random session token
   const sessionToken = randomBytes(32).toString('hex');
   
-  // Sign the token with a secret (derived from ADMIN_PASSWORD for simplicity)
-  const secret = getAdminPassword() || 'fallback-secret';
+  // Sign the token with the session secret
+  const secret = getSessionSecret();
   const signature = createHash('sha256')
     .update(sessionToken + secret)
     .digest('hex');
@@ -168,7 +193,7 @@ export async function isAuthenticated(): Promise<boolean> {
   }
   
   const [token, signature] = parts;
-  const secret = getAdminPassword() || 'fallback-secret';
+  const secret = getSessionSecret();
   const expectedSignature = createHash('sha256')
     .update(token + secret)
     .digest('hex');
