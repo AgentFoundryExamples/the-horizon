@@ -1,0 +1,329 @@
+'use client';
+
+/**
+ * UniverseScene - Main 3D scene showing galaxies as particle clouds
+ * Implements shader-based particles with smooth camera transitions
+ */
+
+import { useEffect, useRef, useMemo } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
+import * as THREE from 'three';
+import type { Galaxy } from '@/lib/universe/types';
+import { useNavigationStore } from '@/lib/store';
+import {
+  CameraAnimator,
+  calculateFocusPosition,
+  DEFAULT_CAMERA_POSITIONS,
+  DEFAULT_ANIMATION_CONFIG,
+} from '@/lib/camera';
+import GalaxyView from './GalaxyView';
+
+/**
+ * Particle shader for galaxy rendering
+ */
+const galaxyVertexShader = `
+  attribute float size;
+  attribute vec3 customColor;
+  varying vec3 vColor;
+  
+  void main() {
+    vColor = customColor;
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+    gl_PointSize = size * (300.0 / -mvPosition.z);
+    gl_Position = projectionMatrix * mvPosition;
+  }
+`;
+
+const galaxyFragmentShader = `
+  varying vec3 vColor;
+  
+  void main() {
+    float r = distance(gl_PointCoord, vec2(0.5, 0.5));
+    if (r > 0.5) discard;
+    
+    float alpha = 1.0 - smoothstep(0.0, 0.5, r);
+    gl_FragColor = vec4(vColor, alpha * 0.8);
+  }
+`;
+
+interface GalaxyParticlesProps {
+  galaxy: Galaxy;
+  position: THREE.Vector3;
+  onClick: () => void;
+  isActive: boolean;
+}
+
+/**
+ * Individual galaxy rendered as particle cloud
+ */
+function GalaxyParticles({ galaxy, position, onClick, isActive }: GalaxyParticlesProps) {
+  const meshRef = useRef<THREE.Points>(null);
+  const particleCount = 2000 + (galaxy.solarSystems?.length || 0) * 100;
+
+  const { positions, colors, sizes } = useMemo(() => {
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+
+    // Parse galaxy color
+    const color = new THREE.Color(galaxy.particleColor || '#4A90E2');
+
+    // Create spiral galaxy pattern
+    for (let i = 0; i < particleCount; i++) {
+      const i3 = i * 3;
+      
+      // Spiral parameters
+      const radius = Math.random() * 8 + 2;
+      const spinAngle = radius * 0.5;
+      const branchAngle = ((i % 3) / 3) * Math.PI * 2;
+      
+      const angle = branchAngle + spinAngle;
+      const randomX = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 0.5;
+      const randomY = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 0.5;
+      const randomZ = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 0.5;
+
+      positions[i3] = Math.cos(angle) * radius + randomX;
+      positions[i3 + 1] = randomY * 0.3;
+      positions[i3 + 2] = Math.sin(angle) * radius + randomZ;
+
+      // Color variation
+      const mixedColor = color.clone();
+      mixedColor.lerp(new THREE.Color('#FFFFFF'), Math.random() * 0.3);
+
+      colors[i3] = mixedColor.r;
+      colors[i3 + 1] = mixedColor.g;
+      colors[i3 + 2] = mixedColor.b;
+
+      // Size variation
+      sizes[i] = Math.random() * 2 + 1;
+    }
+
+    return { positions, colors, sizes };
+  }, [galaxy, particleCount]);
+
+  // Gentle rotation animation
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.05;
+      
+      // Pulse effect when active
+      if (isActive) {
+        const scale = 1 + Math.sin(state.clock.getElapsedTime() * 2) * 0.05;
+        meshRef.current.scale.setScalar(scale);
+      }
+    }
+  });
+
+  return (
+    <points
+      ref={meshRef}
+      position={position}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+    >
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={particleCount}
+          array={positions}
+          itemSize={3}
+        />
+        <bufferAttribute
+          attach="attributes-customColor"
+          count={particleCount}
+          array={colors}
+          itemSize={3}
+        />
+        <bufferAttribute
+          attach="attributes-size"
+          count={particleCount}
+          array={sizes}
+          itemSize={1}
+        />
+      </bufferGeometry>
+      <shaderMaterial
+        vertexShader={galaxyVertexShader}
+        fragmentShader={galaxyFragmentShader}
+        transparent
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </points>
+  );
+}
+
+interface SceneContentProps {
+  galaxies: Galaxy[];
+}
+
+/**
+ * Main scene content with camera management
+ */
+function SceneContent({ galaxies }: SceneContentProps) {
+  const { camera } = useThree();
+  const controlsRef = useRef<any>(null);
+  const animatorRef = useRef<CameraAnimator | null>(null);
+
+  const {
+    focusLevel,
+    focusedGalaxyId,
+    isTransitioning,
+    setTransitioning,
+    navigateToGalaxy,
+  } = useNavigationStore();
+
+  // Position galaxies in a grid
+  const galaxyPositions = useMemo(() => {
+    const positions = new Map<string, THREE.Vector3>();
+    const spacing = 30;
+    const cols = Math.ceil(Math.sqrt(galaxies.length));
+
+    galaxies.forEach((galaxy, index) => {
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      positions.set(
+        galaxy.id,
+        new THREE.Vector3(
+          (col - (cols - 1) / 2) * spacing,
+          0,
+          (row - Math.floor(galaxies.length / cols) / 2) * spacing
+        )
+      );
+    });
+
+    return positions;
+  }, [galaxies]);
+
+  const focusedGalaxy = galaxies.find((g) => g.id === focusedGalaxyId);
+
+  // Handle camera transitions
+  useEffect(() => {
+    if (focusLevel === 'universe') {
+      // Return to universe view
+      const targetPos = DEFAULT_CAMERA_POSITIONS.universe;
+      animatorRef.current = new CameraAnimator(
+        {
+          position: camera.position.clone(),
+          lookAt: new THREE.Vector3(0, 0, 0),
+        },
+        targetPos,
+        DEFAULT_ANIMATION_CONFIG,
+        true
+      );
+
+      animatorRef.current.setOnComplete(() => {
+        setTransitioning(false);
+        animatorRef.current = null;
+        if (controlsRef.current) {
+          controlsRef.current.enabled = true;
+        }
+      });
+
+      if (controlsRef.current) {
+        controlsRef.current.enabled = false;
+      }
+    } else if (focusLevel === 'galaxy' && focusedGalaxyId) {
+      // Focus on specific galaxy
+      const galaxyPos = galaxyPositions.get(focusedGalaxyId);
+      if (galaxyPos) {
+        const targetPos = calculateFocusPosition(galaxyPos, 25, 35);
+        
+        animatorRef.current = new CameraAnimator(
+          {
+            position: camera.position.clone(),
+            lookAt: new THREE.Vector3(0, 0, 0),
+          },
+          targetPos,
+          DEFAULT_ANIMATION_CONFIG,
+          true
+        );
+
+        animatorRef.current.setOnComplete(() => {
+          setTransitioning(false);
+          animatorRef.current = null;
+        });
+
+        if (controlsRef.current) {
+          controlsRef.current.enabled = false;
+        }
+      }
+    }
+  }, [focusLevel, focusedGalaxyId, camera, galaxyPositions, setTransitioning]);
+
+  // Animation loop
+  useFrame((state) => {
+    if (animatorRef.current) {
+      const complete = animatorRef.current.update(camera, state.clock.getElapsedTime() * 1000);
+      if (complete) {
+        animatorRef.current = null;
+      }
+    }
+  });
+
+  return (
+    <>
+      <ambientLight intensity={0.3} />
+      <pointLight position={[10, 10, 10]} intensity={0.8} />
+      
+      {/* Render galaxies or galaxy detail view */}
+      {focusLevel === 'universe' && galaxies.map((galaxy) => {
+        const position = galaxyPositions.get(galaxy.id);
+        if (!position) return null;
+
+        return (
+          <GalaxyParticles
+            key={galaxy.id}
+            galaxy={galaxy}
+            position={position}
+            onClick={() => navigateToGalaxy(galaxy.id)}
+            isActive={false}
+          />
+        );
+      })}
+
+      {focusLevel === 'galaxy' && focusedGalaxy && (
+        <GalaxyView
+          galaxy={focusedGalaxy}
+          position={galaxyPositions.get(focusedGalaxy.id) || new THREE.Vector3(0, 0, 0)}
+        />
+      )}
+
+      {/* Orbit controls - disabled during transitions */}
+      <OrbitControls
+        ref={controlsRef}
+        enabled={!isTransitioning && focusLevel === 'universe'}
+        enableDamping
+        dampingFactor={0.05}
+        minDistance={20}
+        maxDistance={200}
+        maxPolarAngle={Math.PI / 2}
+      />
+    </>
+  );
+}
+
+interface UniverseSceneProps {
+  galaxies: Galaxy[];
+}
+
+/**
+ * Main UniverseScene component
+ */
+export default function UniverseScene({ galaxies }: UniverseSceneProps) {
+  return (
+    <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
+      <Canvas
+        camera={{
+          position: [0, 50, 100],
+          fov: 75,
+        }}
+        style={{ background: '#000000' }}
+      >
+        <SceneContent galaxies={galaxies} />
+      </Canvas>
+    </div>
+  );
+}
