@@ -32,6 +32,56 @@
       }
     },
     {
+      "id": "src/app/api/admin/login/route.ts",
+      "path": "src/app/api/admin/login/route.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "@/lib/auth",
+          "next/server"
+        ]
+      }
+    },
+    {
+      "id": "src/app/api/admin/logout/route.ts",
+      "path": "src/app/api/admin/logout/route.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "@/lib/auth",
+          "next/server"
+        ]
+      }
+    },
+    {
+      "id": "src/app/api/admin/universe/route.ts",
+      "path": "src/app/api/admin/universe/route.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [
+          "crypto"
+        ],
+        "third-party": [
+          "@/../public/universe/universe.json",
+          "@/lib/auth",
+          "@/lib/github",
+          "@/lib/universe/mutate",
+          "next/server"
+        ]
+      }
+    },
+    {
+      "id": "src/lib/__tests__/auth.test.ts",
+      "path": "src/lib/__tests__/auth.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/__tests__/camera.test.ts",
       "path": "src/lib/__tests__/camera.test.ts",
       "type": "file",
@@ -40,6 +90,15 @@
         "third-party": [
           "three"
         ]
+      }
+    },
+    {
+      "id": "src/lib/__tests__/github.test.ts",
+      "path": "src/lib/__tests__/github.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
       }
     },
     {
@@ -54,6 +113,19 @@
       }
     },
     {
+      "id": "src/lib/auth.ts",
+      "path": "src/lib/auth.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [
+          "crypto"
+        ],
+        "third-party": [
+          "next/headers"
+        ]
+      }
+    },
+    {
       "id": "src/lib/camera.ts",
       "path": "src/lib/camera.ts",
       "type": "file",
@@ -62,6 +134,17 @@
         "third-party": [
           "three"
         ]
+      }
+    },
+    {
+      "id": "src/lib/github.ts",
+      "path": "src/lib/github.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [
+          "crypto"
+        ],
+        "third-party": []
       }
     },
     {
@@ -87,6 +170,15 @@
     {
       "id": "src/lib/universe/__tests__/edge-cases.test.ts",
       "path": "src/lib/universe/__tests__/edge-cases.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/universe/__tests__/mutate.test.ts",
+      "path": "src/lib/universe/__tests__/mutate.test.ts",
       "type": "file",
       "external_dependencies": {
         "stdlib": [],
@@ -124,6 +216,15 @@
       }
     },
     {
+      "id": "src/lib/universe/mutate.ts",
+      "path": "src/lib/universe/mutate.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/universe/types.ts",
       "path": "src/lib/universe/types.ts",
       "type": "file",
@@ -131,12 +232,33 @@
         "stdlib": [],
         "third-party": []
       }
+    },
+    {
+      "id": "src/middleware.ts",
+      "path": "src/middleware.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [
+          "crypto"
+        ],
+        "third-party": [
+          "next/server"
+        ]
+      }
     }
   ],
   "edges": [
     {
+      "source": "src/lib/__tests__/auth.test.ts",
+      "target": "src/lib/auth.ts"
+    },
+    {
       "source": "src/lib/__tests__/camera.test.ts",
       "target": "src/lib/camera.ts"
+    },
+    {
+      "source": "src/lib/__tests__/github.test.ts",
+      "target": "src/lib/github.ts"
     },
     {
       "source": "src/lib/__tests__/store.test.ts",
@@ -155,27 +277,46 @@
       "target": "src/lib/universe/types.ts"
     },
     {
+      "source": "src/lib/universe/__tests__/mutate.test.ts",
+      "target": "src/lib/universe/mutate.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/mutate.test.ts",
+      "target": "src/lib/universe/types.ts"
+    },
+    {
       "source": "src/lib/universe/__tests__/types.test.ts",
       "target": "src/lib/universe/types.ts"
     },
     {
       "source": "src/lib/universe/data-service.ts",
       "target": "src/lib/universe/types.ts"
+    },
+    {
+      "source": "src/lib/universe/mutate.ts",
+      "target": "src/lib/universe/types.ts"
     }
   ],
   "external_dependencies_summary": {
     "stdlib": [
+      "crypto",
       "fs/promises",
       "path"
     ],
     "third-party": [
+      "@/../public/universe/universe.json",
+      "@/lib/auth",
+      "@/lib/github",
+      "@/lib/universe/mutate",
       "@testing-library/jest-dom",
       "@testing-library/react",
+      "next/headers",
       "next/jest",
+      "next/server",
       "three",
       "zustand"
     ],
-    "stdlib_count": 2,
-    "third-party_count": 5
+    "stdlib_count": 3,
+    "third-party_count": 11
   }
 }

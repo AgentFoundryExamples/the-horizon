@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 13
+Total files: 23
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -33,6 +33,42 @@ Total files: 13
 **LOC:** 10  
 **TODOs/FIXMEs:** 0  
 
+## src/app/api/admin/login/route.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 2.57 KB  
+**LOC:** 56  
+**TODOs/FIXMEs:** 0  
+
+## src/app/api/admin/logout/route.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 0.96 KB  
+**LOC:** 14  
+**TODOs/FIXMEs:** 0  
+
+## src/app/api/admin/universe/route.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 3.71 KB  
+**LOC:** 108  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/__tests__/auth.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 3.76 KB  
+**LOC:** 79  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/__tests__/camera.test.ts
 **Language:** TypeScript  
 **Role:** implementation  
@@ -40,6 +76,15 @@ Total files: 13
 **Summary:** TypeScript core implementation  
 **Size:** 9.81 KB  
 **LOC:** 252  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/__tests__/github.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 3.11 KB  
+**LOC:** 69  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/__tests__/store.test.ts
@@ -51,6 +96,15 @@ Total files: 13
 **LOC:** 374  
 **TODOs/FIXMEs:** 0  
 
+## src/lib/auth.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 6.02 KB  
+**LOC:** 146  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/camera.ts
 **Language:** TypeScript  
 **Role:** implementation  
@@ -58,6 +112,15 @@ Total files: 13
 **Summary:** TypeScript core implementation  
 **Size:** 5.85 KB  
 **LOC:** 195  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/github.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 11.13 KB  
+**LOC:** 350  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/store.ts
@@ -87,6 +150,15 @@ Total files: 13
 **LOC:** 35  
 **TODOs/FIXMEs:** 0  
 
+## src/lib/universe/__tests__/mutate.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 11.18 KB  
+**LOC:** 318  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/universe/__tests__/types.test.ts
 **Language:** TypeScript  
 **Role:** implementation  
@@ -114,6 +186,15 @@ Total files: 13
 **LOC:** 6  
 **TODOs/FIXMEs:** 0  
 
+## src/lib/universe/mutate.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 17.49 KB  
+**LOC:** 470  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/universe/types.ts
 **Language:** TypeScript  
 **Role:** implementation  
@@ -121,4 +202,13 @@ Total files: 13
 **Summary:** TypeScript core implementation  
 **Size:** 6.97 KB  
 **LOC:** 196  
+**TODOs/FIXMEs:** 0  
+
+## src/middleware.ts
+**Language:** TypeScript  
+**Role:** middleware  
+**Role Justification:** filename contains 'middleware'  
+**Summary:** TypeScript middleware component (role: middleware)  
+**Size:** 2.62 KB  
+**LOC:** 59  
 **TODOs/FIXMEs:** 0  

@@ -17,6 +17,7 @@
     └── af_maintenance.yml
 ├── docs
   ├── content-authoring.md
+  ├── deployment.md
   ├── universe-schema.md
   └── visuals.md
 ├── public
@@ -24,6 +25,20 @@
     └── universe.json
 ├── src
   ├── app
+    ├── admin
+      ├── login
+        └── page.tsx
+      ├── admin.css
+      ├── layout.tsx
+      └── page.tsx
+    ├── api
+      └── admin
+        ├── login
+          └── route.ts
+        ├── logout
+          └── route.ts
+        └── universe
+          └── route.ts
     ├── galaxy
       └── [id]
         └── page.tsx
@@ -31,6 +46,11 @@
     ├── layout.tsx
     └── page.tsx
   ├── components
+    ├── admin
+      ├── GalaxyEditor.tsx
+      ├── PlanetEditor.tsx
+      ├── SolarSystemEditor.tsx
+      └── UniverseEditor.tsx
     ├── GalaxyView.tsx
     ├── MarkdownContent.tsx
     ├── PlanetSurface.tsx
@@ -39,20 +59,27 @@
     └── UniverseScene.tsx
   ├── lib
     ├── __tests__
+      ├── auth.test.ts
       ├── camera.test.ts
+      ├── github.test.ts
       └── store.test.ts
     ├── universe
       ├── __tests__
         ├── data-service.test.ts
         ├── edge-cases.test.ts
+        ├── mutate.test.ts
         └── types.test.ts
       ├── data-service.ts
       ├── index.ts
+      ├── mutate.ts
       └── types.ts
+    ├── auth.ts
     ├── camera.ts
+    ├── github.ts
     └── store.ts
-  └── styles
+  ├── styles
     └── planet.css
+  └── middleware.ts
 ├── .env.example
 ├── .eslintrc.json
 ├── .gitignore

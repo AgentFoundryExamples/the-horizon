@@ -80,6 +80,10 @@
         },
         {
           "type": "file",
+          "name": "deployment.md"
+        },
+        {
+          "type": "file",
           "name": "universe-schema.md"
         },
         {
@@ -114,6 +118,76 @@
           "children": [
             {
               "type": "directory",
+              "name": "admin",
+              "children": [
+                {
+                  "type": "directory",
+                  "name": "login",
+                  "children": [
+                    {
+                      "type": "file",
+                      "name": "page.tsx"
+                    }
+                  ]
+                },
+                {
+                  "type": "file",
+                  "name": "admin.css"
+                },
+                {
+                  "type": "file",
+                  "name": "layout.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "page.tsx"
+                }
+              ]
+            },
+            {
+              "type": "directory",
+              "name": "api",
+              "children": [
+                {
+                  "type": "directory",
+                  "name": "admin",
+                  "children": [
+                    {
+                      "type": "directory",
+                      "name": "login",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "route.ts"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "logout",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "route.ts"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "universe",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "route.ts"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "directory",
               "name": "galaxy",
               "children": [
                 {
@@ -146,6 +220,28 @@
           "type": "directory",
           "name": "components",
           "children": [
+            {
+              "type": "directory",
+              "name": "admin",
+              "children": [
+                {
+                  "type": "file",
+                  "name": "GalaxyEditor.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "PlanetEditor.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "SolarSystemEditor.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "UniverseEditor.tsx"
+                }
+              ]
+            },
             {
               "type": "file",
               "name": "GalaxyView.tsx"
@@ -182,7 +278,15 @@
               "children": [
                 {
                   "type": "file",
+                  "name": "auth.test.ts"
+                },
+                {
+                  "type": "file",
                   "name": "camera.test.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "github.test.ts"
                 },
                 {
                   "type": "file",
@@ -208,6 +312,10 @@
                     },
                     {
                       "type": "file",
+                      "name": "mutate.test.ts"
+                    },
+                    {
+                      "type": "file",
                       "name": "types.test.ts"
                     }
                   ]
@@ -222,13 +330,25 @@
                 },
                 {
                   "type": "file",
+                  "name": "mutate.ts"
+                },
+                {
+                  "type": "file",
                   "name": "types.ts"
                 }
               ]
             },
             {
               "type": "file",
+              "name": "auth.ts"
+            },
+            {
+              "type": "file",
               "name": "camera.ts"
+            },
+            {
+              "type": "file",
+              "name": "github.ts"
             },
             {
               "type": "file",
@@ -245,6 +365,10 @@
               "name": "planet.css"
             }
           ]
+        },
+        {
+          "type": "file",
+          "name": "middleware.ts"
         }
       ]
     },

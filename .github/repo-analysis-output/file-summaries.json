@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 13,
+  "total_files": 23,
   "files": [
     {
       "schema_version": "2.0",
@@ -46,6 +46,62 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/app/api/admin/login/route.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 2629,
+        "loc": 56,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/app/api/admin/logout/route.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 984,
+        "loc": 14,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/app/api/admin/universe/route.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 3804,
+        "loc": 108,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/__tests__/auth.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 3848,
+        "loc": 79,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/__tests__/camera.test.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -55,6 +111,20 @@
       "metrics": {
         "size_bytes": 10047,
         "loc": 252,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/__tests__/github.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 3184,
+        "loc": 69,
         "todo_count": 0
       }
     },
@@ -74,6 +144,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/auth.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 6161,
+        "loc": 146,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/camera.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -83,6 +167,20 @@
       "metrics": {
         "size_bytes": 5989,
         "loc": 195,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/github.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 11402,
+        "loc": 350,
         "todo_count": 0
       }
     },
@@ -130,6 +228,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/universe/__tests__/mutate.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 11452,
+        "loc": 318,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/universe/__tests__/types.test.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -172,6 +284,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/universe/mutate.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 17905,
+        "loc": 470,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/universe/types.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -181,6 +307,20 @@
       "metrics": {
         "size_bytes": 7142,
         "loc": 196,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/middleware.ts",
+      "language": "TypeScript",
+      "role": "middleware",
+      "role_justification": "filename contains 'middleware'",
+      "summary": "TypeScript middleware component (role: middleware)",
+      "summary_text": "TypeScript middleware component (role: middleware)",
+      "metrics": {
+        "size_bytes": 2685,
+        "loc": 59,
         "todo_count": 0
       }
     }
