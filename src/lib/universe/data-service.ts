@@ -89,6 +89,13 @@ function sanitizeUniverse(universe: Universe): Universe {
 }
 
 /**
+ * Formats an error message from an unknown error type
+ */
+function formatErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+/**
  * Loads universe data from filesystem (Node.js environment)
  */
 async function loadFromFilesystem(): Promise<Universe> {
@@ -99,7 +106,7 @@ async function loadFromFilesystem(): Promise<Universe> {
     const fileContents = await fs.readFile(filePath, 'utf8');
     return JSON.parse(fileContents) as Universe;
   } catch (error) {
-    throw new Error(`Failed to load universe data from filesystem: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(`Failed to load universe data from filesystem: ${formatErrorMessage(error)}`);
   }
 }
 
@@ -114,7 +121,7 @@ async function loadFromFetch(): Promise<Universe> {
     }
     return await response.json() as Universe;
   } catch (error) {
-    throw new Error(`Failed to fetch universe data: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(`Failed to fetch universe data: ${formatErrorMessage(error)}`);
   }
 }
 
@@ -136,7 +143,8 @@ export async function loadUniverse(): Promise<Universe> {
     // Fallback to dynamic loading if static import fails or in certain environments
     // Priority: filesystem (Node.js/SSR) > fetch (browser)
     if (!data || !data.galaxies) {
-      console.warn('Static universe import failed or empty, attempting dynamic load');
+      const missingReason = !data ? 'data is null/undefined' : 'data.galaxies is missing';
+      console.warn(`Static universe import invalid (${missingReason}), attempting dynamic load`);
       
       // Check if we're in a Node.js environment (SSR/SSG)
       if (typeof window === 'undefined') {
@@ -160,7 +168,7 @@ export async function loadUniverse(): Promise<Universe> {
     return cachedUniverse;
   } catch (error) {
     // Re-throw with context - let callers decide how to handle
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorMessage = formatErrorMessage(error);
     console.error('Critical error loading universe data:', errorMessage);
     
     // For graceful degradation in production, return empty universe
