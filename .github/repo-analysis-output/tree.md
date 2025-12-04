@@ -16,6 +16,7 @@
   └── workflows
     └── af_maintenance.yml
 ├── docs
+  ├── content-authoring.md
   ├── universe-schema.md
   └── visuals.md
 ├── public
@@ -31,9 +32,12 @@
     └── page.tsx
   ├── components
     ├── GalaxyView.tsx
+    ├── MarkdownContent.tsx
+    ├── PlanetSurface.tsx
     ├── SceneHUD.tsx
+    ├── SolarSystemView.tsx
     └── UniverseScene.tsx
-  └── lib
+  ├── lib
     ├── __tests__
       ├── camera.test.ts
       └── store.test.ts
@@ -47,6 +51,8 @@
       └── types.ts
     ├── camera.ts
     └── store.ts
+  └── styles
+    └── planet.css
 ├── .env.example
 ├── .eslintrc.json
 ├── .gitignore

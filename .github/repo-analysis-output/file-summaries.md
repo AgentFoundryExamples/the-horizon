@@ -47,8 +47,8 @@ Total files: 13
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 10.41 KB  
-**LOC:** 242  
+**Size:** 14.85 KB  
+**LOC:** 374  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/camera.ts
@@ -65,8 +65,8 @@ Total files: 13
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 4.82 KB  
-**LOC:** 119  
+**Size:** 6.57 KB  
+**LOC:** 167  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/__tests__/data-service.test.ts

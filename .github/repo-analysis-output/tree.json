@@ -76,6 +76,10 @@
       "children": [
         {
           "type": "file",
+          "name": "content-authoring.md"
+        },
+        {
+          "type": "file",
           "name": "universe-schema.md"
         },
         {
@@ -148,7 +152,19 @@
             },
             {
               "type": "file",
+              "name": "MarkdownContent.tsx"
+            },
+            {
+              "type": "file",
+              "name": "PlanetSurface.tsx"
+            },
+            {
+              "type": "file",
               "name": "SceneHUD.tsx"
+            },
+            {
+              "type": "file",
+              "name": "SolarSystemView.tsx"
             },
             {
               "type": "file",
@@ -217,6 +233,16 @@
             {
               "type": "file",
               "name": "store.ts"
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "styles",
+          "children": [
+            {
+              "type": "file",
+              "name": "planet.css"
             }
           ]
         }
