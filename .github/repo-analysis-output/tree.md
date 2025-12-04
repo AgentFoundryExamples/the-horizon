@@ -1,4 +1,4 @@
-# agent-foundry-template
+# the-horizon
 
 ├── .github
   ├── af-config
