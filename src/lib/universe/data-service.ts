@@ -7,11 +7,13 @@ import type { Universe, Galaxy, SolarSystem, Planet, Moon, Star } from './types'
 import { validateUniverse } from './types';
 
 // Import the universe data statically
-// @ts-ignore - JSON import may vary between test and runtime
-import * as universeDataImport from '../../../public/universe/universe.json';
+// JSON imports are handled differently in Jest vs runtime, so we need defensive code
+import universeDataModule from '../../../public/universe/universe.json';
 
-// Handle both default and named exports from JSON
-const universeData = (universeDataImport as any).default || universeDataImport;
+// Handle both default and named exports from JSON depending on environment
+const universeData: Universe = 
+  (universeDataModule as { default?: Universe } & Universe).default || 
+  (universeDataModule as Universe);
 
 /**
  * Cached universe data
