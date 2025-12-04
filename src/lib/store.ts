@@ -18,6 +18,7 @@ export interface NavigationState {
 interface NavigationStore extends NavigationState {
   setFocus: (level: FocusLevel, id?: string | null) => void;
   setTransitioning: (isTransitioning: boolean) => void;
+  finishTransition: () => void;
   navigateToGalaxy: (galaxyId: string) => void;
   navigateToSolarSystem: (solarSystemId: string) => void;
   navigateBack: () => void;
@@ -51,6 +52,29 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
 
   setTransitioning: (isTransitioning: boolean) => {
     set({ isTransitioning });
+  },
+
+  finishTransition: () => {
+    const state = get();
+    const nextAction = state.transitionQueue[0];
+
+    if (nextAction) {
+      // Dequeue the action and set transitioning to false temporarily
+      set({ 
+        transitionQueue: state.transitionQueue.slice(1),
+        isTransitioning: false 
+      });
+      
+      // Execute the next action (which will set isTransitioning back to true)
+      if (nextAction.level === 'galaxy' && nextAction.id) {
+        get().navigateToGalaxy(nextAction.id);
+      } else if (nextAction.level === 'solar-system' && nextAction.id) {
+        get().navigateToSolarSystem(nextAction.id);
+      }
+    } else {
+      // No more actions, transition is finished
+      set({ isTransitioning: false });
+    }
   },
 
   navigateToGalaxy: (galaxyId: string) => {
@@ -93,24 +117,25 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
   navigateBack: () => {
     const state = get();
 
-    // Ignore if transitioning
-    if (state.isTransitioning) {
+    // Ignore if transitioning or already at the top level
+    if (state.isTransitioning || state.focusLevel === 'universe') {
       return;
     }
-
-    set({ isTransitioning: true });
 
     if (state.focusLevel === 'solar-system') {
       // Go back to galaxy view
       set({
+        isTransitioning: true,
         focusLevel: 'galaxy',
         focusedSolarSystemId: null,
       });
     } else if (state.focusLevel === 'galaxy') {
       // Go back to universe view
       set({
+        isTransitioning: true,
         focusLevel: 'universe',
         focusedGalaxyId: null,
+        focusedSolarSystemId: null, // Ensure this is also cleared
       });
     }
   },

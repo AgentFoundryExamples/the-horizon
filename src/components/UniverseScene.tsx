@@ -180,6 +180,7 @@ function SceneContent({ galaxies }: SceneContentProps) {
     focusedGalaxyId,
     isTransitioning,
     setTransitioning,
+    finishTransition,
     navigateToGalaxy,
   } = useNavigationStore();
 
@@ -223,7 +224,7 @@ function SceneContent({ galaxies }: SceneContentProps) {
       );
 
       animatorRef.current.setOnComplete(() => {
-        setTransitioning(false);
+        finishTransition();
         animatorRef.current = null;
         if (controlsRef.current) {
           controlsRef.current.enabled = true;
@@ -250,7 +251,7 @@ function SceneContent({ galaxies }: SceneContentProps) {
         );
 
         animatorRef.current.setOnComplete(() => {
-          setTransitioning(false);
+          finishTransition();
           animatorRef.current = null;
         });
 
@@ -259,7 +260,7 @@ function SceneContent({ galaxies }: SceneContentProps) {
         }
       }
     }
-  }, [focusLevel, focusedGalaxyId, camera, galaxyPositions, setTransitioning]);
+  }, [focusLevel, focusedGalaxyId, camera, galaxyPositions, finishTransition]);
 
   // Animation loop
   useFrame((state) => {

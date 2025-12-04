@@ -62,12 +62,25 @@ function PlanetInstance({ solarSystem, systemPosition }: PlanetInstanceProps) {
   const planetsRef = useRef<THREE.Group>(null);
 
   const planetData = useMemo(() => {
+    // Seeded pseudo-random number generator for deterministic orbits
+    const createSeededRandom = (seed: number) => {
+      let state = seed;
+      return () => {
+        state = (state * 9301 + 49297) % 233280;
+        return state / 233280;
+      };
+    };
+
     return (solarSystem.planets || []).map((planet, index) => {
+      // Create a unique seed for each planet for deterministic randomness
+      const seed = solarSystem.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + index;
+      const seededRandom = createSeededRandom(seed);
+
       // Simple Keplerian orbit parameters
       const semiMajorAxis = 2 + index * 1.5;
-      const eccentricity = Math.random() * 0.1; // Slight ellipse
-      const inclination = (Math.random() - 0.5) * 0.2; // Small inclination
-      const argumentOfPeriapsis = Math.random() * Math.PI * 2;
+      const eccentricity = seededRandom() * 0.1; // Slight ellipse
+      const inclination = (seededRandom() - 0.5) * 0.2; // Small inclination
+      const argumentOfPeriapsis = seededRandom() * Math.PI * 2;
       const orbitSpeed = 0.5 / (semiMajorAxis * semiMajorAxis); // Kepler's third law approximation
 
       return {
@@ -77,7 +90,7 @@ function PlanetInstance({ solarSystem, systemPosition }: PlanetInstanceProps) {
         inclination,
         argumentOfPeriapsis,
         orbitSpeed,
-        phase: Math.random() * Math.PI * 2, // Random starting position
+        phase: seededRandom() * Math.PI * 2, // Random but deterministic starting position
         size: 0.3 + (planet.moons?.length || 0) * 0.05,
       };
     });

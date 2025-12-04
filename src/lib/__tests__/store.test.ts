@@ -255,4 +255,65 @@ describe('Navigation Store', () => {
       expect(result.current.focusedSolarSystemId).toBe('sol-system');
     });
   });
+
+  describe('finishTransition', () => {
+    it('should process queued navigation when transition completes', () => {
+      const { result } = renderHook(() => useNavigationStore());
+
+      act(() => {
+        // Start first navigation
+        result.current.navigateToGalaxy('milky-way');
+        // Queue second navigation
+        result.current.navigateToGalaxy('andromeda');
+      });
+
+      expect(result.current.focusedGalaxyId).toBe('milky-way');
+      expect(result.current.transitionQueue.length).toBe(1);
+
+      // Finish the first transition
+      act(() => {
+        result.current.finishTransition();
+      });
+
+      // Should have processed the queued navigation
+      expect(result.current.focusedGalaxyId).toBe('andromeda');
+      expect(result.current.transitionQueue.length).toBe(0);
+      expect(result.current.isTransitioning).toBe(true);
+    });
+
+    it('should set isTransitioning to false when queue is empty', () => {
+      const { result } = renderHook(() => useNavigationStore());
+
+      act(() => {
+        result.current.navigateToGalaxy('milky-way');
+      });
+
+      expect(result.current.isTransitioning).toBe(true);
+
+      act(() => {
+        result.current.finishTransition();
+      });
+
+      expect(result.current.isTransitioning).toBe(false);
+    });
+
+    it('should process solar system navigation from queue', () => {
+      const { result } = renderHook(() => useNavigationStore());
+
+      act(() => {
+        result.current.navigateToGalaxy('milky-way');
+        result.current.navigateToSolarSystem('sol-system');
+      });
+
+      expect(result.current.focusLevel).toBe('galaxy');
+      expect(result.current.transitionQueue.length).toBe(1);
+
+      act(() => {
+        result.current.finishTransition();
+      });
+
+      expect(result.current.focusLevel).toBe('solar-system');
+      expect(result.current.focusedSolarSystemId).toBe('sol-system');
+    });
+  });
 });
