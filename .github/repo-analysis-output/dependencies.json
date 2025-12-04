@@ -1,10 +1,126 @@
 {
-  "nodes": [],
-  "edges": [],
+  "nodes": [
+    {
+      "id": "jest.config.js",
+      "path": "jest.config.js",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "next/jest"
+        ]
+      }
+    },
+    {
+      "id": "jest.setup.js",
+      "path": "jest.setup.js",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "@testing-library/jest-dom"
+        ]
+      }
+    },
+    {
+      "id": "next.config.js",
+      "path": "next.config.js",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/universe/__tests__/data-service.test.ts",
+      "path": "src/lib/universe/__tests__/data-service.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/universe/__tests__/edge-cases.test.ts",
+      "path": "src/lib/universe/__tests__/edge-cases.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/universe/__tests__/types.test.ts",
+      "path": "src/lib/universe/__tests__/types.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/universe/data-service.ts",
+      "path": "src/lib/universe/data-service.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [
+          "fs/promises",
+          "path"
+        ],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/universe/index.ts",
+      "path": "src/lib/universe/index.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/universe/types.ts",
+      "path": "src/lib/universe/types.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "src/lib/universe/__tests__/data-service.test.ts",
+      "target": "src/lib/universe/data-service.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/edge-cases.test.ts",
+      "target": "src/lib/universe/data-service.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/edge-cases.test.ts",
+      "target": "src/lib/universe/types.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/types.test.ts",
+      "target": "src/lib/universe/types.ts"
+    },
+    {
+      "source": "src/lib/universe/data-service.ts",
+      "target": "src/lib/universe/types.ts"
+    }
+  ],
   "external_dependencies_summary": {
-    "stdlib": [],
-    "third-party": [],
-    "stdlib_count": 0,
-    "third-party_count": 0
+    "stdlib": [
+      "fs/promises",
+      "path"
+    ],
+    "third-party": [
+      "@testing-library/jest-dom",
+      "next/jest"
+    ],
+    "stdlib_count": 2,
+    "third-party_count": 2
   }
 }

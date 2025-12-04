@@ -13,5 +13,36 @@
     └── tree.md
   └── workflows
     └── af_maintenance.yml
+├── docs
+  └── universe-schema.md
+├── public
+  └── universe
+    └── universe.json
+├── src
+  ├── app
+    ├── galaxy
+      └── [id]
+        └── page.tsx
+    ├── globals.css
+    ├── layout.tsx
+    └── page.tsx
+  └── lib
+    └── universe
+      ├── __tests__
+        ├── data-service.test.ts
+        ├── edge-cases.test.ts
+        └── types.test.ts
+      ├── data-service.ts
+      ├── index.ts
+      └── types.ts
+├── .env.example
+├── .eslintrc.json
+├── .gitignore
+├── jest.config.js
+├── jest.setup.js
 ├── LICENSE
-└── README.md
+├── next.config.js
+├── package-lock.json
+├── package.json
+├── README.md
+└── tsconfig.json
