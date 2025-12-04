@@ -63,6 +63,8 @@ function PlanetInstance({ solarSystem, systemPosition }: PlanetInstanceProps) {
 
   const planetData = useMemo(() => {
     // Seeded pseudo-random number generator for deterministic orbits
+    // Uses Linear Congruential Generator with parameters from Numerical Recipes
+    // (a=9301, c=49297, m=233280) which provides good distribution for small sequences
     const createSeededRandom = (seed: number) => {
       let state = seed;
       return () => {

@@ -70,6 +70,11 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
         get().navigateToGalaxy(nextAction.id);
       } else if (nextAction.level === 'solar-system' && nextAction.id) {
         get().navigateToSolarSystem(nextAction.id);
+      } else if (nextAction.level === 'universe') {
+        // Universe navigation doesn't require an ID
+        get().navigateBack(); // Navigate back handles universe level
+      } else {
+        console.warn('Unknown navigation level in queue:', nextAction.level);
       }
     } else {
       // No more actions, transition is finished
