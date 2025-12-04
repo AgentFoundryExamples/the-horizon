@@ -5,12 +5,15 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 ## Features
 
 - 🌌 **Universe Data Schema**: Well-defined JSON structure for galaxies, solar systems, planets, and moons
-- 🎨 **3D Ready**: Built with Three.js and React Three Fiber for future 3D visualizations
+- 🎨 **3D Visualization**: Interactive 3D universe with shader-based particle galaxies
+- 🎬 **Cinematic Navigation**: Smooth camera transitions with spline-based paths and easing
+- 🪐 **Keplerian Orbits**: Realistic planetary motion using simplified orbital mechanics
+- 🎮 **Multi-Layer Exploration**: Traverse from universe → galaxy → solar system views
 - 📝 **Markdown Content**: Rich content support using React Markdown
 - ✅ **TypeScript**: Fully typed data models with runtime validation
 - 🧪 **Tested**: Comprehensive unit tests for data loading and validation
 - 🚀 **Next.js 14**: Server-side rendering and static generation support
-- 📱 **Responsive**: Mobile-friendly design
+- ⚡ **Performance**: Instanced rendering, LOD, and GPU-accelerated shaders
 
 ## Quick Start
 
@@ -56,19 +59,26 @@ the-horizon/
 ├── src/
 │   ├── app/                    # Next.js app directory
 │   │   ├── layout.tsx         # Root layout
-│   │   ├── page.tsx           # Home page
+│   │   ├── page.tsx           # Home page with 3D scene
 │   │   ├── globals.css        # Global styles
 │   │   └── galaxy/[id]/       # Galaxy detail pages
+│   ├── components/            # React components
+│   │   ├── UniverseScene.tsx  # Main 3D scene with galaxies
+│   │   ├── GalaxyView.tsx     # Galaxy detail view with orbits
+│   │   └── SceneHUD.tsx       # Navigation overlay
 │   └── lib/
-│       └── universe/          # Universe data library
-│           ├── types.ts       # TypeScript models
-│           ├── data-service.ts # Data loading service
-│           └── __tests__/     # Unit tests
+│       ├── universe/          # Universe data library
+│       │   ├── types.ts       # TypeScript models
+│       │   ├── data-service.ts # Data loading service
+│       │   └── __tests__/     # Unit tests
+│       ├── camera.ts          # Camera animation utilities
+│       └── store.ts           # Zustand state management
 ├── public/
 │   └── universe/
 │       └── universe.json      # Universe data
 ├── docs/
-│   └── universe-schema.md     # Schema documentation
+│   ├── universe-schema.md     # Schema documentation
+│   └── visuals.md            # Scene controls and animation tuning
 ├── .env.example              # Environment variable template
 ├── next.config.js            # Next.js configuration
 ├── tsconfig.json             # TypeScript configuration
@@ -175,6 +185,25 @@ The application can be deployed to any platform that supports Next.js.
 - **Testing**: Jest 29.7.0, Testing Library
 - **Linting**: ESLint 8.57.1
 
+## 3D Scene Controls
+
+### Navigation
+
+- **Mouse Drag**: Orbit around the universe (universe view only)
+- **Mouse Wheel**: Zoom in/out (universe view only)
+- **Click Galaxy**: Transition to galaxy detail view
+- **Back Button**: Return to previous level with animated transition
+
+### Performance
+
+The scene uses several optimizations for smooth 60 FPS rendering:
+- Shader-based particle systems for galaxies (2,000+ particles each)
+- Instanced rendering for planets and stars
+- GPU-accelerated animations
+- Efficient state management with Zustand
+
+See [docs/visuals.md](docs/visuals.md) for detailed scene controls, animation tuning, and performance optimization guidelines.
+
 ## Future Enhancements
 
 - 🎮 Interactive 3D universe visualization
@@ -220,6 +249,7 @@ If the dev server won't start:
 ## Documentation
 
 - [Universe Schema Documentation](docs/universe-schema.md)
+- [Visual Scene Controls and Animation Tuning](docs/visuals.md)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [React Three Fiber Documentation](https://docs.pmnd.rs/react-three-fiber)
 
