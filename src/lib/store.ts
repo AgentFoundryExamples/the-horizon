@@ -36,6 +36,11 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
   ...initialState,
 
   setFocus: (level: FocusLevel, id: string | null = null) => {
+    // Validate that galaxy/solar-system levels have an id
+    if ((level === 'galaxy' || level === 'solar-system') && !id) {
+      console.warn(`setFocus: ${level} level requires an id parameter`);
+    }
+
     set({
       focusLevel: level,
       ...(level === 'galaxy' && { focusedGalaxyId: id, focusedSolarSystemId: null }),

@@ -52,6 +52,10 @@ interface PlanetInstanceProps {
 /**
  * Planets orbiting a star using Keplerian motion
  */
+
+// Constants for orbital calculations
+const KEPLER_ITERATION_COUNT = 5;
+
 function PlanetInstance({ solarSystem, systemPosition }: PlanetInstanceProps) {
   const planetsRef = useRef<THREE.Group>(null);
 
@@ -90,7 +94,7 @@ function PlanetInstance({ solarSystem, systemPosition }: PlanetInstanceProps) {
       
       // Simplified Keplerian orbit calculation
       let eccentricAnomaly = meanAnomaly;
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < KEPLER_ITERATION_COUNT; i++) {
         eccentricAnomaly = meanAnomaly + data.eccentricity * Math.sin(eccentricAnomaly);
       }
 
@@ -187,6 +191,10 @@ interface GalaxyViewProps {
   position: THREE.Vector3;
 }
 
+// Constants for background particle field
+const BACKGROUND_PARTICLE_COUNT = 500;
+const BACKGROUND_PARTICLE_RANGE = 40;
+
 /**
  * Galaxy detail view showing stars and solar systems
  */
@@ -261,12 +269,12 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={500}
+            count={BACKGROUND_PARTICLE_COUNT}
             array={new Float32Array(
-              Array.from({ length: 500 }, () => [
-                (Math.random() - 0.5) * 40,
-                (Math.random() - 0.5) * 40,
-                (Math.random() - 0.5) * 40,
+              Array.from({ length: BACKGROUND_PARTICLE_COUNT }, () => [
+                (Math.random() - 0.5) * BACKGROUND_PARTICLE_RANGE,
+                (Math.random() - 0.5) * BACKGROUND_PARTICLE_RANGE,
+                (Math.random() - 0.5) * BACKGROUND_PARTICLE_RANGE,
               ]).flat()
             )}
             itemSize={3}

@@ -222,5 +222,6 @@ export function constrainCamera(
     return position.clone().normalize().multiplyScalar(maxDistance);
   }
   
-  return position.clone();
+  // Return original position if within bounds to avoid unnecessary cloning
+  return position;
 }

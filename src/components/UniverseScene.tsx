@@ -22,6 +22,10 @@ import GalaxyView from './GalaxyView';
 /**
  * Particle shader for galaxy rendering
  */
+
+// Constants for shader tuning
+const POINT_SIZE_SCALE_FACTOR = 300.0;
+
 const galaxyVertexShader = `
   attribute float size;
   attribute vec3 customColor;
@@ -30,7 +34,7 @@ const galaxyVertexShader = `
   void main() {
     vColor = customColor;
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = size * (300.0 / -mvPosition.z);
+    gl_PointSize = size * (${POINT_SIZE_SCALE_FACTOR} / -mvPosition.z);
     gl_Position = projectionMatrix * mvPosition;
   }
 `;
