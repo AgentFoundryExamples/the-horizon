@@ -11,6 +11,7 @@ import { validateUniverse } from './types';
 import universeDataModule from '../../../public/universe/universe.json';
 
 // Handle both default and named exports from JSON depending on environment
+// This supports both Jest mocks and Next.js runtime imports
 const universeData: Universe = 
   (universeDataModule as { default?: Universe } & Universe).default || 
   (universeDataModule as Universe);
@@ -88,8 +89,40 @@ function sanitizeUniverse(universe: Universe): Universe {
 }
 
 /**
+ * Loads universe data from filesystem (Node.js environment)
+ */
+async function loadFromFilesystem(): Promise<Universe> {
+  try {
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    const filePath = path.join(process.cwd(), 'public', 'universe', 'universe.json');
+    const fileContents = await fs.readFile(filePath, 'utf8');
+    return JSON.parse(fileContents) as Universe;
+  } catch (error) {
+    throw new Error(`Failed to load universe data from filesystem: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
+ * Loads universe data from HTTP fetch (browser environment)
+ */
+async function loadFromFetch(): Promise<Universe> {
+  try {
+    const response = await fetch('/universe/universe.json');
+    if (!response.ok) {
+      throw new Error(`Failed to load universe data: ${response.statusText} (${response.status})`);
+    }
+    return await response.json() as Universe;
+  } catch (error) {
+    throw new Error(`Failed to fetch universe data: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
  * Loads and validates universe data
- * Returns sanitized data even if validation fails (with warnings logged)
+ * Throws an error if data cannot be loaded, allowing callers to handle failures appropriately
+ * 
+ * @throws {Error} When universe data cannot be loaded or validated
  */
 export async function loadUniverse(): Promise<Universe> {
   if (cachedUniverse) {
@@ -100,31 +133,46 @@ export async function loadUniverse(): Promise<Universe> {
     // Try static import first
     let data: Universe = universeData as Universe;
 
-    // Fallback to fetch if static import fails or in certain environments
+    // Fallback to dynamic loading if static import fails or in certain environments
+    // Priority: filesystem (Node.js/SSR) > fetch (browser)
     if (!data || !data.galaxies) {
-      const response = await fetch('/universe/universe.json');
-      if (!response.ok) {
-        throw new Error(`Failed to load universe data: ${response.statusText}`);
+      console.warn('Static universe import failed or empty, attempting dynamic load');
+      
+      // Check if we're in a Node.js environment (SSR/SSG)
+      if (typeof window === 'undefined') {
+        data = await loadFromFilesystem();
+      } else {
+        // Browser environment
+        data = await loadFromFetch();
       }
-      data = await response.json();
     }
 
     // Validate the data structure
     const validation = validateUniverse(data);
     if (!validation.valid) {
       validationErrors = validation.errors;
-      console.warn('Universe data validation warnings:', validation.errors);
+      console.error('Universe data validation failed:', validation.errors);
+      throw new Error(`Universe data validation failed: ${validation.errors.join('; ')}`);
     }
 
     // Sanitize the data to provide defaults for missing content
     cachedUniverse = sanitizeUniverse(data);
     return cachedUniverse;
   } catch (error) {
-    console.error('Failed to load universe data:', error);
+    // Re-throw with context - let callers decide how to handle
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Critical error loading universe data:', errorMessage);
     
-    // Return empty but valid universe structure as fallback
-    cachedUniverse = { galaxies: [] };
-    return cachedUniverse;
+    // For graceful degradation in production, return empty universe
+    // but log the error prominently for debugging
+    if (process.env.NODE_ENV === 'production') {
+      console.error('PRODUCTION ERROR: Returning empty universe as fallback');
+      cachedUniverse = { galaxies: [] };
+      return cachedUniverse;
+    }
+    
+    // In development, throw the error to surface it immediately
+    throw new Error(`Failed to load universe data: ${errorMessage}`);
   }
 }
 
