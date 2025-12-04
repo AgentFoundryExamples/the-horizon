@@ -19,14 +19,22 @@
 
 import { cookies } from 'next/headers';
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const AUTH_COOKIE_NAME = 'admin-auth';
 const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
+
+/**
+ * Gets the admin password from environment variable
+ */
+function getAdminPassword(): string | undefined {
+  return process.env.ADMIN_PASSWORD;
+}
 
 /**
  * Validates admin password against environment variable
  */
 export function validatePassword(password: string): boolean {
+  const ADMIN_PASSWORD = getAdminPassword();
+  
   if (!ADMIN_PASSWORD) {
     console.error('ADMIN_PASSWORD not configured in environment variables');
     return false;

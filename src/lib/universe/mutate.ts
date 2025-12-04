@@ -38,10 +38,11 @@ import {
 export function generateId(name: string): string {
   return name
     .toLowerCase()
+    .trim()
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
-    .trim();
+    .replace(/^-|-$/g, ''); // Remove leading and trailing hyphens
 }
 
 /**

@@ -17,11 +17,6 @@
  * Uses GitHub REST API to create branches, commit files, and open pull requests
  */
 
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const GITHUB_OWNER = process.env.GITHUB_OWNER || process.env.VERCEL_GIT_REPO_OWNER;
-const GITHUB_REPO = process.env.GITHUB_REPO || process.env.VERCEL_GIT_REPO_SLUG;
-const GITHUB_BRANCH = process.env.GITHUB_BRANCH || 'main';
-
 export interface GitHubConfig {
   token: string;
   owner: string;
@@ -41,6 +36,11 @@ export interface CommitResult {
  * Gets GitHub configuration from environment variables
  */
 export function getGitHubConfig(): GitHubConfig | null {
+  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+  const GITHUB_OWNER = process.env.GITHUB_OWNER || process.env.VERCEL_GIT_REPO_OWNER;
+  const GITHUB_REPO = process.env.GITHUB_REPO || process.env.VERCEL_GIT_REPO_SLUG;
+  const GITHUB_BRANCH = process.env.GITHUB_BRANCH || 'main';
+
   if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
     console.error('GitHub configuration incomplete. Required: GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO');
     return null;
