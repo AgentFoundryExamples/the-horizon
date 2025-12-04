@@ -50,11 +50,11 @@ function sanitizeContent(content: string): string {
     sanitized = sanitized.replace(/<script[\s\S]*?<\/script[\s]*>/gi, '');
   }
   
-  // Remove event handlers (multiple passes to handle all variations)
+  // Remove event handlers (multiple passes to handle all variations including unquoted)
   prevLength = 0;
   while (sanitized.length !== prevLength) {
     prevLength = sanitized.length;
-    sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
+    sanitized = sanitized.replace(/\s*on\w+\s*=\s*(?:["'][^"']*["']|[^>\s]+)/gi, '');
   }
   
   return sanitized;
@@ -130,7 +130,7 @@ export default function MarkdownContent({ content, className = '' }: MarkdownCon
               {...props}
             />
           ),
-          img: ({ ...props }) => (
+          img: ({ alt, ...props }) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               style={{
@@ -139,7 +139,7 @@ export default function MarkdownContent({ content, className = '' }: MarkdownCon
                 borderRadius: '4px',
                 marginBottom: '1rem',
               }}
-              alt=""
+              alt={alt || ''}
               {...props}
             />
           ),

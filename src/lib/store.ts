@@ -64,7 +64,7 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
     set({
       focusLevel: level,
       ...(level === 'galaxy' && { focusedGalaxyId: id, focusedSolarSystemId: null, focusedPlanetId: null, focusedMoonId: null }),
-      ...(level === 'solar-system' && { focusedSolarSystemId: id, focusedPlanetId: null, focusedMoonId: null }),
+      ...(level === 'solar-system' && { focusedGalaxyId: get().focusedGalaxyId, focusedSolarSystemId: id, focusedPlanetId: null, focusedMoonId: null }),
       ...(level === 'planet' && { focusedPlanetId: id, focusedMoonId: null }),
       ...(level === 'universe' && { focusedGalaxyId: null, focusedSolarSystemId: null, focusedPlanetId: null, focusedMoonId: null }),
     });

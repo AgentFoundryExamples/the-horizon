@@ -157,7 +157,7 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
 
   // Determine which content to show
   const currentMoon = currentMoonId ? planet.moons?.find((m) => m.id === currentMoonId) : null;
-  const content = currentMoon ? currentMoon.contentMarkdown : planet.contentMarkdown;
+  const content = currentMoon ? (currentMoon.contentMarkdown || `# ${currentMoon.name}\n\nNo content available.`) : (planet.contentMarkdown || `# ${planet.name}\n\nNo content available.`);
   const title = currentMoon ? currentMoon.name : planet.name;
   const subtitle = currentMoon ? `Moon of ${planet.name}` : planet.summary;
 
@@ -197,24 +197,7 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
               <button
                 key={moon.id}
                 onClick={() => navigateToMoon(moon.id)}
-                style={{
-                  padding: '0.75rem',
-                  backgroundColor: '#1A1A1A',
-                  border: '1px solid #444',
-                  borderRadius: '4px',
-                  color: '#FFFFFF',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#2A2A2A';
-                  e.currentTarget.style.borderColor = '#4A90E2';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#1A1A1A';
-                  e.currentTarget.style.borderColor = '#444';
-                }}
+                className="moon-nav-button"
               >
                 {moon.name}
               </button>
@@ -227,22 +210,7 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
       {currentMoon && (
         <button
           onClick={() => navigateToMoon('')}
-          style={{
-            marginTop: '1rem',
-            padding: '0.75rem',
-            backgroundColor: '#4A90E2',
-            border: 'none',
-            borderRadius: '4px',
-            color: '#FFFFFF',
-            cursor: 'pointer',
-            width: '100%',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#357ABD';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#4A90E2';
-          }}
+          className="back-to-planet-button"
         >
           ← Back to {planet.name}
         </button>
