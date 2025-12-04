@@ -18,12 +18,14 @@
 
 import { create } from 'zustand';
 
-export type FocusLevel = 'universe' | 'galaxy' | 'solar-system';
+export type FocusLevel = 'universe' | 'galaxy' | 'solar-system' | 'planet';
 
 export interface NavigationState {
   focusLevel: FocusLevel;
   focusedGalaxyId: string | null;
   focusedSolarSystemId: string | null;
+  focusedPlanetId: string | null;
+  focusedMoonId: string | null;
   isTransitioning: boolean;
   transitionQueue: Array<{ level: FocusLevel; id: string | null }>;
 }
@@ -34,6 +36,8 @@ interface NavigationStore extends NavigationState {
   finishTransition: () => void;
   navigateToGalaxy: (galaxyId: string) => void;
   navigateToSolarSystem: (solarSystemId: string) => void;
+  navigateToPlanet: (planetId: string) => void;
+  navigateToMoon: (moonId: string) => void;
   navigateBack: () => void;
   reset: () => void;
 }
@@ -42,6 +46,8 @@ const initialState: NavigationState = {
   focusLevel: 'universe',
   focusedGalaxyId: null,
   focusedSolarSystemId: null,
+  focusedPlanetId: null,
+  focusedMoonId: null,
   isTransitioning: false,
   transitionQueue: [],
 };
@@ -50,16 +56,17 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
   ...initialState,
 
   setFocus: (level: FocusLevel, id: string | null = null) => {
-    // Validate that galaxy/solar-system levels have an id
-    if ((level === 'galaxy' || level === 'solar-system') && !id) {
+    // Validate that galaxy/solar-system/planet levels have an id
+    if ((level === 'galaxy' || level === 'solar-system' || level === 'planet') && !id) {
       console.warn(`setFocus: ${level} level requires an id parameter`);
     }
 
     set({
       focusLevel: level,
-      ...(level === 'galaxy' && { focusedGalaxyId: id, focusedSolarSystemId: null }),
-      ...(level === 'solar-system' && { focusedSolarSystemId: id }),
-      ...(level === 'universe' && { focusedGalaxyId: null, focusedSolarSystemId: null }),
+      ...(level === 'galaxy' && { focusedGalaxyId: id, focusedSolarSystemId: null, focusedPlanetId: null, focusedMoonId: null }),
+      ...(level === 'solar-system' && { focusedSolarSystemId: id, focusedPlanetId: null, focusedMoonId: null }),
+      ...(level === 'planet' && { focusedPlanetId: id, focusedMoonId: null }),
+      ...(level === 'universe' && { focusedGalaxyId: null, focusedSolarSystemId: null, focusedPlanetId: null, focusedMoonId: null }),
     });
   },
 
@@ -83,6 +90,8 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
         get().navigateToGalaxy(nextAction.id);
       } else if (nextAction.level === 'solar-system' && nextAction.id) {
         get().navigateToSolarSystem(nextAction.id);
+      } else if (nextAction.level === 'planet' && nextAction.id) {
+        get().navigateToPlanet(nextAction.id);
       } else if (nextAction.level === 'universe') {
         // Universe navigation doesn't require an ID
         get().navigateBack(); // Navigate back handles universe level
@@ -111,6 +120,8 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
       focusLevel: 'galaxy',
       focusedGalaxyId: galaxyId,
       focusedSolarSystemId: null,
+      focusedPlanetId: null,
+      focusedMoonId: null,
     });
   },
 
@@ -129,6 +140,40 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
       isTransitioning: true,
       focusLevel: 'solar-system',
       focusedSolarSystemId: solarSystemId,
+      focusedPlanetId: null,
+      focusedMoonId: null,
+    });
+  },
+
+  navigateToPlanet: (planetId: string) => {
+    const state = get();
+
+    // If already transitioning, queue the navigation
+    if (state.isTransitioning) {
+      set({
+        transitionQueue: [...state.transitionQueue, { level: 'planet', id: planetId }],
+      });
+      return;
+    }
+
+    set({
+      isTransitioning: true,
+      focusLevel: 'planet',
+      focusedPlanetId: planetId,
+      focusedMoonId: null,
+    });
+  },
+
+  navigateToMoon: (moonId: string) => {
+    const state = get();
+
+    // Moon navigation is a quick swap, not queued
+    if (state.isTransitioning) {
+      return;
+    }
+
+    set({
+      focusedMoonId: moonId,
     });
   },
 
@@ -140,12 +185,22 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
       return;
     }
 
-    if (state.focusLevel === 'solar-system') {
+    if (state.focusLevel === 'planet') {
+      // Go back to solar system view
+      set({
+        isTransitioning: true,
+        focusLevel: 'solar-system',
+        focusedPlanetId: null,
+        focusedMoonId: null,
+      });
+    } else if (state.focusLevel === 'solar-system') {
       // Go back to galaxy view
       set({
         isTransitioning: true,
         focusLevel: 'galaxy',
         focusedSolarSystemId: null,
+        focusedPlanetId: null,
+        focusedMoonId: null,
       });
     } else if (state.focusLevel === 'galaxy') {
       // Go back to universe view
@@ -153,7 +208,9 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
         isTransitioning: true,
         focusLevel: 'universe',
         focusedGalaxyId: null,
-        focusedSolarSystemId: null, // Ensure this is also cleared
+        focusedSolarSystemId: null,
+        focusedPlanetId: null,
+        focusedMoonId: null,
       });
     }
   },

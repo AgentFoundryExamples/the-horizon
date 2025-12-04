@@ -17,6 +17,8 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
     focusLevel,
     focusedGalaxyId,
     focusedSolarSystemId,
+    focusedPlanetId,
+    focusedMoonId,
     isTransitioning,
     navigateBack,
   } = useNavigationStore();
@@ -25,6 +27,8 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
   const focusedSolarSystem = focusedGalaxy?.solarSystems?.find(
     (s) => s.id === focusedSolarSystemId
   );
+  const focusedPlanet = focusedSolarSystem?.planets?.find((p) => p.id === focusedPlanetId);
+  const focusedMoon = focusedPlanet?.moons?.find((m) => m.id === focusedMoonId);
 
   return (
     <div
@@ -57,11 +61,19 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
             </span>
           </>
         )}
-        {focusLevel === 'solar-system' && (
+        {(focusLevel === 'solar-system' || focusLevel === 'planet') && (
           <>
             <span>→</span>
             <span style={{ color: '#FFFFFF', fontWeight: 'bold' }}>
               {focusedSolarSystem?.name || 'Solar System'}
+            </span>
+          </>
+        )}
+        {focusLevel === 'planet' && (
+          <>
+            <span>→</span>
+            <span style={{ color: '#FFFFFF', fontWeight: 'bold' }}>
+              {focusedMoon ? focusedMoon.name : focusedPlanet?.name || 'Planet'}
             </span>
           </>
         )}
