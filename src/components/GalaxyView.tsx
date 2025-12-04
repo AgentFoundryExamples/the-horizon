@@ -54,6 +54,8 @@ interface PlanetInstanceProps {
  */
 
 // Constants for orbital calculations
+// 5 iterations provides sufficient accuracy for the eccentric anomaly approximation
+// while maintaining 60 FPS performance. More iterations yield diminishing returns.
 const KEPLER_ITERATION_COUNT = 5;
 
 function PlanetInstance({ solarSystem, systemPosition }: PlanetInstanceProps) {

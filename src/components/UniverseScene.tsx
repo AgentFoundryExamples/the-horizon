@@ -54,12 +54,20 @@ interface GalaxyParticlesProps {
   isActive: boolean;
 }
 
+// Performance tuning constants
+const BASE_PARTICLE_COUNT = 2000;
+const PARTICLES_PER_SOLAR_SYSTEM = 100;
+const MAX_PARTICLE_COUNT = 5000; // Cap for performance on lower-end devices
+
 /**
  * Individual galaxy rendered as particle cloud
  */
 function GalaxyParticles({ galaxy, position, onClick, isActive }: GalaxyParticlesProps) {
   const meshRef = useRef<THREE.Points>(null);
-  const particleCount = 2000 + (galaxy.solarSystems?.length || 0) * 100;
+  const particleCount = Math.min(
+    BASE_PARTICLE_COUNT + (galaxy.solarSystems?.length || 0) * PARTICLES_PER_SOLAR_SYSTEM,
+    MAX_PARTICLE_COUNT
+  );
 
   const { positions, colors, sizes } = useMemo(() => {
     const positions = new Float32Array(particleCount * 3);
