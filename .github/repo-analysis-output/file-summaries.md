@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 9
+Total files: 13
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -31,6 +31,42 @@ Total files: 9
 **Summary:** JavaScript module for next.config  
 **Size:** 0.85 KB  
 **LOC:** 10  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/__tests__/camera.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 9.81 KB  
+**LOC:** 252  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/__tests__/store.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 10.41 KB  
+**LOC:** 242  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/camera.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 5.85 KB  
+**LOC:** 195  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/store.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 4.82 KB  
+**LOC:** 119  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/__tests__/data-service.test.ts

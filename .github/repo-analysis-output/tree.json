@@ -38,6 +38,14 @@
             },
             {
               "type": "file",
+              "name": "file-summaries.json"
+            },
+            {
+              "type": "file",
+              "name": "file-summaries.md"
+            },
+            {
+              "type": "file",
               "name": "SUMMARY.md"
             },
             {
@@ -69,6 +77,10 @@
         {
           "type": "file",
           "name": "universe-schema.md"
+        },
+        {
+          "type": "file",
+          "name": "visuals.md"
         }
       ]
     },
@@ -128,8 +140,40 @@
         },
         {
           "type": "directory",
+          "name": "components",
+          "children": [
+            {
+              "type": "file",
+              "name": "GalaxyView.tsx"
+            },
+            {
+              "type": "file",
+              "name": "SceneHUD.tsx"
+            },
+            {
+              "type": "file",
+              "name": "UniverseScene.tsx"
+            }
+          ]
+        },
+        {
+          "type": "directory",
           "name": "lib",
           "children": [
+            {
+              "type": "directory",
+              "name": "__tests__",
+              "children": [
+                {
+                  "type": "file",
+                  "name": "camera.test.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "store.test.ts"
+                }
+              ]
+            },
             {
               "type": "directory",
               "name": "universe",
@@ -165,6 +209,14 @@
                   "name": "types.ts"
                 }
               ]
+            },
+            {
+              "type": "file",
+              "name": "camera.ts"
+            },
+            {
+              "type": "file",
+              "name": "store.ts"
             }
           ]
         }

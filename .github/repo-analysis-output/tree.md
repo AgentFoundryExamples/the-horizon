@@ -8,13 +8,16 @@
   ├── repo-analysis-output
     ├── dependencies.json
     ├── dependencies.md
+    ├── file-summaries.json
+    ├── file-summaries.md
     ├── SUMMARY.md
     ├── tree.json
     └── tree.md
   └── workflows
     └── af_maintenance.yml
 ├── docs
-  └── universe-schema.md
+  ├── universe-schema.md
+  └── visuals.md
 ├── public
   └── universe
     └── universe.json
@@ -26,8 +29,15 @@
     ├── globals.css
     ├── layout.tsx
     └── page.tsx
+  ├── components
+    ├── GalaxyView.tsx
+    ├── SceneHUD.tsx
+    └── UniverseScene.tsx
   └── lib
-    └── universe
+    ├── __tests__
+      ├── camera.test.ts
+      └── store.test.ts
+    ├── universe
       ├── __tests__
         ├── data-service.test.ts
         ├── edge-cases.test.ts
@@ -35,6 +45,8 @@
       ├── data-service.ts
       ├── index.ts
       └── types.ts
+    ├── camera.ts
+    └── store.ts
 ├── .env.example
 ├── .eslintrc.json
 ├── .gitignore

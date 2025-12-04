@@ -32,6 +32,50 @@
       }
     },
     {
+      "id": "src/lib/__tests__/camera.test.ts",
+      "path": "src/lib/__tests__/camera.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "three"
+        ]
+      }
+    },
+    {
+      "id": "src/lib/__tests__/store.test.ts",
+      "path": "src/lib/__tests__/store.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "@testing-library/react"
+        ]
+      }
+    },
+    {
+      "id": "src/lib/camera.ts",
+      "path": "src/lib/camera.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "three"
+        ]
+      }
+    },
+    {
+      "id": "src/lib/store.ts",
+      "path": "src/lib/store.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "zustand"
+        ]
+      }
+    },
+    {
       "id": "src/lib/universe/__tests__/data-service.test.ts",
       "path": "src/lib/universe/__tests__/data-service.test.ts",
       "type": "file",
@@ -91,6 +135,14 @@
   ],
   "edges": [
     {
+      "source": "src/lib/__tests__/camera.test.ts",
+      "target": "src/lib/camera.ts"
+    },
+    {
+      "source": "src/lib/__tests__/store.test.ts",
+      "target": "src/lib/store.ts"
+    },
+    {
       "source": "src/lib/universe/__tests__/data-service.test.ts",
       "target": "src/lib/universe/data-service.ts"
     },
@@ -118,9 +170,12 @@
     ],
     "third-party": [
       "@testing-library/jest-dom",
-      "next/jest"
+      "@testing-library/react",
+      "next/jest",
+      "three",
+      "zustand"
     ],
     "stdlib_count": 2,
-    "third-party_count": 2
+    "third-party_count": 5
   }
 }
