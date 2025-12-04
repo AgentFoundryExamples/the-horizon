@@ -16,6 +16,7 @@
 
 import { useState } from 'react';
 import { Universe, Galaxy } from '@/lib/universe/types';
+import { generateId } from '@/lib/universe/mutate';
 import GalaxyEditor from './GalaxyEditor';
 
 interface UniverseEditorProps {
@@ -87,7 +88,7 @@ export default function UniverseEditor({
 
   const handleAddGalaxy = () => {
     const newGalaxy: Galaxy = {
-      id: `galaxy-${Date.now()}`,
+      id: generateId(`New Galaxy ${Date.now()}`),
       name: 'New Galaxy',
       description: 'A newly discovered galaxy',
       theme: 'blue-white',
