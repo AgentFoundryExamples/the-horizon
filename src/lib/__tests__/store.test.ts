@@ -329,4 +329,176 @@ describe('Navigation Store', () => {
       expect(result.current.focusedSolarSystemId).toBe('sol-system');
     });
   });
+
+  describe('navigateToPlanet', () => {
+    it('should navigate to planet', () => {
+      const { result } = renderHook(() => useNavigationStore());
+
+      act(() => {
+        result.current.navigateToGalaxy('milky-way');
+      });
+
+      act(() => {
+        result.current.finishTransition();
+      });
+
+      act(() => {
+        result.current.navigateToSolarSystem('sol-system');
+      });
+
+      act(() => {
+        result.current.finishTransition();
+      });
+
+      act(() => {
+        result.current.navigateToPlanet('earth');
+      });
+
+      expect(result.current.focusLevel).toBe('planet');
+      expect(result.current.focusedPlanetId).toBe('earth');
+      expect(result.current.focusedMoonId).toBeNull();
+      expect(result.current.isTransitioning).toBe(true);
+    });
+
+    it('should queue planet navigation if already transitioning', () => {
+      const { result } = renderHook(() => useNavigationStore());
+
+      act(() => {
+        result.current.navigateToGalaxy('milky-way');
+      });
+
+      act(() => {
+        result.current.navigateToPlanet('earth');
+      });
+
+      expect(result.current.transitionQueue).toHaveLength(1);
+      expect(result.current.transitionQueue[0]).toEqual({
+        level: 'planet',
+        id: 'earth',
+      });
+    });
+  });
+
+  describe('navigateToMoon', () => {
+    it('should navigate to moon without transition', () => {
+      const { result } = renderHook(() => useNavigationStore());
+
+      act(() => {
+        result.current.navigateToGalaxy('milky-way');
+      });
+
+      act(() => {
+        result.current.finishTransition();
+      });
+
+      act(() => {
+        result.current.navigateToSolarSystem('sol-system');
+      });
+
+      act(() => {
+        result.current.finishTransition();
+      });
+
+      act(() => {
+        result.current.navigateToPlanet('earth');
+      });
+
+      act(() => {
+        result.current.finishTransition();
+      });
+
+      act(() => {
+        result.current.navigateToMoon('luna');
+      });
+
+      expect(result.current.focusLevel).toBe('planet');
+      expect(result.current.focusedPlanetId).toBe('earth');
+      expect(result.current.focusedMoonId).toBe('luna');
+      expect(result.current.isTransitioning).toBe(false);
+    });
+
+    it('should not navigate to moon if transitioning', () => {
+      const { result } = renderHook(() => useNavigationStore());
+
+      act(() => {
+        result.current.navigateToGalaxy('milky-way');
+      });
+
+      act(() => {
+        result.current.navigateToMoon('luna');
+      });
+
+      expect(result.current.focusedMoonId).toBeNull();
+    });
+  });
+
+  describe('navigateBack from planet', () => {
+    it('should navigate back from planet to solar system', () => {
+      const { result } = renderHook(() => useNavigationStore());
+
+      act(() => {
+        result.current.navigateToGalaxy('milky-way');
+      });
+
+      act(() => {
+        result.current.finishTransition();
+      });
+
+      act(() => {
+        result.current.navigateToSolarSystem('sol-system');
+      });
+
+      act(() => {
+        result.current.finishTransition();
+      });
+
+      act(() => {
+        result.current.navigateToPlanet('earth');
+      });
+
+      act(() => {
+        result.current.finishTransition();
+      });
+
+      act(() => {
+        result.current.navigateBack();
+      });
+
+      expect(result.current.focusLevel).toBe('solar-system');
+      expect(result.current.focusedPlanetId).toBeNull();
+      expect(result.current.focusedMoonId).toBeNull();
+      expect(result.current.isTransitioning).toBe(true);
+    });
+  });
+
+  describe('setFocus with planet level', () => {
+    it('should set focus to planet level', () => {
+      const { result } = renderHook(() => useNavigationStore());
+
+      act(() => {
+        result.current.setFocus('planet', 'earth');
+      });
+
+      expect(result.current.focusLevel).toBe('planet');
+      expect(result.current.focusedPlanetId).toBe('earth');
+      expect(result.current.focusedMoonId).toBeNull();
+    });
+
+    it('should clear planet and moon IDs when setting to solar-system', () => {
+      const { result } = renderHook(() => useNavigationStore());
+
+      act(() => {
+        result.current.setFocus('planet', 'earth');
+      });
+
+      act(() => {
+        result.current.setFocus('solar-system', 'sol-system');
+      });
+
+      expect(result.current.focusLevel).toBe('solar-system');
+      expect(result.current.focusedSolarSystemId).toBe('sol-system');
+      expect(result.current.focusedPlanetId).toBeNull();
+      expect(result.current.focusedMoonId).toBeNull();
+    });
+  });
 });
