@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { validatePassword } from '../auth';
+import { validatePassword, checkRateLimit, recordFailedAttempt, clearLoginAttempts } from '../auth';
 
 describe('Auth', () => {
   const originalEnv = process.env;
@@ -53,6 +53,58 @@ describe('Auth', () => {
       process.env.ADMIN_PASSWORD = 'Password123';
       expect(validatePassword('password123')).toBe(false);
       expect(validatePassword('Password123')).toBe(true);
+    });
+
+    it('should use timing-safe comparison (same length passwords)', () => {
+      process.env.ADMIN_PASSWORD = 'password1';
+      // Both passwords are same length but different - should still return false
+      expect(validatePassword('password2')).toBe(false);
+    });
+  });
+
+  describe('Rate Limiting', () => {
+    beforeEach(() => {
+      // Clear any existing rate limit data
+      clearLoginAttempts('test-ip');
+    });
+
+    it('should allow login attempts initially', () => {
+      const result = checkRateLimit('test-ip');
+      expect(result.allowed).toBe(true);
+    });
+
+    it('should track failed login attempts', () => {
+      recordFailedAttempt('test-ip');
+      recordFailedAttempt('test-ip');
+      const result = checkRateLimit('test-ip');
+      expect(result.allowed).toBe(true); // Still allowed, under limit
+    });
+
+    it('should block after max attempts', () => {
+      for (let i = 0; i < 5; i++) {
+        recordFailedAttempt('test-ip');
+      }
+      const result = checkRateLimit('test-ip');
+      expect(result.allowed).toBe(false);
+      expect(result.resetAt).toBeDefined();
+    });
+
+    it('should clear attempts on successful login', () => {
+      recordFailedAttempt('test-ip');
+      recordFailedAttempt('test-ip');
+      clearLoginAttempts('test-ip');
+      const result = checkRateLimit('test-ip');
+      expect(result.allowed).toBe(true);
+    });
+
+    it('should handle different IPs independently', () => {
+      for (let i = 0; i < 5; i++) {
+        recordFailedAttempt('ip-1');
+      }
+      const result1 = checkRateLimit('ip-1');
+      const result2 = checkRateLimit('ip-2');
+      expect(result1.allowed).toBe(false);
+      expect(result2.allowed).toBe(true);
     });
   });
 });

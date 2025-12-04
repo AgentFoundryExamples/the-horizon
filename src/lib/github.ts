@@ -92,7 +92,8 @@ async function getFileSha(
     const content = Buffer.from(data.content, 'base64').toString('utf-8');
     return { sha: data.sha, content };
   } catch (error) {
-    console.error('Error fetching file SHA:', error);
+    // Log sanitized error without exposing tokens
+    console.error('Error fetching file SHA from GitHub');
     throw error;
   }
 }
@@ -147,7 +148,8 @@ async function createBranch(
 
     return baseSha;
   } catch (error) {
-    console.error('Error creating branch:', error);
+    // Log sanitized error
+    console.error('Error creating branch in GitHub');
     throw error;
   }
 }
@@ -195,7 +197,8 @@ async function commitFile(
     const data = await response.json();
     return data.commit.sha;
   } catch (error) {
-    console.error('Error committing file:', error);
+    // Log sanitized error
+    console.error('Error committing file to GitHub');
     throw error;
   }
 }
@@ -236,7 +239,8 @@ async function createPullRequest(
     const data = await response.json();
     return data.html_url;
   } catch (error) {
-    console.error('Error creating pull request:', error);
+    // Log sanitized error
+    console.error('Error creating pull request in GitHub');
     throw error;
   }
 }
@@ -346,9 +350,13 @@ export async function pushUniverseChanges(
       };
     }
   } catch (error) {
+    // Sanitize error message to avoid exposing tokens or sensitive info
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
-    // Check for specific error types
+    // Log sanitized error without details
+    console.error('Error pushing changes to GitHub');
+    
+    // Check for specific error types without exposing details
     if (errorMessage.includes('rate limit')) {
       return {
         success: false,
@@ -376,7 +384,7 @@ export async function pushUniverseChanges(
     return {
       success: false,
       message: 'Failed to push changes to GitHub',
-      error: errorMessage,
+      error: 'An error occurred while communicating with GitHub. Please check your configuration and try again.',
     };
   }
 }
@@ -411,7 +419,8 @@ export async function fetchCurrentUniverse(): Promise<{
       hash,
     };
   } catch (error) {
-    console.error('Error fetching current universe:', error);
+    // Log sanitized error
+    console.error('Error fetching current universe from GitHub');
     return null;
   }
 }

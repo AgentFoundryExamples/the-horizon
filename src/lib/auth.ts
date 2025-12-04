@@ -18,9 +18,15 @@
  */
 
 import { cookies } from 'next/headers';
+import { timingSafeEqual, createHash, randomBytes } from 'crypto';
 
 const AUTH_COOKIE_NAME = 'admin-auth';
 const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
+
+// In-memory store for rate limiting (resets on server restart)
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
 
 /**
  * Gets the admin password from environment variable
@@ -30,7 +36,7 @@ function getAdminPassword(): string | undefined {
 }
 
 /**
- * Validates admin password against environment variable
+ * Validates admin password against environment variable using timing-safe comparison
  */
 export function validatePassword(password: string): boolean {
   const ADMIN_PASSWORD = getAdminPassword();
@@ -45,15 +51,89 @@ export function validatePassword(password: string): boolean {
     return false;
   }
   
-  return password === ADMIN_PASSWORD;
+  // Use timing-safe comparison to prevent timing attacks
+  try {
+    const passwordBuffer = Buffer.from(password, 'utf8');
+    const adminPasswordBuffer = Buffer.from(ADMIN_PASSWORD, 'utf8');
+    
+    // Hash both passwords to ensure buffers are same length for timingSafeEqual
+    const passwordHash = createHash('sha256').update(passwordBuffer).digest();
+    const adminPasswordHash = createHash('sha256').update(adminPasswordBuffer).digest();
+    
+    return timingSafeEqual(passwordHash, adminPasswordHash);
+  } catch (error) {
+    // If comparison fails for any reason, return false
+    return false;
+  }
 }
 
 /**
- * Creates an authenticated session by setting a secure cookie
+ * Check if IP is rate limited
+ */
+export function checkRateLimit(ip: string): { allowed: boolean; resetAt?: number } {
+  const now = Date.now();
+  const attempt = loginAttempts.get(ip);
+  
+  if (attempt) {
+    // Check if lockout period has expired
+    if (now > attempt.resetAt) {
+      loginAttempts.delete(ip);
+      return { allowed: true };
+    }
+    
+    // Check if max attempts exceeded
+    if (attempt.count >= MAX_LOGIN_ATTEMPTS) {
+      return { allowed: false, resetAt: attempt.resetAt };
+    }
+  }
+  
+  return { allowed: true };
+}
+
+/**
+ * Record a failed login attempt
+ */
+export function recordFailedAttempt(ip: string): void {
+  const now = Date.now();
+  const attempt = loginAttempts.get(ip);
+  
+  if (attempt && now < attempt.resetAt) {
+    // Increment existing attempt
+    attempt.count++;
+  } else {
+    // Create new attempt record
+    loginAttempts.set(ip, {
+      count: 1,
+      resetAt: now + LOCKOUT_DURATION,
+    });
+  }
+}
+
+/**
+ * Clear login attempts for an IP (on successful login)
+ */
+export function clearLoginAttempts(ip: string): void {
+  loginAttempts.delete(ip);
+}
+
+/**
+ * Creates an authenticated session by setting a secure signed cookie
  */
 export async function createSession(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.set(AUTH_COOKIE_NAME, 'authenticated', {
+  
+  // Generate a secure random session token
+  const sessionToken = randomBytes(32).toString('hex');
+  
+  // Sign the token with a secret (derived from ADMIN_PASSWORD for simplicity)
+  const secret = getAdminPassword() || 'fallback-secret';
+  const signature = createHash('sha256')
+    .update(sessionToken + secret)
+    .digest('hex');
+  
+  const signedToken = `${sessionToken}.${signature}`;
+  
+  cookieStore.set(AUTH_COOKIE_NAME, signedToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -76,5 +156,29 @@ export async function destroySession(): Promise<void> {
 export async function isAuthenticated(): Promise<boolean> {
   const cookieStore = await cookies();
   const authCookie = cookieStore.get(AUTH_COOKIE_NAME);
-  return authCookie?.value === 'authenticated';
+  
+  if (!authCookie?.value) {
+    return false;
+  }
+  
+  // Validate the signed token
+  const parts = authCookie.value.split('.');
+  if (parts.length !== 2) {
+    return false;
+  }
+  
+  const [token, signature] = parts;
+  const secret = getAdminPassword() || 'fallback-secret';
+  const expectedSignature = createHash('sha256')
+    .update(token + secret)
+    .digest('hex');
+  
+  // Use timing-safe comparison for signature validation
+  try {
+    const signatureBuffer = Buffer.from(signature, 'hex');
+    const expectedSignatureBuffer = Buffer.from(expectedSignature, 'hex');
+    return timingSafeEqual(signatureBuffer, expectedSignatureBuffer);
+  } catch (error) {
+    return false;
+  }
 }

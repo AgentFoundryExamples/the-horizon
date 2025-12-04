@@ -14,8 +14,34 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { createHash, timingSafeEqual } from 'crypto';
 
 const AUTH_COOKIE_NAME = 'admin-auth';
+
+/**
+ * Validates a signed session token
+ */
+function validateSessionToken(signedToken: string): boolean {
+  const parts = signedToken.split('.');
+  if (parts.length !== 2) {
+    return false;
+  }
+  
+  const [token, signature] = parts;
+  const secret = process.env.ADMIN_PASSWORD || 'fallback-secret';
+  const expectedSignature = createHash('sha256')
+    .update(token + secret)
+    .digest('hex');
+  
+  // Use timing-safe comparison
+  try {
+    const signatureBuffer = Buffer.from(signature, 'hex');
+    const expectedSignatureBuffer = Buffer.from(expectedSignature, 'hex');
+    return timingSafeEqual(signatureBuffer, expectedSignatureBuffer);
+  } catch (error) {
+    return false;
+  }
+}
 
 /**
  * Middleware to protect admin routes
@@ -28,7 +54,7 @@ export function middleware(request: NextRequest) {
   if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
     const authCookie = request.cookies.get(AUTH_COOKIE_NAME);
 
-    if (!authCookie || authCookie.value !== 'authenticated') {
+    if (!authCookie || !validateSessionToken(authCookie.value)) {
       // Redirect to login page with return URL
       const url = request.nextUrl.clone();
       url.pathname = '/admin/login';

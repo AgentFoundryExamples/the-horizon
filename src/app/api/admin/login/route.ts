@@ -13,10 +13,45 @@
 // limitations under the License.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { validatePassword, createSession } from '@/lib/auth';
+import { validatePassword, createSession, checkRateLimit, recordFailedAttempt, clearLoginAttempts } from '@/lib/auth';
+
+/**
+ * Gets client IP address from request
+ */
+function getClientIp(request: NextRequest): string {
+  // Try to get real IP from headers (works with proxies/CDNs)
+  const forwarded = request.headers.get('x-forwarded-for');
+  const realIp = request.headers.get('x-real-ip');
+  
+  if (forwarded) {
+    return forwarded.split(',')[0].trim();
+  }
+  
+  if (realIp) {
+    return realIp;
+  }
+  
+  // Fallback to a default (in development, this might not be available)
+  return 'unknown';
+}
 
 export async function POST(request: NextRequest) {
   try {
+    const clientIp = getClientIp(request);
+    
+    // Check rate limiting
+    const rateLimit = checkRateLimit(clientIp);
+    if (!rateLimit.allowed) {
+      const resetIn = rateLimit.resetAt ? Math.ceil((rateLimit.resetAt - Date.now()) / 1000 / 60) : 15;
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: `Too many login attempts. Please try again in ${resetIn} minutes.` 
+        },
+        { status: 429 }
+      );
+    }
+    
     const { password } = await request.json();
 
     if (!password) {
@@ -27,16 +62,21 @@ export async function POST(request: NextRequest) {
     }
 
     if (validatePassword(password)) {
+      // Clear failed attempts on successful login
+      clearLoginAttempts(clientIp);
       await createSession();
       return NextResponse.json({ success: true });
     } else {
+      // Record failed attempt
+      recordFailedAttempt(clientIp);
       return NextResponse.json(
         { success: false, error: 'Invalid password' },
         { status: 401 }
       );
     }
   } catch (error) {
-    console.error('Login error:', error);
+    // Log error without exposing sensitive details
+    console.error('Login error occurred');
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
