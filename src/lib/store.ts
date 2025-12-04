@@ -172,8 +172,9 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
       return;
     }
 
+    // Empty string clears the moon selection, returning to planet view
     set({
-      focusedMoonId: moonId,
+      focusedMoonId: moonId === '' ? null : moonId,
     });
   },
 
