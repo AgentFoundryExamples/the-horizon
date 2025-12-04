@@ -29,14 +29,35 @@ interface MarkdownContentProps {
 
 /**
  * Sanitize markdown content by removing potentially unsafe HTML
- * React Markdown by default doesn't render raw HTML, but we ensure it here
+ * 
+ * SECURITY NOTE: This is defense-in-depth. React Markdown is configured with
+ * skipHtml={true} which prevents rendering of any raw HTML, making this the
+ * primary security control. This sanitization provides an additional layer.
+ * 
+ * The regex pattern handles common script tag variations. While CodeQL flags
+ * edge cases like </script\t\n bar>, these are already blocked by skipHtml.
  */
 function sanitizeContent(content: string): string {
-  // Remove script tags and event handlers
-  return content
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/on\w+="[^"]*"/gi, '')
-    .replace(/on\w+='[^']*'/gi, '');
+  // Remove script tags with comprehensive pattern (multiple passes to handle edge cases)
+  let sanitized = content;
+  let prevLength = 0;
+  
+  // Keep removing script tags until no more are found
+  // This handles nested tags and variations
+  while (sanitized.length !== prevLength) {
+    prevLength = sanitized.length;
+    // Match opening tag, any content, and closing tag with whitespace variations
+    sanitized = sanitized.replace(/<script[\s\S]*?<\/script[\s]*>/gi, '');
+  }
+  
+  // Remove event handlers (multiple passes to handle all variations)
+  prevLength = 0;
+  while (sanitized.length !== prevLength) {
+    prevLength = sanitized.length;
+    sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
+  }
+  
+  return sanitized;
 }
 
 export default function MarkdownContent({ content, className = '' }: MarkdownContentProps) {
@@ -46,6 +67,7 @@ export default function MarkdownContent({ content, className = '' }: MarkdownCon
     <div className={`markdown-content ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
+        skipHtml={true}
         components={{
           // Customize rendering of specific elements
           h1: ({ ...props }) => <h1 style={{ fontSize: '2rem', marginBottom: '1rem', marginTop: '1.5rem' }} {...props} />,
