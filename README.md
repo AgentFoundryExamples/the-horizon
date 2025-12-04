@@ -8,8 +8,10 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 - 🎨 **3D Visualization**: Interactive 3D universe with shader-based particle galaxies
 - 🎬 **Cinematic Navigation**: Smooth camera transitions with spline-based paths and easing
 - 🪐 **Keplerian Orbits**: Realistic planetary motion using simplified orbital mechanics
-- 🎮 **Multi-Layer Exploration**: Traverse from universe → galaxy → solar system views
-- 📝 **Markdown Content**: Rich content support using React Markdown
+- 🎮 **Multi-Layer Exploration**: Traverse from universe → galaxy → solar system → planet views
+- 📝 **Markdown Content**: Rich content support using React Markdown with sanitization
+- 🌙 **Moon Navigation**: Explore planet surfaces and hop between moons with seamless transitions
+- ♿ **Accessibility**: Keyboard navigation, focus states, and reduced motion support
 - ✅ **TypeScript**: Fully typed data models with runtime validation
 - 🧪 **Tested**: Comprehensive unit tests for data loading and validation
 - 🚀 **Next.js 14**: Server-side rendering and static generation support
@@ -65,7 +67,12 @@ the-horizon/
 │   ├── components/            # React components
 │   │   ├── UniverseScene.tsx  # Main 3D scene with galaxies
 │   │   ├── GalaxyView.tsx     # Galaxy detail view with orbits
+│   │   ├── SolarSystemView.tsx # Solar system with planets
+│   │   ├── PlanetSurface.tsx  # Planet surface with moons
+│   │   ├── MarkdownContent.tsx # Markdown renderer
 │   │   └── SceneHUD.tsx       # Navigation overlay
+│   ├── styles/
+│   │   └── planet.css         # Planet surface styles
 │   └── lib/
 │       ├── universe/          # Universe data library
 │       │   ├── types.ts       # TypeScript models
@@ -78,7 +85,8 @@ the-horizon/
 │       └── universe.json      # Universe data
 ├── docs/
 │   ├── universe-schema.md     # Schema documentation
-│   └── visuals.md            # Scene controls and animation tuning
+│   ├── visuals.md            # Scene controls and animation tuning
+│   └── content-authoring.md  # Markdown authoring guidelines
 ├── .env.example              # Environment variable template
 ├── next.config.js            # Next.js configuration
 ├── tsconfig.json             # TypeScript configuration
@@ -191,8 +199,20 @@ The application can be deployed to any platform that supports Next.js.
 
 - **Mouse Drag**: Orbit around the universe (universe view only)
 - **Mouse Wheel**: Zoom in/out (universe view only)
-- **Click Galaxy**: Transition to galaxy detail view
+- **Click Galaxy**: Transition to galaxy detail view with orbiting solar systems
+- **Click Solar System**: Zoom into solar system with orbiting planets
+- **Click Planet**: Land on planet surface to view markdown content
+- **Click Moon (in skybox)**: Hop to moon and view its content
 - **Back Button**: Return to previous level with animated transition
+- **Breadcrumbs**: Navigate hierarchy via top navigation bar
+
+### Accessibility
+
+The application supports modern accessibility features:
+- **Keyboard Navigation**: All interactive elements are keyboard accessible
+- **Focus States**: Clear visual indicators for focused elements
+- **Reduced Motion**: Respects `prefers-reduced-motion` setting to disable non-essential animations
+- **Screen Reader Support**: Semantic HTML and ARIA labels where appropriate
 
 ### Performance
 
@@ -201,8 +221,10 @@ The scene uses several optimizations for smooth 60 FPS rendering:
 - Instanced rendering for planets and stars
 - GPU-accelerated animations
 - Efficient state management with Zustand
+- Optimized markdown rendering with React Markdown
 
 See [docs/visuals.md](docs/visuals.md) for detailed scene controls, animation tuning, and performance optimization guidelines.
+See [docs/content-authoring.md](docs/content-authoring.md) for markdown authoring guidelines.
 
 ## Future Enhancements
 

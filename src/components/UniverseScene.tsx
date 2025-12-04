@@ -18,6 +18,9 @@ import {
   DEFAULT_ANIMATION_CONFIG,
 } from '@/lib/camera';
 import GalaxyView from './GalaxyView';
+import SolarSystemView from './SolarSystemView';
+import { PlanetSurface3D, PlanetSurfaceOverlay } from './PlanetSurface';
+import '../styles/planet.css';
 
 /**
  * Particle shader for galaxy rendering
@@ -178,6 +181,8 @@ function SceneContent({ galaxies }: SceneContentProps) {
   const {
     focusLevel,
     focusedGalaxyId,
+    focusedSolarSystemId,
+    focusedPlanetId,
     isTransitioning,
     setTransitioning,
     finishTransition,
@@ -207,6 +212,8 @@ function SceneContent({ galaxies }: SceneContentProps) {
   }, [galaxies]);
 
   const focusedGalaxy = galaxies.find((g) => g.id === focusedGalaxyId);
+  const focusedSolarSystem = focusedGalaxy?.solarSystems?.find((s) => s.id === focusedSolarSystemId);
+  const focusedPlanet = focusedSolarSystem?.planets?.find((p) => p.id === focusedPlanetId);
 
   // Handle camera transitions
   useEffect(() => {
@@ -259,8 +266,61 @@ function SceneContent({ galaxies }: SceneContentProps) {
           controlsRef.current.enabled = false;
         }
       }
+    } else if (focusLevel === 'solar-system' && focusedSolarSystemId) {
+      // Focus on solar system
+      const galaxyPos = galaxyPositions.get(focusedGalaxyId || '');
+      if (galaxyPos) {
+        const targetPos = calculateFocusPosition(galaxyPos, 15, 20);
+        
+        animatorRef.current = new CameraAnimator(
+          {
+            position: camera.position.clone(),
+            lookAt: new THREE.Vector3(0, 0, 0),
+          },
+          targetPos,
+          DEFAULT_ANIMATION_CONFIG,
+          true
+        );
+
+        animatorRef.current.setOnComplete(() => {
+          finishTransition();
+          animatorRef.current = null;
+        });
+
+        if (controlsRef.current) {
+          controlsRef.current.enabled = false;
+        }
+      }
+    } else if (focusLevel === 'planet' && focusedPlanetId) {
+      // Focus on planet surface
+      const galaxyPos = galaxyPositions.get(focusedGalaxyId || '');
+      if (galaxyPos) {
+        const targetPos = {
+          position: new THREE.Vector3(galaxyPos.x + 5, galaxyPos.y + 3, galaxyPos.z + 5),
+          lookAt: galaxyPos,
+        };
+        
+        animatorRef.current = new CameraAnimator(
+          {
+            position: camera.position.clone(),
+            lookAt: new THREE.Vector3(0, 0, 0),
+          },
+          targetPos,
+          DEFAULT_ANIMATION_CONFIG,
+          true
+        );
+
+        animatorRef.current.setOnComplete(() => {
+          finishTransition();
+          animatorRef.current = null;
+        });
+
+        if (controlsRef.current) {
+          controlsRef.current.enabled = false;
+        }
+      }
     }
-  }, [focusLevel, focusedGalaxyId, camera, galaxyPositions, finishTransition]);
+  }, [focusLevel, focusedGalaxyId, focusedSolarSystemId, focusedPlanetId, camera, galaxyPositions, finishTransition]);
 
   // Animation loop
   useFrame((state) => {
@@ -300,6 +360,21 @@ function SceneContent({ galaxies }: SceneContentProps) {
         />
       )}
 
+      {focusLevel === 'solar-system' && focusedSolarSystem && (
+        <SolarSystemView
+          solarSystem={focusedSolarSystem}
+          position={galaxyPositions.get(focusedGalaxyId || '') || new THREE.Vector3(0, 0, 0)}
+        />
+      )}
+
+      {focusLevel === 'planet' && focusedPlanet && focusedSolarSystem && (
+        <PlanetSurface3D
+          planet={focusedPlanet}
+          solarSystem={focusedSolarSystem}
+          position={galaxyPositions.get(focusedGalaxyId || '') || new THREE.Vector3(0, 0, 0)}
+        />
+      )}
+
       {/* Orbit controls - disabled during transitions */}
       <OrbitControls
         ref={controlsRef}
@@ -322,6 +397,13 @@ interface UniverseSceneProps {
  * Main UniverseScene component
  */
 export default function UniverseScene({ galaxies }: UniverseSceneProps) {
+  const { focusLevel, focusedGalaxyId, focusedSolarSystemId, focusedPlanetId, focusedMoonId } =
+    useNavigationStore();
+
+  const focusedGalaxy = galaxies.find((g) => g.id === focusedGalaxyId);
+  const focusedSolarSystem = focusedGalaxy?.solarSystems?.find((s) => s.id === focusedSolarSystemId);
+  const focusedPlanet = focusedSolarSystem?.planets?.find((p) => p.id === focusedPlanetId);
+
   return (
     <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
       <Canvas
@@ -333,6 +415,11 @@ export default function UniverseScene({ galaxies }: UniverseSceneProps) {
       >
         <SceneContent galaxies={galaxies} />
       </Canvas>
+
+      {/* Planet surface overlay for markdown content */}
+      {focusLevel === 'planet' && focusedPlanet && (
+        <PlanetSurfaceOverlay planet={focusedPlanet} currentMoonId={focusedMoonId} />
+      )}
     </div>
   );
 }
