@@ -141,12 +141,15 @@ The Horizon includes a password-protected admin interface for editing universe c
 **Access**: Navigate to `/admin` and log in with your admin password.
 
 **Features**:
-- 🔒 Password-protected access with session management
+- 🔒 Password-protected access with signed session tokens
+- 🛡️ Timing-safe authentication preventing timing attacks
+- 🚫 Rate limiting (5 attempts per 15 minutes) to prevent brute force
 - ✏️ CRUD operations for galaxies, solar systems, planets, and moons
 - 📝 Built-in markdown editor with live preview
 - 🔄 GitHub integration for automatic commits and pull requests
 - ✅ Real-time validation against the universe schema
 - 🔐 Optimistic locking to prevent concurrent edit conflicts
+- 📋 Sanitized error logging (no token exposure)
 
 ### Using the Admin Interface
 

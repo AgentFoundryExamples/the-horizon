@@ -122,6 +122,30 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 - Don't use common words or patterns
 - Don't reuse passwords from other services
 
+### Security Features
+
+The admin interface includes multiple layers of security protection:
+
+**Timing-Safe Password Validation**
+- Uses constant-time comparison to prevent timing attacks
+- Password hashes are compared with `timingSafeEqual` to avoid leaking password length
+
+**Signed Session Tokens**
+- Session cookies use cryptographically signed random tokens
+- Prevents session forgery by validating HMAC-SHA256 signatures
+- Tokens are validated in middleware on every protected route
+
+**Rate Limiting**
+- Maximum 5 failed login attempts per IP address
+- 15-minute lockout period after exceeding limit
+- Automatic reset on successful login
+- Helps prevent brute force attacks
+
+**Sanitized Error Logging**
+- No tokens or sensitive data exposed in error messages
+- Generic error responses prevent information leakage
+- Detailed errors logged server-side only
+
 ## How Admin Changes Work
 
 Understanding the workflow helps troubleshoot issues:
@@ -217,6 +241,27 @@ After deployment, verify everything works:
 - Check for extra spaces or newlines in the password
 - Ensure password is not the default `CHANGE_ME_USE_STRONG_PASSWORD_MIN_16_CHARS`
 - Redeploy after changing environment variables
+
+### Too Many Login Attempts
+
+**Symptom**: "Too many login attempts. Please try again in X minutes."
+
+**Solutions**:
+- This is rate limiting protection after 5 failed attempts
+- Wait 15 minutes for the lockout to expire
+- Verify you're using the correct password
+- If locked out frequently, check for automation or bots
+- Rate limiting resets on server restart (in development)
+
+### Session Expired
+
+**Symptom**: Redirected to login page while working in admin
+
+**Solutions**:
+- Sessions expire after 24 hours
+- Log in again to create a new session
+- Session cookies are signed and validated on each request
+- Browser restart or cookie clearing will require re-login
 
 ### GitHub API Errors
 
