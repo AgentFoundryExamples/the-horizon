@@ -234,6 +234,10 @@
                 },
                 {
                   "type": "file",
+                  "name": "SceneTooltip.test.tsx"
+                },
+                {
+                  "type": "file",
                   "name": "Tooltip.test.tsx"
                 },
                 {
@@ -283,6 +287,10 @@
             {
               "type": "file",
               "name": "SceneHUD.tsx"
+            },
+            {
+              "type": "file",
+              "name": "SceneTooltip.tsx"
             },
             {
               "type": "file",

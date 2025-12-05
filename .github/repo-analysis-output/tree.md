@@ -49,6 +49,7 @@
   ├── components
     ├── __tests__
       ├── SceneHUD.test.tsx
+      ├── SceneTooltip.test.tsx
       ├── Tooltip.test.tsx
       ├── UniverseScene.test.tsx
       └── WelcomeMessage.test.tsx
@@ -61,6 +62,7 @@
     ├── MarkdownContent.tsx
     ├── PlanetSurface.tsx
     ├── SceneHUD.tsx
+    ├── SceneTooltip.tsx
     ├── SolarSystemView.tsx
     ├── Tooltip.tsx
     ├── UniverseScene.tsx
