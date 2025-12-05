@@ -19,11 +19,12 @@
  * Extends the existing GalaxyView with planet interaction
  */
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { SolarSystem, Planet } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
+import SceneTooltip from './SceneTooltip';
 import {
   calculatePlanetSize,
   calculateOrbitalRadius,
@@ -49,12 +50,14 @@ function PlanetMesh({
   systemPosition,
   onClick,
   totalPlanets,
+  onHover,
 }: {
   planet: Planet;
   index: number;
   systemPosition: THREE.Vector3;
   onClick: () => void;
   totalPlanets: number;
+  onHover: (planetId: string | null, position: THREE.Vector3 | null, size: number) => void;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
 
@@ -107,7 +110,16 @@ function PlanetMesh({
   });
 
   return (
-    <mesh ref={meshRef} onClick={onClick}>
+    <mesh
+      ref={meshRef}
+      onClick={onClick}
+      onPointerOver={() => {
+        if (meshRef.current) {
+          onHover(planet.id, meshRef.current.position.clone(), orbitalData.size);
+        }
+      }}
+      onPointerOut={() => onHover(null, null, 0)}
+    >
       <sphereGeometry args={[orbitalData.size, 16, 16]} />
       <meshStandardMaterial
         color={
@@ -130,11 +142,50 @@ function PlanetMesh({
 export default function SolarSystemView({ solarSystem, position }: SolarSystemViewProps) {
   const { navigateToPlanet } = useNavigationStore();
   const totalPlanets = (solarSystem.planets || []).length;
+  const [hoveredObject, setHoveredObject] = useState<{
+    type: 'star' | 'planet';
+    id: string | null;
+    position: THREE.Vector3 | null;
+    offset: number;
+  } | null>(null);
+
+  const handleStarHover = (isHovered: boolean) => {
+    if (isHovered) {
+      setHoveredObject({
+        type: 'star',
+        id: solarSystem.id,
+        position: new THREE.Vector3(position.x, position.y, position.z),
+        offset: STAR_SCALE.RADIUS + 1.5,
+      });
+    } else {
+      setHoveredObject(null);
+    }
+  };
+
+  const handlePlanetHover = (planetId: string | null, planetPosition: THREE.Vector3 | null, size: number) => {
+    if (planetId && planetPosition) {
+      setHoveredObject({
+        type: 'planet',
+        id: planetId,
+        position: planetPosition,
+        offset: size + 1,
+      });
+    } else {
+      setHoveredObject(null);
+    }
+  };
+
+  const hoveredPlanet = hoveredObject?.type === 'planet' 
+    ? (solarSystem.planets || []).find(p => p.id === hoveredObject.id)
+    : null;
 
   return (
     <group position={position}>
       {/* Central star */}
-      <mesh>
+      <mesh
+        onPointerOver={() => handleStarHover(true)}
+        onPointerOut={() => handleStarHover(false)}
+      >
         <sphereGeometry args={[STAR_SCALE.RADIUS, 16, 16]} />
         <meshBasicMaterial color="#FDB813" />
         <pointLight
@@ -153,8 +204,43 @@ export default function SolarSystemView({ solarSystem, position }: SolarSystemVi
           systemPosition={position}
           onClick={() => navigateToPlanet(planet.id)}
           totalPlanets={totalPlanets}
+          onHover={handlePlanetHover}
         />
       ))}
+
+      {/* Consolidated tooltip rendering */}
+      {hoveredObject && hoveredObject.position && (
+        <SceneTooltip
+          visible={true}
+          worldPosition={new THREE.Vector3(
+            hoveredObject.position.x,
+            hoveredObject.position.y + hoveredObject.offset,
+            hoveredObject.position.z
+          )}
+          distanceFactor={10}
+          fontSize={hoveredObject.type === 'star' ? '1rem' : '0.95rem'}
+          borderColor={hoveredObject.type === 'star' ? 'rgba(251, 184, 19, 0.7)' : undefined}
+          content={
+            hoveredObject.type === 'star' ? (
+              <>
+                <strong>{solarSystem.name}</strong>
+                <div style={{ fontSize: '0.75rem', marginTop: '0.25rem', opacity: 0.9 }}>
+                  Star
+                </div>
+              </>
+            ) : hoveredPlanet ? (
+              <>
+                <strong>{hoveredPlanet.name}</strong>
+                {hoveredPlanet.moons && hoveredPlanet.moons.length > 0 && (
+                  <div style={{ fontSize: '0.75rem', marginTop: '0.25rem', opacity: 0.9 }}>
+                    {hoveredPlanet.moons.length} moon{hoveredPlanet.moons.length !== 1 ? 's' : ''}
+                  </div>
+                )}
+              </>
+            ) : null
+          }
+        />
+      )}
     </group>
   );
 }

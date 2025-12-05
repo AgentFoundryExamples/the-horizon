@@ -21,6 +21,16 @@ export interface TooltipProps {
   delay?: number;
   /** Whether to show on touch devices (default: true) */
   enableTouch?: boolean;
+  /** Vertical offset in pixels (positive = up, negative = down) */
+  offsetY?: number;
+  /** Horizontal offset in pixels (positive = right, negative = left) */
+  offsetX?: number;
+  /** Font size for tooltip text (e.g., '1rem', '16px') */
+  fontSize?: string;
+  /** Maximum width for tooltip (e.g., '300px', '90vw') */
+  maxWidth?: string;
+  /** Fixed 3D screen coordinates for tooltip (bypasses automatic positioning) */
+  screenCoordinates?: { x: number; y: number };
 }
 
 /**
@@ -34,6 +44,11 @@ export default function Tooltip({
   position = 'top',
   delay = 300,
   enableTouch = true,
+  offsetY = 0,
+  offsetX = 0,
+  fontSize = '1rem',
+  maxWidth = '300px',
+  screenCoordinates,
 }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [coords, setCoords] = useState({ x: 0, y: 0 });
@@ -64,6 +79,12 @@ export default function Tooltip({
   };
 
   const updatePosition = () => {
+    // Use fixed screen coordinates if provided (for 3D scenes)
+    if (screenCoordinates) {
+      setCoords({ x: screenCoordinates.x + offsetX, y: screenCoordinates.y + offsetY });
+      return;
+    }
+
     if (!triggerRef.current) return;
 
     const rect = triggerRef.current.getBoundingClientRect();
@@ -89,7 +110,7 @@ export default function Tooltip({
         break;
     }
 
-    setCoords({ x, y });
+    setCoords({ x: x + offsetX, y: y + offsetY });
   };
 
   const handleMouseEnter = () => {
@@ -133,10 +154,20 @@ export default function Tooltip({
     };
   }, []);
 
-  // Update position when tooltip becomes visible
+  // Update position when tooltip becomes visible or when window resizes
   useEffect(() => {
     if (isVisible) {
       updatePosition();
+      
+      // Handle window resize
+      const handleResize = () => {
+        if (isVisible) {
+          updatePosition();
+        }
+      };
+      
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
     }
   }, [isVisible]);
 
@@ -145,50 +176,81 @@ export default function Tooltip({
       position: 'fixed',
       zIndex: 9999,
       pointerEvents: 'none',
-      padding: '0.5rem 0.75rem',
-      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+      padding: '0.75rem 1rem',
+      backgroundColor: 'rgba(0, 0, 0, 0.95)',
       color: '#FFFFFF',
-      borderRadius: '4px',
-      fontSize: '0.875rem',
-      maxWidth: '250px',
+      borderRadius: '8px',
+      fontSize: fontSize,
+      maxWidth: maxWidth,
       wordWrap: 'break-word',
       whiteSpace: 'normal',
-      border: '1px solid rgba(74, 144, 226, 0.5)',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+      border: '2px solid rgba(74, 144, 226, 0.7)',
+      boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5)',
+      backdropFilter: 'blur(4px)',
     };
 
-    // Position-specific adjustments
+    // Calculate initial position based on position prop
+    let left = coords.x;
+    let top = coords.y;
+    let transform = '';
+
     switch (position) {
       case 'top':
-        return {
-          ...baseStyle,
-          left: `${coords.x}px`,
-          top: `${coords.y}px`,
-          transform: 'translate(-50%, -100%) translateY(-8px)',
-        };
+        transform = 'translate(-50%, -100%) translateY(-12px)';
+        break;
       case 'bottom':
-        return {
-          ...baseStyle,
-          left: `${coords.x}px`,
-          top: `${coords.y}px`,
-          transform: 'translate(-50%, 0) translateY(8px)',
-        };
+        transform = 'translate(-50%, 0) translateY(12px)';
+        break;
       case 'left':
-        return {
-          ...baseStyle,
-          left: `${coords.x}px`,
-          top: `${coords.y}px`,
-          transform: 'translate(-100%, -50%) translateX(-8px)',
-        };
+        transform = 'translate(-100%, -50%) translateX(-12px)';
+        break;
       case 'right':
-        return {
-          ...baseStyle,
-          left: `${coords.x}px`,
-          top: `${coords.y}px`,
-          transform: 'translate(0, -50%) translateX(8px)',
-        };
+        transform = 'translate(0, -50%) translateX(12px)';
+        break;
     }
+
+    return {
+      ...baseStyle,
+      left: `${left}px`,
+      top: `${top}px`,
+      transform,
+    };
   };
+
+  // Adjust position after render to handle viewport boundaries
+  useEffect(() => {
+    if (isVisible && tooltipRef.current) {
+      const tooltipRect = tooltipRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      let needsUpdate = false;
+      let newLeft = coords.x;
+      let newTop = coords.y;
+
+      // Check horizontal overflow
+      if (tooltipRect.right > viewportWidth - 10) {
+        newLeft = viewportWidth - tooltipRect.width / 2 - 10;
+        needsUpdate = true;
+      } else if (tooltipRect.left < 10) {
+        newLeft = tooltipRect.width / 2 + 10;
+        needsUpdate = true;
+      }
+
+      // Check vertical overflow
+      if (position === 'top' && tooltipRect.top < 10) {
+        // Would overflow top edge, adjust down
+        needsUpdate = true;
+      } else if (position === 'bottom' && tooltipRect.bottom > viewportHeight - 10) {
+        // Would overflow bottom edge, adjust up
+        needsUpdate = true;
+      }
+
+      if (needsUpdate && (newLeft !== coords.x || newTop !== coords.y)) {
+        setCoords({ x: newLeft, y: newTop });
+      }
+    }
+  }, [isVisible, coords, position]);
 
   return (
     <>

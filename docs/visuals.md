@@ -1482,9 +1482,608 @@ useEffect(() => {
 5. **Ambient Occlusion**: Enhanced depth perception
 6. **VR Support**: Immersive exploration mode
 
+## Enhanced Tooltip System
+
+The Horizon features an improved tooltip system designed for optimal readability and accessibility in 3D scenes. Tooltips now render larger labels above celestial objects with no overlap.
+
+### Tooltip Components
+
+#### Standard Tooltip Component
+
+The standard `Tooltip` component (`src/components/Tooltip.tsx`) is used for 2D UI elements:
+
+```typescript
+import Tooltip from '@/components/Tooltip';
+
+<Tooltip
+  content="Tooltip text"
+  position="top"
+  offsetY={10}
+  fontSize="1rem"
+  maxWidth="300px"
+>
+  <button>Hover me</button>
+</Tooltip>
+```
+
+**Features:**
+- **Configurable offsets**: `offsetX` and `offsetY` for precise positioning
+- **Custom typography**: `fontSize` prop for larger, more readable text
+- **Responsive sizing**: `maxWidth` prop with responsive defaults
+- **Viewport boundary detection**: Automatically flips position to stay within viewport
+- **3D coordinate support**: `screenCoordinates` prop for fixed positioning
+- **Accessibility**: Full ARIA support and keyboard navigation
+
+#### SceneTooltip Component
+
+The `SceneTooltip` component (`src/components/SceneTooltip.tsx`) is specialized for 3D Three.js scenes:
+
+```typescript
+import SceneTooltip from '@/components/SceneTooltip';
+
+<SceneTooltip
+  content="Galaxy name"
+  worldPosition={new THREE.Vector3(0, 10, 0)}
+  visible={isHovered}
+  offsetY={-40}
+  distanceFactor={50}
+/>
+```
+
+**Features:**
+- **3D-to-2D projection**: Automatically projects 3D world coordinates to screen space
+- **Distance-based scaling**: Uses `distanceFactor` to maintain readability at different zoom levels
+- **Positioned above objects**: Default `offsetY={-40}` renders tooltips above celestial bodies
+- **Non-intrusive**: `pointerEvents: 'none'` ensures tooltips don't block interactions
+
+### Tooltip Styling Guidelines
+
+#### Typography
+
+All tooltips use consistent typography for readability:
+
+```css
+{
+  fontSize: '1rem',           /* Base size (16px) */
+  fontWeight: 'bold',         /* For object names */
+  color: '#FFFFFF',           /* High contrast on dark background */
+  textAlign: 'center',        /* Centered for symmetry */
+}
+```
+
+**Responsive sizing:**
+- **Desktop**: `1rem` (16px)
+- **Tablet**: `0.9rem` (14.4px)
+- **Mobile**: `0.85rem` (13.6px)
+
+#### Color and Contrast
+
+Tooltips meet WCAG 2.1 Level AA contrast requirements:
+
+```css
+{
+  background: 'rgba(0, 0, 0, 0.95)',           /* Nearly opaque black */
+  color: '#FFFFFF',                            /* Pure white text */
+  border: '2px solid rgba(74, 144, 226, 0.7)', /* Blue accent border */
+}
+```
+
+**Contrast ratios:**
+- Text: 21:1 (exceeds AAA requirement of 7:1)
+- Border: Provides visual delineation without affecting text contrast
+
+#### Visual Effects
+
+Tooltips use modern CSS features for polish:
+
+```css
+{
+  backdropFilter: 'blur(4px)',              /* Subtle blur behind tooltip */
+  boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5)', /* Depth perception */
+  borderRadius: '8px',                       /* Rounded corners */
+}
+```
+
+**Performance note:** `backdropFilter` can be disabled on low-end devices by removing the property.
+
+### Positioning System
+
+#### Vertical Offset Strategy
+
+Tooltips are positioned above objects to avoid overlap:
+
+```typescript
+// Galaxy tooltips (large objects)
+offsetY={-40}  // 40px above galaxy center
+
+// Planet tooltips (smaller objects)
+offsetY={planet.radius + 1}  // Above planet surface
+
+// Star tooltips
+offsetY={STAR_SCALE.RADIUS + 1.5}  // Above star surface
+```
+
+**Why this works:**
+- Prevents tooltip from obscuring the object being hovered
+- Maintains visual connection between tooltip and object
+- Reduces z-fighting issues with overlapping elements
+
+#### Horizontal Centering
+
+All 3D scene tooltips use centered alignment:
+
+```typescript
+<Html center>  // Centers tooltip on 3D position
+  <div style={{ textAlign: 'center' }}>...</div>
+</Html>
+```
+
+This ensures tooltips remain centered regardless of:
+- Camera angle
+- Object rotation
+- Zoom level
+
+#### Viewport Boundary Detection
+
+The standard `Tooltip` component includes automatic boundary detection:
+
+```typescript
+// Check horizontal overflow
+if (left + tooltipRect.width / 2 > viewportWidth - 10) {
+  left = viewportWidth - tooltipRect.width / 2 - 10;
+}
+
+// Check vertical overflow and flip position if needed
+if (position === 'top' && top - tooltipRect.height - 12 < 10) {
+  // Flip to bottom
+  transform = 'translate(-50%, 0) translateY(12px)';
+}
+```
+
+This prevents tooltips from:
+- Overflowing screen edges
+- Being cut off on small viewports
+- Obscuring UI controls
+
+### Implementation Details
+
+#### Universe View - Galaxy Tooltips
+
+Located in `src/components/UniverseScene.tsx`:
+
+```typescript
+{hovered && (
+  <Html distanceFactor={50} center>
+    <div style={{...tooltipStyles, transform: 'translateY(-40px)'}}>
+      <strong>{galaxy.name}</strong>
+      <div>{solarSystemCount} solar systems</div>
+    </div>
+  </Html>
+)}
+```
+
+**Key features:**
+- Shows galaxy name in bold
+- Displays solar system count
+- Positioned 40px above galaxy center
+- `distanceFactor={50}` maintains size at distance
+
+#### Solar System View - Star and Planet Tooltips
+
+Located in `src/components/SolarSystemView.tsx`:
+
+**Star tooltip:**
+```typescript
+{starHovered && (
+  <Html
+    position={[0, STAR_SCALE.RADIUS + 1.5, 0]}
+    distanceFactor={10}
+    center
+  >
+    <div style={tooltipStyles}>
+      <strong>{solarSystem.name}</strong>
+      <div>Star</div>
+    </div>
+  </Html>
+)}
+```
+
+**Planet tooltip:**
+```typescript
+{hovered && (
+  <Html
+    position={[x, y + planetSize + 1, z]}
+    distanceFactor={10}
+    center
+  >
+    <div style={tooltipStyles}>
+      <strong>{planet.name}</strong>
+      <div>{moonCount} moons</div>
+    </div>
+  </Html>
+)}
+```
+
+**Key features:**
+- Star tooltip uses gold border (`rgba(251, 184, 19, 0.7)`)
+- Planet tooltips show moon count
+- Positioned above each object's surface
+- `distanceFactor={10}` for closer zoom level
+
+### Responsive Behavior
+
+#### Small Screens (≤768px)
+
+Tooltips automatically adjust for tablets:
+
+```css
+@media (max-width: 768px) {
+  .scene-tooltip {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.85rem;
+    max-width: 250px;
+  }
+}
+```
+
+#### Mobile Devices (≤480px)
+
+Further optimization for phones:
+
+```css
+@media (max-width: 480px) {
+  .scene-tooltip {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    max-width: 200px;
+  }
+}
+```
+
+**Touch device considerations:**
+- Tap to show tooltip (toggle behavior)
+- Tooltip dismisses on second tap or when tapping elsewhere
+- No delay on touch events for immediate feedback
+
+### Accessibility Features
+
+#### Screen Reader Support
+
+All tooltips include proper ARIA attributes:
+
+```html
+<div
+  role="tooltip"
+  aria-live="polite"
+  style={{...}}
+>
+  {content}
+</div>
+```
+
+- **`role="tooltip"`**: Identifies element as a tooltip
+- **`aria-live="polite"`**: Announces changes to screen readers when user is idle
+- **`pointerEvents: 'none'`**: Ensures tooltip doesn't interfere with interactions
+
+#### Keyboard Navigation
+
+Standard tooltips support keyboard navigation:
+
+```typescript
+<div
+  tabIndex={0}
+  onFocus={showTooltip}
+  onBlur={hideTooltip}
+  role="button"
+  aria-label="Show tooltip"
+>
+  {trigger}
+</div>
+```
+
+- Focus shows tooltip
+- Blur hides tooltip
+- Tab-navigable for keyboard users
+
+#### High Contrast Mode
+
+Tooltips adapt to high contrast preferences:
+
+```css
+@media (prefers-contrast: high) {
+  .scene-tooltip,
+  .tooltip-content {
+    background: #000000;      /* Solid black instead of transparent */
+    border-width: 3px;        /* Thicker border */
+    border-color: #4A90E2;    /* High contrast blue */
+  }
+}
+```
+
+#### Reduced Motion Support
+
+Tooltips respect `prefers-reduced-motion`:
+- No entrance animations when reduced motion is preferred
+- Instant appearance/disappearance
+- Static positioning (no floating or bouncing effects)
+
+### Z-Index Layering
+
+Tooltip z-index hierarchy prevents overlap issues:
+
+```typescript
+// Z-index values
+SceneTooltip: 9999          // Highest - always on top
+TransitionIndicator: 1000   // High - above scene but below tooltips
+WelcomeMessage: 50          // Medium - above scene content
+SceneHUD: 100               // Above scene, below overlays
+Canvas (3D scene): 0        // Base layer
+```
+
+**Why this matters:**
+- Multiple simultaneous hovers don't create z-fighting
+- UI controls remain accessible
+- Transition messages appear prominently
+- Scene content never obscures tooltips
+
+### Edge Cases and Solutions
+
+#### Multiple Overlapping Bodies
+
+**Problem:** User hovers over two celestial bodies at once.
+
+**Solution:** Each component manages its own hover state independently. Z-index ensures all tooltips are visible without fighting.
+
+```typescript
+const [hovered, setHovered] = useState(false);
+
+<mesh
+  onPointerOver={() => setHovered(true)}
+  onPointerOut={() => setHovered(false)}
+>
+  ...
+</mesh>
+```
+
+#### Deep Zoom Scenarios
+
+**Problem:** Tooltips may appear too large or small at extreme zoom levels.
+
+**Solution:** Use appropriate `distanceFactor` values:
+- Universe view (far): `distanceFactor={50}`
+- Galaxy view (medium): `distanceFactor={30}`
+- Solar system view (close): `distanceFactor={10}`
+
+#### Long Object Names
+
+**Problem:** Names like "Messier 87 Supergiant Elliptical Galaxy" overflow.
+
+**Solution:** Automatic text wrapping:
+
+```css
+{
+  maxWidth: '300px',
+  wordWrap: 'break-word',
+  whiteSpace: 'normal',
+}
+```
+
+Names wrap naturally while maintaining readability.
+
+#### Rapid Camera Movement
+
+**Problem:** Tooltips may jitter during camera animations.
+
+**Solution:** Tooltips use `Html` from `@react-three/drei` which:
+- Updates position every frame
+- Uses GPU-accelerated transforms
+- Maintains smooth tracking during movement
+
+### Performance Considerations
+
+#### Rendering Optimization
+
+Tooltips only render when visible:
+
+```typescript
+{hovered && (
+  <Html>...</Html>
+)}
+```
+
+This conditional rendering:
+- Reduces DOM nodes when not needed
+- Minimizes re-renders
+- Improves frame rate
+
+#### CSS Performance
+
+Tooltips use GPU-accelerated properties:
+
+```css
+{
+  transform: 'translateY(-40px)',  /* GPU-accelerated */
+  backdropFilter: 'blur(4px)',     /* GPU-accelerated */
+  /* Avoid: margin-top, top animation */
+}
+```
+
+#### Distance Factor Tuning
+
+Higher `distanceFactor` values reduce scaling calculations:
+- Lower values (10): More responsive scaling, higher CPU cost
+- Higher values (50): Less scaling, better performance
+
+### Testing Tooltips
+
+#### Manual Testing Checklist
+
+- [ ] Hover over galaxies shows name and system count
+- [ ] Hover over solar systems shows system name
+- [ ] Hover over planets shows planet name and moon count
+- [ ] Hover over star shows solar system name
+- [ ] Tooltips positioned above objects without overlap
+- [ ] Tooltips remain readable at all zoom levels
+- [ ] Tooltips don't overflow viewport edges
+- [ ] Multiple tooltips can appear simultaneously
+- [ ] Tooltips dismiss when pointer moves away
+- [ ] Touch devices: tap to show, tap again to hide
+- [ ] Keyboard navigation works for standard tooltips
+- [ ] Screen reader announces tooltip content
+- [ ] High contrast mode increases visibility
+- [ ] Reduced motion disables entrance animations
+
+#### Automated Tests
+
+Tests are located in:
+- `src/components/__tests__/Tooltip.test.tsx`
+- `src/components/__tests__/SceneTooltip.test.tsx`
+
+Run tests:
+```bash
+npm test -- Tooltip.test
+npm test -- SceneTooltip.test
+```
+
+Key test coverage:
+- Offset calculation logic
+- Viewport boundary detection
+- Custom fontSize and maxWidth
+- Fixed screen coordinates
+- ARIA attributes
+- Visibility toggling
+
+#### Visual Regression Testing
+
+To test tooltip appearance across browsers:
+
+1. **Chrome DevTools Device Mode**: Test responsive sizing
+2. **Firefox Accessibility Inspector**: Verify ARIA attributes
+3. **Safari**: Test backdrop-filter compatibility
+4. **Touch device emulation**: Verify tap behavior
+
+### Customization Guide
+
+#### Change Tooltip Colors
+
+Edit inline styles in components or create CSS classes:
+
+```typescript
+// Warm color theme
+{
+  background: 'rgba(40, 20, 0, 0.95)',
+  border: '2px solid rgba(255, 165, 0, 0.7)',
+  color: '#FFA500',
+}
+```
+
+#### Adjust Positioning
+
+Modify offset values for different positioning:
+
+```typescript
+// Further above object
+offsetY={-60}
+
+// To the right of object
+offsetX={40}
+
+// Below object (for top-heavy scenes)
+offsetY={40}
+```
+
+#### Change Typography
+
+Customize font properties:
+
+```typescript
+<SceneTooltip
+  fontSize="1.2rem"
+  maxWidth="350px"
+  content={<div style={{ fontWeight: '600' }}>Custom text</div>}
+/>
+```
+
+#### Add Custom Animations
+
+For entrance effects (respecting reduced motion):
+
+```css
+@keyframes tooltipSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-40px);
+  }
+}
+
+.scene-tooltip {
+  animation: tooltipSlideIn 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-tooltip {
+    animation: none;
+  }
+}
+```
+
+### Integration with Existing Components
+
+The tooltip system integrates seamlessly with:
+
+1. **UniverseScene**: Galaxy hover labels
+2. **GalaxyView**: Solar system and planet labels (future)
+3. **SolarSystemView**: Star and planet labels
+4. **PlanetSurface**: Surface feature labels (future)
+
+All components follow the same styling guidelines for consistency.
+
+### Migration from Old Tooltip System
+
+**Before:**
+```typescript
+// Small, hard-to-read tooltips
+<Html distanceFactor={50}>
+  <div style={{
+    fontSize: '0.875rem',
+    padding: '0.5rem 0.75rem',
+  }}>
+    {name}
+  </div>
+</Html>
+```
+
+**After:**
+```typescript
+// Large, readable tooltips positioned above objects
+<Html distanceFactor={50} center>
+  <div style={{
+    fontSize: '1rem',
+    padding: '0.75rem 1rem',
+    transform: 'translateY(-40px)',
+  }}>
+    <strong>{name}</strong>
+  </div>
+</Html>
+```
+
+**Key improvements:**
+- 14% larger font size (0.875rem → 1rem)
+- 50% more padding for touch targets
+- Positioned above objects (no overlap)
+- Stronger visual contrast
+- Bold text for names
+- Responsive sizing for mobile
+
 ## References
 
 - [React Three Fiber Documentation](https://docs.pmnd.rs/react-three-fiber)
 - [Three.js Fundamentals](https://threejs.org/manual/)
 - [Keplerian Orbital Elements](https://en.wikipedia.org/wiki/Orbital_elements)
 - [Easing Functions](https://easings.net/)
+- [WCAG 2.1 Contrast Requirements](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)
+- [@react-three/drei Html Component](https://github.com/pmndrs/drei#html)
