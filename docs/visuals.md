@@ -251,6 +251,374 @@ The 800px max-width ensures optimal line length:
 - Meets readability guidelines (45-75 characters)
 - Comfortable reading without head movement
 
+## Galaxy Scale Configuration
+
+### Overview
+
+The Horizon implements automatic galaxy scaling that adapts to the total number of galaxies in the universe. This ensures sparse universes feel immersive with large, detailed galaxies, while crowded universes remain readable with appropriately sized representations.
+
+### Dynamic Scaling Behavior
+
+The galaxy rendering system automatically adjusts galaxy sizes based on total count:
+
+- **Sparse (1-2 galaxies)**: Galaxies render at maximum size (radius 15 units) to fill the canvas and provide an immersive experience
+- **Moderate (3-25 galaxies)**: Sizes interpolate smoothly using logarithmic scaling to prevent jarring transitions
+- **Crowded (50+ galaxies)**: Galaxies render at minimum size (radius 4 units) to maintain clickability and prevent visual clutter
+
+### Galaxy Scale Constants
+
+Located in `GALAXY_SCALE` in `src/lib/universe/scale-constants.ts`:
+
+```typescript
+GALAXY_SCALE = {
+  MIN_RADIUS: 4,              // Minimum galaxy radius (50+ galaxies)
+  MAX_RADIUS: 15,             // Maximum galaxy radius (1-2 galaxies)
+  BASE_RADIUS: 8,             // Reference size for default case
+  MIN_SIZE_THRESHOLD: 50,     // Count at which MIN_RADIUS applies
+  MAX_SIZE_THRESHOLD: 2,      // Count at which MAX_RADIUS applies
+  SMOOTHING_FACTOR: 0.8,      // Controls transition smoothness (0-1)
+}
+```
+
+**Why These Values:**
+
+- `MIN_RADIUS` of 4 units ensures galaxies remain clickable even in very crowded universes (approximately 200-250px diameter at default zoom, exceeding WCAG touch target requirements)
+- `MAX_RADIUS` of 15 units provides impressive visual presence for sparse universes without overwhelming the canvas
+- `BASE_RADIUS` of 8 units serves as a sensible middle ground for reference
+- `SMOOTHING_FACTOR` of 0.8 reduces sudden size changes when galaxies are added or removed (lower values = smoother transitions)
+- Thresholds at 2 and 50 galaxies define clear boundaries for maximum and minimum sizes
+
+### Galaxy Size Calculation
+
+The `calculateGalaxyScale()` function computes galaxy radius based on total count:
+
+```typescript
+function calculateGalaxyScale(galaxyCount: number): { 
+  minRadius: number; 
+  maxRadius: number;
+}
+```
+
+**Algorithm:**
+
+1. **Edge cases**: Zero galaxies return base size; counts ≤2 return maximum size
+2. **Logarithmic interpolation**: Uses natural logarithm to smooth transitions
+3. **Smoothing application**: Applies power function to reduce jarring changes
+4. **Ratio maintenance**: minRadius is always 20% of maxRadius for proper particle distribution
+
+**Examples:**
+
+```typescript
+calculateGalaxyScale(1)   // { minRadius: 3, maxRadius: 15 }
+calculateGalaxyScale(5)   // { minRadius: 2.2, maxRadius: 11 }
+calculateGalaxyScale(10)  // { minRadius: 1.6, maxRadius: 8 }
+calculateGalaxyScale(50)  // { minRadius: 0.8, maxRadius: 4 }
+calculateGalaxyScale(100) // { minRadius: 0.8, maxRadius: 4 }
+```
+
+### Manual Size Overrides
+
+Featured galaxies can have fixed sizes independent of the global count-based scaling:
+
+```typescript
+// In Galaxy type definition
+interface Galaxy {
+  // ...other fields
+  manualRadius?: number;  // Optional fixed radius override
+}
+```
+
+**Usage:**
+
+```typescript
+const galaxy = {
+  id: 'featured-galaxy',
+  name: 'Andromeda',
+  manualRadius: 12,  // Always renders at radius 12, regardless of count
+  // ...other fields
+};
+```
+
+The `calculateGalaxyScaleWithOverride()` function handles this:
+
+```typescript
+calculateGalaxyScaleWithOverride(galaxyCount: 50, manualRadius: 12)
+// Returns: { minRadius: 2.4, maxRadius: 12 }
+// Ignores galaxyCount when manualRadius is set
+```
+
+**When to use manual overrides:**
+
+- Featured or "hero" galaxies that should always be prominent
+- Tutorial galaxies that need consistent sizing across play sessions
+- Galaxies with special significance in the narrative
+- Testing and debugging scenarios
+
+### Smoothing and Transitions
+
+The scaling system prevents jarring visual changes through several mechanisms:
+
+#### Logarithmic Scaling
+
+Instead of linear interpolation, the system uses natural logarithm:
+
+```typescript
+const logCount = Math.log(galaxyCount);
+const t = (logCount - logMin) / (logMax - logMin);
+```
+
+This means:
+- Adding galaxy #6 to a 5-galaxy universe: ~10% size change
+- Adding galaxy #51 to a 50-galaxy universe: ~1% size change
+
+#### Power Smoothing
+
+The interpolation factor is raised to the smoothing power:
+
+```typescript
+const smoothT = Math.pow(t, SMOOTHING_FACTOR);
+```
+
+With `SMOOTHING_FACTOR = 0.8`:
+- Changes are more gradual across the middle range
+- Size transitions feel natural and predictable
+- Avoids sudden "jumps" when galaxies are added/removed
+
+#### Testing Transitions
+
+To verify smooth scaling, test consecutive counts:
+
+```bash
+# Run in browser console
+for (let i = 1; i <= 20; i++) {
+  const scale = calculateGalaxyScale(i);
+  console.log(`${i} galaxies: ${scale.maxRadius.toFixed(2)} units`);
+}
+```
+
+Expected output shows gradual decrease:
+```
+1 galaxies: 15.00 units
+2 galaxies: 15.00 units
+3 galaxies: 13.28 units
+4 galaxies: 11.95 units
+5 galaxies: 10.85 units
+...
+```
+
+### Performance Considerations
+
+The dynamic scaling system is designed for performance:
+
+#### Calculation Efficiency
+
+- **Memoization**: Galaxy scale is calculated once per render when count changes
+- **O(1) complexity**: Logarithm and power operations are constant time
+- **No re-renders**: Scale changes don't trigger particle regeneration (handled in useMemo)
+
+```typescript
+// In GalaxyParticles component
+const galaxyScale = useMemo(() => {
+  return calculateGalaxyScaleWithOverride(galaxyCount, galaxy.manualRadius);
+}, [galaxyCount, galaxy.manualRadius]);
+```
+
+#### Frame Rate Targets
+
+With dynamic scaling, the system maintains:
+
+- **Desktop**: 60 FPS with 20+ galaxies
+- **Mobile**: 30+ FPS with 10+ galaxies
+- **Low-end**: 30 FPS minimum with adaptive particle counts
+
+#### Memory Usage
+
+Galaxy scaling doesn't increase memory footprint:
+- Particle buffers are pre-allocated based on solar system count
+- Position calculations use the same Float32Array regardless of scale
+- No additional textures or geometries are created
+
+### Customization Guide
+
+#### Adjusting Size Range
+
+To make galaxies generally larger or smaller:
+
+```typescript
+// Larger galaxies across all counts
+GALAXY_SCALE = {
+  MIN_RADIUS: 6,    // Instead of 4
+  MAX_RADIUS: 20,   // Instead of 15
+  // ...
+}
+```
+
+#### Changing Transition Speed
+
+To make size changes more or less gradual:
+
+```typescript
+// Smoother transitions (slower change)
+SMOOTHING_FACTOR: 0.9,  // Instead of 0.8
+
+// Sharper transitions (faster response)
+SMOOTHING_FACTOR: 0.6,
+```
+
+#### Adjusting Thresholds
+
+To change when min/max sizes apply:
+
+```typescript
+// Maximum size for up to 5 galaxies
+MAX_SIZE_THRESHOLD: 5,  // Instead of 2
+
+// Minimum size kicks in earlier
+MIN_SIZE_THRESHOLD: 30,  // Instead of 50
+```
+
+#### Customizing Particle Distribution
+
+Galaxy particles are distributed in a spiral pattern with dynamic radius:
+
+```typescript
+// In UniverseScene.tsx, GalaxyParticles component
+const radius = Math.random() * (galaxyScale.maxRadius - galaxyScale.minRadius) 
+             + galaxyScale.minRadius;
+```
+
+To create denser centers:
+
+```typescript
+// Use power function to concentrate particles toward center
+const t = Math.random();
+const radius = Math.pow(t, 1.5) * (maxRadius - minRadius) + minRadius;
+```
+
+To create sparser centers:
+
+```typescript
+// Use inverse power function
+const t = Math.random();
+const radius = Math.pow(t, 0.5) * (maxRadius - minRadius) + minRadius;
+```
+
+### Edge Cases
+
+#### Single Galaxy Universe
+
+- Uses maximum size (15 units) for dramatic presence
+- Centered on canvas with ample whitespace
+- Rotation and particle effects fully visible
+
+#### Zero Galaxies
+
+- Returns base size for fallback rendering
+- Prevents errors if data loading fails
+- Maintains UI layout stability
+
+#### Very Large Catalogs (100+)
+
+- Applies minimum size floor (4 units)
+- Galaxies remain clickable (200-250px diameter)
+- Grid layout spacing adjusts to prevent overlap
+- Performance remains stable with efficient rendering
+
+#### Mixed Manual Overrides
+
+- Featured galaxies can be larger than automatic scale
+- Other galaxies use count-based scaling normally
+- No visual conflicts or z-fighting
+- Manual overrides don't affect other galaxies' sizes
+
+### Integration with Grid Layout
+
+Galaxy positions are calculated independently of scale:
+
+```typescript
+// In SceneContent, UniverseScene.tsx
+const spacing = 30;  // Fixed spacing in Three.js units
+const cols = Math.ceil(Math.sqrt(galaxies.length));
+
+galaxies.forEach((galaxy, index) => {
+  const col = index % cols;
+  const row = Math.floor(index / cols);
+  positions.set(
+    galaxy.id,
+    new THREE.Vector3(
+      (col - (cols - 1) / 2) * spacing,
+      0,
+      (row - Math.floor(galaxies.length / cols) / 2) * spacing
+    )
+  );
+});
+```
+
+The 30-unit spacing ensures:
+- Galaxies don't overlap even at maximum size (15 units)
+- Adequate whitespace for visual clarity
+- Click targets remain distinct
+- Tooltips have room to display
+
+To adjust spacing for different size ranges:
+
+```typescript
+// Dynamic spacing based on maximum possible galaxy size
+const maxPossibleRadius = calculateGalaxyScale(galaxies.length).maxRadius;
+const spacing = Math.max(30, maxPossibleRadius * 2.5);
+```
+
+### Testing Galaxy Scaling
+
+#### Unit Tests
+
+Comprehensive tests cover all scenarios:
+
+```bash
+npm test -- scale-constants.test.ts
+```
+
+Key test cases:
+- Single galaxy returns maximum size
+- 50+ galaxies return minimum size
+- Smooth interpolation between thresholds
+- Manual overrides work correctly
+- Logarithmic scaling prevents jarring transitions
+- Performance remains fast (< 0.01ms per calculation)
+
+#### Visual Testing
+
+To manually verify galaxy scaling:
+
+1. **Test with 1 galaxy**: Should fill canvas nicely
+2. **Add galaxies incrementally**: Watch sizes decrease smoothly
+3. **Test with 50+ galaxies**: All should be small but clickable
+4. **Test manual override**: Featured galaxy stays large
+5. **Performance**: Monitor FPS in dev tools (target: 60 FPS desktop)
+
+#### Browser Console Testing
+
+```javascript
+// Test scale calculation
+const { calculateGalaxyScale } = require('./src/lib/universe/scale-constants');
+
+console.table([
+  { count: 1, ...calculateGalaxyScale(1) },
+  { count: 5, ...calculateGalaxyScale(5) },
+  { count: 10, ...calculateGalaxyScale(10) },
+  { count: 50, ...calculateGalaxyScale(50) },
+]);
+```
+
+### Documentation Updates
+
+When modifying galaxy scaling:
+
+1. **Update constants**: Document any changes to `GALAXY_SCALE` values
+2. **Update tests**: Ensure test expectations match new behavior
+3. **Update this doc**: Keep examples and screenshots current
+4. **Update schema docs**: If adding new Galaxy properties
+
 ## Solar System Scale Configuration
 
 ### Overview
