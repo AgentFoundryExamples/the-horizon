@@ -155,9 +155,7 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
             <textarea
               value={localPlanet.contentMarkdown}
               onChange={(e) => handleChange('contentMarkdown', e.target.value)}
-              rows={20}
               placeholder="# Planet Name&#10;&#10;Add your markdown content here..."
-              style={{ fontFamily: 'Monaco, Menlo, monospace', fontSize: '0.9rem' }}
             />
             <span className="form-hint">
               Supports GitHub-flavored markdown. Use headers, lists, bold, italics, etc.
@@ -226,9 +224,7 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
                         <textarea
                           value={moon.contentMarkdown}
                           onChange={(e) => handleUpdateMoon(index, 'contentMarkdown', e.target.value)}
-                          rows={15}
                           placeholder="# Moon Name&#10;&#10;Add your markdown content here..."
-                          style={{ fontFamily: 'Monaco, Menlo, monospace', fontSize: '0.9rem' }}
                         />
                       </div>
                       <div className="editor-panel">

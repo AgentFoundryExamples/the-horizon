@@ -219,6 +219,30 @@ body {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
 }
 
+.editor-panel textarea {
+  flex: 1;
+  min-height: 0;
+  resize: none;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9rem;
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 4px;
+  color: var(--admin-text);
+}
+
+.editor-panel textarea:focus {
+  outline: none;
+  border-color: var(--admin-primary);
+}
+
+.editor-panel .form-hint {
+  flex-shrink: 0;
+  margin-top: 0.5rem;
+}
+
 .form-hint {
   display: block;
   margin-top: 0.25rem;
@@ -309,10 +333,12 @@ body {
 }
 
 .editor-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
   gap: 1.5rem;
   margin-top: 1rem;
+  /* Use clamp to ensure height is responsive but within reasonable bounds */
+  /* Min: 600px for usability, Preferred: viewport-relative, Max: 1200px to prevent excessive height */
+  height: clamp(600px, calc(100vh - 400px), 1200px);
 }
 
 .editor-panel {
@@ -320,20 +346,26 @@ body {
   border: 1px solid var(--admin-border);
   border-radius: 4px;
   padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .editor-panel h4 {
   margin-top: 0;
+  margin-bottom: 1rem;
   color: var(--admin-text);
+  flex-shrink: 0;
 }
 
 .markdown-preview {
-  min-height: 300px;
+  flex: 1;
   padding: 1rem;
   background: var(--admin-surface);
   border-radius: 4px;
   overflow-y: auto;
-  max-height: 600px;
+  min-height: 0;
 }
 
 .markdown-preview h1 {
@@ -394,7 +426,15 @@ body {
   }
 
   .editor-container {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    /* On mobile, use auto height to prevent forcing page scroll */
+    height: auto;
+    min-height: min(400px, 50vh);
+  }
+
+  .editor-panel {
+    /* Use viewport-relative minimum to work better on small devices */
+    min-height: min(300px, 40vh);
   }
 
   .admin-grid {

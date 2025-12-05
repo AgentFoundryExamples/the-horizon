@@ -6,6 +6,18 @@ This guide covers how to create and manage markdown content for planets and moon
 
 The admin interface uses a two-step workflow to ensure content changes are safe and reviewable:
 
+### Admin Editor Layout
+
+The admin markdown editor has been designed to provide a spacious editing experience:
+
+- **Full-Width Layout**: The editor expands to fill the full width of its container
+- **Flexible Height**: The editor adjusts its height dynamically (minimum 600px, maximum based on viewport)
+- **Side-by-Side Panels**: On desktop, the markdown editor and preview pane are displayed side by side for easy comparison
+- **Responsive Design**: On mobile devices (< 768px width), the panels stack vertically for optimal viewing
+- **Scrollable Content**: Long markdown documents scroll within the editor and preview panes, keeping controls accessible
+
+The editor provides a comfortable workspace for creating and editing content while maintaining a clear preview of how the markdown will render.
+
 ### Step 1: Save to Disk
 When you edit universe content (galaxies, solar systems, planets, or moons), your changes are initially stored only in the browser's memory. To persist these changes:
 
