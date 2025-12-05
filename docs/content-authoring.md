@@ -2,6 +2,48 @@
 
 This guide covers how to create and manage markdown content for planets and moons in The Horizon universe explorer.
 
+## Admin Workflow: Save vs Commit
+
+The admin interface uses a two-step workflow to ensure content changes are safe and reviewable:
+
+### Step 1: Save to Disk
+When you edit universe content (galaxies, solar systems, planets, or moons), your changes are initially stored only in the browser's memory. To persist these changes:
+
+1. Click the **"💾 Save to Disk"** button in the admin interface
+2. This saves your edits to `public/universe/universe.json` on the server
+3. Changes are validated before being written to prevent corrupted data
+4. Your changes are now persisted locally but **not yet committed to version control**
+
+**Important:** Saving to disk does **not** create a Git commit. Your changes are only saved to the local file system.
+
+### Step 2: Commit to GitHub
+After you've saved your changes and verified they work correctly:
+
+1. Enter a descriptive commit message explaining your changes
+2. Choose whether to create a Pull Request (recommended) or commit directly to main
+3. Click **"✓ Commit to GitHub"** or **"🔀 Create PR"**
+4. Your saved changes will be committed to the repository
+
+**Best Practice:** Always test your changes locally before committing to GitHub.
+
+### Why Two Steps?
+
+This workflow provides several benefits:
+
+- **Safety**: Validate changes before they reach version control
+- **Iteration**: Make multiple edits and save incrementally without cluttering Git history
+- **Review**: Create PRs for team review before merging to main
+- **Recovery**: Disk-saved changes persist even if your browser session ends
+
+### Error Handling
+
+The admin interface validates all changes before saving:
+
+- **Validation Errors**: If your universe data is invalid (e.g., missing required fields), you'll see an error message
+- **Disk Write Failures**: If the server can't write to disk (e.g., out of space), you'll be notified and your in-memory edits preserved
+- **Concurrent Edits**: If another admin modifies the same data, you'll be warned about conflicts and asked to refresh
+- **Authentication**: Unauthenticated or expired sessions will be rejected with clear messaging
+
 ## Overview
 
 Planets and moons in The Horizon use **markdown** to render rich, readable content. When users click on a planet, they land on its surface and see a scrollable markdown pane with:

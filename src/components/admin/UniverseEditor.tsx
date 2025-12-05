@@ -32,17 +32,57 @@ export default function UniverseEditor({
 }: UniverseEditorProps) {
   const [editingGalaxy, setEditingGalaxy] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [committing, setCommitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [commitMessage, setCommitMessage] = useState('');
   const [createPR, setCreatePR] = useState(false);
 
-  const handleSave = async () => {
+  const handleSaveToFile = async () => {
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch('/api/admin/universe', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          universe,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setMessage({
+          type: 'success',
+          text: 'Changes saved to disk successfully. Remember to commit when ready!',
+        });
+        onUpdate(universe);
+      } else {
+        setMessage({
+          type: 'error',
+          text: data.error || data.message || 'Failed to save changes',
+        });
+      }
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text: 'Failed to connect to server',
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCommit = async () => {
     if (!commitMessage.trim()) {
       setMessage({ type: 'error', text: 'Commit message is required' });
       return;
     }
 
-    setSaving(true);
+    setCommitting(true);
     setMessage(null);
 
     try {
@@ -66,14 +106,14 @@ export default function UniverseEditor({
           type: 'success',
           text: createPR
             ? `Pull request created successfully! ${data.prUrl}`
-            : 'Changes committed successfully',
+            : 'Changes committed to GitHub successfully',
         });
         setCommitMessage('');
         onUpdate(universe);
       } else {
         setMessage({
           type: 'error',
-          text: data.error || data.message || 'Failed to save changes',
+          text: data.error || data.message || 'Failed to commit changes',
         });
       }
     } catch (err) {
@@ -82,7 +122,7 @@ export default function UniverseEditor({
         text: 'Failed to connect to server',
       });
     } finally {
-      setSaving(false);
+      setCommitting(false);
     }
   };
 
@@ -183,7 +223,27 @@ export default function UniverseEditor({
       )}
 
       <div className="admin-card">
-        <h3>Commit Changes</h3>
+        <h3>Save Changes</h3>
+        <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
+          Save your edits to disk first, then commit to GitHub when ready.
+        </p>
+        
+        <button
+          onClick={handleSaveToFile}
+          className="btn"
+          disabled={saving}
+          style={{ marginBottom: '1rem' }}
+        >
+          {saving ? 'Saving...' : '💾 Save to Disk'}
+        </button>
+        
+        <span className="form-hint" style={{ display: 'block', marginBottom: '1.5rem' }}>
+          Saves changes to local universe.json without committing to GitHub
+        </span>
+      </div>
+
+      <div className="admin-card">
+        <h3>Commit Changes to GitHub</h3>
         <div className="form-group">
           <label htmlFor="commitMessage">Commit Message</label>
           <input
@@ -215,11 +275,11 @@ export default function UniverseEditor({
         </div>
 
         <button
-          onClick={handleSave}
+          onClick={handleCommit}
           className="btn"
-          disabled={saving || !commitMessage.trim()}
+          disabled={committing || !commitMessage.trim()}
         >
-          {saving ? 'Saving...' : createPR ? 'Create PR' : 'Commit to GitHub'}
+          {committing ? 'Committing...' : createPR ? '🔀 Create PR' : '✓ Commit to GitHub'}
         </button>
       </div>
     </div>

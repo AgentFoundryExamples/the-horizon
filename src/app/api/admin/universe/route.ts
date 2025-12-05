@@ -17,6 +17,7 @@ import { sha256 } from '@/lib/crypto';
 import { isAuthenticated } from '@/lib/auth';
 import { fetchCurrentUniverse, pushUniverseChanges } from '@/lib/github';
 import { parseAndValidateUniverse, serializeUniverse } from '@/lib/universe/mutate';
+import { persistUniverseToFile } from '@/lib/universe/persist';
 import universeData from '@/../public/universe/universe.json';
 
 /**
@@ -64,8 +65,72 @@ export async function GET() {
 }
 
 /**
+ * PATCH /api/admin/universe
+ * Saves universe changes to local file without committing to GitHub
+ */
+export async function PATCH(request: NextRequest) {
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+
+  try {
+    const { universe } = await request.json();
+
+    if (!universe) {
+      return NextResponse.json(
+        { error: 'Universe data is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate universe data
+    const { errors } = parseAndValidateUniverse(JSON.stringify(universe));
+    if (errors.length > 0) {
+      return NextResponse.json(
+        { error: 'Validation failed', validationErrors: errors },
+        { status: 400 }
+      );
+    }
+
+    // Persist to local file
+    const result = await persistUniverseToFile(universe);
+
+    if (result.success) {
+      // Calculate new hash
+      const content = serializeUniverse(universe);
+      const hash = await sha256(content);
+
+      return NextResponse.json({
+        success: true,
+        message: 'Universe data saved successfully',
+        hash,
+      });
+    } else {
+      return NextResponse.json(
+        {
+          success: false,
+          error: result.error,
+          message: 'Failed to save universe data to disk',
+        },
+        { status: 500 }
+      );
+    }
+  } catch (error) {
+    console.error('Error saving universe to disk:', error);
+    return NextResponse.json(
+      { error: 'Failed to save universe data' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
  * POST /api/admin/universe
- * Saves universe changes to GitHub
+ * Commits universe changes to GitHub (requires data to already be saved locally)
  */
 export async function POST(request: NextRequest) {
   const authenticated = await isAuthenticated();
@@ -102,7 +167,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Serialize and push to GitHub
+    // First persist to local file
+    const persistResult = await persistUniverseToFile(universe);
+    if (!persistResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: persistResult.error,
+          message: 'Failed to save universe data to disk before committing',
+        },
+        { status: 500 }
+      );
+    }
+
+    // Then push to GitHub
     const content = serializeUniverse(universe);
     const result = await pushUniverseChanges(
       content,
@@ -129,9 +207,9 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('Error saving universe:', error);
+    console.error('Error committing universe:', error);
     return NextResponse.json(
-      { error: 'Failed to save universe data' },
+      { error: 'Failed to commit universe data' },
       { status: 500 }
     );
   }
