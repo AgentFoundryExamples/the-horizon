@@ -374,7 +374,7 @@
     flex-direction: column;
     gap: 1rem;
     padding: 1rem;
-    /* Allow natural page scrolling */
+    /* Fix nested scrollbars on mobile by allowing natural page scrolling instead of container scrolling */
     overflow-y: visible;
     height: auto;
   }
@@ -391,12 +391,12 @@
     max-width: 100%;
     order: 2;
     padding: 1.5rem;
-    /* Disable scrolling on the column to prevent nested scrollbars */
+    /* Disable column-level scrolling to prevent nested scrollbars - content will scroll with page */
     overflow-y: visible;
   }
 
   .planet-content-body {
-    /* Disable scrolling on the body to prevent nested scrollbars */
+    /* Disable body-level scrolling to prevent nested scrollbars - content will scroll with page */
     overflow-y: visible;
   }
 
