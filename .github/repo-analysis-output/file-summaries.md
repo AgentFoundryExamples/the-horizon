@@ -191,8 +191,8 @@ Total files: 31
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 11.18 KB  
-**LOC:** 318  
+**Size:** 15.50 KB  
+**LOC:** 454  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/__tests__/persist.test.ts
@@ -245,8 +245,8 @@ Total files: 31
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 17.49 KB  
-**LOC:** 470  
+**Size:** 18.62 KB  
+**LOC:** 499  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/persist.ts
