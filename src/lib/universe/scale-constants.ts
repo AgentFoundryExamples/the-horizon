@@ -159,3 +159,122 @@ export function calculateSafeSpacing(planetCount: number): number {
   const densityFactor = Math.max(1.0, planetCount / ORBITAL_SPACING.ADAPTIVE_SPACING_THRESHOLD);
   return ORBITAL_SPACING.RADIUS_INCREMENT * densityFactor;
 }
+
+/**
+ * Galaxy size configuration
+ * Scales galaxies based on total count to optimize canvas usage
+ */
+export const GALAXY_SCALE = {
+  /**
+   * Minimum galaxy radius in Three.js units
+   * Used when there are many galaxies (50+)
+   */
+  MIN_RADIUS: 4,
+  
+  /**
+   * Maximum galaxy radius in Three.js units
+   * Used when there are few galaxies (1-2)
+   */
+  MAX_RADIUS: 15,
+  
+  /**
+   * Base galaxy radius for reference
+   * Used as default when no scaling is applied
+   */
+  BASE_RADIUS: 8,
+  
+  /**
+   * Count threshold for minimum size
+   * Galaxies at or above this count use MIN_RADIUS
+   */
+  MIN_SIZE_THRESHOLD: 50,
+  
+  /**
+   * Count threshold for maximum size
+   * Galaxies at or below this count use MAX_RADIUS
+   */
+  MAX_SIZE_THRESHOLD: 2,
+  
+  /**
+   * Smoothing factor for scale transitions
+   * Higher values create more gradual size changes when galaxies are added/removed
+   */
+  SMOOTHING_FACTOR: 0.8,
+  
+  /**
+   * Ratio of minimum to maximum radius for particle distribution
+   * minRadius is always RADIUS_RATIO * maxRadius to maintain proper spiral shape
+   * A ratio of 0.2 (20%) ensures particles are well-distributed from center to edge
+   */
+  RADIUS_RATIO: 0.2,
+} as const;
+
+/**
+ * Calculate galaxy render radius based on total galaxy count
+ * Implements a smooth logarithmic scale to prevent jarring size changes
+ * 
+ * @param galaxyCount Total number of galaxies in the universe
+ * @returns Object with minRadius and maxRadius for galaxy particle distribution
+ * 
+ * @example
+ * // Few galaxies fill the canvas
+ * calculateGalaxyScale(1) // { minRadius: 3, maxRadius: 15 }
+ * 
+ * // Many galaxies shrink to fit
+ * calculateGalaxyScale(50) // { minRadius: 0.8, maxRadius: 4 }
+ */
+export function calculateGalaxyScale(galaxyCount: number): { minRadius: number; maxRadius: number } {
+  // Handle edge cases
+  if (galaxyCount <= 0) {
+    return { minRadius: GALAXY_SCALE.BASE_RADIUS * GALAXY_SCALE.RADIUS_RATIO, maxRadius: GALAXY_SCALE.BASE_RADIUS };
+  }
+  
+  if (galaxyCount <= GALAXY_SCALE.MAX_SIZE_THRESHOLD) {
+    // Few galaxies: use maximum size to fill canvas
+    return { minRadius: GALAXY_SCALE.MAX_RADIUS * GALAXY_SCALE.RADIUS_RATIO, maxRadius: GALAXY_SCALE.MAX_RADIUS };
+  }
+  
+  if (galaxyCount >= GALAXY_SCALE.MIN_SIZE_THRESHOLD) {
+    // Many galaxies: use minimum size to avoid crowding
+    return { minRadius: GALAXY_SCALE.MIN_RADIUS * GALAXY_SCALE.RADIUS_RATIO, maxRadius: GALAXY_SCALE.MIN_RADIUS };
+  }
+  
+  // Intermediate counts: smooth logarithmic interpolation
+  // Use log scale to prevent jarring transitions when adding/removing galaxies
+  const logMin = Math.log(GALAXY_SCALE.MAX_SIZE_THRESHOLD);
+  const logMax = Math.log(GALAXY_SCALE.MIN_SIZE_THRESHOLD);
+  const logCount = Math.log(galaxyCount);
+  
+  // Calculate interpolation factor (0 = few galaxies, 1 = many galaxies)
+  const t = (logCount - logMin) / (logMax - logMin);
+  
+  // Apply smoothing to reduce sudden jumps
+  const smoothT = Math.pow(t, GALAXY_SCALE.SMOOTHING_FACTOR);
+  
+  // Interpolate between max and min radius
+  const maxRadius = GALAXY_SCALE.MAX_RADIUS - (GALAXY_SCALE.MAX_RADIUS - GALAXY_SCALE.MIN_RADIUS) * smoothT;
+  const minRadius = maxRadius * GALAXY_SCALE.RADIUS_RATIO;
+  
+  return { minRadius, maxRadius };
+}
+
+/**
+ * Calculate galaxy render radius with manual override support
+ * Allows specific galaxies to have fixed sizes independent of global scaling
+ * 
+ * @param galaxyCount Total number of galaxies in the universe
+ * @param manualRadius Optional fixed radius for this specific galaxy
+ * @returns Object with minRadius and maxRadius for galaxy particle distribution
+ */
+export function calculateGalaxyScaleWithOverride(
+  galaxyCount: number,
+  manualRadius?: number
+): { minRadius: number; maxRadius: number } {
+  if (manualRadius !== undefined && manualRadius > 0) {
+    // Use manual override
+    return { minRadius: manualRadius * GALAXY_SCALE.RADIUS_RATIO, maxRadius: manualRadius };
+  }
+  
+  // Use automatic scaling
+  return calculateGalaxyScale(galaxyCount);
+}

@@ -18,6 +18,7 @@ import {
   DEFAULT_ANIMATION_CONFIG,
 } from '@/lib/camera';
 import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG as DEFAULT_ANIM_CONFIG } from '@/lib/animation';
+import { calculateGalaxyScaleWithOverride } from '@/lib/universe/scale-constants';
 import GalaxyView from './GalaxyView';
 import SolarSystemView from './SolarSystemView';
 import { PlanetSurface3D, PlanetSurfaceOverlay } from './PlanetSurface';
@@ -57,6 +58,7 @@ interface GalaxyParticlesProps {
   onClick: () => void;
   isActive: boolean;
   animationConfig: ReturnType<typeof getAnimationConfig>;
+  galaxyCount: number;
 }
 
 // Performance tuning constants
@@ -67,13 +69,18 @@ const MAX_PARTICLE_COUNT = 5000; // Cap for performance on lower-end devices
 /**
  * Individual galaxy rendered as particle cloud
  */
-function GalaxyParticles({ galaxy, position, onClick, isActive, animationConfig }: GalaxyParticlesProps) {
+function GalaxyParticles({ galaxy, position, onClick, isActive, animationConfig, galaxyCount }: GalaxyParticlesProps) {
   const meshRef = useRef<THREE.Points>(null);
   const [hovered, setHovered] = useState(false);
   const particleCount = Math.min(
     BASE_PARTICLE_COUNT + (galaxy.solarSystems?.length || 0) * PARTICLES_PER_SOLAR_SYSTEM,
     MAX_PARTICLE_COUNT
   );
+
+  // Calculate dynamic galaxy scale based on total galaxy count
+  const galaxyScale = useMemo(() => {
+    return calculateGalaxyScaleWithOverride(galaxyCount, galaxy.manualRadius);
+  }, [galaxyCount, galaxy.manualRadius]);
 
   const { positions, colors, sizes } = useMemo(() => {
     const positions = new Float32Array(particleCount * 3);
@@ -83,12 +90,12 @@ function GalaxyParticles({ galaxy, position, onClick, isActive, animationConfig 
     // Parse galaxy color
     const color = new THREE.Color(galaxy.particleColor || '#4A90E2');
 
-    // Create spiral galaxy pattern
+    // Create spiral galaxy pattern with dynamic radius
     for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3;
       
-      // Spiral parameters
-      const radius = Math.random() * 8 + 2;
+      // Spiral parameters - use dynamic scale
+      const radius = Math.random() * (galaxyScale.maxRadius - galaxyScale.minRadius) + galaxyScale.minRadius;
       const spinAngle = radius * 0.5;
       const branchAngle = ((i % 3) / 3) * Math.PI * 2;
       
@@ -114,7 +121,7 @@ function GalaxyParticles({ galaxy, position, onClick, isActive, animationConfig 
     }
 
     return { positions, colors, sizes };
-  }, [galaxy, particleCount]);
+  }, [galaxy, particleCount, galaxyScale]);
 
   // Gentle rotation animation
   useFrame((state) => {
@@ -391,6 +398,7 @@ function SceneContent({ galaxies }: SceneContentProps) {
             onClick={() => navigateToGalaxy(galaxy.id)}
             isActive={false}
             animationConfig={animationConfig}
+            galaxyCount={galaxies.length}
           />
         );
       })}

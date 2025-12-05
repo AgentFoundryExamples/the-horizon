@@ -54,6 +54,12 @@ export interface Galaxy {
   particleColor: string;
   stars: Star[];
   solarSystems: SolarSystem[];
+  /**
+   * Optional manual radius override for this galaxy
+   * If specified, this galaxy will render at this fixed size
+   * regardless of the total galaxy count
+   */
+  manualRadius?: number;
 }
 
 export interface Universe {
