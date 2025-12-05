@@ -19,6 +19,34 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 ## Changelog
 
+### v0.1.2 - Documentation and UX Refinements (December 2024)
+
+*This release focuses on comprehensive documentation updates and user experience improvements documented throughout the iteration.*
+
+**Documentation Enhancements:**
+- **Complete Admin Workflow Documentation**: Detailed two-step save/commit process in content-authoring.md
+- **Layout and Scaling Guides**: Comprehensive planet surface layout documentation with responsive behavior
+- **Galaxy Scale System**: Dynamic galaxy scaling based on total count with full customization guide
+- **Interactive Labels**: Enhanced tooltip system documentation with accessibility features
+- **Visual Scene Controls**: Complete animation tuning and hover state documentation
+
+**User Experience Improvements:**
+- **Admin Editor Layout**: Full-width markdown editor with flexible height and side-by-side preview
+- **Enhanced Tooltips**: Larger, more readable labels positioned above celestial objects
+- **Improved Validation**: Inline form validation with clear error messages for required fields
+- **Galaxy Scaling**: Automatic size adjustment from sparse (1-2 galaxies) to crowded (50+) universes
+- **Hover States**: Interactive labels for galaxies, solar systems, planets, and stars
+
+**Documentation Updates:**
+- Updated content-authoring.md with admin save/commit workflow and validation details
+- Enhanced visuals.md with planet layout, galaxy scaling, and tooltip system documentation
+- Synchronized deployment.md with current security features and Edge Runtime support
+- Refreshed roadmap.md with completed features and clear shipped vs planned work
+
+**No Code Changes**: This is a documentation-only release capturing work completed in previous iterations.
+
+See [docs/roadmap.md](docs/roadmap.md) for complete feature status and future plans.
+
 ### v0.1.1 - Security & Performance Update (December 2024)
 
 *This release includes critical security patches, dependency updates, and UI improvements.*

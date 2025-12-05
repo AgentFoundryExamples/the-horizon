@@ -2,7 +2,16 @@
 
 This document outlines the current state of The Horizon, what has been shipped, known limitations, and planned future enhancements.
 
-## Current Release: v0.1.1 (December 2024)
+## Current Release: v0.1.2 (December 2024)
+
+This release captures comprehensive documentation improvements and UX refinements completed across recent iterations (ISS-1 through ISS-7). All documentation has been synchronized to reflect the current state of admin workflows, visual enhancements, layout systems, and scaling behaviors.
+
+**Key Improvements Documented:**
+- **Admin Save/Commit Flow**: Two-step workflow with disk save and GitHub commit clearly documented
+- **Layout Refinements**: Planet surface 30/70 split, responsive behavior, accessibility features
+- **Hover States**: Interactive tooltips for galaxies, solar systems, planets, and stars
+- **Galaxy Scaling**: Dynamic size adjustment based on total galaxy count (1-2 to 50+)
+- **Form Validation**: Inline error messages and required field indicators
 
 ### ✅ Shipped Features
 
@@ -235,6 +244,25 @@ Before deploying a new version, complete these verification steps:
 
 ## Version History
 
+### v0.1.2 - Documentation and UX Refinements (December 2024)
+- **Documentation Enhancements**:
+  - Complete admin workflow guide with two-step save/commit process
+  - Planet surface layout documentation with responsive design patterns
+  - Galaxy scale system with dynamic sizing based on total count
+  - Enhanced tooltip system with accessibility and positioning documentation
+  - Comprehensive animation tuning and hover state guides
+- **User Experience Documentation**:
+  - Admin editor layout improvements (full-width, flexible height, side-by-side preview)
+  - Enhanced tooltip system (larger text, positioned above objects, no overlap)
+  - Galaxy scaling behavior (automatic sizing from 1-2 galaxies to 50+)
+  - Form validation improvements (inline errors, required field indicators)
+  - Interactive hover labels for all celestial objects
+- **Documentation Synchronization**:
+  - content-authoring.md: Updated with admin save/commit workflow and validation
+  - visuals.md: Enhanced with layout, scaling, and tooltip documentation
+  - deployment.md: Verified Edge Runtime and security features current
+  - roadmap.md: Clarified shipped vs planned features
+
 ### v0.1.1 - Security & Performance Update (December 2024)
 - **Dependency Security Updates**:
   - Upgraded Next.js from 14.2.15 to 14.2.33 to address critical security vulnerabilities:
@@ -274,7 +302,7 @@ Before deploying a new version, complete these verification steps:
 - Security hardening (authentication, rate limiting, sanitization)
 
 ### Future Versions
-- **v0.2.0**: Enhanced admin features, mobile optimizations
+- **v0.2.0**: Enhanced admin features, mobile optimizations, bulk operations
 - **v0.3.0**: Procedural generation system
 - **v0.4.0**: Binary star systems
 - **v0.5.0**: Advanced 3D features and effects
@@ -462,5 +490,5 @@ Have ideas for future features? Here's how to contribute:
 ---
 
 *Last Updated: December 2024*  
-*Version: 0.1.1*  
+*Version: 0.1.2*  
 *Maintained by: Agent Foundry and John Brosnihan*
