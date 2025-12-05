@@ -17,6 +17,12 @@
  * These functions work in both Edge Runtime and Node.js environments
  */
 
+// Fixed length for constant-time string comparison
+// SHA-256 produces 64 hex characters, which when UTF-8 encoded by TextEncoder
+// results in 64 bytes (1 byte per character). This ensures all comparisons
+// take the same amount of time regardless of actual string length.
+const TIMING_SAFE_FIXED_LENGTH = 64;
+
 // Get crypto from global scope (works in browser, Edge, and Node with polyfill)
 const getCrypto = (): Crypto => {
   const cryptoInstance = globalThis.crypto;
@@ -68,10 +74,6 @@ export function timingSafeEqual(a: string, b: string): boolean {
   const bufferA = encoder.encode(a);
   const bufferB = encoder.encode(b);
   
-  // For true constant-time comparison, always use the same fixed length
-  // This is optimized for SHA-256 hashes which are always 64 hex characters (32 bytes when encoded)
-  const fixedLength = 64; // Max expected length for hex hash strings
-  
   // XOR all bytes and accumulate the result
   let result = 0;
   
@@ -79,7 +81,8 @@ export function timingSafeEqual(a: string, b: string): boolean {
   result |= bufferA.length ^ bufferB.length;
   
   // Always iterate the full fixed length to maintain constant time
-  for (let i = 0; i < fixedLength; i++) {
+  // This covers SHA-256 hex strings (64 chars = 64 bytes UTF-8) and provides safety margin
+  for (let i = 0; i < TIMING_SAFE_FIXED_LENGTH; i++) {
     // Use 0 for out-of-bounds access
     const byteA = i < bufferA.length ? bufferA[i] : 0;
     const byteB = i < bufferB.length ? bufferB[i] : 0;

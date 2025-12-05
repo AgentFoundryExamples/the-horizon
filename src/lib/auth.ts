@@ -83,7 +83,10 @@ export async function validatePassword(password: string): Promise<boolean> {
   // Use timing-safe comparison to prevent timing attacks
   try {
     // Check if we need to recompute the admin password hash
-    // (happens when ADMIN_PASSWORD changes or on first call)
+    // Note: This cache check is safe because:
+    // 1. It compares against internally cached values, not user input
+    // 2. ADMIN_PASSWORD rarely changes at runtime (environment variable)
+    // 3. The actual timing-sensitive comparison is done on the hashed values below
     if (!adminPasswordHashCache || cachedAdminPassword !== ADMIN_PASSWORD) {
       adminPasswordHashCache = await sha256(ADMIN_PASSWORD);
       cachedAdminPassword = ADMIN_PASSWORD;
