@@ -55,14 +55,16 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 - Optimistic locking to prevent concurrent edit conflicts
 - Security features:
   - Timing-safe password authentication
-  - Signed session tokens with HMAC-SHA256
+  - Signed session tokens with SHA-256 (Web Crypto API)
   - Rate limiting (5 attempts per 15 minutes)
   - Sanitized error logging (no token exposure)
+  - Edge Runtime compatible authentication
 
 🧪 **Testing & Quality**
-- Comprehensive unit test coverage (150 tests across 8 suites)
-- Tests for data loading, validation, authentication, and GitHub integration
+- Comprehensive unit test coverage (164 tests across 9 suites)
+- Tests for data loading, validation, authentication, crypto utilities, and GitHub integration
 - Edge case handling for empty data, missing content, and concurrent edits
+- Web Crypto API polyfills for Node.js test environment
 
 📚 **Documentation**
 - Complete deployment guide in `docs/deployment.md`
@@ -77,11 +79,12 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 - Zustand state management
 - ESLint configuration for code quality
 - Jest testing framework
+- Web Crypto API for Edge Runtime compatibility
 
 **Verification Steps:**
-✅ All 150 unit tests passing  
+✅ All 164 unit tests passing  
 ✅ Project builds without errors  
-✅ Admin authentication working  
+✅ Admin authentication working on Edge Runtime  
 ✅ GitHub integration tested  
 ✅ Markdown rendering validated  
 ✅ 3D scene performance optimized  
@@ -212,9 +215,10 @@ The Horizon includes a password-protected admin interface for editing universe c
 **Access**: Navigate to `/admin` and log in with your admin password.
 
 **Features**:
-- 🔒 Password-protected access with signed session tokens
+- 🔒 Password-protected access with signed session tokens (Web Crypto API)
 - 🛡️ Timing-safe authentication preventing timing attacks
 - 🚫 Rate limiting (5 attempts per 15 minutes) to prevent brute force
+- ⚡ Edge Runtime compatible for serverless deployments
 - ✏️ CRUD operations for galaxies, solar systems, planets, and moons
 - 📝 Built-in markdown editor with live preview
 - 🔄 GitHub integration for automatic commits and pull requests
