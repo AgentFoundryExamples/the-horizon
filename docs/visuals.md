@@ -1003,6 +1003,476 @@ sizes[i] = 2.5;
 3. Verify material transparency flags
 4. Ensure proper render order
 
+## Galaxy Animations and Interactive Labels
+
+The Horizon features dynamic galaxy animations and interactive hover/tap labels that enhance the visual experience while maintaining accessibility and performance.
+
+### Animation System
+
+#### Animation Configuration
+
+Animations are controlled through a centralized configuration system defined in `src/lib/animation.ts`:
+
+```typescript
+interface AnimationConfig {
+  rotation: boolean;           // Enable rotation animations
+  rotationSpeed: number;       // Rotation speed multiplier (0-1)
+  parallax: boolean;           // Enable parallax effects
+  particleDrift: boolean;      // Enable particle drift
+  driftSpeed: number;          // Particle drift speed multiplier (0-1)
+  intensity: number;           // Overall animation intensity (0-1)
+}
+```
+
+Default configuration:
+```typescript
+{
+  rotation: true,
+  rotationSpeed: 1.0,
+  parallax: true,
+  particleDrift: true,
+  driftSpeed: 1.0,
+  intensity: 1.0,
+}
+```
+
+#### Prefers-Reduced-Motion Support
+
+The application automatically detects and respects the user's `prefers-reduced-motion` setting:
+
+```typescript
+const prefersReducedMotion = usePrefersReducedMotion();
+const animationConfig = getAnimationConfig(DEFAULT_ANIMATION_CONFIG, prefersReducedMotion);
+```
+
+When reduced motion is preferred, all animations are disabled:
+- `rotation`: false
+- `rotationSpeed`: 0
+- `parallax`: false
+- `particleDrift`: false
+- `driftSpeed`: 0
+- `intensity`: 0
+
+#### Performance-Based Animation Adjustment
+
+The system includes automatic performance monitoring and intensity adjustment:
+
+```typescript
+function calculateAnimationIntensity(fps: number, targetFps: number = 60): number
+```
+
+Behavior:
+- **FPS ≥ 60**: Full intensity (1.0)
+- **30 < FPS < 60**: Gradual reduction proportional to FPS
+- **FPS ≤ 30**: Minimum intensity (0.3)
+
+This ensures smooth performance on low-power devices by dynamically reducing animation complexity.
+
+#### Animation Types
+
+##### 1. Galaxy Rotation
+
+Gentle rotation of galaxies around the Y-axis:
+
+```typescript
+// GalaxyView.tsx
+groupRef.current.rotation.y += 0.001 * animationConfig.rotationSpeed * animationConfig.intensity;
+```
+
+Customization:
+```typescript
+// Faster rotation
+rotation.y += 0.002 * animationConfig.rotationSpeed * animationConfig.intensity;
+
+// Slower rotation
+rotation.y += 0.0005 * animationConfig.rotationSpeed * animationConfig.intensity;
+```
+
+##### 2. Particle Drift
+
+Subtle circular drift animation for background particles:
+
+```typescript
+// Applied to particle positions in animation loop
+for (let i = 0; i < positions.length; i += 3) {
+  positions[i] = originalX + Math.sin(time * 0.1 + i) * 0.01 * animationConfig.driftSpeed;
+  positions[i + 2] = originalZ + Math.cos(time * 0.1 + i) * 0.01 * animationConfig.driftSpeed;
+}
+```
+
+This creates a gentle "breathing" effect in galaxy particle clouds.
+
+##### 3. Star Pulsing
+
+Free-floating stars pulse gently:
+
+```typescript
+// StarInstance in GalaxyView.tsx
+const scale = 1 + Math.sin(state.clock.getElapsedTime() * 2) * 0.1 * animationConfig.intensity;
+meshRef.current.scale.setScalar(scale);
+```
+
+##### 4. Galaxy Particle Cloud Rotation
+
+Galaxy particle clouds in universe view rotate:
+
+```typescript
+// UniverseScene.tsx
+meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.05 * animationConfig.rotationSpeed * animationConfig.intensity;
+```
+
+#### Cleanup and Memory Management
+
+All animations properly clean up on component unmount to prevent memory leaks:
+
+```typescript
+useEffect(() => {
+  let rafId: number;
+  
+  const animate = () => {
+    // Animation logic
+    rafId = requestAnimationFrame(animate);
+  };
+  
+  animate();
+  
+  return () => {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+    }
+  };
+}, []);
+```
+
+### Interactive Labels (Tooltips)
+
+#### Tooltip Component
+
+The reusable `Tooltip` component (`src/components/Tooltip.tsx`) provides hover/tap labels with full accessibility support.
+
+Features:
+- **Hover**: Shows on mouse enter, hides on mouse leave
+- **Focus**: Shows on keyboard focus, hides on blur
+- **Touch**: Toggles on tap for mobile devices
+- **Accessibility**: Full ARIA support and keyboard navigation
+- **Reduced Motion**: Instant appearance when preferred
+
+Usage in 3D scenes:
+
+```typescript
+import { Html } from '@react-three/drei';
+
+{hovered && (
+  <Html distanceFactor={10} center>
+    <div style={{...tooltipStyles}}>
+      {objectName}
+    </div>
+  </Html>
+)}
+```
+
+#### Tooltip Locations
+
+Tooltips are implemented in multiple locations:
+
+1. **Universe View - Galaxy Particles**
+   - Display: Galaxy name + solar system count
+   - Trigger: Hover over galaxy particle cloud
+   - Distance factor: 50 (scales with camera distance)
+
+2. **Galaxy View - Solar Systems**
+   - Display: Solar system name
+   - Trigger: Hover over central star
+   - Distance factor: 10
+
+3. **Galaxy View - Planets**
+   - Display: Planet name
+   - Trigger: Hover over planet mesh
+   - Includes: Emissive highlight on hover
+
+4. **Galaxy View - Stars**
+   - Display: Star name
+   - Trigger: Hover over star mesh
+
+#### Tooltip Styling
+
+Standard tooltip appearance:
+
+```css
+{
+  background: 'rgba(0, 0, 0, 0.9)',
+  color: '#FFFFFF',
+  padding: '0.5rem 0.75rem',
+  borderRadius: '4px',
+  border: '1px solid rgba(74, 144, 226, 0.5)',
+  fontSize: '0.875rem',
+  whiteSpace: 'nowrap',
+  pointerEvents: 'none',
+  userSelect: 'none',
+}
+```
+
+Animation (respects prefers-reduced-motion):
+
+```css
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+```
+
+#### Touch Device Support
+
+Tooltips on touch devices use tap-to-toggle behavior:
+
+```typescript
+const handleTouchStart = (e: React.TouchEvent) => {
+  if (enableTouch) {
+    e.preventDefault();
+    if (isVisible) {
+      hideTooltip();
+    } else {
+      showTooltip();
+    }
+  }
+};
+```
+
+This prevents tooltips from blocking object selection on mobile devices.
+
+#### Long Text Handling
+
+Tooltips automatically handle long names:
+
+```css
+{
+  maxWidth: '250px',
+  wordWrap: 'break-word',
+  whiteSpace: 'normal',
+}
+```
+
+### Admin Editor Integration
+
+#### Animation Preview in GalaxyEditor
+
+The Galaxy Editor includes an animation preview toggle:
+
+```typescript
+<label>
+  <input
+    type="checkbox"
+    checked={showAnimationPreview}
+    onChange={(e) => setShowAnimationPreview(e.target.checked)}
+  />
+  Preview animations (respects prefers-reduced-motion)
+</label>
+```
+
+This allows content authors to preview animations while editing galaxy properties without affecting the user-facing behavior.
+
+### Performance Considerations
+
+#### Frame Rate Targets
+
+- **Desktop**: 60 FPS with all animations enabled
+- **Mobile**: 30+ FPS with adaptive intensity
+- **Low-end**: 30 FPS minimum with reduced animations
+
+#### Optimization Strategies
+
+1. **Conditional Rendering**: Tooltips only render when visible
+2. **RequestAnimationFrame**: Proper cleanup prevents memory leaks
+3. **GPU Acceleration**: CSS transforms for smooth animations
+4. **Batch Updates**: Particle updates batched per frame
+5. **Distance Culling**: Tooltips scale with camera distance
+
+#### Performance Monitoring
+
+Use the browser's Performance panel to measure:
+
+```javascript
+// Monitor FPS
+const measureFps = () => {
+  frameCount++;
+  const elapsed = currentTime - lastTime;
+  if (elapsed >= 1000) {
+    const currentFps = Math.round((frameCount * 1000) / elapsed);
+    console.log('FPS:', currentFps);
+  }
+};
+```
+
+Expected results:
+- Universe view (multiple galaxies): 50-60 FPS
+- Galaxy view (detailed): 55-60 FPS
+- With reduced motion: 60 FPS (static)
+
+### Accessibility Features
+
+#### Keyboard Navigation
+
+- Tab through interactive elements
+- Focus indicators visible
+- Tooltips appear on focus
+- ARIA attributes for screen readers
+
+#### Screen Reader Support
+
+Tooltips include proper ARIA attributes:
+
+```html
+<div
+  role="tooltip"
+  aria-live="polite"
+  className="tooltip-content"
+>
+  {content}
+</div>
+```
+
+#### Color Contrast
+
+All tooltip text meets WCAG 2.1 Level AA contrast requirements:
+- Text: #FFFFFF on rgba(0, 0, 0, 0.9) = 21:1 contrast ratio
+- Border: rgba(74, 144, 226, 0.5) provides visual delineation
+
+### Testing Animations and Tooltips
+
+#### Manual Testing Checklist
+
+- [ ] Hover over galaxies shows name and system count
+- [ ] Hover over solar systems shows system name
+- [ ] Hover over planets shows planet name with highlight
+- [ ] Hover over stars shows star name
+- [ ] Tooltips dismiss when pointer moves away
+- [ ] Tooltips work with keyboard focus
+- [ ] Touch devices can tap to toggle tooltips
+- [ ] Animations respect prefers-reduced-motion
+- [ ] No animation frame leaks on unmount
+- [ ] Performance stays above 30 FPS on mobile
+
+#### Automated Tests
+
+Tests are located in:
+- `src/components/__tests__/Tooltip.test.tsx`
+- `src/lib/__tests__/animation.test.ts`
+
+Run tests:
+```bash
+npm test -- Tooltip.test
+npm test -- animation.test
+```
+
+#### Performance Testing
+
+1. Open Chrome DevTools > Performance
+2. Start recording
+3. Navigate through different views
+4. Stop recording after 10 seconds
+5. Verify:
+   - FPS > 30 consistently
+   - No long tasks > 50ms
+   - No memory leaks
+   - Clean unmount (no warnings)
+
+### Customization Guide
+
+#### Adjusting Animation Speed
+
+Edit `src/lib/animation.ts`:
+
+```typescript
+// Slower animations
+{
+  rotationSpeed: 0.5,  // Half speed
+  driftSpeed: 0.5,     // Half speed
+  intensity: 0.7,      // 70% intensity
+}
+```
+
+#### Customizing Tooltip Appearance
+
+Edit inline styles in component files or create a shared tooltip component:
+
+```typescript
+// Different color theme
+{
+  background: 'rgba(40, 20, 60, 0.95)',
+  border: '2px solid rgba(138, 43, 226, 0.7)',
+  color: '#E0BBE4',
+}
+```
+
+#### Adding New Animation Types
+
+1. Add to `AnimationConfig` interface in `src/lib/animation.ts`
+2. Update `DEFAULT_ANIMATION_CONFIG` with default value
+3. Handle in `getAnimationConfig` for reduced motion
+4. Apply in component using `useFrame` hook
+
+Example:
+
+```typescript
+// 1. Add to config
+interface AnimationConfig {
+  // ...existing fields
+  scaleOscillation: boolean;
+  scaleAmplitude: number;
+}
+
+// 2. In component
+useFrame((state) => {
+  if (animationConfig.scaleOscillation) {
+    const scale = 1 + Math.sin(state.clock.getElapsedTime()) * animationConfig.scaleAmplitude;
+    meshRef.current.scale.setScalar(scale);
+  }
+});
+```
+
+### Edge Cases and Solutions
+
+#### Multiple Overlapping Tooltips
+
+Solution: Only one tooltip visible at a time per component using state management:
+
+```typescript
+const [hovered, setHovered] = useState<number | null>(null);
+// Only show tooltip when hovered === specific index
+```
+
+#### Tooltip Positioning at Screen Edge
+
+Solution: `Html` component from `@react-three/drei` automatically handles positioning and scaling with `distanceFactor`.
+
+#### Animation Performance Degradation
+
+Solution: Automatic intensity reduction based on FPS monitoring:
+
+```typescript
+const { fps, intensity } = useAnimationPerformance();
+// intensity automatically reduces if FPS drops
+```
+
+#### Memory Leaks from Animation Frames
+
+Solution: Always clean up in useEffect:
+
+```typescript
+useEffect(() => {
+  return () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (rafId) cancelAnimationFrame(rafId);
+  };
+}, []);
+```
+
 ## Future Enhancements
 
 1. **Dynamic LOD**: Adjust quality based on performance metrics

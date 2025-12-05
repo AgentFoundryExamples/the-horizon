@@ -5,9 +5,9 @@
  * Implements shader-based particles with smooth camera transitions
  */
 
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Galaxy } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
@@ -17,6 +17,7 @@ import {
   DEFAULT_CAMERA_POSITIONS,
   DEFAULT_ANIMATION_CONFIG,
 } from '@/lib/camera';
+import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG as DEFAULT_ANIM_CONFIG } from '@/lib/animation';
 import GalaxyView from './GalaxyView';
 import SolarSystemView from './SolarSystemView';
 import { PlanetSurface3D, PlanetSurfaceOverlay } from './PlanetSurface';
@@ -56,6 +57,7 @@ interface GalaxyParticlesProps {
   position: THREE.Vector3;
   onClick: () => void;
   isActive: boolean;
+  animationConfig: ReturnType<typeof getAnimationConfig>;
 }
 
 // Performance tuning constants
@@ -66,8 +68,9 @@ const MAX_PARTICLE_COUNT = 5000; // Cap for performance on lower-end devices
 /**
  * Individual galaxy rendered as particle cloud
  */
-function GalaxyParticles({ galaxy, position, onClick, isActive }: GalaxyParticlesProps) {
+function GalaxyParticles({ galaxy, position, onClick, isActive, animationConfig }: GalaxyParticlesProps) {
   const meshRef = useRef<THREE.Points>(null);
+  const [hovered, setHovered] = useState(false);
   const particleCount = Math.min(
     BASE_PARTICLE_COUNT + (galaxy.solarSystems?.length || 0) * PARTICLES_PER_SOLAR_SYSTEM,
     MAX_PARTICLE_COUNT
@@ -116,54 +119,83 @@ function GalaxyParticles({ galaxy, position, onClick, isActive }: GalaxyParticle
 
   // Gentle rotation animation
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.05;
+    if (meshRef.current && animationConfig.rotation) {
+      meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.05 * animationConfig.rotationSpeed * animationConfig.intensity;
       
       // Pulse effect when active
       if (isActive) {
-        const scale = 1 + Math.sin(state.clock.getElapsedTime() * 2) * 0.05;
+        const scale = 1 + Math.sin(state.clock.getElapsedTime() * 2) * 0.05 * animationConfig.intensity;
         meshRef.current.scale.setScalar(scale);
       }
     }
   });
 
   return (
-    <points
-      ref={meshRef}
+    <group
       position={position}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
     >
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particleCount}
-          array={positions}
-          itemSize={3}
+      <points
+        ref={meshRef}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+      >
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={particleCount}
+            array={positions}
+            itemSize={3}
+          />
+          <bufferAttribute
+            attach="attributes-customColor"
+            count={particleCount}
+            array={colors}
+            itemSize={3}
+          />
+          <bufferAttribute
+            attach="attributes-size"
+            count={particleCount}
+            array={sizes}
+            itemSize={1}
+          />
+        </bufferGeometry>
+        <shaderMaterial
+          vertexShader={galaxyVertexShader}
+          fragmentShader={galaxyFragmentShader}
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
         />
-        <bufferAttribute
-          attach="attributes-customColor"
-          count={particleCount}
-          array={colors}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-size"
-          count={particleCount}
-          array={sizes}
-          itemSize={1}
-        />
-      </bufferGeometry>
-      <shaderMaterial
-        vertexShader={galaxyVertexShader}
-        fragmentShader={galaxyFragmentShader}
-        transparent
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
+      </points>
+      {hovered && (
+        <Html distanceFactor={50} center>
+          <div
+            style={{
+              background: 'rgba(0, 0, 0, 0.9)',
+              color: '#FFFFFF',
+              padding: '0.5rem 0.75rem',
+              borderRadius: '4px',
+              border: '1px solid rgba(74, 144, 226, 0.5)',
+              fontSize: '0.875rem',
+              whiteSpace: 'nowrap',
+              pointerEvents: 'none',
+              userSelect: 'none',
+            }}
+          >
+            <strong>{galaxy.name}</strong>
+            {galaxy.solarSystems && galaxy.solarSystems.length > 0 && (
+              <div style={{ fontSize: '0.75rem', marginTop: '0.25rem', opacity: 0.8 }}>
+                {galaxy.solarSystems.length} solar system{galaxy.solarSystems.length !== 1 ? 's' : ''}
+              </div>
+            )}
+          </div>
+        </Html>
+      )}
+    </group>
   );
 }
 
@@ -178,6 +210,8 @@ function SceneContent({ galaxies }: SceneContentProps) {
   const { camera } = useThree();
   const controlsRef = useRef<any>(null);
   const animatorRef = useRef<CameraAnimator | null>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const animationConfig = getAnimationConfig(DEFAULT_ANIM_CONFIG, prefersReducedMotion);
 
   const {
     focusLevel,
@@ -350,6 +384,7 @@ function SceneContent({ galaxies }: SceneContentProps) {
             position={position}
             onClick={() => navigateToGalaxy(galaxy.id)}
             isActive={false}
+            animationConfig={animationConfig}
           />
         );
       })}

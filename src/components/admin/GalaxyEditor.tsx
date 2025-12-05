@@ -29,6 +29,7 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
   const [localGalaxy, setLocalGalaxy] = useState(galaxy);
   const [editingSystem, setEditingSystem] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'info' | 'systems' | 'stars'>('info');
+  const [showAnimationPreview, setShowAnimationPreview] = useState(false);
 
   const handleChange = (field: keyof Galaxy, value: unknown) => {
     const updated = { ...localGalaxy, [field]: value };
@@ -206,6 +207,21 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
               placeholder="#4A90E2"
               style={{ marginTop: '0.5rem' }}
             />
+          </div>
+
+          <div className="form-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={showAnimationPreview}
+                onChange={(e) => setShowAnimationPreview(e.target.checked)}
+                style={{ marginRight: '0.5rem' }}
+              />
+              Preview animations (respects prefers-reduced-motion)
+            </label>
+            <span className="form-hint">
+              Toggle to preview galaxy rotation and particle drift animations
+            </span>
           </div>
         </>
       )}
