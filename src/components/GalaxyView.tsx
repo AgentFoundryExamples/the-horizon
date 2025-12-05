@@ -299,6 +299,7 @@ const BACKGROUND_PARTICLE_RANGE = 40;
 export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
   const groupRef = useRef<THREE.Group>(null);
   const particlesRef = useRef<THREE.Points>(null);
+  const originalPositionsRef = useRef<Float32Array | null>(null);
   const { navigateToSolarSystem } = useNavigationStore();
   const prefersReducedMotion = usePrefersReducedMotion();
   const animationConfig = getAnimationConfig(DEFAULT_ANIMATION_CONFIG, prefersReducedMotion);
@@ -343,13 +344,17 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
       const geometry = particlesRef.current.geometry;
       const positions = geometry.attributes.position.array as Float32Array;
       
+      // Store original positions on first frame
+      if (!originalPositionsRef.current) {
+        originalPositionsRef.current = new Float32Array(positions);
+      }
+      
+      const originals = originalPositionsRef.current;
+      
       for (let i = 0; i < positions.length; i += 3) {
-        const originalX = positions[i];
-        const originalZ = positions[i + 2];
-        
-        // Subtle drift in circular pattern
-        positions[i] = originalX + Math.sin(time * 0.1 + i) * 0.01 * animationConfig.driftSpeed;
-        positions[i + 2] = originalZ + Math.cos(time * 0.1 + i) * 0.01 * animationConfig.driftSpeed;
+        // Calculate offsets from original positions
+        positions[i] = originals[i] + Math.sin(time * 0.1 + i) * 0.01 * animationConfig.driftSpeed;
+        positions[i + 2] = originals[i + 2] + Math.cos(time * 0.1 + i) * 0.01 * animationConfig.driftSpeed;
       }
       
       geometry.attributes.position.needsUpdate = true;

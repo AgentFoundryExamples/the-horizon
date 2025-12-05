@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect, useRef, ReactNode } from 'react';
+import { usePrefersReducedMotion } from '@/lib/animation';
 
 export interface TooltipProps {
   /** Content to display in tooltip */
@@ -39,27 +40,14 @@ export default function Tooltip({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const prefersReducedMotion = useRef(false);
-
-  // Check for prefers-reduced-motion
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    prefersReducedMotion.current = mediaQuery.matches;
-
-    const handleChange = (e: MediaQueryListEvent) => {
-      prefersReducedMotion.current = e.matches;
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const showTooltip = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
 
-    const actualDelay = prefersReducedMotion.current ? 0 : delay;
+    const actualDelay = prefersReducedMotion ? 0 : delay;
     
     timeoutRef.current = setTimeout(() => {
       updatePosition();
