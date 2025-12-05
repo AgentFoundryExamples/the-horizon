@@ -5,11 +5,13 @@
  * Uses instanced meshes for performance
  */
 
-import { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useRef, useMemo, useState } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { Galaxy, SolarSystem, Star } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
+import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG } from '@/lib/animation';
+import { Html } from '@react-three/drei';
 
 interface OrbitRingProps {
   radius: number;
@@ -47,6 +49,7 @@ function OrbitRing({ radius, color }: OrbitRingProps) {
 interface PlanetInstanceProps {
   solarSystem: SolarSystem;
   systemPosition: THREE.Vector3;
+  animationConfig: ReturnType<typeof getAnimationConfig>;
 }
 
 /**
@@ -58,8 +61,9 @@ interface PlanetInstanceProps {
 // while maintaining 60 FPS performance. More iterations yield diminishing returns.
 const KEPLER_ITERATION_COUNT = 5;
 
-function PlanetInstance({ solarSystem, systemPosition }: PlanetInstanceProps) {
+function PlanetInstance({ solarSystem, systemPosition, animationConfig }: PlanetInstanceProps) {
   const planetsRef = useRef<THREE.Group>(null);
+  const [hovered, setHovered] = useState<number | null>(null);
 
   const planetData = useMemo(() => {
     // Seeded pseudo-random number generator for deterministic orbits
@@ -133,12 +137,36 @@ function PlanetInstance({ solarSystem, systemPosition }: PlanetInstanceProps) {
 
   return (
     <group position={systemPosition}>
-      {/* Central star */}
-      <mesh>
-        <sphereGeometry args={[0.5, 16, 16]} />
-        <meshBasicMaterial color="#FDB813" />
-        <pointLight color="#FDB813" intensity={1} distance={20} />
-      </mesh>
+      {/* Central star with tooltip */}
+      <group>
+        <mesh
+          onPointerOver={() => setHovered(-1)}
+          onPointerOut={() => setHovered(null)}
+        >
+          <sphereGeometry args={[0.5, 16, 16]} />
+          <meshBasicMaterial color="#FDB813" />
+          <pointLight color="#FDB813" intensity={1} distance={20} />
+        </mesh>
+        {hovered === -1 && (
+          <Html distanceFactor={10} center>
+            <div
+              style={{
+                background: 'rgba(0, 0, 0, 0.9)',
+                color: '#FFFFFF',
+                padding: '0.5rem 0.75rem',
+                borderRadius: '4px',
+                border: '1px solid rgba(74, 144, 226, 0.5)',
+                fontSize: '0.875rem',
+                whiteSpace: 'nowrap',
+                pointerEvents: 'none',
+                userSelect: 'none',
+              }}
+            >
+              {solarSystem.name}
+            </div>
+          </Html>
+        )}
+      </group>
 
       {/* Orbit rings */}
       {planetData.map((data, index) => (
@@ -152,13 +180,39 @@ function PlanetInstance({ solarSystem, systemPosition }: PlanetInstanceProps) {
       {/* Planets */}
       <group ref={planetsRef}>
         {planetData.map((data, index) => (
-          <mesh key={`planet-${index}`}>
-            <sphereGeometry args={[data.size, 8, 8]} />
-            <meshStandardMaterial
-              color={data.planet.theme === 'blue-green' ? '#2E86AB' : 
-                     data.planet.theme === 'red' ? '#E63946' : '#CCCCCC'}
-            />
-          </mesh>
+          <group key={`planet-${index}`}>
+            <mesh
+              onPointerOver={() => setHovered(index)}
+              onPointerOut={() => setHovered(null)}
+            >
+              <sphereGeometry args={[data.size, 8, 8]} />
+              <meshStandardMaterial
+                color={data.planet.theme === 'blue-green' ? '#2E86AB' : 
+                       data.planet.theme === 'red' ? '#E63946' : '#CCCCCC'}
+                emissive={hovered === index ? '#4A90E2' : '#000000'}
+                emissiveIntensity={hovered === index ? 0.3 : 0}
+              />
+            </mesh>
+            {hovered === index && (
+              <Html distanceFactor={10} center>
+                <div
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    color: '#FFFFFF',
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(74, 144, 226, 0.5)',
+                    fontSize: '0.875rem',
+                    whiteSpace: 'nowrap',
+                    pointerEvents: 'none',
+                    userSelect: 'none',
+                  }}
+                >
+                  {data.planet.name}
+                </div>
+              </Html>
+            )}
+          </group>
         ))}
       </group>
     </group>
@@ -168,38 +222,65 @@ function PlanetInstance({ solarSystem, systemPosition }: PlanetInstanceProps) {
 interface StarInstanceProps {
   star: Star;
   position: THREE.Vector3;
+  animationConfig: ReturnType<typeof getAnimationConfig>;
 }
 
 /**
  * Free-floating star rendering
  */
-function StarInstance({ star, position }: StarInstanceProps) {
+function StarInstance({ star, position, animationConfig }: StarInstanceProps) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState(false);
 
   useFrame((state) => {
-    if (meshRef.current) {
-      // Gentle pulsing
-      const scale = 1 + Math.sin(state.clock.getElapsedTime() * 2) * 0.1;
+    if (meshRef.current && animationConfig.rotation) {
+      // Gentle pulsing (controlled by animation config)
+      const scale = 1 + Math.sin(state.clock.getElapsedTime() * 2) * 0.1 * animationConfig.intensity;
       meshRef.current.scale.setScalar(scale);
     }
   });
 
   return (
-    <mesh ref={meshRef} position={position}>
-      <sphereGeometry args={[0.4, 16, 16]} />
-      <meshBasicMaterial
-        color={star.theme.includes('yellow') ? '#FDB813' :
-               star.theme.includes('red') ? '#E63946' :
-               star.theme.includes('blue') ? '#4A90E2' : '#FFFFFF'}
-      />
-      <pointLight
-        color={star.theme.includes('yellow') ? '#FDB813' :
-               star.theme.includes('red') ? '#E63946' :
-               star.theme.includes('blue') ? '#4A90E2' : '#FFFFFF'}
-        intensity={0.5}
-        distance={10}
-      />
-    </mesh>
+    <group position={position}>
+      <mesh
+        ref={meshRef}
+        onPointerOver={() => setHovered(true)}
+        onPointerOut={() => setHovered(false)}
+      >
+        <sphereGeometry args={[0.4, 16, 16]} />
+        <meshBasicMaterial
+          color={star.theme.includes('yellow') ? '#FDB813' :
+                 star.theme.includes('red') ? '#E63946' :
+                 star.theme.includes('blue') ? '#4A90E2' : '#FFFFFF'}
+        />
+        <pointLight
+          color={star.theme.includes('yellow') ? '#FDB813' :
+                 star.theme.includes('red') ? '#E63946' :
+                 star.theme.includes('blue') ? '#4A90E2' : '#FFFFFF'}
+          intensity={0.5}
+          distance={10}
+        />
+      </mesh>
+      {hovered && (
+        <Html distanceFactor={10} center>
+          <div
+            style={{
+              background: 'rgba(0, 0, 0, 0.9)',
+              color: '#FFFFFF',
+              padding: '0.5rem 0.75rem',
+              borderRadius: '4px',
+              border: '1px solid rgba(74, 144, 226, 0.5)',
+              fontSize: '0.875rem',
+              whiteSpace: 'nowrap',
+              pointerEvents: 'none',
+              userSelect: 'none',
+            }}
+          >
+            {star.name}
+          </div>
+        </Html>
+      )}
+    </group>
   );
 }
 
@@ -217,7 +298,10 @@ const BACKGROUND_PARTICLE_RANGE = 40;
  */
 export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
   const groupRef = useRef<THREE.Group>(null);
+  const particlesRef = useRef<THREE.Points>(null);
   const { navigateToSolarSystem } = useNavigationStore();
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const animationConfig = getAnimationConfig(DEFAULT_ANIMATION_CONFIG, prefersReducedMotion);
 
   // Layout solar systems in a circle
   const systemPositions = useMemo(() => {
@@ -247,10 +331,28 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
     });
   }, [galaxy.stars]);
 
-  // Gentle rotation
-  useFrame(() => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += 0.001;
+  // Gentle rotation and particle drift
+  useFrame((state) => {
+    if (groupRef.current && animationConfig.rotation) {
+      groupRef.current.rotation.y += 0.001 * animationConfig.rotationSpeed * animationConfig.intensity;
+    }
+    
+    // Particle drift animation
+    if (particlesRef.current && animationConfig.particleDrift) {
+      const time = state.clock.getElapsedTime();
+      const geometry = particlesRef.current.geometry;
+      const positions = geometry.attributes.position.array as Float32Array;
+      
+      for (let i = 0; i < positions.length; i += 3) {
+        const originalX = positions[i];
+        const originalZ = positions[i + 2];
+        
+        // Subtle drift in circular pattern
+        positions[i] = originalX + Math.sin(time * 0.1 + i) * 0.01 * animationConfig.driftSpeed;
+        positions[i + 2] = originalZ + Math.cos(time * 0.1 + i) * 0.01 * animationConfig.driftSpeed;
+      }
+      
+      geometry.attributes.position.needsUpdate = true;
     }
   });
 
@@ -268,6 +370,7 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
           <PlanetInstance
             solarSystem={system}
             systemPosition={systemPositions[index]}
+            animationConfig={animationConfig}
           />
         </group>
       ))}
@@ -278,11 +381,12 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
           key={star.id}
           star={star}
           position={starPositions[index]}
+          animationConfig={animationConfig}
         />
       ))}
 
       {/* Background particle field for atmosphere */}
-      <points>
+      <points ref={particlesRef}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
