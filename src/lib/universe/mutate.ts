@@ -37,7 +37,7 @@ import {
  * Handles unicode characters by normalizing them
  */
 export function generateId(name: string): string {
-  if (!name || typeof name !== 'string') {
+  if (!name) {
     return '';
   }
   
@@ -95,12 +95,20 @@ export function getAllIds(universe: Universe, type: 'galaxy' | 'solarSystem' | '
 
 // Galaxy mutations
 
-export function createGalaxy(universe: Universe, galaxy: Galaxy): Universe {
-  // Auto-generate ID from name if ID is empty or invalid
-  const galaxyWithId = {
+/**
+ * Ensures a galaxy has a valid ID, auto-generating from name if needed
+ */
+export function ensureGalaxyId(galaxy: Galaxy): Galaxy {
+  const id = galaxy.id?.trim();
+  return {
     ...galaxy,
-    id: galaxy.id && galaxy.id.trim() ? galaxy.id : generateId(galaxy.name),
+    id: id || generateId(galaxy.name),
   };
+}
+
+export function createGalaxy(universe: Universe, galaxy: Galaxy): Universe {
+  // Ensure galaxy has a valid ID
+  const galaxyWithId = ensureGalaxyId(galaxy);
   
   const validation = validateGalaxy(galaxyWithId, 'New Galaxy');
   if (!validation.valid) {

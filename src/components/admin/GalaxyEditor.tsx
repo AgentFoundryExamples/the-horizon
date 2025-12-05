@@ -16,7 +16,7 @@
 
 import { useState } from 'react';
 import { Galaxy, SolarSystem, Star } from '@/lib/universe/types';
-import { generateId } from '@/lib/universe/mutate';
+import { generateId, ensureGalaxyId } from '@/lib/universe/mutate';
 import SolarSystemEditor from './SolarSystemEditor';
 
 interface GalaxyEditorProps {
@@ -31,7 +31,7 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
   const [activeTab, setActiveTab] = useState<'info' | 'systems' | 'stars'>('info');
   const [showAnimationPreview, setShowAnimationPreview] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [idManuallyEdited, setIdManuallyEdited] = useState(!!galaxy.id && galaxy.id.trim().length > 0);
+  const [idManuallyEdited, setIdManuallyEdited] = useState(Boolean(galaxy.id?.trim()));
 
   const handleChange = (field: keyof Galaxy, value: unknown) => {
     const updated = { ...localGalaxy, [field]: value };
@@ -86,11 +86,8 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
       return;
     }
     
-    // Auto-generate ID from name if ID is empty or just whitespace
-    const updatedGalaxy = {
-      ...localGalaxy,
-      id: localGalaxy.id && localGalaxy.id.trim() ? localGalaxy.id : generateId(localGalaxy.name),
-    };
+    // Ensure galaxy has a valid ID (auto-generated if needed)
+    const updatedGalaxy = ensureGalaxyId(localGalaxy);
     
     onUpdate(updatedGalaxy);
   };

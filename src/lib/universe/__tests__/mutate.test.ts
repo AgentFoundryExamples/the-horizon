@@ -14,6 +14,7 @@
 
 import {
   generateId,
+  ensureGalaxyId,
   isIdUnique,
   getAllIds,
   createGalaxy,
@@ -117,6 +118,53 @@ describe('Universe Mutations', () => {
     it('should handle mixed case and symbols', () => {
       expect(generateId('The "Great" Galaxy!')).toBe('the-great-galaxy');
       expect(generateId('Galaxy @#$%^& 42')).toBe('galaxy-42');
+    });
+  });
+
+  describe('ensureGalaxyId', () => {
+    it('should keep existing non-empty ID', () => {
+      const galaxy: Galaxy = {
+        id: 'custom-id',
+        name: 'Test Galaxy',
+        description: 'Test',
+        theme: 'blue',
+        particleColor: '#000',
+        stars: [],
+        solarSystems: [],
+      };
+      
+      const result = ensureGalaxyId(galaxy);
+      expect(result.id).toBe('custom-id');
+    });
+
+    it('should generate ID from name when ID is empty', () => {
+      const galaxy: Galaxy = {
+        id: '',
+        name: 'Andromeda Galaxy',
+        description: 'Test',
+        theme: 'blue',
+        particleColor: '#000',
+        stars: [],
+        solarSystems: [],
+      };
+      
+      const result = ensureGalaxyId(galaxy);
+      expect(result.id).toBe('andromeda-galaxy');
+    });
+
+    it('should generate ID from name when ID is whitespace', () => {
+      const galaxy: Galaxy = {
+        id: '   ',
+        name: 'Milky Way',
+        description: 'Test',
+        theme: 'blue',
+        particleColor: '#000',
+        stars: [],
+        solarSystems: [],
+      };
+      
+      const result = ensureGalaxyId(galaxy);
+      expect(result.id).toBe('milky-way');
     });
   });
 
