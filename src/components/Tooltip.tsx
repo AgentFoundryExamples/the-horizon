@@ -111,8 +111,8 @@ export default function Tooltip({
   const handleClick = (e: React.MouseEvent) => {
     // This check is for touch devices, where we want tap-to-toggle behavior.
     // 'pointerType' is available on React's synthetic PointerEvents.
-    // We cast the native event to check its type.
-    const isTouchEvent = (e.nativeEvent as PointerEvent).pointerType === 'touch';
+    // Check if the property exists before accessing it (older browsers may use MouseEvent).
+    const isTouchEvent = (e.nativeEvent as any)?.pointerType === 'touch';
 
     if (enableTouch && isTouchEvent) {
       e.preventDefault();
