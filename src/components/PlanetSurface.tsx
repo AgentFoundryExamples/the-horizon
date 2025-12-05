@@ -77,9 +77,9 @@ export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurface
 
   return (
     <group position={position}>
-      {/* Planet sphere */}
+      {/* Planet sphere - reduced size for left-column layout */}
       <mesh ref={planetRef}>
-        <sphereGeometry args={[3, 32, 32]} />
+        <sphereGeometry args={[1.5, 32, 32]} />
         <meshStandardMaterial
           color={
             planet.theme === 'blue-green'
@@ -164,59 +164,55 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
   const subtitle = currentMoon ? `Moon of ${planet.name}` : planet.summary;
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: '50%',
-        right: '2rem',
-        transform: 'translateY(-50%)',
-        width: '400px',
-        maxHeight: '80vh',
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        border: '1px solid #444',
-        borderRadius: '8px',
-        padding: '1.5rem',
-        overflow: 'auto',
-        zIndex: 100,
-        color: '#FFFFFF',
-      }}
-    >
-      {/* Title and subtitle */}
-      <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid #444', paddingBottom: '1rem' }}>
-        <h1 style={{ fontSize: '1.8rem', marginBottom: '0.5rem', color: '#4A90E2' }}>{title}</h1>
-        {subtitle && <p style={{ fontSize: '0.9rem', color: '#AAAAAA', margin: 0 }}>{subtitle}</p>}
+    <div className="planet-surface-container">
+      {/* Left column - Planet visualization placeholder */}
+      <div className="planet-visual-column">
+        <div className="planet-visual-label">
+          <span>{title}</span>
+        </div>
       </div>
 
-      {/* Markdown content */}
-      <MarkdownContent content={content} />
-
-      {/* Moon navigation */}
-      {!currentMoon && planet.moons && planet.moons.length > 0 && (
-        <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #444' }}>
-          <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Moons</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {planet.moons.map((moon) => (
-              <button
-                key={moon.id}
-                onClick={() => navigateToMoon(moon.id)}
-                className="moon-nav-button"
-              >
-                {moon.name}
-              </button>
-            ))}
-          </div>
+      {/* Right column - Content */}
+      <div className="planet-content-column">
+        {/* Title and subtitle */}
+        <div className="planet-content-header">
+          <h1 className="planet-title">{title}</h1>
+          {subtitle && <p className="planet-subtitle">{subtitle}</p>}
         </div>
-      )}
 
-      {/* Back to planet button when viewing moon */}
-      {currentMoon && (
-        <button
-          onClick={() => navigateToMoon('')}
-          className="back-to-planet-button"
-        >
-          ← Back to {planet.name}
-        </button>
-      )}
+        {/* Markdown content */}
+        <div className="planet-content-body">
+          <MarkdownContent content={content} />
+        </div>
+
+        {/* Moon navigation */}
+        {!currentMoon && planet.moons && planet.moons.length > 0 && (
+          <div className="planet-moons-section">
+            <h3 className="moons-title">Moons</h3>
+            <div className="moons-button-group">
+              {planet.moons.map((moon) => (
+                <button
+                  key={moon.id}
+                  onClick={() => navigateToMoon(moon.id)}
+                  className="moon-nav-button"
+                >
+                  {moon.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Back to planet button when viewing moon */}
+        {currentMoon && (
+          <button
+            onClick={() => navigateToMoon('')}
+            className="back-to-planet-button"
+          >
+            ← Back to {planet.name}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
