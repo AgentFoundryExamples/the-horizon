@@ -8,27 +8,29 @@ Includes classification of external dependencies as stdlib vs third-party.
 
 ## Statistics
 
-- **Total files**: 23
-- **Intra-repo dependencies**: 12
-- **External stdlib dependencies**: 3
-- **External third-party dependencies**: 11
+- **Total files**: 25
+- **Intra-repo dependencies**: 16
+- **External stdlib dependencies**: 4
+- **External third-party dependencies**: 12
 
 ## External Dependencies
 
 ### Standard Library / Core Modules
 
-Total: 3 unique modules
+Total: 4 unique modules
 
 - `crypto`
 - `fs/promises`
 - `path`
+- `util`
 
 ### Third-Party Packages
 
-Total: 11 unique packages
+Total: 12 unique packages
 
 - `@/../public/universe/universe.json`
 - `@/lib/auth`
+- `@/lib/crypto`
 - `@/lib/github`
 - `@/lib/universe/mutate`
 - `@testing-library/jest-dom`
@@ -42,6 +44,7 @@ Total: 11 unique packages
 ## Most Depended Upon Files (Intra-Repo)
 
 - `src/lib/universe/types.ts` (5 dependents)
+- `src/lib/crypto.ts` (4 dependents)
 - `src/lib/universe/data-service.ts` (2 dependents)
 - `src/lib/auth.ts` (1 dependents)
 - `src/lib/camera.ts` (1 dependents)
@@ -55,9 +58,9 @@ Total: 11 unique packages
 - `src/lib/universe/__tests__/mutate.test.ts` (2 dependencies)
 - `src/lib/__tests__/auth.test.ts` (1 dependencies)
 - `src/lib/__tests__/camera.test.ts` (1 dependencies)
+- `src/lib/__tests__/crypto.test.ts` (1 dependencies)
 - `src/lib/__tests__/github.test.ts` (1 dependencies)
 - `src/lib/__tests__/store.test.ts` (1 dependencies)
+- `src/lib/auth.ts` (1 dependencies)
+- `src/lib/github.ts` (1 dependencies)
 - `src/lib/universe/__tests__/data-service.test.ts` (1 dependencies)
-- `src/lib/universe/__tests__/types.test.ts` (1 dependencies)
-- `src/lib/universe/data-service.ts` (1 dependencies)
-- `src/lib/universe/mutate.ts` (1 dependencies)

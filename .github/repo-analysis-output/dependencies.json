@@ -16,7 +16,10 @@
       "path": "jest.setup.js",
       "type": "file",
       "external_dependencies": {
-        "stdlib": [],
+        "stdlib": [
+          "crypto",
+          "util"
+        ],
         "third-party": [
           "@testing-library/jest-dom"
         ]
@@ -60,12 +63,11 @@
       "path": "src/app/api/admin/universe/route.ts",
       "type": "file",
       "external_dependencies": {
-        "stdlib": [
-          "crypto"
-        ],
+        "stdlib": [],
         "third-party": [
           "@/../public/universe/universe.json",
           "@/lib/auth",
+          "@/lib/crypto",
           "@/lib/github",
           "@/lib/universe/mutate",
           "next/server"
@@ -93,6 +95,15 @@
       }
     },
     {
+      "id": "src/lib/__tests__/crypto.test.ts",
+      "path": "src/lib/__tests__/crypto.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/__tests__/github.test.ts",
       "path": "src/lib/__tests__/github.test.ts",
       "type": "file",
@@ -117,9 +128,7 @@
       "path": "src/lib/auth.ts",
       "type": "file",
       "external_dependencies": {
-        "stdlib": [
-          "crypto"
-        ],
+        "stdlib": [],
         "third-party": [
           "next/headers"
         ]
@@ -137,13 +146,20 @@
       }
     },
     {
+      "id": "src/lib/crypto.ts",
+      "path": "src/lib/crypto.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/github.ts",
       "path": "src/lib/github.ts",
       "type": "file",
       "external_dependencies": {
-        "stdlib": [
-          "crypto"
-        ],
+        "stdlib": [],
         "third-party": []
       }
     },
@@ -238,9 +254,7 @@
       "path": "src/middleware.ts",
       "type": "file",
       "external_dependencies": {
-        "stdlib": [
-          "crypto"
-        ],
+        "stdlib": [],
         "third-party": [
           "next/server"
         ]
@@ -257,12 +271,24 @@
       "target": "src/lib/camera.ts"
     },
     {
+      "source": "src/lib/__tests__/crypto.test.ts",
+      "target": "src/lib/crypto.ts"
+    },
+    {
       "source": "src/lib/__tests__/github.test.ts",
       "target": "src/lib/github.ts"
     },
     {
       "source": "src/lib/__tests__/store.test.ts",
       "target": "src/lib/store.ts"
+    },
+    {
+      "source": "src/lib/auth.ts",
+      "target": "src/lib/crypto.ts"
+    },
+    {
+      "source": "src/lib/github.ts",
+      "target": "src/lib/crypto.ts"
     },
     {
       "source": "src/lib/universe/__tests__/data-service.test.ts",
@@ -295,17 +321,23 @@
     {
       "source": "src/lib/universe/mutate.ts",
       "target": "src/lib/universe/types.ts"
+    },
+    {
+      "source": "src/middleware.ts",
+      "target": "src/lib/crypto.ts"
     }
   ],
   "external_dependencies_summary": {
     "stdlib": [
       "crypto",
       "fs/promises",
-      "path"
+      "path",
+      "util"
     ],
     "third-party": [
       "@/../public/universe/universe.json",
       "@/lib/auth",
+      "@/lib/crypto",
       "@/lib/github",
       "@/lib/universe/mutate",
       "@testing-library/jest-dom",
@@ -316,7 +348,7 @@
       "three",
       "zustand"
     ],
-    "stdlib_count": 3,
-    "third-party_count": 11
+    "stdlib_count": 4,
+    "third-party_count": 12
   }
 }

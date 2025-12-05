@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 23
+Total files: 25
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -20,8 +20,8 @@ Total files: 23
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** JavaScript module for jest.setup  
-**Size:** 0.61 KB  
-**LOC:** 1  
+**Size:** 1.05 KB  
+**LOC:** 14  
 **TODOs/FIXMEs:** 0  
 
 ## next.config.js
@@ -56,7 +56,7 @@ Total files: 23
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 3.71 KB  
+**Size:** 3.69 KB  
 **LOC:** 108  
 **TODOs/FIXMEs:** 0  
 
@@ -65,8 +65,8 @@ Total files: 23
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 3.76 KB  
-**LOC:** 79  
+**Size:** 4.45 KB  
+**LOC:** 82  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/__tests__/camera.test.ts
@@ -76,6 +76,15 @@ Total files: 23
 **Summary:** TypeScript core implementation  
 **Size:** 9.81 KB  
 **LOC:** 252  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/__tests__/crypto.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 4.10 KB  
+**LOC:** 75  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/__tests__/github.test.ts
@@ -101,8 +110,8 @@ Total files: 23
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 6.02 KB  
-**LOC:** 146  
+**Size:** 6.18 KB  
+**LOC:** 143  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/camera.ts
@@ -114,13 +123,22 @@ Total files: 23
 **LOC:** 195  
 **TODOs/FIXMEs:** 0  
 
+## src/lib/crypto.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 3.28 KB  
+**LOC:** 57  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/github.ts
 **Language:** TypeScript  
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 11.13 KB  
-**LOC:** 350  
+**Size:** 11.04 KB  
+**LOC:** 346  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/store.ts
@@ -209,6 +227,6 @@ Total files: 23
 **Role:** middleware  
 **Role Justification:** filename contains 'middleware'  
 **Summary:** TypeScript middleware component (role: middleware)  
-**Size:** 2.62 KB  
-**LOC:** 59  
+**Size:** 2.93 KB  
+**LOC:** 64  
 **TODOs/FIXMEs:** 0  

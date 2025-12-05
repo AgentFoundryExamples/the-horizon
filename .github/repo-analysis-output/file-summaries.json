@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 23,
+  "total_files": 25,
   "files": [
     {
       "schema_version": "2.0",
@@ -25,8 +25,8 @@
       "summary": "JavaScript module for jest.setup",
       "summary_text": "JavaScript module for jest.setup",
       "metrics": {
-        "size_bytes": 626,
-        "loc": 1,
+        "size_bytes": 1074,
+        "loc": 14,
         "todo_count": 0
       }
     },
@@ -53,7 +53,7 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 2629,
+        "size_bytes": 2635,
         "loc": 56,
         "todo_count": 0
       }
@@ -81,7 +81,7 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 3804,
+        "size_bytes": 3777,
         "loc": 108,
         "todo_count": 0
       }
@@ -95,8 +95,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 3848,
-        "loc": 79,
+        "size_bytes": 4552,
+        "loc": 82,
         "todo_count": 0
       }
     },
@@ -111,6 +111,20 @@
       "metrics": {
         "size_bytes": 10047,
         "loc": 252,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/__tests__/crypto.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 4199,
+        "loc": 75,
         "todo_count": 0
       }
     },
@@ -151,8 +165,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 6161,
-        "loc": 146,
+        "size_bytes": 6329,
+        "loc": 143,
         "todo_count": 0
       }
     },
@@ -172,6 +186,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/crypto.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 3363,
+        "loc": 57,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/github.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -179,8 +207,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 11402,
-        "loc": 350,
+        "size_bytes": 11310,
+        "loc": 346,
         "todo_count": 0
       }
     },
@@ -319,8 +347,8 @@
       "summary": "TypeScript middleware component (role: middleware)",
       "summary_text": "TypeScript middleware component (role: middleware)",
       "metrics": {
-        "size_bytes": 2685,
-        "loc": 59,
+        "size_bytes": 3000,
+        "loc": 64,
         "todo_count": 0
       }
     }
