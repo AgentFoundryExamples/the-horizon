@@ -84,6 +84,10 @@
         },
         {
           "type": "file",
+          "name": "roadmap.md"
+        },
+        {
+          "type": "file",
           "name": "universe-schema.md"
         },
         {
