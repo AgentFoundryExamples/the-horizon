@@ -349,13 +349,19 @@ describe('Scale Constants', () => {
       expect(GALAXY_SCALE.SMOOTHING_FACTOR).toBeGreaterThan(0);
       expect(GALAXY_SCALE.SMOOTHING_FACTOR).toBeLessThanOrEqual(1);
     });
+
+    it('should have valid radius ratio', () => {
+      expect(GALAXY_SCALE.RADIUS_RATIO).toBeGreaterThan(0);
+      expect(GALAXY_SCALE.RADIUS_RATIO).toBeLessThan(1);
+      expect(GALAXY_SCALE.RADIUS_RATIO).toBe(0.2);
+    });
   });
 
   describe('calculateGalaxyScale', () => {
     it('should return maximum size for single galaxy', () => {
       const scale = calculateGalaxyScale(1);
       expect(scale.maxRadius).toBe(GALAXY_SCALE.MAX_RADIUS);
-      expect(scale.minRadius).toBe(GALAXY_SCALE.MAX_RADIUS * 0.2);
+      expect(scale.minRadius).toBe(GALAXY_SCALE.MAX_RADIUS * GALAXY_SCALE.RADIUS_RATIO);
     });
 
     it('should return maximum size for two galaxies', () => {
@@ -366,7 +372,7 @@ describe('Scale Constants', () => {
     it('should return minimum size for 50+ galaxies', () => {
       const scale = calculateGalaxyScale(50);
       expect(scale.maxRadius).toBe(GALAXY_SCALE.MIN_RADIUS);
-      expect(scale.minRadius).toBe(GALAXY_SCALE.MIN_RADIUS * 0.2);
+      expect(scale.minRadius).toBe(GALAXY_SCALE.MIN_RADIUS * GALAXY_SCALE.RADIUS_RATIO);
     });
 
     it('should return minimum size for 100 galaxies', () => {
@@ -393,14 +399,15 @@ describe('Scale Constants', () => {
       testCounts.forEach(count => {
         const scale = calculateGalaxyScale(count);
         const ratio = scale.maxRadius / scale.minRadius;
-        expect(ratio).toBeCloseTo(5, 0);
+        const expectedRatio = 1 / GALAXY_SCALE.RADIUS_RATIO;
+        expect(ratio).toBeCloseTo(expectedRatio, 0);
       });
     });
 
     it('should handle edge case of zero galaxies', () => {
       const scale = calculateGalaxyScale(0);
       expect(scale.maxRadius).toBe(GALAXY_SCALE.BASE_RADIUS);
-      expect(scale.minRadius).toBe(GALAXY_SCALE.BASE_RADIUS * 0.25);
+      expect(scale.minRadius).toBe(GALAXY_SCALE.BASE_RADIUS * GALAXY_SCALE.RADIUS_RATIO);
     });
 
     it('should be deterministic', () => {
@@ -438,7 +445,7 @@ describe('Scale Constants', () => {
       const scale = calculateGalaxyScaleWithOverride(10, manualRadius);
       
       expect(scale.maxRadius).toBe(manualRadius);
-      expect(scale.minRadius).toBe(manualRadius * 0.2);
+      expect(scale.minRadius).toBe(manualRadius * GALAXY_SCALE.RADIUS_RATIO);
     });
 
     it('should ignore galaxy count when manual radius is set', () => {
@@ -478,7 +485,7 @@ describe('Scale Constants', () => {
       const scale = calculateGalaxyScaleWithOverride(10, manualRadius);
       
       expect(scale.maxRadius).toBe(manualRadius);
-      expect(scale.minRadius).toBe(manualRadius * 0.2);
+      expect(scale.minRadius).toBe(manualRadius * GALAXY_SCALE.RADIUS_RATIO);
     });
 
     it('should allow very large manual radius', () => {
@@ -486,7 +493,7 @@ describe('Scale Constants', () => {
       const scale = calculateGalaxyScaleWithOverride(10, manualRadius);
       
       expect(scale.maxRadius).toBe(manualRadius);
-      expect(scale.minRadius).toBe(manualRadius * 0.2);
+      expect(scale.minRadius).toBe(manualRadius * GALAXY_SCALE.RADIUS_RATIO);
     });
   });
 

@@ -277,6 +277,7 @@ GALAXY_SCALE = {
   MIN_SIZE_THRESHOLD: 50,     // Count at which MIN_RADIUS applies
   MAX_SIZE_THRESHOLD: 2,      // Count at which MAX_RADIUS applies
   SMOOTHING_FACTOR: 0.8,      // Controls transition smoothness (0-1)
+  RADIUS_RATIO: 0.2,          // minRadius = maxRadius * RADIUS_RATIO (20%)
 }
 ```
 
@@ -286,6 +287,7 @@ GALAXY_SCALE = {
 - `MAX_RADIUS` of 15 units provides impressive visual presence for sparse universes without overwhelming the canvas
 - `BASE_RADIUS` of 8 units serves as a sensible middle ground for reference
 - `SMOOTHING_FACTOR` of 0.8 reduces sudden size changes when galaxies are added or removed (lower values = smoother transitions)
+- `RADIUS_RATIO` of 0.2 maintains proper particle distribution in spiral galaxies (minRadius is always 20% of maxRadius)
 - Thresholds at 2 and 50 galaxies define clear boundaries for maximum and minimum sizes
 
 ### Galaxy Size Calculation
@@ -304,7 +306,7 @@ function calculateGalaxyScale(galaxyCount: number): {
 1. **Edge cases**: Zero galaxies return base size; counts ≤2 return maximum size
 2. **Logarithmic interpolation**: Uses natural logarithm to smooth transitions
 3. **Smoothing application**: Applies power function to reduce jarring changes
-4. **Ratio maintenance**: minRadius is always 20% of maxRadius for proper particle distribution
+4. **Ratio maintenance**: minRadius is always `RADIUS_RATIO` (20%) of maxRadius for proper particle distribution
 
 **Examples:**
 

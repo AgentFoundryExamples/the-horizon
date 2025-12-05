@@ -200,6 +200,13 @@ export const GALAXY_SCALE = {
    * Higher values create more gradual size changes when galaxies are added/removed
    */
   SMOOTHING_FACTOR: 0.8,
+  
+  /**
+   * Ratio of minimum to maximum radius for particle distribution
+   * minRadius is always RADIUS_RATIO * maxRadius to maintain proper spiral shape
+   * A ratio of 0.2 (20%) ensures particles are well-distributed from center to edge
+   */
+  RADIUS_RATIO: 0.2,
 } as const;
 
 /**
@@ -219,17 +226,17 @@ export const GALAXY_SCALE = {
 export function calculateGalaxyScale(galaxyCount: number): { minRadius: number; maxRadius: number } {
   // Handle edge cases
   if (galaxyCount <= 0) {
-    return { minRadius: GALAXY_SCALE.BASE_RADIUS * 0.25, maxRadius: GALAXY_SCALE.BASE_RADIUS };
+    return { minRadius: GALAXY_SCALE.BASE_RADIUS * GALAXY_SCALE.RADIUS_RATIO, maxRadius: GALAXY_SCALE.BASE_RADIUS };
   }
   
   if (galaxyCount <= GALAXY_SCALE.MAX_SIZE_THRESHOLD) {
     // Few galaxies: use maximum size to fill canvas
-    return { minRadius: GALAXY_SCALE.MAX_RADIUS * 0.2, maxRadius: GALAXY_SCALE.MAX_RADIUS };
+    return { minRadius: GALAXY_SCALE.MAX_RADIUS * GALAXY_SCALE.RADIUS_RATIO, maxRadius: GALAXY_SCALE.MAX_RADIUS };
   }
   
   if (galaxyCount >= GALAXY_SCALE.MIN_SIZE_THRESHOLD) {
     // Many galaxies: use minimum size to avoid crowding
-    return { minRadius: GALAXY_SCALE.MIN_RADIUS * 0.2, maxRadius: GALAXY_SCALE.MIN_RADIUS };
+    return { minRadius: GALAXY_SCALE.MIN_RADIUS * GALAXY_SCALE.RADIUS_RATIO, maxRadius: GALAXY_SCALE.MIN_RADIUS };
   }
   
   // Intermediate counts: smooth logarithmic interpolation
@@ -246,7 +253,7 @@ export function calculateGalaxyScale(galaxyCount: number): { minRadius: number; 
   
   // Interpolate between max and min radius
   const maxRadius = GALAXY_SCALE.MAX_RADIUS - (GALAXY_SCALE.MAX_RADIUS - GALAXY_SCALE.MIN_RADIUS) * smoothT;
-  const minRadius = maxRadius * 0.2; // Min is always 20% of max for good particle distribution
+  const minRadius = maxRadius * GALAXY_SCALE.RADIUS_RATIO;
   
   return { minRadius, maxRadius };
 }
@@ -265,7 +272,7 @@ export function calculateGalaxyScaleWithOverride(
 ): { minRadius: number; maxRadius: number } {
   if (manualRadius !== undefined && manualRadius > 0) {
     // Use manual override
-    return { minRadius: manualRadius * 0.2, maxRadius: manualRadius };
+    return { minRadius: manualRadius * GALAXY_SCALE.RADIUS_RATIO, maxRadius: manualRadius };
   }
   
   // Use automatic scaling
