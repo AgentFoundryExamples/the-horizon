@@ -154,10 +154,20 @@ export default function Tooltip({
     };
   }, []);
 
-  // Update position when tooltip becomes visible
+  // Update position when tooltip becomes visible or when window resizes
   useEffect(() => {
     if (isVisible) {
       updatePosition();
+      
+      // Handle window resize
+      const handleResize = () => {
+        if (isVisible) {
+          updatePosition();
+        }
+      };
+      
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
     }
   }, [isVisible]);
 
@@ -199,33 +209,6 @@ export default function Tooltip({
         break;
     }
 
-    // Viewport boundary detection - adjust if tooltip would overflow
-    if (tooltipRef.current) {
-      const tooltipRect = tooltipRef.current.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      // Check horizontal overflow
-      if (left + tooltipRect.width / 2 > viewportWidth - 10) {
-        // Would overflow right edge
-        left = viewportWidth - tooltipRect.width / 2 - 10;
-      } else if (left - tooltipRect.width / 2 < 10) {
-        // Would overflow left edge
-        left = tooltipRect.width / 2 + 10;
-      }
-
-      // Check vertical overflow
-      if (position === 'top' && top - tooltipRect.height - 12 < 10) {
-        // Would overflow top edge, flip to bottom
-        top = coords.y;
-        transform = 'translate(-50%, 0) translateY(12px)';
-      } else if (position === 'bottom' && top + tooltipRect.height + 12 > viewportHeight - 10) {
-        // Would overflow bottom edge, flip to top
-        top = coords.y;
-        transform = 'translate(-50%, -100%) translateY(-12px)';
-      }
-    }
-
     return {
       ...baseStyle,
       left: `${left}px`,
@@ -233,6 +216,41 @@ export default function Tooltip({
       transform,
     };
   };
+
+  // Adjust position after render to handle viewport boundaries
+  useEffect(() => {
+    if (isVisible && tooltipRef.current) {
+      const tooltipRect = tooltipRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      let needsUpdate = false;
+      let newLeft = coords.x;
+      let newTop = coords.y;
+
+      // Check horizontal overflow
+      if (tooltipRect.right > viewportWidth - 10) {
+        newLeft = viewportWidth - tooltipRect.width / 2 - 10;
+        needsUpdate = true;
+      } else if (tooltipRect.left < 10) {
+        newLeft = tooltipRect.width / 2 + 10;
+        needsUpdate = true;
+      }
+
+      // Check vertical overflow
+      if (position === 'top' && tooltipRect.top < 10) {
+        // Would overflow top edge, adjust down
+        needsUpdate = true;
+      } else if (position === 'bottom' && tooltipRect.bottom > viewportHeight - 10) {
+        // Would overflow bottom edge, adjust up
+        needsUpdate = true;
+      }
+
+      if (needsUpdate && (newLeft !== coords.x || newTop !== coords.y)) {
+        setCoords({ x: newLeft, y: newTop });
+      }
+    }
+  }, [isVisible, coords, position]);
 
   return (
     <>

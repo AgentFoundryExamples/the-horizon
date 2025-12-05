@@ -5,8 +5,7 @@
  * Projects 3D world coordinates to screen space for tooltip positioning
  */
 
-import { useState, useEffect, ReactNode } from 'react';
-import { useThree } from '@react-three/fiber';
+import { ReactNode } from 'react';
 import * as THREE from 'three';
 import { Html } from '@react-three/drei';
 
@@ -27,6 +26,10 @@ export interface SceneTooltipProps {
   maxWidth?: string;
   /** Distance factor for scaling (higher = less scaling with distance) */
   distanceFactor?: number;
+  /** Border color override */
+  borderColor?: string;
+  /** Additional CSS class name */
+  className?: string;
 }
 
 /**
@@ -42,6 +45,8 @@ export default function SceneTooltip({
   fontSize = '1rem',
   maxWidth = '300px',
   distanceFactor = 50,
+  borderColor = 'rgba(74, 144, 226, 0.7)',
+  className = '',
 }: SceneTooltipProps) {
   if (!visible) return null;
 
@@ -57,19 +62,11 @@ export default function SceneTooltip({
         }}
       >
         <div
+          className={`scene-tooltip ${className}`}
           style={{
-            background: 'rgba(0, 0, 0, 0.95)',
-            color: '#FFFFFF',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            border: '2px solid rgba(74, 144, 226, 0.7)',
             fontSize: fontSize,
             maxWidth: maxWidth,
-            wordWrap: 'break-word',
-            whiteSpace: 'normal',
-            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5)',
-            backdropFilter: 'blur(4px)',
-            textAlign: 'center',
+            border: `2px solid ${borderColor}`,
           }}
           role="tooltip"
           aria-live="polite"
@@ -79,25 +76,4 @@ export default function SceneTooltip({
       </Html>
     </group>
   );
-}
-
-/**
- * Hook to project 3D world coordinates to 2D screen coordinates
- * Useful for custom tooltip positioning outside of the Three.js scene
- */
-export function useWorldToScreen(worldPosition: THREE.Vector3): { x: number; y: number } | null {
-  const { camera, size } = useThree();
-  const [screenPosition, setScreenPosition] = useState<{ x: number; y: number } | null>(null);
-
-  useEffect(() => {
-    const vector = worldPosition.clone();
-    vector.project(camera);
-
-    const x = (vector.x * 0.5 + 0.5) * size.width;
-    const y = (vector.y * -0.5 + 0.5) * size.height;
-
-    setScreenPosition({ x, y });
-  }, [worldPosition, camera, size]);
-
-  return screenPosition;
 }
