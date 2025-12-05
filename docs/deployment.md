@@ -68,6 +68,29 @@ The admin interface requires a GitHub Personal Access Token to commit changes ba
 
 ### Creating a Token
 
+GitHub now recommends using fine-grained personal access tokens for better security.
+
+**Option 1: Fine-Grained Token (Recommended)**
+
+1. Go to [GitHub Settings → Developer settings → Personal access tokens → Fine-grained tokens](https://github.com/settings/personal-access-tokens/new)
+
+2. Fill in the form:
+   - **Token name**: "The Horizon Admin Interface"
+   - **Expiration**: Choose based on your security policy (90 days recommended)
+   - **Repository access**: Select "Only select repositories" and choose your repository
+   - **Permissions**: Under "Repository permissions", set:
+     - ✅ `Contents` - Read and write access (for committing files)
+     - ✅ `Pull requests` - Read and write access (for creating PRs)
+     - ✅ `Metadata` - Read-only (automatically selected)
+
+3. Click **Generate token**
+
+4. **Copy the token immediately** - you won't be able to see it again!
+
+5. Add it to your Vercel environment variables as `GITHUB_TOKEN`
+
+**Option 2: Classic Token (Legacy)**
+
 1. Go to [GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)](https://github.com/settings/tokens/new)
 
 2. Fill in the form:
@@ -76,7 +99,6 @@ The admin interface requires a GitHub Personal Access Token to commit changes ba
    - **Scopes**: Select the following:
      - ✅ `repo` - Full control of private repositories
        - Includes: `repo:status`, `repo_deployment`, `public_repo`, `repo:invite`, `security_events`
-     - ✅ `workflow` (optional) - If you want to trigger GitHub Actions
 
 3. Click **Generate token**
 
@@ -275,7 +297,7 @@ After deployment, verify everything works:
 
 **Solutions**:
 - Verify `GITHUB_TOKEN` is valid and not expired
-- Check token has `repo` scope
+- Check token has appropriate permissions (`Contents: Read & write` for fine-grained tokens, or `repo` scope for classic tokens)
 - Ensure token belongs to a user with write access to the repository
 - Regenerate token if compromised
 
