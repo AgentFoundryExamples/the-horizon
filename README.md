@@ -72,7 +72,7 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 **Technical Improvements:**
 - TypeScript 5.6.3 with full type safety
-- Next.js 14.2.15 with server-side rendering
+- Next.js 14.2.33 with server-side rendering (upgraded from 14.2.15 for security fixes)
 - Three.js 0.170.0 for 3D graphics
 - Zustand state management
 - ESLint configuration for code quality
@@ -307,7 +307,7 @@ The application can be deployed to any platform that supports Next.js.
 
 ## Tech Stack
 
-- **Framework**: Next.js 14.2.15
+- **Framework**: Next.js 14.2.33
 - **Language**: TypeScript 5.6.3
 - **UI Library**: React 18.3.1
 - **3D Graphics**: Three.js 0.170.0, React Three Fiber 8.17.10, Drei 9.117.3
