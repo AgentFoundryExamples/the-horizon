@@ -115,11 +115,11 @@ a {
   }
 }
 
-/* Welcome message responsive styling */
-.welcome-message {
-  /* Responsive adjustments for small screens */
-}
-
+/* Welcome message responsive styling 
+ * Note: !important is used to override inline styles from the component.
+ * This is necessary because the component uses inline styles for layout,
+ * and media queries need higher specificity to apply responsive adjustments.
+ */
 @media (max-width: 768px) {
   .welcome-message {
     padding: 0.75rem 1.5rem !important;

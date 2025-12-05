@@ -69,7 +69,7 @@ describe('WelcomeMessage', () => {
       expect(message.style.backdropFilter).toBe('blur(8px)');
     });
 
-    it('should be responsive with maxWidth', () => {
+    it('should be responsive with maxWidth and width', () => {
       const { container } = render(<WelcomeMessage />);
       const message = container.querySelector('.welcome-message');
       
@@ -87,7 +87,7 @@ describe('WelcomeMessage', () => {
       expect(message).toHaveStyle({ zIndex: '50' });
     });
 
-    it('should be compact with reduced padding', () => {
+    it('should have compact padding', () => {
       const { container } = render(<WelcomeMessage />);
       const message = container.querySelector('.welcome-message');
       
