@@ -16,9 +16,10 @@ import { persistUniverseToFile } from '../persist';
 import type { Universe } from '../types';
 import fs from 'fs/promises';
 import path from 'path';
+import os from 'os';
 
 describe('Universe Persistence', () => {
-  const testDir = '/tmp/test-universe';
+  const testDir = path.join(os.tmpdir(), 'test-universe');
   const testFile = path.join(testDir, 'universe.json');
 
   let testUniverse: Universe;

@@ -25,14 +25,18 @@ import { serializeUniverse } from './mutate';
 /**
  * Persists universe data to local file system (server-side only)
  * @param universe - The universe data to persist
- * @param filePath - Path to the universe.json file (default: public/universe/universe.json)
+ * @param filePath - Path to the universe.json file (default from env or public/universe/universe.json)
  * @returns Promise<{ success: boolean; error?: string }>
  */
 export async function persistUniverseToFile(
   universe: Universe,
-  filePath: string = 'public/universe/universe.json'
+  filePath?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Use provided path, or environment variable, or default
+    const targetPath = filePath || 
+      process.env.UNIVERSE_DATA_PATH || 
+      'public/universe/universe.json';
     // Validate before persisting
     const validation = validateUniverse(universe);
     if (!validation.valid) {
@@ -46,7 +50,7 @@ export async function persistUniverseToFile(
     const content = serializeUniverse(universe);
 
     // Resolve the absolute path
-    const absolutePath = path.resolve(process.cwd(), filePath);
+    const absolutePath = path.resolve(process.cwd(), targetPath);
 
     // Ensure directory exists
     const dir = path.dirname(absolutePath);
