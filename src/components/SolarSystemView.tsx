@@ -24,6 +24,13 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { SolarSystem, Planet } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
+import {
+  calculatePlanetSize,
+  calculateOrbitalRadius,
+  calculateSafeSpacing,
+  ORBITAL_SPACING,
+  STAR_SCALE,
+} from '@/lib/universe/scale-constants';
 
 interface SolarSystemViewProps {
   solarSystem: SolarSystem;
@@ -41,11 +48,13 @@ function PlanetMesh({
   index,
   systemPosition,
   onClick,
+  totalPlanets,
 }: {
   planet: Planet;
   index: number;
   systemPosition: THREE.Vector3;
   onClick: () => void;
+  totalPlanets: number;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
 
@@ -57,16 +66,18 @@ function PlanetMesh({
       return x - Math.floor(x);
     };
 
-    const semiMajorAxis = 2 + index * 1.5;
-    const eccentricity = seededRandom() * 0.1;
-    const inclination = (seededRandom() - 0.5) * 0.2;
+    // Use new scale constants for improved usability
+    const safeSpacing = calculateSafeSpacing(totalPlanets);
+    const semiMajorAxis = ORBITAL_SPACING.BASE_RADIUS + index * safeSpacing;
+    const eccentricity = seededRandom() * ORBITAL_SPACING.MAX_ECCENTRICITY;
+    const inclination = (seededRandom() - 0.5) * ORBITAL_SPACING.MAX_INCLINATION * 2;
     const argumentOfPeriapsis = seededRandom() * Math.PI * 2;
     const orbitSpeed = 0.5 / (semiMajorAxis * semiMajorAxis);
     const phase = seededRandom() * Math.PI * 2;
-    const size = 0.3 + (planet.moons?.length || 0) * 0.05;
+    const size = calculatePlanetSize(planet.moons?.length || 0);
 
     return { semiMajorAxis, eccentricity, inclination, argumentOfPeriapsis, orbitSpeed, phase, size };
-  }, [planet, index]);
+  }, [planet, index, totalPlanets]);
 
   useFrame((state) => {
     if (!meshRef.current) return;
@@ -118,14 +129,19 @@ function PlanetMesh({
  */
 export default function SolarSystemView({ solarSystem, position }: SolarSystemViewProps) {
   const { navigateToPlanet } = useNavigationStore();
+  const totalPlanets = (solarSystem.planets || []).length;
 
   return (
     <group position={position}>
       {/* Central star */}
       <mesh>
-        <sphereGeometry args={[0.5, 16, 16]} />
+        <sphereGeometry args={[STAR_SCALE.RADIUS, 16, 16]} />
         <meshBasicMaterial color="#FDB813" />
-        <pointLight color="#FDB813" intensity={2} distance={20} />
+        <pointLight
+          color="#FDB813"
+          intensity={STAR_SCALE.LIGHT_INTENSITY}
+          distance={STAR_SCALE.LIGHT_DISTANCE}
+        />
       </mesh>
 
       {/* Planets */}
@@ -136,6 +152,7 @@ export default function SolarSystemView({ solarSystem, position }: SolarSystemVi
           index={index}
           systemPosition={position}
           onClick={() => navigateToPlanet(planet.id)}
+          totalPlanets={totalPlanets}
         />
       ))}
     </group>
