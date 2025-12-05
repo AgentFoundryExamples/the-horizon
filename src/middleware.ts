@@ -71,8 +71,20 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
     const authCookie = request.cookies.get(AUTH_COOKIE_NAME);
 
-    if (!authCookie || !(await validateSessionToken(authCookie.value))) {
-      // Redirect to login page with return URL
+    try {
+      // Validate session token with error handling for async operations
+      const isValid = authCookie ? await validateSessionToken(authCookie.value) : false;
+      
+      if (!isValid) {
+        // Redirect to login page with return URL
+        const url = request.nextUrl.clone();
+        url.pathname = '/admin/login';
+        url.searchParams.set('returnUrl', pathname);
+        return NextResponse.redirect(url);
+      }
+    } catch (error) {
+      // If validation fails for any reason, redirect to login
+      console.error('Session validation error in middleware:', error);
       const url = request.nextUrl.clone();
       url.pathname = '/admin/login';
       url.searchParams.set('returnUrl', pathname);

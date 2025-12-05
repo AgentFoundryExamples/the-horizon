@@ -17,28 +17,14 @@
  * These functions work in both Edge Runtime and Node.js environments
  */
 
-// Cache the crypto instance to avoid repeated lookups
-let cachedCrypto: Crypto | undefined;
-
 // Get crypto from global scope (works in browser, Edge, and Node with polyfill)
 const getCrypto = (): Crypto => {
-  if (cachedCrypto) {
-    return cachedCrypto;
+  const cryptoInstance = globalThis.crypto;
+  
+  if (!cryptoInstance) {
+    throw new Error('Web Crypto API is not available in this environment.');
   }
   
-  let cryptoInstance: Crypto;
-  
-  if (typeof crypto !== 'undefined') {
-    cryptoInstance = crypto;
-  } else if (typeof globalThis !== 'undefined' && globalThis.crypto) {
-    cryptoInstance = globalThis.crypto;
-  } else if (typeof global !== 'undefined' && (global as any).crypto) {
-    cryptoInstance = (global as any).crypto;
-  } else {
-    throw new Error('Web Crypto API is not available');
-  }
-  
-  cachedCrypto = cryptoInstance;
   return cryptoInstance;
 };
 
@@ -71,6 +57,7 @@ export async function sha256(data: string): Promise<string> {
 /**
  * Performs timing-safe comparison of two strings
  * Constant-time string comparison to prevent timing attacks
+ * Optimized for comparing equal-length hash strings (e.g., SHA-256 hex outputs)
  * @param a - First string
  * @param b - Second string
  * @returns True if strings are equal
@@ -81,19 +68,19 @@ export function timingSafeEqual(a: string, b: string): boolean {
   const bufferA = encoder.encode(a);
   const bufferB = encoder.encode(b);
   
-  // To maintain constant time, we need to compare all bytes
-  // even if lengths differ. We'll pad the shorter one with zeros.
-  const maxLength = Math.max(bufferA.length, bufferB.length);
+  // For true constant-time comparison, always use the same fixed length
+  // This is optimized for SHA-256 hashes which are always 64 hex characters (32 bytes when encoded)
+  const fixedLength = 64; // Max expected length for hex hash strings
   
   // XOR all bytes and accumulate the result
-  // This ensures the comparison takes the same time regardless of where differences occur
   let result = 0;
   
-  // Add length difference to result (will be non-zero if lengths differ)
+  // Compare length difference (will be non-zero if lengths differ)
   result |= bufferA.length ^ bufferB.length;
   
-  for (let i = 0; i < maxLength; i++) {
-    // Use 0 for out-of-bounds access to maintain constant time
+  // Always iterate the full fixed length to maintain constant time
+  for (let i = 0; i < fixedLength; i++) {
+    // Use 0 for out-of-bounds access
     const byteA = i < bufferA.length ? bufferA[i] : 0;
     const byteB = i < bufferB.length ? bufferB[i] : 0;
     result |= byteA ^ byteB;

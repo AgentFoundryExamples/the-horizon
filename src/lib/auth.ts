@@ -53,6 +53,10 @@ function getSessionSecret(): string {
   return ADMIN_PASSWORD;
 }
 
+// Cache the admin password hash to avoid re-computing it on every call
+let adminPasswordHashCache: string | null = null;
+let cachedAdminPassword: string | null = null;
+
 /**
  * Gets the admin password from environment variable
  */
@@ -78,11 +82,16 @@ export async function validatePassword(password: string): Promise<boolean> {
   
   // Use timing-safe comparison to prevent timing attacks
   try {
-    // Hash both passwords to ensure consistent length for timingSafeEqual
-    const passwordHash = await sha256(password);
-    const adminPasswordHash = await sha256(ADMIN_PASSWORD);
+    // Check if we need to recompute the admin password hash
+    // (happens when ADMIN_PASSWORD changes or on first call)
+    if (!adminPasswordHashCache || cachedAdminPassword !== ADMIN_PASSWORD) {
+      adminPasswordHashCache = await sha256(ADMIN_PASSWORD);
+      cachedAdminPassword = ADMIN_PASSWORD;
+    }
     
-    return timingSafeEqual(passwordHash, adminPasswordHash);
+    const passwordHash = await sha256(password);
+    
+    return timingSafeEqual(passwordHash, adminPasswordHashCache);
   } catch (error) {
     // If comparison fails for any reason, return false
     return false;
