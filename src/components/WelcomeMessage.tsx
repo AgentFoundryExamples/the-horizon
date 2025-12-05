@@ -1,15 +1,11 @@
 'use client';
 
 /**
- * WelcomeMessage - Welcome callout displayed on galaxy view
+ * WelcomeMessage - Welcome callout displayed on universe landing page
  * Shows a tasteful branding message with instructions
  */
 
-interface WelcomeMessageProps {
-  galaxyName: string;
-}
-
-export default function WelcomeMessage({ galaxyName }: WelcomeMessageProps) {
+export default function WelcomeMessage() {
   return (
     <div
       className="welcome-message"
@@ -17,15 +13,15 @@ export default function WelcomeMessage({ galaxyName }: WelcomeMessageProps) {
       aria-label="Welcome message"
       style={{
         position: 'absolute',
-        top: '50%',
+        top: '2rem',
         left: '50%',
-        transform: 'translate(-50%, -50%)',
-        padding: '2rem',
+        transform: 'translateX(-50%)',
+        padding: '1rem 2rem',
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
         border: '2px solid rgba(74, 144, 226, 0.5)',
         borderRadius: '12px',
         maxWidth: '90%',
-        width: '500px',
+        width: 'auto',
         textAlign: 'center',
         zIndex: 50,
         pointerEvents: 'none',
@@ -36,7 +32,7 @@ export default function WelcomeMessage({ galaxyName }: WelcomeMessageProps) {
       <h2
         style={{
           fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
-          marginBottom: '1rem',
+          marginBottom: '0.5rem',
           color: '#4A90E2',
           fontWeight: 'bold',
           letterSpacing: '0.05em',
@@ -46,22 +42,13 @@ export default function WelcomeMessage({ galaxyName }: WelcomeMessageProps) {
       </h2>
       <p
         style={{
-          fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
-          color: '#CCCCCC',
-          marginBottom: '1rem',
-          lineHeight: '1.6',
-        }}
-      >
-        You are now exploring <strong style={{ color: '#FFFFFF' }}>{galaxyName}</strong>
-      </p>
-      <p
-        style={{
           fontSize: 'clamp(0.8rem, 1.8vw, 1rem)',
-          color: '#999',
+          color: '#CCCCCC',
           lineHeight: '1.5',
+          margin: 0,
         }}
       >
-        Click on solar systems to discover planets and moons
+        Click a galaxy to explore
       </p>
     </div>
   );

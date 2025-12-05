@@ -21,7 +21,6 @@ import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG a
 import GalaxyView from './GalaxyView';
 import SolarSystemView from './SolarSystemView';
 import { PlanetSurface3D, PlanetSurfaceOverlay } from './PlanetSurface';
-import WelcomeMessage from './WelcomeMessage';
 import '../styles/planet.css';
 
 /**
@@ -458,11 +457,6 @@ export default function UniverseScene({ galaxies }: UniverseSceneProps) {
       >
         <SceneContent galaxies={galaxies} />
       </Canvas>
-
-      {/* Welcome message for galaxy view */}
-      {focusLevel === 'galaxy' && focusedGalaxy && (
-        <WelcomeMessage galaxyName={focusedGalaxy.name} />
-      )}
 
       {/* Planet surface overlay for markdown content */}
       {focusLevel === 'planet' && focusedPlanet && (

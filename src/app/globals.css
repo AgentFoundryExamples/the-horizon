@@ -114,3 +114,27 @@ a {
     border-color: #4A90E2;
   }
 }
+
+/* Welcome message responsive styling */
+.welcome-message {
+  /* Responsive adjustments for small screens */
+}
+
+@media (max-width: 768px) {
+  .welcome-message {
+    padding: 0.75rem 1.5rem !important;
+    top: 1rem !important;
+  }
+  
+  .welcome-message h2 {
+    margin-bottom: 0.25rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-message {
+    padding: 0.5rem 1rem !important;
+    top: 0.5rem !important;
+    max-width: 95% !important;
+  }
+}
