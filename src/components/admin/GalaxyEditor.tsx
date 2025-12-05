@@ -87,7 +87,8 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
     try {
       galaxyToValidate = ensureGalaxyId(localGalaxy);
     } catch (error) {
-      // If ID generation fails (e.g., missing name), validation will catch it
+      // If ID generation fails due to missing name, proceed with validation
+      // which will display the appropriate error message
       galaxyToValidate = localGalaxy;
     }
     
