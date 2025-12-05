@@ -49,6 +49,7 @@
   ├── components
     ├── __tests__
       ├── SceneHUD.test.tsx
+      ├── Tooltip.test.tsx
       ├── UniverseScene.test.tsx
       └── WelcomeMessage.test.tsx
     ├── admin
@@ -61,10 +62,12 @@
     ├── PlanetSurface.tsx
     ├── SceneHUD.tsx
     ├── SolarSystemView.tsx
+    ├── Tooltip.tsx
     ├── UniverseScene.tsx
     └── WelcomeMessage.tsx
   ├── lib
     ├── __tests__
+      ├── animation.test.ts
       ├── auth.test.ts
       ├── camera.test.ts
       ├── crypto.test.ts
@@ -82,6 +85,7 @@
       ├── mutate.ts
       ├── scale-constants.ts
       └── types.ts
+    ├── animation.ts
     ├── auth.ts
     ├── camera.ts
     ├── crypto.ts

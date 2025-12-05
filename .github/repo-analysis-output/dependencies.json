@@ -75,6 +75,17 @@
       }
     },
     {
+      "id": "src/lib/__tests__/animation.test.ts",
+      "path": "src/lib/__tests__/animation.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "@testing-library/react"
+        ]
+      }
+    },
+    {
       "id": "src/lib/__tests__/auth.test.ts",
       "path": "src/lib/__tests__/auth.test.ts",
       "type": "file",
@@ -120,6 +131,17 @@
         "stdlib": [],
         "third-party": [
           "@testing-library/react"
+        ]
+      }
+    },
+    {
+      "id": "src/lib/animation.ts",
+      "path": "src/lib/animation.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "react"
         ]
       }
     },
@@ -281,6 +303,10 @@
   ],
   "edges": [
     {
+      "source": "src/lib/__tests__/animation.test.ts",
+      "target": "src/lib/animation.ts"
+    },
+    {
       "source": "src/lib/__tests__/auth.test.ts",
       "target": "src/lib/auth.ts"
     },
@@ -367,10 +393,11 @@
       "next/headers",
       "next/jest",
       "next/server",
+      "react",
       "three",
       "zustand"
     ],
     "stdlib_count": 4,
-    "third-party_count": 12
+    "third-party_count": 13
   }
 }

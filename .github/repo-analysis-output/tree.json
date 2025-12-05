@@ -234,6 +234,10 @@
                 },
                 {
                   "type": "file",
+                  "name": "Tooltip.test.tsx"
+                },
+                {
+                  "type": "file",
                   "name": "UniverseScene.test.tsx"
                 },
                 {
@@ -286,6 +290,10 @@
             },
             {
               "type": "file",
+              "name": "Tooltip.tsx"
+            },
+            {
+              "type": "file",
               "name": "UniverseScene.tsx"
             },
             {
@@ -302,6 +310,10 @@
               "type": "directory",
               "name": "__tests__",
               "children": [
+                {
+                  "type": "file",
+                  "name": "animation.test.ts"
+                },
                 {
                   "type": "file",
                   "name": "auth.test.ts"
@@ -375,6 +387,10 @@
                   "name": "types.ts"
                 }
               ]
+            },
+            {
+              "type": "file",
+              "name": "animation.ts"
             },
             {
               "type": "file",

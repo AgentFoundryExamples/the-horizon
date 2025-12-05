@@ -8,10 +8,10 @@ Includes classification of external dependencies as stdlib vs third-party.
 
 ## Statistics
 
-- **Total files**: 27
-- **Intra-repo dependencies**: 17
+- **Total files**: 29
+- **Intra-repo dependencies**: 18
 - **External stdlib dependencies**: 4
-- **External third-party dependencies**: 12
+- **External third-party dependencies**: 13
 
 ## External Dependencies
 
@@ -26,7 +26,7 @@ Total: 4 unique modules
 
 ### Third-Party Packages
 
-Total: 12 unique packages
+Total: 13 unique packages
 
 - `@/../public/universe/universe.json`
 - `@/lib/auth`
@@ -38,6 +38,7 @@ Total: 12 unique packages
 - `next/headers`
 - `next/jest`
 - `next/server`
+- `react`
 - `three`
 - `zustand`
 
@@ -46,6 +47,7 @@ Total: 12 unique packages
 - `src/lib/universe/types.ts` (5 dependents)
 - `src/lib/crypto.ts` (4 dependents)
 - `src/lib/universe/data-service.ts` (2 dependents)
+- `src/lib/animation.ts` (1 dependents)
 - `src/lib/auth.ts` (1 dependents)
 - `src/lib/camera.ts` (1 dependents)
 - `src/lib/github.ts` (1 dependents)
@@ -57,6 +59,7 @@ Total: 12 unique packages
 
 - `src/lib/universe/__tests__/edge-cases.test.ts` (2 dependencies)
 - `src/lib/universe/__tests__/mutate.test.ts` (2 dependencies)
+- `src/lib/__tests__/animation.test.ts` (1 dependencies)
 - `src/lib/__tests__/auth.test.ts` (1 dependencies)
 - `src/lib/__tests__/camera.test.ts` (1 dependencies)
 - `src/lib/__tests__/crypto.test.ts` (1 dependencies)
@@ -64,4 +67,3 @@ Total: 12 unique packages
 - `src/lib/__tests__/store.test.ts` (1 dependencies)
 - `src/lib/auth.ts` (1 dependencies)
 - `src/lib/github.ts` (1 dependencies)
-- `src/lib/universe/__tests__/data-service.test.ts` (1 dependencies)
