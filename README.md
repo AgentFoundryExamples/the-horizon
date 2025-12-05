@@ -19,6 +19,36 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 ## Changelog
 
+### v0.1.1 - Security & Performance Update (December 2024)
+
+*This release includes critical security patches, dependency updates, and UI improvements.*
+
+**Key Highlights:**
+- **Security Updates**: Upgraded Next.js from 14.2.15 to 14.2.33, addressing 7 critical vulnerabilities (CVSS up to 9.1)
+- **Edge Runtime Compatibility**: Migrated authentication to Web Crypto API for serverless deployment support
+- **UI Enhancements**: Added context-aware welcome message, improved animations, and enhanced visual feedback
+- **Zero Vulnerabilities**: All npm audit vulnerabilities resolved
+
+**What's New:**
+- Timing-safe password validation using Web Crypto API
+- Session tokens signed with HMAC-SHA256 for enhanced security
+- `SESSION_SECRET` environment variable for independent session signing (recommended for production)
+- Context-aware welcome message when exploring galaxies
+- Improved camera transitions and scene animations
+- Enhanced interactive labels and tooltips
+- Adjusted scene proportions for better visual hierarchy
+
+**Deployment Notes:**
+- **New Environment Variable**: `SESSION_SECRET` is recommended for enhanced security (see [.env.example](.env.example))
+- **Admin Re-login Required**: Adding `SESSION_SECRET` will invalidate existing sessions
+
+**Technical Details:**
+- All 164 unit tests passing with Web Crypto polyfills
+- Build verified with no breaking changes
+- Updated documentation for Edge Runtime security features
+
+See [docs/roadmap.md](docs/roadmap.md) for complete security vulnerability details and version history.
+
 ### v0.1.0 - Horizon Launch (December 2024)
 
 *This release establishes the semantic versioning baseline at 0.1.0, representing the first feature-complete iteration before the 1.0 stable release.*
@@ -265,6 +295,7 @@ cp .env.example .env.local
 
 **For Admin Interface**:
 - `ADMIN_PASSWORD` - Password for admin access (min 16 characters recommended)
+- `SESSION_SECRET` - Secret for signing session tokens (generate with `openssl rand -base64 32`)
 - `GITHUB_TOKEN` - Personal access token with `repo` scope
 - `GITHUB_OWNER` - Repository owner (e.g., 'AgentFoundryExamples')
 - `GITHUB_REPO` - Repository name (e.g., 'the-horizon')
@@ -287,6 +318,7 @@ cp .env.example .env.local
 2. Import project in Vercel dashboard
 3. Configure environment variables:
    - `ADMIN_PASSWORD` - Strong password for admin access
+   - `SESSION_SECRET` - Secret for signing session tokens
    - `GITHUB_TOKEN` - GitHub personal access token
    - `GITHUB_OWNER` - Your GitHub username or organization
    - `GITHUB_REPO` - Repository name

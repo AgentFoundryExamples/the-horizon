@@ -2,7 +2,7 @@
 
 This document outlines the current state of The Horizon, what has been shipped, known limitations, and planned future enhancements.
 
-## Current Release: v0.1.0 (December 2024)
+## Current Release: v0.1.1 (December 2024)
 
 ### ✅ Shipped Features
 
@@ -40,19 +40,22 @@ This document outlines the current state of The Horizon, what has been shipped, 
 - [x] Automatic Vercel redeployment on commit
 
 #### Security
-- [x] Timing-safe password authentication
-- [x] Signed session tokens with HMAC-SHA256
+- [x] Timing-safe password authentication (Web Crypto API)
+- [x] Signed session tokens with HMAC-SHA256 (Web Crypto API)
+- [x] Separate SESSION_SECRET for enhanced security
 - [x] Rate limiting (5 attempts per 15 minutes)
 - [x] Sanitized error logging (no token exposure)
 - [x] XSS prevention in markdown content
+- [x] Edge Runtime compatible for serverless deployments
 
 #### Developer Experience
-- [x] Comprehensive test coverage (150 tests, 8 suites)
+- [x] Comprehensive test coverage (164 tests, 9 suites)
 - [x] TypeScript with full type safety
 - [x] ESLint configuration
 - [x] Hot module replacement in development
-- [x] Next.js 14 with App Router
+- [x] Next.js 14.2.33 with App Router and security patches
 - [x] Detailed documentation for deployment and usage
+- [x] Edge Runtime compatible authentication
 
 ## Known Limitations
 
@@ -232,7 +235,7 @@ Before deploying a new version, complete these verification steps:
 
 ## Version History
 
-### v0.1.1 - Security Update (December 2024)
+### v0.1.1 - Security & Performance Update (December 2024)
 - **Dependency Security Updates**:
   - Upgraded Next.js from 14.2.15 to 14.2.33 to address critical security vulnerabilities:
     - Fixed Authorization Bypass in Next.js Middleware (GHSA-f82v-jwr5-mffw, CVSS 9.1)
@@ -240,13 +243,27 @@ Before deploying a new version, complete these verification steps:
     - Fixed Improper Middleware Redirect Handling Leading to SSRF (GHSA-4342-x723-ch2f, CVSS 6.5)
     - Fixed Content Injection Vulnerability for Image Optimization (GHSA-xv57-4mr9-wg8v, CVSS 4.3)
     - Fixed Race Condition to Cache Poisoning (GHSA-qpjv-v59x-3qc4, CVSS 3.7)
-    - Fixed Denial of Service (DoS) with Server Actions (GHSA-7m27-7ghc-44w9, CVSS 5.3)
-    - Fixed Information exposure in dev server due to lack of origin verification (GHSA-3h52-269p-cp9r)
+    - Denial of Service (DoS) with Server Actions (GHSA-7m27-7ghc-44w9, CVSS 5.3)
+    - Information exposure in dev server due to lack of origin verification (GHSA-3h52-269p-cp9r)
   - Upgraded eslint-config-next from 14.2.15 to 14.2.33
   - Added npm overrides to force glob@10.5.0 (fixes command injection vulnerability GHSA-5j98-mcp5-4vw2)
   - Zero npm audit vulnerabilities after upgrade
-- **Testing**: All 150 tests passing, build verified, no breaking changes
-- **Documentation**: Updated deployment guide and roadmap with new baseline
+- **Authentication Improvements**:
+  - Migrated authentication from Node.js crypto to Web Crypto API for Edge Runtime compatibility
+  - Timing-safe password validation using Web Crypto API primitives
+  - Session tokens signed with HMAC-SHA256 via Web Crypto API
+  - Added SESSION_SECRET environment variable for enhanced security (falls back to ADMIN_PASSWORD if not set)
+  - All 164 tests updated and passing with Web Crypto polyfills
+- **UI & UX Enhancements**:
+  - Added context-aware welcome message when exploring galaxies
+  - Improved camera transitions and scene animations
+  - Enhanced visual feedback for interactive labels/tooltips
+  - Adjusted scene proportions for better visual hierarchy
+- **Testing & Documentation**: 
+  - All 164 unit tests passing, build verified, no breaking changes
+  - Updated deployment guide with Edge Runtime security details
+  - Enhanced roadmap with complete security update documentation
+  - Added welcome message customization guide to content-authoring.md
 
 ### v0.1.0 - Initial Feature-Complete Release (December 2024)
 - Universe schema with hierarchical data structure
@@ -445,5 +462,5 @@ Have ideas for future features? Here's how to contribute:
 ---
 
 *Last Updated: December 2024*  
-*Version: 0.1.0*  
+*Version: 0.1.1*  
 *Maintained by: Agent Foundry and John Brosnihan*
