@@ -413,7 +413,7 @@ function SceneContent({ galaxies }: SceneContentProps) {
         <PlanetSurface3D
           planet={focusedPlanet}
           solarSystem={focusedSolarSystem}
-          position={galaxyPositions.get(focusedGalaxyId || '') || new THREE.Vector3(0, 0, 0)}
+          position={new THREE.Vector3(-3, 0, 0)}
         />
       )}
 

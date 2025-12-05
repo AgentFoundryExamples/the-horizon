@@ -2,6 +2,255 @@
 
 This document describes the 3D scene controls, camera animations, and performance optimizations in The Horizon application.
 
+## Planet Surface Layout
+
+### Overview
+
+Planet detail pages use a two-column layout that prioritizes textual content while maintaining an engaging 3D visualization. This design ensures markdown content receives appropriate prominence for storytelling while the planet rendering complements the narrative.
+
+### Layout Structure
+
+The planet surface view consists of two main areas:
+
+```
+┌─────────────────────────────────────────┐
+│  ┌──────────┐  ┌─────────────────────┐ │
+│  │          │  │                     │ │
+│  │  Planet  │  │   Content Area      │ │
+│  │   3D     │  │   - Title           │ │
+│  │  Visual  │  │   - Subtitle        │ │
+│  │          │  │   - Markdown Body   │ │
+│  │          │  │   - Moon Navigation │ │
+│  └──────────┘  └─────────────────────┘ │
+└─────────────────────────────────────────┘
+   30% width        70% width
+```
+
+#### Left Column - Planet Visualization
+- **Width**: 30% of viewport (max 400px)
+- **Content**: 3D planet rendering with moons in skybox
+- **Planet Size**: Reduced to radius 1.5 units for proportional display
+- **Position**: Left-aligned at (-3, 0, 0) in 3D space
+- **Label**: Planet name displayed below visualization
+
+#### Right Column - Content Area
+- **Width**: 70% of viewport (max 800px)
+- **Content**: 
+  - Header with planet/moon name and subtitle
+  - Scrollable markdown body
+  - Moon navigation buttons (when viewing planet)
+  - Back button (when viewing moon)
+- **Max-width**: 800px to prevent excessive line length
+- **Line length**: Optimal for readability (60-80 characters per line)
+
+### Responsive Behavior
+
+The layout adapts to different screen sizes:
+
+#### Desktop (> 1024px)
+- Two-column layout with 30/70 width split
+- Planet visual: 30% width, max 400px
+- Content: 70% width, max 800px
+- Gap: 2rem between columns
+- Padding: 2rem around container
+
+#### Tablet (≤ 1024px)
+- Two-column layout with 35/65 width split
+- Slightly larger planet visual for better visibility
+- Content max-width: 600px
+- Gap: 1.5rem
+- Padding: 1.5rem
+
+#### Mobile (≤ 768px)
+- **Single column layout** (stacked vertically)
+- Planet visual on top (min-height: 200px)
+- Content below (full width)
+- Gap: 1rem
+- Padding: 1rem
+- Scrollable container for long content
+
+#### Small Mobile (≤ 480px)
+- Reduced padding: 0.75rem
+- Content padding: 1rem
+- Smaller title font: 1.35rem
+- Enhanced touch targets: 52px minimum
+
+### Accessibility Features
+
+#### Touch Targets
+All interactive elements meet WCAG 2.1 Level AA requirements:
+- **Desktop**: 44px minimum height
+- **Tablet**: 48px minimum height
+- **Mobile**: 52px minimum height
+
+#### Color Contrast
+The layout supports both dark and light color schemes:
+
+**Dark Mode (default)**:
+- Content background: rgba(0, 0, 0, 0.85) with white text
+- Contrast ratio: 21:1 (exceeds WCAG AAA)
+- Blue accent: #4A90E2
+
+**Light Mode** (via `prefers-color-scheme: light`):
+- Content background: rgba(255, 255, 255, 0.95) with black text
+- Contrast ratio: 21:1 (exceeds WCAG AAA)
+- Blue accent: #2C5AA0 (darker for better contrast)
+
+#### Keyboard Navigation
+- All buttons are keyboard accessible
+- Clear focus indicators (2px solid #4A90E2)
+- Logical tab order: title → content → buttons
+
+#### Reduced Motion
+Respects `prefers-reduced-motion` setting:
+- Animations set to 0.01ms duration
+- Static positioning (no floating effects)
+- Maintains full functionality
+
+### Edge Cases
+
+#### Planets Without Markdown
+When a planet has no `contentMarkdown`:
+- Fallback message: "# [Planet Name]\n\nNo content available."
+- Layout remains consistent
+- No large empty areas
+- Moon navigation still available
+
+#### Extremely Long Headings
+Long headings wrap naturally:
+- `word-wrap: break-word`
+- `overflow-wrap: break-word`
+- No horizontal overflow
+
+#### Long Lists or Content
+Scrollable content area prevents layout breaking:
+- Content body scrolls independently
+- Fixed header and navigation
+- Smooth scrolling behavior
+- Custom scrollbar styling
+
+#### No Moons
+When a planet has no moons:
+- Moon navigation section hidden
+- Content area remains properly sized
+- No empty space where moons would be
+
+### Customization
+
+#### Adjusting Column Widths
+
+Edit `src/styles/planet.css`:
+
+```css
+/* Wider planet visual */
+.planet-visual-column {
+  flex: 0 0 35%;  /* Instead of 30% */
+  max-width: 450px;  /* Instead of 400px */
+}
+
+/* Narrower content */
+.planet-content-column {
+  max-width: 700px;  /* Instead of 800px */
+}
+```
+
+#### Changing Planet Position
+
+Edit `src/components/UniverseScene.tsx`:
+
+```typescript
+// Further left
+position={new THREE.Vector3(-4, 0, 0)}
+
+// More centered
+position={new THREE.Vector3(-2, 0, 0)}
+
+// Right side
+position={new THREE.Vector3(3, 0, 0)}
+```
+
+#### Modifying Planet Size
+
+Edit `src/components/PlanetSurface.tsx`:
+
+```typescript
+// Larger planet
+<sphereGeometry args={[2, 32, 32]} />  // Instead of 1.5
+
+// Smaller planet
+<sphereGeometry args={[1, 32, 32]} />
+```
+
+#### Adjusting Content Width
+
+Edit `src/styles/planet.css`:
+
+```css
+/* Wider content for more generous reading */
+.planet-content-column {
+  max-width: 900px;  /* Instead of 800px */
+}
+
+/* Narrower for tighter focus */
+.planet-content-column {
+  max-width: 650px;
+}
+```
+
+### Performance Considerations
+
+The planet surface layout is optimized for performance:
+
+#### Minimal Re-renders
+- Content only updates when planet/moon changes
+- 3D scene uses memoized components
+- CSS transitions use GPU acceleration
+
+#### Efficient Scrolling
+- Content body uses native scrolling
+- Smooth scrolling via CSS
+- No JavaScript scroll handlers
+
+#### Mobile Optimization
+- Single column reduces complexity
+- Smaller planet radius (fewer polygons)
+- Conditional rendering based on viewport
+
+### Testing Guidelines
+
+When testing planet page layout:
+
+1. **Desktop**: Verify two-column layout with proper spacing
+2. **Tablet**: Check 35/65 split and touch targets
+3. **Mobile**: Confirm single column stacking
+4. **Long content**: Test scrolling in content body
+5. **No markdown**: Verify fallback message displays
+6. **Dark/light mode**: Check contrast in both schemes
+7. **Keyboard**: Tab through all interactive elements
+8. **Screen reader**: Verify logical reading order
+
+### Content Authoring Guidelines
+
+When creating planet content:
+
+#### Optimal Content Length
+- **Minimum**: 200-300 words for meaningful content
+- **Optimal**: 500-800 words for engaging narratives
+- **Maximum**: No strict limit, content scrolls
+
+#### Formatting Best Practices
+- Use headings (##, ###) to break up sections
+- Keep paragraphs to 3-4 sentences
+- Use lists for key features or facts
+- Include images with descriptive alt text
+- Avoid extremely wide tables (800px max)
+
+#### Line Length Considerations
+The 800px max-width ensures optimal line length:
+- At 16px font: ~80-90 characters per line
+- Meets readability guidelines (45-75 characters)
+- Comfortable reading without head movement
+
 ## Solar System Scale Configuration
 
 ### Overview
