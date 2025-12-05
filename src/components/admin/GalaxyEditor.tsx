@@ -58,22 +58,22 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
     handleChange('id', value);
   };
 
-  const validateGalaxy = (): boolean => {
+  const validateGalaxy = (galaxyToValidate: Galaxy): boolean => {
     const errors: Record<string, string> = {};
     
-    if (!localGalaxy.name || localGalaxy.name.trim().length === 0) {
+    if (!galaxyToValidate.name || galaxyToValidate.name.trim().length === 0) {
       errors.name = 'Name is required';
     }
     
-    if (!localGalaxy.description || localGalaxy.description.trim().length === 0) {
+    if (!galaxyToValidate.description || galaxyToValidate.description.trim().length === 0) {
       errors.description = 'Description is required';
     }
     
-    if (!localGalaxy.theme || localGalaxy.theme.trim().length === 0) {
+    if (!galaxyToValidate.theme || galaxyToValidate.theme.trim().length === 0) {
       errors.theme = 'Theme is required';
     }
     
-    if (!localGalaxy.particleColor || localGalaxy.particleColor.trim().length === 0) {
+    if (!galaxyToValidate.particleColor || galaxyToValidate.particleColor.trim().length === 0) {
       errors.particleColor = 'Particle color is required';
     }
     
@@ -82,14 +82,22 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
   };
 
   const handleSave = () => {
-    if (!validateGalaxy()) {
+    // Ensure galaxy has a valid ID before validation
+    let galaxyToValidate: Galaxy;
+    try {
+      galaxyToValidate = ensureGalaxyId(localGalaxy);
+    } catch (error) {
+      // If ID generation fails (e.g., missing name), validation will catch it
+      galaxyToValidate = localGalaxy;
+    }
+    
+    if (!validateGalaxy(galaxyToValidate)) {
+      // If validation fails, update state to show generated ID to the user
+      setLocalGalaxy(galaxyToValidate);
       return;
     }
     
-    // Ensure galaxy has a valid ID (auto-generated if needed)
-    const updatedGalaxy = ensureGalaxyId(localGalaxy);
-    
-    onUpdate(updatedGalaxy);
+    onUpdate(galaxyToValidate);
   };
 
   const handleAddSolarSystem = () => {

@@ -35,20 +35,27 @@ import {
 /**
  * Generates a unique ID based on name (kebab-case)
  * Handles unicode characters by normalizing them
+ * 
+ * Note: Unicode normalization uses NFD decomposition and removes combining marks.
+ * This handles most Latin-script diacritics (é→e, ñ→n) but has limitations:
+ * - Ligatures (æ, œ) are removed entirely
+ * - Emoji and symbols are removed
+ * - CJK characters (Chinese, Japanese, Korean) are removed
+ * For non-Latin scripts, consider providing explicit IDs.
  */
 export function generateId(name: string): string {
-  if (!name) {
+  const trimmedName = name?.trim();
+  if (!trimmedName) {
     return '';
   }
   
   // Normalize unicode characters (e.g., é -> e, ñ -> n)
-  const normalized = name
+  const normalized = trimmedName
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
   
   return normalized
     .toLowerCase()
-    .trim()
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
@@ -97,8 +104,13 @@ export function getAllIds(universe: Universe, type: 'galaxy' | 'solarSystem' | '
 
 /**
  * Ensures a galaxy has a valid ID, auto-generating from name if needed
+ * @throws Error if galaxy.name is missing or empty
  */
 export function ensureGalaxyId(galaxy: Galaxy): Galaxy {
+  if (!galaxy.name || !galaxy.name.trim()) {
+    throw new Error('Galaxy name is required to generate ID');
+  }
+  
   const id = galaxy.id?.trim();
   return {
     ...galaxy,

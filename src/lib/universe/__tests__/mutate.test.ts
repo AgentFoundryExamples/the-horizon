@@ -166,6 +166,34 @@ describe('Universe Mutations', () => {
       const result = ensureGalaxyId(galaxy);
       expect(result.id).toBe('milky-way');
     });
+
+    it('should throw error when name is missing', () => {
+      const galaxy: Galaxy = {
+        id: '',
+        name: '',
+        description: 'Test',
+        theme: 'blue',
+        particleColor: '#000',
+        stars: [],
+        solarSystems: [],
+      };
+      
+      expect(() => ensureGalaxyId(galaxy)).toThrow('Galaxy name is required to generate ID');
+    });
+
+    it('should throw error when name is whitespace only', () => {
+      const galaxy: Galaxy = {
+        id: '',
+        name: '   ',
+        description: 'Test',
+        theme: 'blue',
+        particleColor: '#000',
+        stars: [],
+        solarSystems: [],
+      };
+      
+      expect(() => ensureGalaxyId(galaxy)).toThrow('Galaxy name is required to generate ID');
+    });
   });
 
   describe('isIdUnique', () => {
