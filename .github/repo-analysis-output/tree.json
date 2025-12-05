@@ -324,6 +324,10 @@
                     },
                     {
                       "type": "file",
+                      "name": "scale-constants.test.ts"
+                    },
+                    {
+                      "type": "file",
                       "name": "types.test.ts"
                     }
                   ]
@@ -339,6 +343,10 @@
                 {
                   "type": "file",
                   "name": "mutate.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "scale-constants.ts"
                 },
                 {
                   "type": "file",

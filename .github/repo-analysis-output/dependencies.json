@@ -202,6 +202,15 @@
       }
     },
     {
+      "id": "src/lib/universe/__tests__/scale-constants.test.ts",
+      "path": "src/lib/universe/__tests__/scale-constants.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/universe/__tests__/types.test.ts",
       "path": "src/lib/universe/__tests__/types.test.ts",
       "type": "file",
@@ -234,6 +243,15 @@
     {
       "id": "src/lib/universe/mutate.ts",
       "path": "src/lib/universe/mutate.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/universe/scale-constants.ts",
+      "path": "src/lib/universe/scale-constants.ts",
       "type": "file",
       "external_dependencies": {
         "stdlib": [],
@@ -309,6 +327,10 @@
     {
       "source": "src/lib/universe/__tests__/mutate.test.ts",
       "target": "src/lib/universe/types.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/scale-constants.test.ts",
+      "target": "src/lib/universe/scale-constants.ts"
     },
     {
       "source": "src/lib/universe/__tests__/types.test.ts",

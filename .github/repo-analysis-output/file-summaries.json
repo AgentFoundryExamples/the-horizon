@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 25,
+  "total_files": 27,
   "files": [
     {
       "schema_version": "2.0",
@@ -270,6 +270,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/universe/__tests__/scale-constants.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 11962,
+        "loc": 233,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/universe/__tests__/types.test.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -321,6 +335,20 @@
       "metrics": {
         "size_bytes": 17905,
         "loc": 470,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/universe/scale-constants.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 4549,
+        "loc": 127,
         "todo_count": 0
       }
     },
