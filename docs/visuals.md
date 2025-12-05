@@ -495,6 +495,245 @@ Potential improvements for the transition indicator:
 4. **Custom transitions**: Different animations for forward vs backward navigation
 5. **Loading states**: Integrate with data loading for async content
 
+## Welcome Message
+
+The welcome message provides context-aware branding when users enter galaxy view, replacing the previous bottom-right disclaimer that appeared globally.
+
+### Purpose
+
+- **Branding**: Establishes "The Horizon" identity at the appropriate narrative moment
+- **Context**: Confirms which galaxy the user is exploring
+- **Guidance**: Provides navigation hints for discovering solar systems
+
+### Behavior
+
+- **Visibility**: Only renders when `focusLevel === 'galaxy'`
+- **Position**: Centered on viewport (non-blocking, pointer-events disabled)
+- **Display Duration**: Remains visible throughout galaxy exploration
+- **Transitions**: Hidden during camera transitions, reappears when settled
+
+### Conditional Rendering
+
+The welcome message displays only when:
+```typescript
+focusLevel === 'galaxy' && focusedGalaxy
+```
+
+This ensures:
+- Universe view has no branding overlay (clean exploration)
+- Solar system and planet views are unobstructed
+- Message appears contextually when entering a galaxy
+
+### Styling
+
+```typescript
+{
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  padding: '2rem',
+  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  border: '2px solid rgba(74, 144, 226, 0.5)',
+  borderRadius: '12px',
+  backdropFilter: 'blur(8px)',
+  pointerEvents: 'none',  // Non-interactive
+  zIndex: 50,  // Below transition indicator (z-index: 1000)
+}
+```
+
+### Responsive Typography
+
+Uses CSS `clamp()` for fluid text scaling:
+
+```typescript
+// Heading
+fontSize: 'clamp(1.5rem, 4vw, 2.5rem)'  // 1.5rem → 2.5rem
+
+// Body text
+fontSize: 'clamp(0.9rem, 2vw, 1.1rem)'  // 0.9rem → 1.1rem
+
+// Instructions
+fontSize: 'clamp(0.8rem, 1.8vw, 1rem)'  // 0.8rem → 1rem
+```
+
+This ensures readability across:
+- **Mobile** (320px+): Smaller text, still legible
+- **Tablet** (768px+): Medium text
+- **Desktop** (1024px+): Full-size text
+
+### Accessibility
+
+#### Screen Reader Support
+
+```html
+<div
+  className="welcome-message"
+  role="complementary"
+  aria-label="Welcome message"
+>
+```
+
+- **`role="complementary"`**: Identifies as supporting content
+- **`aria-label`**: Provides context for screen readers
+- **`pointerEvents: 'none'`**: Doesn't trap focus or block interaction
+
+#### Keyboard Navigation
+
+The message is purely informational:
+- No interactive elements to tab to
+- Doesn't interfere with scene navigation controls
+- Back button remains accessible via keyboard
+
+#### Reduced Motion Support
+
+The welcome message has no animations, making it inherently compatible with `prefers-reduced-motion`. It appears and disappears instantly based on navigation state.
+
+### Customization
+
+#### Change Message Content
+
+Edit `src/components/WelcomeMessage.tsx`:
+
+```typescript
+<h2>Welcome to {customBrandName}</h2>
+<p>Exploring the wonders of {galaxyName}</p>
+<p>Your journey through the cosmos begins here</p>
+```
+
+#### Adjust Positioning
+
+```typescript
+// Move to top-center
+top: '20%',
+left: '50%',
+
+// Move to bottom-left
+top: 'auto',
+bottom: '2rem',
+left: '2rem',
+transform: 'none',
+```
+
+#### Change Colors
+
+```typescript
+// Warmer theme
+backgroundColor: 'rgba(40, 20, 0, 0.8)',
+border: '2px solid rgba(255, 165, 0, 0.5)',
+color: '#FFA500',
+```
+
+#### Adjust Size
+
+```typescript
+// Larger message
+maxWidth: '95%',
+width: '700px',
+padding: '3rem',
+```
+
+### Edge Cases
+
+#### Long Galaxy Names
+
+Long galaxy names wrap naturally:
+```css
+word-wrap: break-word;
+overflow-wrap: break-word;
+```
+
+Galaxy name example:
+- Short: "Andromeda"
+- Long: "Messier 87 Supergiant Elliptical Galaxy" (wraps on mobile)
+
+#### Small Screens (< 480px)
+
+On very small devices:
+- `maxWidth: '90%'` prevents overflow
+- `clamp()` typography ensures minimum readability
+- Padding adjusts for touch-friendly spacing
+
+#### SSR Hydration
+
+Initial server render:
+- `focusLevel === 'universe'` (default state)
+- Welcome message not rendered
+- No hydration mismatch on client load
+
+#### Rapid Navigation
+
+If user clicks through galaxies quickly:
+- Message updates with new galaxy name
+- No flickering (re-renders are efficient)
+- Transition indicator (z-index: 1000) appears above message (z-index: 50)
+
+### Testing
+
+To test the welcome message:
+
+1. **Navigation**: Click a galaxy particle to see the message appear
+2. **Content**: Verify galaxy name displays correctly
+3. **Responsiveness**: Resize browser window to test text scaling
+4. **Accessibility**: Use screen reader to verify `aria-label`
+5. **Non-blocking**: Verify you can still use back button and scene controls
+
+### Performance
+
+The welcome message has minimal performance impact:
+- **Conditional rendering**: Only renders when needed
+- **No animations**: Static display (no RAF loop)
+- **Simple DOM**: Single div with text nodes
+- **No images**: Pure CSS styling
+
+### Integration Points
+
+The welcome message integrates with:
+
+1. **Navigation Store** (`src/lib/store.ts`):
+   - Reads `focusLevel` to determine visibility
+   - Reads `focusedGalaxyId` to find galaxy data
+
+2. **UniverseScene** (`src/components/UniverseScene.tsx`):
+   - Conditionally renders `<WelcomeMessage />` component
+   - Passes `galaxyName` prop from `focusedGalaxy.name`
+
+3. **Scene Hierarchy**:
+   ```
+   <div> (scene container)
+     <Canvas> (3D scene)
+     <WelcomeMessage /> (if galaxy view)
+     <PlanetSurfaceOverlay /> (if planet view)
+   </div>
+   ```
+
+### Migration Notes
+
+This replaces the previous bottom-right info overlay that appeared globally:
+
+**Before** (global disclaimer in `src/app/page.tsx`):
+```typescript
+// Appeared on universe view only
+<div style={{ position: 'absolute', bottom: '1rem', right: '1rem' }}>
+  <h3>The Horizon</h3>
+  <p>Click on galaxies to explore...</p>
+</div>
+```
+
+**After** (contextual welcome in galaxy view):
+```typescript
+// Appears on galaxy view only
+{focusLevel === 'galaxy' && focusedGalaxy && (
+  <WelcomeMessage galaxyName={focusedGalaxy.name} />
+)}
+```
+
+**Benefits of new approach**:
+- Contextual: Appears when exploring a specific galaxy
+- Non-intrusive: Centered, semi-transparent, doesn't cover controls
+- Responsive: Better text scaling and mobile support
+- Accessible: Proper ARIA attributes and semantic HTML
+
 ## Camera System
 
 ### Camera Animations
