@@ -18,7 +18,7 @@
  */
 
 import { cookies } from 'next/headers';
-import { timingSafeEqual, createHash, randomBytes } from 'crypto';
+import { timingSafeEqual, sha256, randomBytes } from './crypto';
 
 const AUTH_COOKIE_NAME = 'admin-auth';
 const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
@@ -63,7 +63,7 @@ function getAdminPassword(): string | undefined {
 /**
  * Validates admin password against environment variable using timing-safe comparison
  */
-export function validatePassword(password: string): boolean {
+export async function validatePassword(password: string): Promise<boolean> {
   const ADMIN_PASSWORD = getAdminPassword();
   
   if (!ADMIN_PASSWORD) {
@@ -78,12 +78,9 @@ export function validatePassword(password: string): boolean {
   
   // Use timing-safe comparison to prevent timing attacks
   try {
-    const passwordBuffer = Buffer.from(password, 'utf8');
-    const adminPasswordBuffer = Buffer.from(ADMIN_PASSWORD, 'utf8');
-    
-    // Hash both passwords to ensure buffers are same length for timingSafeEqual
-    const passwordHash = createHash('sha256').update(passwordBuffer).digest();
-    const adminPasswordHash = createHash('sha256').update(adminPasswordBuffer).digest();
+    // Hash both passwords to ensure consistent length for timingSafeEqual
+    const passwordHash = await sha256(password);
+    const adminPasswordHash = await sha256(ADMIN_PASSWORD);
     
     return timingSafeEqual(passwordHash, adminPasswordHash);
   } catch (error) {
@@ -148,13 +145,11 @@ export async function createSession(): Promise<void> {
   const cookieStore = await cookies();
   
   // Generate a secure random session token
-  const sessionToken = randomBytes(32).toString('hex');
+  const sessionToken = randomBytes(32);
   
   // Sign the token with the session secret
   const secret = getSessionSecret();
-  const signature = createHash('sha256')
-    .update(sessionToken + secret)
-    .digest('hex');
+  const signature = await sha256(sessionToken + secret);
   
   const signedToken = `${sessionToken}.${signature}`;
   
@@ -194,15 +189,11 @@ export async function isAuthenticated(): Promise<boolean> {
   
   const [token, signature] = parts;
   const secret = getSessionSecret();
-  const expectedSignature = createHash('sha256')
-    .update(token + secret)
-    .digest('hex');
+  const expectedSignature = await sha256(token + secret);
   
   // Use timing-safe comparison for signature validation
   try {
-    const signatureBuffer = Buffer.from(signature, 'hex');
-    const expectedSignatureBuffer = Buffer.from(expectedSignature, 'hex');
-    return timingSafeEqual(signatureBuffer, expectedSignatureBuffer);
+    return timingSafeEqual(signature, expectedSignature);
   } catch (error) {
     return false;
   }

@@ -14,7 +14,7 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { createHash, timingSafeEqual } from 'crypto';
+import { sha256, timingSafeEqual } from './lib/crypto';
 
 const AUTH_COOKIE_NAME = 'admin-auth';
 
@@ -41,7 +41,7 @@ function getSessionSecret(): string {
 /**
  * Validates a signed session token
  */
-function validateSessionToken(signedToken: string): boolean {
+async function validateSessionToken(signedToken: string): Promise<boolean> {
   const parts = signedToken.split('.');
   if (parts.length !== 2) {
     return false;
@@ -51,14 +51,10 @@ function validateSessionToken(signedToken: string): boolean {
   
   try {
     const secret = getSessionSecret();
-    const expectedSignature = createHash('sha256')
-      .update(token + secret)
-      .digest('hex');
+    const expectedSignature = await sha256(token + secret);
     
     // Use timing-safe comparison
-    const signatureBuffer = Buffer.from(signature, 'hex');
-    const expectedSignatureBuffer = Buffer.from(expectedSignature, 'hex');
-    return timingSafeEqual(signatureBuffer, expectedSignatureBuffer);
+    return timingSafeEqual(signature, expectedSignature);
   } catch (error) {
     return false;
   }
@@ -68,14 +64,14 @@ function validateSessionToken(signedToken: string): boolean {
  * Middleware to protect admin routes
  * Redirects unauthenticated users to the login page
  */
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Only apply to /admin routes (except login page)
   if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
     const authCookie = request.cookies.get(AUTH_COOKIE_NAME);
 
-    if (!authCookie || !validateSessionToken(authCookie.value)) {
+    if (!authCookie || !(await validateSessionToken(authCookie.value))) {
       // Redirect to login page with return URL
       const url = request.nextUrl.clone();
       url.pathname = '/admin/login';

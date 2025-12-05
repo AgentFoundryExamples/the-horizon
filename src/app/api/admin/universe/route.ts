@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createHash } from 'crypto';
+import { sha256 } from '@/lib/crypto';
 import { isAuthenticated } from '@/lib/auth';
 import { fetchCurrentUniverse, pushUniverseChanges } from '@/lib/github';
 import { parseAndValidateUniverse, serializeUniverse } from '@/lib/universe/mutate';
@@ -47,7 +47,7 @@ export async function GET() {
 
     // Fallback to local file
     const content = JSON.stringify(universeData, null, 2);
-    const hash = createHash('sha256').update(content).digest('hex');
+    const hash = await sha256(content);
 
     return NextResponse.json({
       universe: universeData,
