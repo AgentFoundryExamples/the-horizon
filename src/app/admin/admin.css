@@ -238,6 +238,11 @@ body {
   border-color: var(--admin-primary);
 }
 
+.editor-panel .form-hint {
+  flex-shrink: 0;
+  margin-top: 0.5rem;
+}
+
 .form-hint {
   display: block;
   margin-top: 0.25rem;
@@ -332,6 +337,7 @@ body {
   gap: 1.5rem;
   margin-top: 1rem;
   min-height: 600px;
+  /* Max height accounts for header (60px), stats cards (~200px), controls (~140px) */
   max-height: calc(100vh - 400px);
 }
 
