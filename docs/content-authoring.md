@@ -273,6 +273,93 @@ Before committing changes:
 - [React Markdown Documentation](https://github.com/remarkjs/react-markdown)
 - [Universe Schema Documentation](./universe-schema.md)
 
+## Welcome Message Customization
+
+The Horizon welcome message appears when users navigate to a galaxy view. This provides context-aware branding and navigation hints.
+
+### Location
+
+The welcome message is rendered by the `WelcomeMessage` component in `src/components/WelcomeMessage.tsx` and is displayed only when `focusLevel === 'galaxy'` in the navigation state.
+
+### Customizing Content
+
+To change the welcome message text, edit `src/components/WelcomeMessage.tsx`:
+
+```typescript
+<h2>Welcome to the Horizon</h2>
+<p>You are now exploring {galaxyName}</p>
+<p>Click on solar systems to discover planets and moons</p>
+```
+
+### Styling
+
+The welcome message uses responsive typography with `clamp()` for fluid scaling:
+- Heading: `clamp(1.5rem, 4vw, 2.5rem)` - scales from 1.5rem to 2.5rem
+- Body: `clamp(0.9rem, 2vw, 1.1rem)` - scales from 0.9rem to 1.1rem
+
+To adjust styling:
+```typescript
+// Change colors
+color: '#4A90E2',  // Heading color
+color: '#CCCCCC',  // Body text
+
+// Adjust sizing
+maxWidth: '90%',   // Maximum width (responsive)
+width: '500px',    // Preferred width
+padding: '2rem',   // Internal spacing
+```
+
+### Localization
+
+To support multiple languages, you can:
+
+1. **Add language prop**:
+```typescript
+interface WelcomeMessageProps {
+  galaxyName: string;
+  locale?: string;
+}
+```
+
+2. **Create translation map**:
+```typescript
+const translations = {
+  en: {
+    title: 'Welcome to the Horizon',
+    exploring: 'You are now exploring',
+    instruction: 'Click on solar systems to discover planets and moons'
+  },
+  es: {
+    title: 'Bienvenido al Horizonte',
+    exploring: 'Ahora estás explorando',
+    instruction: 'Haz clic en los sistemas solares para descubrir planetas y lunas'
+  }
+};
+```
+
+3. **Use translations**:
+```typescript
+const t = translations[locale || 'en'];
+<h2>{t.title}</h2>
+```
+
+### Accessibility
+
+The welcome message includes:
+- `role="complementary"` - identifies as supporting content
+- `aria-label="Welcome message"` - screen reader label
+- `pointerEvents: 'none'` - doesn't block interaction with the scene
+- Responsive text sizing for readability on all devices
+
+### Conditional Display
+
+The message only appears when:
+- `focusLevel === 'galaxy'` (not on universe, solar-system, or planet views)
+- A galaxy is currently focused
+- The user is not transitioning between views
+
+This ensures the welcome message provides context without being intrusive.
+
 ## Contributing
 
 When adding new content:

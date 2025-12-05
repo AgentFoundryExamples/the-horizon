@@ -21,31 +21,6 @@ export default async function HomePage() {
     <main style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
       <UniverseScene galaxies={galaxies} />
       <SceneHUD galaxies={galaxies} />
-      
-      {/* Info overlay */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '1rem',
-          right: '1rem',
-          padding: '1rem',
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          border: '1px solid #444',
-          borderRadius: '8px',
-          maxWidth: '300px',
-          zIndex: 100,
-        }}
-      >
-        <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem', color: '#4A90E2' }}>
-          The Horizon
-        </h3>
-        <p style={{ fontSize: '0.8rem', color: '#CCCCCC', marginBottom: '0.5rem' }}>
-          Click on galaxies to explore solar systems and stars.
-        </p>
-        <p style={{ fontSize: '0.75rem', color: '#888' }}>
-          Use mouse to orbit • Scroll to zoom
-        </p>
-      </div>
     </main>
   );
 }
