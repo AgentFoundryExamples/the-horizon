@@ -115,26 +115,60 @@ a {
   }
 }
 
-/* Welcome message responsive styling 
- * Note: !important is used to override inline styles from the component.
- * This is necessary because the component uses inline styles for layout,
- * and media queries need higher specificity to apply responsive adjustments.
- */
+/* Welcome message styling */
+.welcome-message {
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1rem 2rem;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 2px solid rgba(74, 144, 226, 0.5);
+  border-radius: 12px;
+  max-width: 90%;
+  width: auto;
+  text-align: center;
+  z-index: 50;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.welcome-message-title {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  margin-bottom: 0.5rem;
+  color: #4A90E2;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+}
+
+.welcome-message-text {
+  font-size: clamp(0.8rem, 1.8vw, 1rem);
+  color: #CCCCCC;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .welcome-message {
-    padding: 0.75rem 1.5rem !important;
-    top: 1rem !important;
+    padding: 0.75rem 1.5rem;
+    top: 1rem;
   }
   
-  .welcome-message h2 {
-    margin-bottom: 0.25rem !important;
+  .welcome-message-title {
+    margin-bottom: 0.25rem;
   }
 }
 
 @media (max-width: 480px) {
   .welcome-message {
-    padding: 0.5rem 1rem !important;
-    top: 0.5rem !important;
-    max-width: 95% !important;
+    padding: 0.5rem 1rem;
+    top: 0.5rem;
+    max-width: 95%;
+  }
+
+  .welcome-message-title {
+    margin-bottom: 0.125rem;
   }
 }

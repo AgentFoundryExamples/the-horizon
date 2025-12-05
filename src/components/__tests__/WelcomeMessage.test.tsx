@@ -35,13 +35,6 @@ describe('WelcomeMessage', () => {
       expect(message).toHaveAttribute('aria-label', 'Welcome message');
     });
 
-    it('should not trap focus (pointer-events: none)', () => {
-      const { container } = render(<WelcomeMessage />);
-      const message = container.querySelector('.welcome-message');
-      
-      expect(message).toHaveStyle({ pointerEvents: 'none' });
-    });
-
     it('should have semantic heading structure', () => {
       render(<WelcomeMessage />);
       
@@ -50,89 +43,37 @@ describe('WelcomeMessage', () => {
     });
   });
 
-  describe('Styling and Positioning', () => {
-    it('should be positioned at top center of screen', () => {
+  describe('Component Structure', () => {
+    it('should render with correct CSS class names', () => {
       const { container } = render(<WelcomeMessage />);
+      
       const message = container.querySelector('.welcome-message');
+      const title = container.querySelector('.welcome-message-title');
+      const text = container.querySelector('.welcome-message-text');
       
-      expect(message).toHaveStyle({
-        position: 'absolute',
-        top: '2rem',
-        left: '50%',
-      });
+      expect(message).toBeInTheDocument();
+      expect(title).toBeInTheDocument();
+      expect(text).toBeInTheDocument();
     });
 
-    it('should have backdrop blur effect', () => {
+    it('should have welcome-message class for styling', () => {
       const { container } = render(<WelcomeMessage />);
-      const message = container.querySelector('.welcome-message') as HTMLElement;
       
-      expect(message.style.backdropFilter).toBe('blur(8px)');
+      expect(container.querySelector('.welcome-message')).toHaveClass('welcome-message');
     });
 
-    it('should be responsive with maxWidth and width', () => {
+    it('should have welcome-message-title class on heading', () => {
       const { container } = render(<WelcomeMessage />);
-      const message = container.querySelector('.welcome-message');
+      const heading = container.querySelector('h2');
       
-      expect(message).toHaveStyle({
-        maxWidth: '90%',
-        width: 'auto',
-      });
+      expect(heading).toHaveClass('welcome-message-title');
     });
 
-    it('should have appropriate z-index', () => {
-      const { container } = render(<WelcomeMessage />);
-      const message = container.querySelector('.welcome-message');
-      
-      // Should be below transition indicator (z-index: 1000)
-      expect(message).toHaveStyle({ zIndex: '50' });
-    });
-
-    it('should have compact padding', () => {
-      const { container } = render(<WelcomeMessage />);
-      const message = container.querySelector('.welcome-message');
-      
-      expect(message).toHaveStyle({
-        padding: '1rem 2rem',
-      });
-    });
-  });
-
-  describe('Responsive Typography', () => {
-    it('should have responsive heading with proper styling', () => {
-      const { container } = render(<WelcomeMessage />);
-      const heading = container.querySelector('h2') as HTMLElement;
-      
-      // Verify heading exists and has styling
-      expect(heading).toBeInTheDocument();
-      expect(heading).toHaveStyle({
-        color: '#4A90E2',
-        fontWeight: 'bold',
-      });
-    });
-
-    it('should have responsive body text with proper styling', () => {
+    it('should have welcome-message-text class on paragraph', () => {
       const { container } = render(<WelcomeMessage />);
       const paragraph = container.querySelector('p');
       
-      expect(paragraph).toBeInTheDocument();
-      expect(paragraph).toHaveStyle({
-        color: '#CCCCCC',
-      });
-    });
-  });
-
-  describe('Component Structure', () => {
-    it('should render with correct class name', () => {
-      const { container } = render(<WelcomeMessage />);
-      
-      expect(container.querySelector('.welcome-message')).toBeInTheDocument();
-    });
-
-    it('should have centered text alignment', () => {
-      const { container } = render(<WelcomeMessage />);
-      const message = container.querySelector('.welcome-message');
-      
-      expect(message).toHaveStyle({ textAlign: 'center' });
+      expect(paragraph).toHaveClass('welcome-message-text');
     });
 
     it('should render exactly one heading', () => {
@@ -147,6 +88,22 @@ describe('WelcomeMessage', () => {
       const paragraphs = container.querySelectorAll('p');
       
       expect(paragraphs).toHaveLength(1);
+    });
+  });
+
+  describe('Content Validation', () => {
+    it('should have correct heading text content', () => {
+      render(<WelcomeMessage />);
+      
+      const heading = screen.getByRole('heading', { level: 2 });
+      expect(heading).toHaveTextContent('Welcome to the Horizon');
+    });
+
+    it('should have correct paragraph text content', () => {
+      render(<WelcomeMessage />);
+      
+      const paragraph = screen.getByText('Click a galaxy to explore');
+      expect(paragraph.tagName).toBe('P');
     });
   });
 });
