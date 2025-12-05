@@ -65,6 +65,46 @@ describe('Universe Persistence', () => {
       expect(parsed).toEqual(testUniverse);
     });
 
+    it('should reject path traversal attempts', async () => {
+      const maliciousPath = '../../../etc/passwd';
+      const result = await persistUniverseToFile(testUniverse, maliciousPath);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('path traversal not allowed');
+    });
+
+    it('should use unique temp file names', async () => {
+      // First save
+      await persistUniverseToFile(testUniverse, testFile);
+
+      // Verify no .tmp files remain
+      const files = await fs.readdir(testDir);
+      const tmpFiles = files.filter(f => f.includes('.tmp'));
+      expect(tmpFiles.length).toBe(0);
+    });
+
+    it('should clean up temp file on error', async () => {
+      // Mock fs.rename to throw an error
+      const originalRename = fs.rename;
+      const mockRename = jest.fn().mockRejectedValue(new Error('Simulated rename failure'));
+      (fs as any).rename = mockRename;
+
+      try {
+        const result = await persistUniverseToFile(testUniverse, testFile);
+
+        // Should fail
+        expect(result.success).toBe(false);
+
+        // Verify no .tmp files remain (cleanup should have happened)
+        const files = await fs.readdir(testDir);
+        const tmpFiles = files.filter(f => f.includes('.tmp'));
+        expect(tmpFiles.length).toBe(0);
+      } finally {
+        // Restore original fs.rename
+        (fs as any).rename = originalRename;
+      }
+    });
+
     it('should create parent directory if it does not exist', async () => {
       const nestedFile = path.join(testDir, 'nested', 'deep', 'universe.json');
       const result = await persistUniverseToFile(testUniverse, nestedFile);

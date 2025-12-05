@@ -19,6 +19,8 @@ import { fetchCurrentUniverse, pushUniverseChanges } from '@/lib/github';
 import { parseAndValidateUniverse, serializeUniverse } from '@/lib/universe/mutate';
 import { persistUniverseToFile } from '@/lib/universe/persist';
 import universeData from '@/../public/universe/universe.json';
+import fs from 'fs/promises';
+import path from 'path';
 
 /**
  * GET /api/admin/universe
@@ -78,13 +80,37 @@ export async function PATCH(request: NextRequest) {
   }
 
   try {
-    const { universe } = await request.json();
+    const { universe, currentHash } = await request.json();
 
     if (!universe) {
       return NextResponse.json(
         { error: 'Universe data is required' },
         { status: 400 }
       );
+    }
+
+    // Optimistic locking: verify current hash if provided
+    if (currentHash) {
+      const targetPath = process.env.UNIVERSE_DATA_PATH || 'public/universe/universe.json';
+      const absolutePath = path.resolve(process.cwd(), targetPath);
+      
+      try {
+        const currentContent = await fs.readFile(absolutePath, 'utf-8');
+        const actualHash = await sha256(currentContent);
+        
+        if (actualHash !== currentHash) {
+          return NextResponse.json(
+            {
+              error: 'Conflict detected',
+              message: 'The file has been modified by another user. Please refresh and try again.',
+            },
+            { status: 409 }
+          );
+        }
+      } catch (error) {
+        // If file doesn't exist yet, allow the save to proceed
+        console.log('File does not exist yet, proceeding with save');
+      }
     }
 
     // Validate universe data
@@ -100,9 +126,11 @@ export async function PATCH(request: NextRequest) {
     const result = await persistUniverseToFile(universe);
 
     if (result.success) {
-      // Calculate new hash
-      const content = serializeUniverse(universe);
-      const hash = await sha256(content);
+      // Calculate new hash from the persisted file to ensure synchronization
+      const targetPath = process.env.UNIVERSE_DATA_PATH || 'public/universe/universe.json';
+      const absolutePath = path.resolve(process.cwd(), targetPath);
+      const persistedContent = await fs.readFile(absolutePath, 'utf-8');
+      const hash = await sha256(persistedContent);
 
       return NextResponse.json({
         success: true,
@@ -130,7 +158,7 @@ export async function PATCH(request: NextRequest) {
 
 /**
  * POST /api/admin/universe
- * Commits universe changes to GitHub (requires data to already be saved locally)
+ * Commits universe changes to GitHub (reads from persisted file)
  */
 export async function POST(request: NextRequest) {
   const authenticated = await isAuthenticated();
@@ -142,14 +170,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { universe, commitMessage, createPR, currentHash } = await request.json();
-
-    if (!universe) {
-      return NextResponse.json(
-        { error: 'Universe data is required' },
-        { status: 400 }
-      );
-    }
+    const { commitMessage, createPR, currentHash } = await request.json();
 
     if (!commitMessage) {
       return NextResponse.json(
@@ -158,8 +179,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate universe data
-    const { errors } = parseAndValidateUniverse(JSON.stringify(universe));
+    // Read content from the persisted file to prevent data loss
+    const targetPath = process.env.UNIVERSE_DATA_PATH || 'public/universe/universe.json';
+    const absolutePath = path.resolve(process.cwd(), targetPath);
+    
+    let content: string;
+    try {
+      content = await fs.readFile(absolutePath, 'utf-8');
+    } catch (error) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'No saved data found',
+          message: 'Please save your changes to disk before committing',
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate the persisted data
+    const { errors } = parseAndValidateUniverse(content);
     if (errors.length > 0) {
       return NextResponse.json(
         { error: 'Validation failed', validationErrors: errors },
@@ -167,21 +206,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // First persist to local file
-    const persistResult = await persistUniverseToFile(universe);
-    if (!persistResult.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: persistResult.error,
-          message: 'Failed to save universe data to disk before committing',
-        },
-        { status: 500 }
-      );
-    }
-
-    // Then push to GitHub
-    const content = serializeUniverse(universe);
+    // Push to GitHub
     const result = await pushUniverseChanges(
       content,
       commitMessage,

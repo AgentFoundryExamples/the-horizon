@@ -36,6 +36,7 @@ export default function UniverseEditor({
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [commitMessage, setCommitMessage] = useState('');
   const [createPR, setCreatePR] = useState(false);
+  const [localHash, setLocalHash] = useState(currentHash);
 
   const handleSaveToFile = async () => {
     setSaving(true);
@@ -49,6 +50,7 @@ export default function UniverseEditor({
         },
         body: JSON.stringify({
           universe,
+          currentHash: localHash,
         }),
       });
 
@@ -59,7 +61,16 @@ export default function UniverseEditor({
           type: 'success',
           text: 'Changes saved to disk successfully. Remember to commit when ready!',
         });
+        // Update local hash to the new hash from the server
+        if (data.hash) {
+          setLocalHash(data.hash);
+        }
         onUpdate(universe);
+      } else if (response.status === 409) {
+        setMessage({
+          type: 'error',
+          text: data.message || 'Conflict detected. Please refresh the page and try again.',
+        });
       } else {
         setMessage({
           type: 'error',
@@ -92,10 +103,9 @@ export default function UniverseEditor({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          universe,
           commitMessage,
           createPR,
-          currentHash,
+          currentHash: localHash,
         }),
       });
 
