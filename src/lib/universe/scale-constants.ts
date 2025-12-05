@@ -58,7 +58,7 @@ export const PLANET_SCALE = {
 export const ORBITAL_SPACING = {
   /**
    * Base orbital radius (distance from star)
-   * First planet orbit distance
+   * Orbital radius for the innermost planet (index 0)
    */
   BASE_RADIUS: 4.0,
   
