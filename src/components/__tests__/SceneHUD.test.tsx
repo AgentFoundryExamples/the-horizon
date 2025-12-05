@@ -2,7 +2,7 @@
  * Unit tests for SceneHUD component - Transition Indicator
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react';
 import SceneHUD from '../SceneHUD';
 import { useNavigationStore } from '@/lib/store';

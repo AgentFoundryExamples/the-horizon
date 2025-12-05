@@ -57,22 +57,12 @@ a {
 /* Respect prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   .transition-indicator {
-    animation: fadeInReduced 0.01s ease-in;
+    animation-duration: 0.01s;
   }
   
   .transition-indicator-spinner {
     animation: none;
-    /* Show a static indicator instead of spinning */
-    border-top-color: #4A90E2;
-    border-right-color: #4A90E2;
-  }
-
-  @keyframes fadeInReduced {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    /* Show a simple circle instead of spinning */
+    border-color: rgba(74, 144, 226, 0.6);
   }
 }
