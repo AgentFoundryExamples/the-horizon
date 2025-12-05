@@ -79,6 +79,77 @@
   flex-direction: column;
 }
 
+/* Light mode support via prefers-color-scheme */
+@media (prefers-color-scheme: light) {
+  .planet-content-column {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-color: #CCCCCC;
+    color: #000000;
+  }
+
+  .planet-title {
+    color: #2C5AA0;
+  }
+
+  .planet-subtitle {
+    color: #666666;
+  }
+
+  .planet-visual-label {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-color: rgba(74, 144, 226, 0.8);
+    color: #000000;
+  }
+
+  .markdown-content {
+    color: #000000;
+  }
+
+  .markdown-content h1,
+  .markdown-content h2,
+  .markdown-content h3,
+  .markdown-content h4,
+  .markdown-content h5,
+  .markdown-content h6 {
+    color: #000000;
+  }
+
+  .markdown-content p,
+  .markdown-content li {
+    color: #333333;
+  }
+
+  .markdown-content code {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #000000;
+  }
+
+  .markdown-content pre {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .markdown-content blockquote {
+    color: #333333;
+  }
+
+  .moon-nav-button {
+    background-color: #F5F5F5;
+    border-color: #CCCCCC;
+    color: #000000;
+  }
+
+  .moon-nav-button:hover,
+  .moon-nav-button:focus-visible {
+    background-color: #E5E5E5;
+    border-color: #2C5AA0;
+  }
+
+  .planet-content-header,
+  .planet-moons-section {
+    border-color: #CCCCCC;
+  }
+}
+
 .planet-content-header {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
