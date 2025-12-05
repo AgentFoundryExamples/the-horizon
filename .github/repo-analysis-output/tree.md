@@ -47,6 +47,8 @@
     ├── layout.tsx
     └── page.tsx
   ├── components
+    ├── __tests__
+      └── SceneHUD.test.tsx
     ├── admin
       ├── GalaxyEditor.tsx
       ├── PlanetEditor.tsx

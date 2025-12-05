@@ -226,6 +226,16 @@
           "children": [
             {
               "type": "directory",
+              "name": "__tests__",
+              "children": [
+                {
+                  "type": "file",
+                  "name": "SceneHUD.test.tsx"
+                }
+              ]
+            },
+            {
+              "type": "directory",
               "name": "admin",
               "children": [
                 {
