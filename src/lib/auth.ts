@@ -144,14 +144,14 @@ export function clearLoginAttempts(ip: string): void {
 export async function createSession(): Promise<void> {
   const cookieStore = await cookies();
   
-  // Generate a secure random session token
-  const sessionToken = randomBytes(32);
+  // Generate a secure random session token (hex string)
+  const sessionTokenHex = randomBytes(32);
   
   // Sign the token with the session secret
   const secret = getSessionSecret();
-  const signature = await sha256(sessionToken + secret);
+  const signature = await sha256(sessionTokenHex + secret);
   
-  const signedToken = `${sessionToken}.${signature}`;
+  const signedToken = `${sessionTokenHex}.${signature}`;
   
   cookieStore.set(AUTH_COOKIE_NAME, signedToken, {
     httpOnly: true,

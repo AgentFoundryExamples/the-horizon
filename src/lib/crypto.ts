@@ -17,18 +17,29 @@
  * These functions work in both Edge Runtime and Node.js environments
  */
 
+// Cache the crypto instance to avoid repeated lookups
+let cachedCrypto: Crypto | undefined;
+
 // Get crypto from global scope (works in browser, Edge, and Node with polyfill)
 const getCrypto = (): Crypto => {
+  if (cachedCrypto) {
+    return cachedCrypto;
+  }
+  
+  let cryptoInstance: Crypto;
+  
   if (typeof crypto !== 'undefined') {
-    return crypto;
+    cryptoInstance = crypto;
+  } else if (typeof globalThis !== 'undefined' && globalThis.crypto) {
+    cryptoInstance = globalThis.crypto;
+  } else if (typeof global !== 'undefined' && (global as any).crypto) {
+    cryptoInstance = (global as any).crypto;
+  } else {
+    throw new Error('Web Crypto API is not available');
   }
-  if (typeof globalThis !== 'undefined' && globalThis.crypto) {
-    return globalThis.crypto;
-  }
-  if (typeof global !== 'undefined' && (global as any).crypto) {
-    return (global as any).crypto;
-  }
-  throw new Error('Web Crypto API is not available');
+  
+  cachedCrypto = cryptoInstance;
+  return cryptoInstance;
 };
 
 /**
@@ -70,16 +81,22 @@ export function timingSafeEqual(a: string, b: string): boolean {
   const bufferA = encoder.encode(a);
   const bufferB = encoder.encode(b);
   
-  // If lengths differ, comparison fails (but still compare all bytes for timing safety)
-  if (bufferA.length !== bufferB.length) {
-    return false;
-  }
+  // To maintain constant time, we need to compare all bytes
+  // even if lengths differ. We'll pad the shorter one with zeros.
+  const maxLength = Math.max(bufferA.length, bufferB.length);
   
   // XOR all bytes and accumulate the result
   // This ensures the comparison takes the same time regardless of where differences occur
   let result = 0;
-  for (let i = 0; i < bufferA.length; i++) {
-    result |= bufferA[i] ^ bufferB[i];
+  
+  // Add length difference to result (will be non-zero if lengths differ)
+  result |= bufferA.length ^ bufferB.length;
+  
+  for (let i = 0; i < maxLength; i++) {
+    // Use 0 for out-of-bounds access to maintain constant time
+    const byteA = i < bufferA.length ? bufferA[i] : 0;
+    const byteB = i < bufferB.length ? bufferB[i] : 0;
+    result |= byteA ^ byteB;
   }
   
   return result === 0;
