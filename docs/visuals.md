@@ -45,11 +45,12 @@ Located in `ORBITAL_SPACING`:
 
 ```typescript
 ORBITAL_SPACING = {
-  BASE_RADIUS: 4.0,        // First planet's orbital radius
-  RADIUS_INCREMENT: 3.0,    // Spacing between orbits
-  MIN_SEPARATION: 2.0,      // Minimum safe distance
-  MAX_ECCENTRICITY: 0.05,   // Orbit ellipticity (0 = circle)
-  MAX_INCLINATION: 0.15,    // Orbital tilt in radians
+  BASE_RADIUS: 4.0,                    // First planet's orbital radius
+  RADIUS_INCREMENT: 3.0,               // Spacing between orbits
+  MIN_SEPARATION: 2.0,                 // Minimum safe distance
+  MAX_ECCENTRICITY: 0.05,              // Orbit ellipticity (0 = circle)
+  MAX_INCLINATION: 0.15,               // Orbital tilt in radians
+  ADAPTIVE_SPACING_THRESHOLD: 8,       // Planet count for adaptive spacing
 }
 ```
 
@@ -58,18 +59,19 @@ ORBITAL_SPACING = {
 - `RADIUS_INCREMENT` of 3.0 ensures planets don't overlap even with maximum sizes
 - `MAX_ECCENTRICITY` of 0.05 keeps orbits nearly circular for predictable spacing (was 0.1 for more elliptical orbits)
 - `MAX_INCLINATION` of 0.15 radians (~8.6 degrees) adds 3D depth without causing z-fighting
+- `ADAPTIVE_SPACING_THRESHOLD` of 8 planets triggers proportional spacing increase for larger systems
 
 **Adaptive Spacing for Many Planets:**
 
-The `calculateSafeSpacing()` function automatically increases spacing when you have 8+ planets:
+The `calculateSafeSpacing()` function automatically increases spacing when you have more than the threshold:
 ```typescript
 function calculateSafeSpacing(planetCount: number): number {
-  const densityFactor = Math.max(1.0, planetCount / 8);
+  const densityFactor = Math.max(1.0, planetCount / ADAPTIVE_SPACING_THRESHOLD);
   return RADIUS_INCREMENT * densityFactor;
 }
 ```
 
-For example:
+For example (with threshold = 8):
 - 4 planets: uses standard 3.0 spacing
 - 8 planets: uses 3.0 spacing (threshold)
 - 12 planets: uses 4.5 spacing (1.5× standard)
@@ -81,6 +83,11 @@ For tighter orbits (more compact view):
 ```typescript
 BASE_RADIUS: 3.0,       // Instead of 4.0
 RADIUS_INCREMENT: 2.5,   // Instead of 3.0
+```
+
+To adjust when adaptive spacing kicks in:
+```typescript
+ADAPTIVE_SPACING_THRESHOLD: 10,  // Instead of 8
 ```
 
 For more elliptical orbits (more dramatic):

@@ -165,13 +165,13 @@ describe('Scale Constants', () => {
       expect(spacing).toBe(ORBITAL_SPACING.RADIUS_INCREMENT);
     });
 
-    it('should return standard spacing at threshold (8 planets)', () => {
-      const spacing = calculateSafeSpacing(8);
+    it('should return standard spacing at threshold', () => {
+      const spacing = calculateSafeSpacing(ORBITAL_SPACING.ADAPTIVE_SPACING_THRESHOLD);
       expect(spacing).toBe(ORBITAL_SPACING.RADIUS_INCREMENT);
     });
 
     it('should increase spacing for many planets', () => {
-      const spacing8 = calculateSafeSpacing(8);
+      const spacing8 = calculateSafeSpacing(ORBITAL_SPACING.ADAPTIVE_SPACING_THRESHOLD);
       const spacing12 = calculateSafeSpacing(12);
       const spacing16 = calculateSafeSpacing(16);
       
@@ -180,10 +180,11 @@ describe('Scale Constants', () => {
     });
 
     it('should scale proportionally with planet count', () => {
-      const spacing8 = calculateSafeSpacing(8);
-      const spacing16 = calculateSafeSpacing(16);
+      const threshold = ORBITAL_SPACING.ADAPTIVE_SPACING_THRESHOLD;
+      const spacing8 = calculateSafeSpacing(threshold);
+      const spacing16 = calculateSafeSpacing(threshold * 2);
       
-      // 16 planets should have 2× spacing of 8 planets
+      // Double the planet count should give 2× spacing
       expect(spacing16).toBeCloseTo(spacing8 * 2, 2);
     });
 

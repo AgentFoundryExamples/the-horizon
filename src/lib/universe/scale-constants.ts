@@ -85,6 +85,12 @@ export const ORBITAL_SPACING = {
    * Creates 3D depth while avoiding z-fighting
    */
   MAX_INCLINATION: 0.15,
+  
+  /**
+   * Planet count threshold for adaptive spacing
+   * Systems with more planets get increased spacing to prevent crowding
+   */
+  ADAPTIVE_SPACING_THRESHOLD: 8,
 } as const;
 
 /**
@@ -136,6 +142,6 @@ export function calculateSafeSpacing(planetCount: number): number {
   if (planetCount <= 1) return ORBITAL_SPACING.RADIUS_INCREMENT;
   
   // For many planets, increase spacing to prevent crowding
-  const densityFactor = Math.max(1.0, planetCount / 8);
+  const densityFactor = Math.max(1.0, planetCount / ORBITAL_SPACING.ADAPTIVE_SPACING_THRESHOLD);
   return ORBITAL_SPACING.RADIUS_INCREMENT * densityFactor;
 }
