@@ -336,9 +336,9 @@ body {
   display: flex;
   gap: 1.5rem;
   margin-top: 1rem;
-  min-height: 600px;
-  /* Max height accounts for header (60px), stats cards (~200px), controls (~140px) */
-  max-height: calc(100vh - 400px);
+  /* Use clamp to ensure height is responsive but within reasonable bounds */
+  /* Min: 600px for usability, Preferred: viewport-relative, Max: 1200px to prevent excessive height */
+  height: clamp(600px, calc(100vh - 400px), 1200px);
 }
 
 .editor-panel {
@@ -427,12 +427,14 @@ body {
 
   .editor-container {
     flex-direction: column;
-    min-height: auto;
-    max-height: none;
+    /* On mobile, use auto height to prevent forcing page scroll */
+    height: auto;
+    min-height: min(400px, 50vh);
   }
 
   .editor-panel {
-    min-height: 400px;
+    /* Use viewport-relative minimum to work better on small devices */
+    min-height: min(300px, 40vh);
   }
 
   .admin-grid {
