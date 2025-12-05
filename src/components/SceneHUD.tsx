@@ -14,6 +14,8 @@ interface SceneHUDProps {
 }
 
 // Helper function to determine transition message based on focus level
+// Note: During transitions, focusLevel represents the destination (not the origin)
+// because the store sets focusLevel and isTransitioning together
 const getTransitionMessage = (focusLevel: FocusLevel): string => {
   if (focusLevel === 'galaxy') return 'Warping to galaxy...';
   if (focusLevel === 'solar-system') return 'Traveling to system...';

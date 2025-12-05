@@ -388,18 +388,19 @@ The transition indicator includes comprehensive accessibility features:
 
 Users with `prefers-reduced-motion` enabled experience:
 
-- **Instant fade in** (0.01s instead of 0.2s)
+- **No entrance animation** (instant appearance)
 - **Static spinner** (no rotation animation)
-- **No scale transform** on appearance
+- **Uniform border** for static visual indicator
 
 ```css
 @media (prefers-reduced-motion: reduce) {
   .transition-indicator {
-    animation: fadeInReduced 0.01s ease-in;
+    animation: none;
   }
   
   .transition-indicator-spinner {
     animation: none;
+    border-color: rgba(74, 144, 226, 0.6);
   }
 }
 ```

@@ -57,7 +57,7 @@ a {
 /* Respect prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   .transition-indicator {
-    animation-duration: 0.01s;
+    animation: none;
   }
   
   .transition-indicator-spinner {
