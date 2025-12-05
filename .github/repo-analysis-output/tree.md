@@ -48,7 +48,9 @@
     └── page.tsx
   ├── components
     ├── __tests__
-      └── SceneHUD.test.tsx
+      ├── SceneHUD.test.tsx
+      ├── UniverseScene.test.tsx
+      └── WelcomeMessage.test.tsx
     ├── admin
       ├── GalaxyEditor.tsx
       ├── PlanetEditor.tsx
@@ -59,7 +61,8 @@
     ├── PlanetSurface.tsx
     ├── SceneHUD.tsx
     ├── SolarSystemView.tsx
-    └── UniverseScene.tsx
+    ├── UniverseScene.tsx
+    └── WelcomeMessage.tsx
   ├── lib
     ├── __tests__
       ├── auth.test.ts

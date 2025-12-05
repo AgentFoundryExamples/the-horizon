@@ -231,6 +231,14 @@
                 {
                   "type": "file",
                   "name": "SceneHUD.test.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "UniverseScene.test.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "WelcomeMessage.test.tsx"
                 }
               ]
             },
@@ -279,6 +287,10 @@
             {
               "type": "file",
               "name": "UniverseScene.tsx"
+            },
+            {
+              "type": "file",
+              "name": "WelcomeMessage.tsx"
             }
           ]
         },
