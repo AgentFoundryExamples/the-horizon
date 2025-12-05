@@ -25,12 +25,16 @@ import * as THREE from 'three';
 import type { Planet, Moon, SolarSystem } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
 import MarkdownContent from './MarkdownContent';
+import { PLANET_SCALE } from '@/lib/universe/scale-constants';
 
 interface PlanetSurfaceProps {
   planet: Planet;
   solarSystem: SolarSystem;
   position: THREE.Vector3;
 }
+
+// Moon size relative to minimum planet size
+const MOON_SIZE = PLANET_SCALE.MIN_SIZE * 0.4;
 
 /**
  * Moon sphere in the skybox
@@ -53,7 +57,7 @@ function MoonSphere({ moon, index, onClick }: { moon: Moon; index: number; onCli
 
   return (
     <mesh ref={meshRef} onClick={onClick}>
-      <sphereGeometry args={[0.3, 16, 16]} />
+      <sphereGeometry args={[MOON_SIZE, 16, 16]} />
       <meshStandardMaterial color="#AAAAAA" />
     </mesh>
   );

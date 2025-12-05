@@ -161,9 +161,30 @@
   }
 }
 
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .moon-nav-button,
+  .back-to-planet-button {
+    /* Ensure larger touch targets on mobile */
+    min-height: 48px;
+    padding: 0.875rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .moon-nav-button,
+  .back-to-planet-button {
+    /* Even larger touch targets on small mobile devices */
+    min-height: 52px;
+    padding: 1rem;
+  }
+}
+
 /* Moon navigation button styles */
 .moon-nav-button {
   padding: 0.75rem;
+  min-height: 44px; /* WCAG 2.1 minimum touch target */
   background-color: #1A1A1A;
   border: 1px solid #444;
   border-radius: 4px;
@@ -172,6 +193,8 @@
   text-align: left;
   transition: all 0.2s;
   width: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .moon-nav-button:hover,
@@ -183,6 +206,7 @@
 .back-to-planet-button {
   margin-top: 1rem;
   padding: 0.75rem;
+  min-height: 44px; /* WCAG 2.1 minimum touch target */
   background-color: #4A90E2;
   border: none;
   border-radius: 4px;
@@ -190,6 +214,9 @@
   cursor: pointer;
   width: 100%;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .back-to-planet-button:hover,

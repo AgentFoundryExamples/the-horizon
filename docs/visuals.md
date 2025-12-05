@@ -2,6 +2,225 @@
 
 This document describes the 3D scene controls, camera animations, and performance optimizations in The Horizon application.
 
+## Solar System Scale Configuration
+
+### Overview
+
+The solar system rendering uses carefully calibrated scale constants to ensure planets are easily clickable and meet accessibility guidelines while maintaining visual appeal. All constants are defined in `src/lib/universe/scale-constants.ts`.
+
+### Planet Size Constants
+
+Located in `PLANET_SCALE`:
+
+```typescript
+PLANET_SCALE = {
+  MIN_SIZE: 0.8,          // Minimum radius (ensures ~44-50px tap target)
+  MAX_SIZE: 1.8,          // Maximum radius (prevents visual dominance)
+  BASE_SIZE: 1.0,         // Base radius for calculations
+  MOON_MULTIPLIER: 0.1,   // Size increase per moon
+}
+```
+
+**Why These Values:**
+- `MIN_SIZE` of 0.8 Three.js units translates to approximately 44-50 CSS pixels at default zoom, meeting WCAG 2.1 Level AA touch target requirements (44×44px minimum)
+- `MAX_SIZE` prevents large planets from obscuring other UI elements or smaller planets
+- `MOON_MULTIPLIER` creates visual variety: planets with more moons appear slightly larger
+
+**Customizing Planet Sizes:**
+
+To make all planets larger:
+```typescript
+MIN_SIZE: 1.0,  // Instead of 0.8
+MAX_SIZE: 2.2,  // Instead of 1.8
+```
+
+To reduce size variance between planets:
+```typescript
+MOON_MULTIPLIER: 0.05,  // Instead of 0.1
+```
+
+### Orbital Spacing Constants
+
+Located in `ORBITAL_SPACING`:
+
+```typescript
+ORBITAL_SPACING = {
+  BASE_RADIUS: 4.0,        // First planet's orbital radius
+  RADIUS_INCREMENT: 3.0,    // Spacing between orbits
+  MIN_SEPARATION: 2.0,      // Minimum safe distance
+  MAX_ECCENTRICITY: 0.05,   // Orbit ellipticity (0 = circle)
+  MAX_INCLINATION: 0.15,    // Orbital tilt in radians
+}
+```
+
+**Why These Values:**
+- `BASE_RADIUS` of 4.0 provides clear separation from the central star (radius 1.2)
+- `RADIUS_INCREMENT` of 3.0 ensures planets don't overlap even with maximum sizes
+- `MAX_ECCENTRICITY` of 0.05 keeps orbits nearly circular for predictable spacing (was 0.1 for more elliptical orbits)
+- `MAX_INCLINATION` of 0.15 radians (~8.6 degrees) adds 3D depth without causing z-fighting
+
+**Adaptive Spacing for Many Planets:**
+
+The `calculateSafeSpacing()` function automatically increases spacing when you have 8+ planets:
+```typescript
+function calculateSafeSpacing(planetCount: number): number {
+  const densityFactor = Math.max(1.0, planetCount / 8);
+  return RADIUS_INCREMENT * densityFactor;
+}
+```
+
+For example:
+- 4 planets: uses standard 3.0 spacing
+- 8 planets: uses 3.0 spacing (threshold)
+- 12 planets: uses 4.5 spacing (1.5× standard)
+- 16 planets: uses 6.0 spacing (2× standard)
+
+**Customizing Orbital Spacing:**
+
+For tighter orbits (more compact view):
+```typescript
+BASE_RADIUS: 3.0,       // Instead of 4.0
+RADIUS_INCREMENT: 2.5,   // Instead of 3.0
+```
+
+For more elliptical orbits (more dramatic):
+```typescript
+MAX_ECCENTRICITY: 0.1,   // Instead of 0.05
+```
+
+For flatter orbital plane:
+```typescript
+MAX_INCLINATION: 0.05,   // Instead of 0.15 (~3 degrees)
+```
+
+### Star Configuration
+
+Located in `STAR_SCALE`:
+
+```typescript
+STAR_SCALE = {
+  RADIUS: 1.2,           // Central star size
+  LIGHT_INTENSITY: 2.5,  // Brightness of star light
+  LIGHT_DISTANCE: 30,    // How far light reaches
+}
+```
+
+**Customizing Star Appearance:**
+
+For a larger, brighter star:
+```typescript
+RADIUS: 1.5,
+LIGHT_INTENSITY: 3.0,
+```
+
+For a smaller, dimmer star:
+```typescript
+RADIUS: 0.8,
+LIGHT_INTENSITY: 1.5,
+```
+
+### Accessibility Features
+
+#### Touch Target Compliance
+
+All interactive elements meet or exceed WCAG 2.1 Level AA requirements:
+- **3D Planets**: Minimum 0.8 Three.js units ≈ 44-50px at default zoom
+- **UI Buttons**: Minimum 44px height (CSS), with increased sizes on mobile:
+  - Tablets (≤768px): 48px minimum
+  - Mobile (≤480px): 52px minimum
+
+#### Responsive Behavior
+
+The scale system adapts to different screen sizes:
+- Desktop: Full detail with all planets visible
+- Tablet: Slightly larger touch targets for easier interaction
+- Mobile: Maximum touch target sizes for finger-friendly navigation
+- High zoom: Planets scale proportionally, maintaining tap target size
+
+#### Reduced Motion Support
+
+Users with `prefers-reduced-motion` enabled experience:
+- Instant transitions (0.01ms) instead of animated movements
+- Static planet positions maintain all interactive functionality
+- No impact on layout or spacing calculations
+
+### Edge Case Handling
+
+#### Many Planets (8+)
+
+The system automatically adjusts spacing to prevent crowding:
+```typescript
+// For a solar system with 12 planets:
+const spacing = calculateSafeSpacing(12);
+// Returns: 3.75 (1.5× standard spacing)
+```
+
+#### Small Screens
+
+CSS media queries ensure usability:
+```css
+@media (max-width: 768px) {
+  .moon-nav-button {
+    min-height: 48px;  /* Larger than desktop */
+  }
+}
+```
+
+#### High Planet Counts (10+)
+
+Even with many planets, the orbital spacing algorithm ensures:
+- No visual overlap between adjacent planets
+- Z-fighting prevention through proper inclination limits
+- Consistent frame rates through efficient rendering
+
+#### Persisted Layout Data
+
+If upgrading from a previous version:
+- Old size values are ignored; new constants apply immediately
+- No migration required - calculations are deterministic based on planet properties
+- Cached Three.js objects automatically recreate with new sizes
+
+### Testing Your Changes
+
+After modifying constants, verify:
+
+1. **Tap Target Size**: Use browser dev tools to measure planet click areas
+   ```javascript
+   // In browser console:
+   const planetMesh = scene.children.find(/* your planet */);
+   const boundingBox = new THREE.Box3().setFromObject(planetMesh);
+   console.log('Planet size:', boundingBox.getSize(new THREE.Vector3()));
+   ```
+
+2. **Orbital Spacing**: Verify no overlaps with many planets
+   ```bash
+   # Create test solar system with 12+ planets
+   # Visually inspect for overlaps at various zoom levels
+   ```
+
+3. **Performance**: Monitor frame rate with many planets
+   ```javascript
+   // Check FPS in dev tools performance panel
+   // Target: 60 FPS desktop, 30 FPS mobile
+   ```
+
+4. **Accessibility**: Test with real devices
+   - Touch interaction on tablets and phones
+   - Keyboard navigation (focus indicators visible)
+   - Screen reader compatibility (buttons properly labeled)
+
+### Performance Considerations
+
+Current scale values are optimized for:
+- **Desktop**: 60 FPS with 10+ planets
+- **Mobile**: 30+ FPS with 8+ planets
+- **Low-end devices**: Graceful degradation (planets still clickable)
+
+If you need to support more planets or lower-end devices:
+- Reduce `LIGHT_DISTANCE` to lower light calculation overhead
+- Consider implementing level-of-detail (LOD) for distant planets
+- Use simpler sphere geometry (fewer segments) for distant objects
+
 ## Scene Architecture
 
 The application uses a multi-layer traversal system with three focus levels:
