@@ -226,6 +226,19 @@ body {
   color: var(--admin-text-muted);
 }
 
+.form-error {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--admin-error);
+}
+
+.form-group input.error,
+.form-group textarea.error,
+.form-group select.error {
+  border-color: var(--admin-error);
+}
+
 .alert {
   padding: 1rem;
   border-radius: 4px;

@@ -16,7 +16,7 @@
 
 import { useState } from 'react';
 import { Galaxy, SolarSystem, Star } from '@/lib/universe/types';
-import { generateId } from '@/lib/universe/mutate';
+import { generateId, ensureGalaxyId } from '@/lib/universe/mutate';
 import SolarSystemEditor from './SolarSystemEditor';
 
 interface GalaxyEditorProps {
@@ -30,14 +30,75 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
   const [editingSystem, setEditingSystem] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'info' | 'systems' | 'stars'>('info');
   const [showAnimationPreview, setShowAnimationPreview] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [idManuallyEdited, setIdManuallyEdited] = useState(Boolean(galaxy.id?.trim()));
 
   const handleChange = (field: keyof Galaxy, value: unknown) => {
     const updated = { ...localGalaxy, [field]: value };
+    
+    // Auto-update ID when name changes, but only if ID hasn't been manually edited
+    if (field === 'name' && !idManuallyEdited && typeof value === 'string') {
+      updated.id = generateId(value);
+    }
+    
     setLocalGalaxy(updated);
+    
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[field]) {
+      setValidationErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
+  
+  const handleIdChange = (value: string) => {
+    setIdManuallyEdited(true);
+    handleChange('id', value);
+  };
+
+  const validateGalaxy = (galaxyToValidate: Galaxy): boolean => {
+    const errors: Record<string, string> = {};
+    
+    if (!galaxyToValidate.name || galaxyToValidate.name.trim().length === 0) {
+      errors.name = 'Name is required';
+    }
+    
+    if (!galaxyToValidate.description || galaxyToValidate.description.trim().length === 0) {
+      errors.description = 'Description is required';
+    }
+    
+    if (!galaxyToValidate.theme || galaxyToValidate.theme.trim().length === 0) {
+      errors.theme = 'Theme is required';
+    }
+    
+    if (!galaxyToValidate.particleColor || galaxyToValidate.particleColor.trim().length === 0) {
+      errors.particleColor = 'Particle color is required';
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSave = () => {
-    onUpdate(localGalaxy);
+    // Ensure galaxy has a valid ID before validation
+    let galaxyToValidate: Galaxy;
+    try {
+      galaxyToValidate = ensureGalaxyId(localGalaxy);
+    } catch (error) {
+      // If ID generation fails due to missing name, proceed with validation
+      // which will display the appropriate error message
+      galaxyToValidate = localGalaxy;
+    }
+    
+    if (!validateGalaxy(galaxyToValidate)) {
+      // If validation fails, update state to show generated ID to the user
+      setLocalGalaxy(galaxyToValidate);
+      return;
+    }
+    
+    onUpdate(galaxyToValidate);
   };
 
   const handleAddSolarSystem = () => {
@@ -156,49 +217,66 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
               type="text"
               id="galaxy-id"
               value={localGalaxy.id}
-              onChange={(e) => handleChange('id', e.target.value)}
+              onChange={(e) => handleIdChange(e.target.value)}
             />
-            <span className="form-hint">Unique identifier (kebab-case)</span>
+            <span className="form-hint">Unique identifier (kebab-case). Auto-generated from name if left empty.</span>
           </div>
 
           <div className="form-group">
-            <label htmlFor="galaxy-name">Name</label>
+            <label htmlFor="galaxy-name">Name *</label>
             <input
               type="text"
               id="galaxy-name"
               value={localGalaxy.name}
               onChange={(e) => handleChange('name', e.target.value)}
+              className={validationErrors.name ? 'error' : ''}
+              required
             />
+            {validationErrors.name && (
+              <span className="form-error">{validationErrors.name}</span>
+            )}
           </div>
 
           <div className="form-group">
-            <label htmlFor="galaxy-description">Description</label>
+            <label htmlFor="galaxy-description">Description *</label>
             <textarea
               id="galaxy-description"
               value={localGalaxy.description}
               onChange={(e) => handleChange('description', e.target.value)}
               rows={3}
+              className={validationErrors.description ? 'error' : ''}
+              required
             />
+            {validationErrors.description && (
+              <span className="form-error">{validationErrors.description}</span>
+            )}
           </div>
 
           <div className="form-group">
-            <label htmlFor="galaxy-theme">Theme</label>
+            <label htmlFor="galaxy-theme">Theme *</label>
             <input
               type="text"
               id="galaxy-theme"
               value={localGalaxy.theme}
               onChange={(e) => handleChange('theme', e.target.value)}
               placeholder="e.g., blue-white, purple-white"
+              className={validationErrors.theme ? 'error' : ''}
+              required
             />
+            {validationErrors.theme && (
+              <span className="form-error">{validationErrors.theme}</span>
+            )}
           </div>
 
           <div className="form-group">
-            <label htmlFor="galaxy-color">Particle Color</label>
+            <label htmlFor="galaxy-color">Particle Color *</label>
             <input
               type="color"
               id="galaxy-color"
               value={localGalaxy.particleColor}
               onChange={(e) => handleChange('particleColor', e.target.value)}
+              className={validationErrors.particleColor ? 'error' : ''}
+              required
             />
             <input
               type="text"
@@ -206,7 +284,12 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
               onChange={(e) => handleChange('particleColor', e.target.value)}
               placeholder="#4A90E2"
               style={{ marginTop: '0.5rem' }}
+              className={validationErrors.particleColor ? 'error' : ''}
+              required
             />
+            {validationErrors.particleColor && (
+              <span className="form-error">{validationErrors.particleColor}</span>
+            )}
           </div>
 
           <div className="form-group">

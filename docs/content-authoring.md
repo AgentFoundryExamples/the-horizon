@@ -40,9 +40,54 @@ This workflow provides several benefits:
 The admin interface validates all changes before saving:
 
 - **Validation Errors**: If your universe data is invalid (e.g., missing required fields), you'll see an error message
+  - Required fields are marked with an asterisk (*) in the form
+  - Inline validation messages appear below fields that fail validation
+  - Fix all validation errors before the form can be submitted
 - **Disk Write Failures**: If the server can't write to disk (e.g., out of space), you'll be notified and your in-memory edits preserved
 - **Concurrent Edits**: If another admin modifies the same data, you'll be warned about conflicts and asked to refresh
 - **Authentication**: Unauthenticated or expired sessions will be rejected with clear messaging
+
+## Adding Galaxies
+
+When creating a new galaxy through the admin interface:
+
+1. **Click "Add Galaxy"** in the Universe Dashboard
+2. **Fill in Required Fields** (marked with *):
+   - **Name**: Display name for the galaxy (e.g., "Andromeda Galaxy")
+   - **Description**: Brief description of the galaxy (required, cannot be empty)
+   - **Theme**: Visual theme identifier (e.g., "blue-white", "purple-white")
+   - **Particle Color**: Hex color code for particle effects (e.g., "#4A90E2")
+
+3. **Optional Fields**:
+   - **ID**: Unique identifier (kebab-case). If left empty, it will be auto-generated from the name
+     - Example: "Andromeda Galaxy" → "andromeda-galaxy"
+     - Unicode names are normalized: "Café Galaxy" → "cafe-galaxy"
+
+4. **Validation Feedback**:
+   - Fields with errors show a red border and error message
+   - Fix all errors before clicking "Save Changes"
+   - The form prevents submission until all required fields are valid
+
+5. **Save Process**:
+   - Click "Save Changes" to save the galaxy to memory
+   - Click "💾 Save to Disk" to persist changes locally
+   - Click "✓ Commit to GitHub" when ready to publish
+
+### Galaxy Validation Rules
+
+- **Name**: Cannot be empty or whitespace-only
+- **Description**: Cannot be empty or whitespace-only
+- **Theme**: Cannot be empty or whitespace-only
+- **Particle Color**: Cannot be empty; should be a valid hex color code
+- **ID Uniqueness**: Galaxy IDs must be unique across all galaxies
+- **Duplicate Names**: While duplicate names are allowed, they may cause confusion and are not recommended
+
+### Edge Cases
+
+- **Duplicate galaxy names**: The system will create unique IDs but won't prevent duplicate names. Consider using unique names for clarity.
+- **Names with spaces or unicode**: These are handled correctly during ID generation (spaces → hyphens, unicode → normalized ASCII)
+- **Empty fields**: Required fields cannot be empty; validation will prevent saving until all fields are filled
+
 
 ## Overview
 
