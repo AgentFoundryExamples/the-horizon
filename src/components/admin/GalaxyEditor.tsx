@@ -31,9 +31,16 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
   const [activeTab, setActiveTab] = useState<'info' | 'systems' | 'stars'>('info');
   const [showAnimationPreview, setShowAnimationPreview] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [idManuallyEdited, setIdManuallyEdited] = useState(!!galaxy.id && galaxy.id.trim().length > 0);
 
   const handleChange = (field: keyof Galaxy, value: unknown) => {
     const updated = { ...localGalaxy, [field]: value };
+    
+    // Auto-update ID when name changes, but only if ID hasn't been manually edited
+    if (field === 'name' && !idManuallyEdited && typeof value === 'string') {
+      updated.id = generateId(value);
+    }
+    
     setLocalGalaxy(updated);
     
     // Clear validation error for this field when user starts typing
@@ -44,6 +51,11 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
         return next;
       });
     }
+  };
+  
+  const handleIdChange = (value: string) => {
+    setIdManuallyEdited(true);
+    handleChange('id', value);
   };
 
   const validateGalaxy = (): boolean => {
@@ -199,9 +211,9 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
               type="text"
               id="galaxy-id"
               value={localGalaxy.id}
-              onChange={(e) => handleChange('id', e.target.value)}
+              onChange={(e) => handleIdChange(e.target.value)}
             />
-            <span className="form-hint">Unique identifier (kebab-case)</span>
+            <span className="form-hint">Unique identifier (kebab-case). Auto-generated from name if left empty.</span>
           </div>
 
           <div className="form-group">
