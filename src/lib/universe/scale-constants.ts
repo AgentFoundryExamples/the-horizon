@@ -19,6 +19,8 @@
  * meeting WCAG 2.1 touch target guidelines (minimum 44x44 CSS pixels).
  * 
  * All sizes are in Three.js units (approximately 1 unit = 50-60 CSS pixels at default zoom).
+ * Note: This conversion factor assumes default Three.js camera settings and viewport size.
+ * Changes to camera FOV, position, or viewport dimensions may affect the actual CSS pixel size.
  */
 
 /**
@@ -49,6 +51,12 @@ export const PLANET_SCALE = {
    * Adds visual variety while maintaining reasonable sizes
    */
   MOON_MULTIPLIER: 0.1,
+  
+  /**
+   * Moon size multiplier relative to minimum planet size
+   * Maintains visual hierarchy where moons are smaller than planets
+   */
+  MOON_SIZE_RATIO: 0.4,
 } as const;
 
 /**
@@ -119,11 +127,16 @@ export const STAR_SCALE = {
  * Ensures size stays within min/max bounds
  */
 export function calculatePlanetSize(moonCount: number): number {
-  const baseSize = PLANET_SCALE.BASE_SIZE + (moonCount * PLANET_SCALE.MOON_MULTIPLIER);
-  return Math.max(
-    PLANET_SCALE.MIN_SIZE,
-    Math.min(PLANET_SCALE.MAX_SIZE, baseSize)
-  );
+  const sizeWithMoons = PLANET_SCALE.MIN_SIZE + (moonCount * PLANET_SCALE.MOON_MULTIPLIER);
+  return Math.min(PLANET_SCALE.MAX_SIZE, sizeWithMoons);
+}
+
+/**
+ * Calculate moon size based on planet scale constants
+ * Maintains consistent visual hierarchy
+ */
+export function calculateMoonSize(): number {
+  return PLANET_SCALE.MIN_SIZE * PLANET_SCALE.MOON_SIZE_RATIO;
 }
 
 /**

@@ -17,6 +17,7 @@ import {
   ORBITAL_SPACING,
   STAR_SCALE,
   calculatePlanetSize,
+  calculateMoonSize,
   calculateOrbitalRadius,
   calculateSafeSpacing,
 } from '../scale-constants';
@@ -111,7 +112,7 @@ describe('Scale Constants', () => {
     it('should handle edge case of exact max size boundary', () => {
       // Calculate moon count that would hit max size
       const moonsToMax = Math.ceil(
-        (PLANET_SCALE.MAX_SIZE - PLANET_SCALE.BASE_SIZE) / PLANET_SCALE.MOON_MULTIPLIER
+        (PLANET_SCALE.MAX_SIZE - PLANET_SCALE.MIN_SIZE) / PLANET_SCALE.MOON_MULTIPLIER
       );
       
       const size = calculatePlanetSize(moonsToMax);
@@ -121,6 +122,30 @@ describe('Scale Constants', () => {
     it('should be deterministic', () => {
       const size1 = calculatePlanetSize(3);
       const size2 = calculatePlanetSize(3);
+      expect(size1).toBe(size2);
+    });
+  });
+
+  describe('calculateMoonSize', () => {
+    it('should return consistent size', () => {
+      const size = calculateMoonSize();
+      expect(size).toBeGreaterThan(0);
+    });
+
+    it('should be smaller than minimum planet size', () => {
+      const moonSize = calculateMoonSize();
+      expect(moonSize).toBeLessThan(PLANET_SCALE.MIN_SIZE);
+    });
+
+    it('should use the configured ratio', () => {
+      const expectedSize = PLANET_SCALE.MIN_SIZE * PLANET_SCALE.MOON_SIZE_RATIO;
+      const actualSize = calculateMoonSize();
+      expect(actualSize).toBe(expectedSize);
+    });
+
+    it('should be deterministic', () => {
+      const size1 = calculateMoonSize();
+      const size2 = calculateMoonSize();
       expect(size1).toBe(size2);
     });
   });
@@ -168,6 +193,14 @@ describe('Scale Constants', () => {
     it('should return standard spacing at threshold', () => {
       const spacing = calculateSafeSpacing(ORBITAL_SPACING.ADAPTIVE_SPACING_THRESHOLD);
       expect(spacing).toBe(ORBITAL_SPACING.RADIUS_INCREMENT);
+    });
+
+    it('should start increasing spacing just above the threshold', () => {
+      const spacingAtThreshold = calculateSafeSpacing(ORBITAL_SPACING.ADAPTIVE_SPACING_THRESHOLD);
+      const spacingAboveThreshold = calculateSafeSpacing(ORBITAL_SPACING.ADAPTIVE_SPACING_THRESHOLD + 1);
+      
+      expect(spacingAtThreshold).toBe(ORBITAL_SPACING.RADIUS_INCREMENT);
+      expect(spacingAboveThreshold).toBeGreaterThan(ORBITAL_SPACING.RADIUS_INCREMENT);
     });
 
     it('should increase spacing for many planets', () => {

@@ -14,17 +14,44 @@ Located in `PLANET_SCALE`:
 
 ```typescript
 PLANET_SCALE = {
-  MIN_SIZE: 0.8,          // Minimum radius (ensures ~44-50px tap target)
-  MAX_SIZE: 1.8,          // Maximum radius (prevents visual dominance)
-  BASE_SIZE: 1.0,         // Base radius for calculations
-  MOON_MULTIPLIER: 0.1,   // Size increase per moon
+  MIN_SIZE: 0.8,           // Minimum radius (ensures ~44-50px tap target)
+  MAX_SIZE: 1.8,           // Maximum radius (prevents visual dominance)
+  BASE_SIZE: 1.0,          // Base radius for calculations
+  MOON_MULTIPLIER: 0.1,    // Size increase per moon
+  MOON_SIZE_RATIO: 0.4,    // Moon size as ratio of minimum planet size
 }
 ```
 
 **Why These Values:**
 - `MIN_SIZE` of 0.8 Three.js units translates to approximately 44-50 CSS pixels at default zoom, meeting WCAG 2.1 Level AA touch target requirements (44×44px minimum)
+  - Note: This conversion assumes default Three.js camera settings and viewport size. Changes to camera FOV, position, or viewport dimensions may affect actual CSS pixel size.
 - `MAX_SIZE` prevents large planets from obscuring other UI elements or smaller planets
 - `MOON_MULTIPLIER` creates visual variety: planets with more moons appear slightly larger
+- `MOON_SIZE_RATIO` of 0.4 means moons are 40% the size of the minimum planet, maintaining visual hierarchy
+
+**Planet Size Calculation:**
+
+The `calculatePlanetSize()` function computes planet radius based on moon count:
+```typescript
+function calculatePlanetSize(moonCount: number): number {
+  const sizeWithMoons = MIN_SIZE + (moonCount * MOON_MULTIPLIER);
+  return Math.min(MAX_SIZE, sizeWithMoons);
+}
+```
+
+Examples:
+- 0 moons: 0.8 units (minimum size)
+- 3 moons: 1.1 units (0.8 + 0.3)
+- 10 moons: 1.8 units (capped at maximum)
+
+**Moon Size Calculation:**
+
+The `calculateMoonSize()` function provides consistent moon sizing:
+```typescript
+function calculateMoonSize(): number {
+  return MIN_SIZE * MOON_SIZE_RATIO;  // 0.32 units
+}
+```
 
 **Customizing Planet Sizes:**
 
@@ -37,6 +64,11 @@ MAX_SIZE: 2.2,  // Instead of 1.8
 To reduce size variance between planets:
 ```typescript
 MOON_MULTIPLIER: 0.05,  // Instead of 0.1
+```
+
+To adjust moon-to-planet size ratio:
+```typescript
+MOON_SIZE_RATIO: 0.5,  // Instead of 0.4 (larger moons)
 ```
 
 ### Orbital Spacing Constants
