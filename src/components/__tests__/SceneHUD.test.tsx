@@ -36,7 +36,7 @@ const mockGalaxies: Galaxy[] = [
               {
                 id: 'luna',
                 name: 'Luna',
-                description: 'Earth\'s moon',
+                description: "Earth's moon",
                 size: 0.3,
                 color: '#CCCCCC',
                 content: '# Luna',

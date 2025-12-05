@@ -7,10 +7,19 @@
 
 import { useNavigationStore } from '@/lib/store';
 import type { Galaxy } from '@/lib/universe/types';
+import type { FocusLevel } from '@/lib/store';
 
 interface SceneHUDProps {
   galaxies: Galaxy[];
 }
+
+// Helper function to determine transition message based on focus level
+const getTransitionMessage = (focusLevel: FocusLevel): string => {
+  if (focusLevel === 'galaxy') return 'Warping to galaxy...';
+  if (focusLevel === 'solar-system') return 'Traveling to system...';
+  if (focusLevel === 'planet') return 'Landing on surface...';
+  return 'Traveling...';
+};
 
 export default function SceneHUD({ galaxies }: SceneHUDProps) {
   const {
@@ -29,14 +38,6 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
   );
   const focusedPlanet = focusedSolarSystem?.planets?.find((p) => p.id === focusedPlanetId);
   const focusedMoon = focusedPlanet?.moons?.find((m) => m.id === focusedMoonId);
-
-  // Determine transition message based on context
-  const getTransitionMessage = () => {
-    if (focusLevel === 'galaxy') return 'Warping to galaxy...';
-    if (focusLevel === 'solar-system') return 'Traveling to system...';
-    if (focusLevel === 'planet') return 'Landing on surface...';
-    return 'Traveling...';
-  };
 
   return (
     <>
@@ -162,7 +163,7 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
               }}
               aria-hidden="true"
             />
-            <span>{getTransitionMessage()}</span>
+            <span>{getTransitionMessage(focusLevel)}</span>
           </div>
         </div>
       )}
