@@ -232,6 +232,22 @@ Before deploying a new version, complete these verification steps:
 
 ## Version History
 
+### v0.1.1 - Security Update (December 2024)
+- **Dependency Security Updates**:
+  - Upgraded Next.js from 14.2.15 to 14.2.33 to address critical security vulnerabilities:
+    - Fixed Authorization Bypass in Next.js Middleware (GHSA-f82v-jwr5-mffw, CVSS 9.1)
+    - Fixed Cache Key Confusion for Image Optimization API Routes (GHSA-g5qg-72qw-gw5v, CVSS 6.2)
+    - Fixed Improper Middleware Redirect Handling Leading to SSRF (GHSA-4342-x723-ch2f, CVSS 6.5)
+    - Fixed Content Injection Vulnerability for Image Optimization (GHSA-xv57-4mr9-wg8v, CVSS 4.3)
+    - Fixed Race Condition to Cache Poisoning (GHSA-qpjv-v59x-3qc4, CVSS 3.7)
+    - Fixed Denial of Service (DoS) with Server Actions (GHSA-7m27-7ghc-44w9, CVSS 5.3)
+    - Fixed Information exposure in dev server due to lack of origin verification (GHSA-3h52-269p-cp9r)
+  - Upgraded eslint-config-next from 14.2.15 to 14.2.33
+  - Added npm overrides to force glob@10.5.0 (fixes command injection vulnerability GHSA-5j98-mcp5-4vw2)
+  - Zero npm audit vulnerabilities after upgrade
+- **Testing**: All 150 tests passing, build verified, no breaking changes
+- **Documentation**: Updated deployment guide and roadmap with new baseline
+
 ### v0.1.0 - Initial Feature-Complete Release (December 2024)
 - Universe schema with hierarchical data structure
 - Immersive 3D traversal with cinematic camera work

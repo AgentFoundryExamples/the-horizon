@@ -4,9 +4,21 @@ This guide covers deploying The Horizon to Vercel and other platforms, with a fo
 
 ## Prerequisites
 
+- **Node.js**: Version 18.x or higher (20.x recommended)
+- **npm**: Version 10.x or higher
 - GitHub repository with your code
 - GitHub Personal Access Token with appropriate scopes
 - Strong admin password (minimum 16 characters recommended)
+
+## Current Version Requirements
+
+The Horizon v0.1.1 has been updated with security patches:
+- **Next.js**: 14.2.33 (upgraded from 14.2.15)
+- **React**: 18.3.1
+- **TypeScript**: 5.6.3
+- **Node.js**: 18.x or higher
+
+See [roadmap.md](./roadmap.md) for detailed security update information.
 
 ## Vercel Deployment
 
@@ -401,16 +413,39 @@ Set environment variables using `.env.local` or system environment variables.
 
 ### Updating Dependencies
 
+**Security First**: Always run `npm audit` after updating dependencies and before deploying.
+
 ```bash
-# Check for updates
+# Check for security vulnerabilities
+npm audit
+
+# Check for available updates
 npm outdated
 
-# Update dependencies
+# Update patch/minor versions automatically
 npm update
 
-# Update major versions (carefully)
+# Update major versions (carefully, test thoroughly)
 npm install package@latest
+
+# After updates, verify everything works
+npm test
+npm run build
+npm run lint
 ```
+
+**Recent Security Updates (v0.1.1)**:
+- Next.js upgraded from 14.2.15 → 14.2.33 (critical security fixes)
+- eslint-config-next upgraded from 14.2.15 → 14.2.33
+- Added npm overrides for glob vulnerability mitigation
+- All tests passing, zero npm audit vulnerabilities
+
+When updating dependencies:
+1. Always check for breaking changes in package changelogs
+2. Run full test suite after updates
+3. Test admin interface functionality
+4. Verify build succeeds without errors
+5. Check for any new peer dependency warnings
 
 ## Support
 
