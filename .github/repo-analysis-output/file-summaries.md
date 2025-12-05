@@ -209,8 +209,8 @@ Total files: 31
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 11.68 KB  
-**LOC:** 233  
+**Size:** 22.38 KB  
+**LOC:** 437  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/__tests__/types.test.ts
@@ -263,8 +263,8 @@ Total files: 31
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 4.44 KB  
-**LOC:** 127  
+**Size:** 8.36 KB  
+**LOC:** 219  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/types.ts
@@ -272,8 +272,8 @@ Total files: 31
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 6.97 KB  
-**LOC:** 196  
+**Size:** 7.16 KB  
+**LOC:** 202  
 **TODOs/FIXMEs:** 0  
 
 ## src/middleware.ts
