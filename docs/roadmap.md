@@ -177,7 +177,7 @@ Before deploying a new version, complete these verification steps:
 - [ ] Set all required environment variables:
   - [ ] `ADMIN_PASSWORD` (strong, 16+ characters)
   - [ ] `SESSION_SECRET` (generated with `openssl rand -base64 32`)
-  - [ ] `GITHUB_TOKEN` (with `repo` scope)
+  - [ ] `GITHUB_TOKEN` (a fine-grained token with `Contents: Read & write` permissions for this repository)
   - [ ] `GITHUB_OWNER`
   - [ ] `GITHUB_REPO`
   - [ ] `GITHUB_BRANCH`

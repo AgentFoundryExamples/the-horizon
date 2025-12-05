@@ -21,6 +21,8 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 ### v0.1.0 - Horizon Launch (December 2024)
 
+*This release establishes the semantic versioning baseline at 0.1.0, representing the first feature-complete iteration before the 1.0 stable release.*
+
 **Major Features Delivered:**
 
 🌌 **Universe Schema & Data Structure**
