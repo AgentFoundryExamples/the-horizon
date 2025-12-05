@@ -17,6 +17,75 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 - 🚀 **Next.js 14**: Server-side rendering and static generation support
 - ⚡ **Performance**: Instanced rendering, LOD, and GPU-accelerated shaders
 
+## Changelog
+
+### v0.1.0 - Horizon Launch (December 2024)
+
+**Major Features Delivered:**
+
+🌌 **Universe Schema & Data Structure**
+- Well-defined hierarchical JSON schema (Universe → Galaxies → Solar Systems → Planets → Moons)
+- TypeScript type definitions with runtime validation
+- Comprehensive documentation in `docs/universe-schema.md`
+- Support for free-floating stars and organized solar systems
+
+🎮 **Immersive 3D Traversal**
+- Multi-layer exploration system with smooth transitions between views
+- Cinematic camera animations using spline-based paths with easing
+- Interactive navigation: universe view → galaxy detail → solar system → planet surface
+- Keplerian orbital mechanics for realistic planetary motion
+- Shader-based particle galaxies with GPU acceleration
+- Moon navigation with seamless surface transitions
+
+📝 **Planet & Moon Markdown Content**
+- Rich markdown support for all planetary bodies using React Markdown
+- Content sanitization to prevent XSS vulnerabilities
+- Live markdown preview in admin interface
+- Support for headers, lists, links, code blocks, and formatting
+- Content authoring guidelines in `docs/content-authoring.md`
+
+🛠️ **Admin Workflow & Content Management**
+- Password-protected admin interface at `/admin`
+- Full CRUD operations for galaxies, solar systems, planets, and moons
+- GitHub integration for automated commits and pull requests
+- Built-in markdown editor with live preview
+- Real-time schema validation against universe data structure
+- Optimistic locking to prevent concurrent edit conflicts
+- Security features:
+  - Timing-safe password authentication
+  - Signed session tokens with HMAC-SHA256
+  - Rate limiting (5 attempts per 15 minutes)
+  - Sanitized error logging (no token exposure)
+
+🧪 **Testing & Quality**
+- Comprehensive unit test coverage (150 tests across 8 suites)
+- Tests for data loading, validation, authentication, and GitHub integration
+- Edge case handling for empty data, missing content, and concurrent edits
+
+📚 **Documentation**
+- Complete deployment guide in `docs/deployment.md`
+- Universe schema documentation in `docs/universe-schema.md`
+- Visual scene controls in `docs/visuals.md`
+- Content authoring guidelines in `docs/content-authoring.md`
+
+**Technical Improvements:**
+- TypeScript 5.6.3 with full type safety
+- Next.js 14.2.15 with server-side rendering
+- Three.js 0.170.0 for 3D graphics
+- Zustand state management
+- ESLint configuration for code quality
+- Jest testing framework
+
+**Verification Steps:**
+✅ All 150 unit tests passing  
+✅ Project builds without errors  
+✅ Admin authentication working  
+✅ GitHub integration tested  
+✅ Markdown rendering validated  
+✅ 3D scene performance optimized  
+
+See [docs/roadmap.md](docs/roadmap.md) for planned features and future enhancements.
+
 ## Quick Start
 
 ### Prerequisites
