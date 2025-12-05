@@ -5,7 +5,7 @@
  * Projects 3D world coordinates to screen space for tooltip positioning
  */
 
-import { useState, useEffect, useRef, ReactNode } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Html } from '@react-three/drei';

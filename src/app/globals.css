@@ -105,16 +105,9 @@ a {
   }
 }
 
-/* Ensure tooltips have high contrast for accessibility */
-.tooltip-content {
-  color: #FFFFFF;
-  background: rgba(0, 0, 0, 0.95);
-}
-
 /* High contrast mode support */
 @media (prefers-contrast: high) {
-  .scene-tooltip,
-  .tooltip-content {
+  .scene-tooltip {
     background: #000000;
     border-width: 3px;
     border-color: #4A90E2;
