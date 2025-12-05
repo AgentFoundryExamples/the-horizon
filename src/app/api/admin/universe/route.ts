@@ -109,7 +109,7 @@ export async function PATCH(request: NextRequest) {
         }
       } catch (error) {
         // If file doesn't exist yet, allow the save to proceed
-        console.log('File does not exist yet, proceeding with save');
+        console.warn('Universe file does not exist yet, proceeding with initial save');
       }
     }
 
