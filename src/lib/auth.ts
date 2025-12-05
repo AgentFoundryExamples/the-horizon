@@ -18,7 +18,7 @@
  */
 
 import { cookies } from 'next/headers';
-import { timingSafeEqual, createHash, randomBytes } from 'crypto';
+import { timingSafeEqual, sha256, randomBytes } from './crypto';
 
 const AUTH_COOKIE_NAME = 'admin-auth';
 const COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
@@ -53,6 +53,10 @@ function getSessionSecret(): string {
   return ADMIN_PASSWORD;
 }
 
+// Cache the admin password hash to avoid re-computing it on every call
+let adminPasswordHashCache: string | null = null;
+let cachedAdminPassword: string | null = null;
+
 /**
  * Gets the admin password from environment variable
  */
@@ -63,7 +67,7 @@ function getAdminPassword(): string | undefined {
 /**
  * Validates admin password against environment variable using timing-safe comparison
  */
-export function validatePassword(password: string): boolean {
+export async function validatePassword(password: string): Promise<boolean> {
   const ADMIN_PASSWORD = getAdminPassword();
   
   if (!ADMIN_PASSWORD) {
@@ -78,14 +82,19 @@ export function validatePassword(password: string): boolean {
   
   // Use timing-safe comparison to prevent timing attacks
   try {
-    const passwordBuffer = Buffer.from(password, 'utf8');
-    const adminPasswordBuffer = Buffer.from(ADMIN_PASSWORD, 'utf8');
+    // Check if we need to recompute the admin password hash
+    // Note: This cache check is safe because:
+    // 1. It compares against internally cached values, not user input
+    // 2. ADMIN_PASSWORD rarely changes at runtime (environment variable)
+    // 3. The actual timing-sensitive comparison is done on the hashed values below
+    if (!adminPasswordHashCache || cachedAdminPassword !== ADMIN_PASSWORD) {
+      adminPasswordHashCache = await sha256(ADMIN_PASSWORD);
+      cachedAdminPassword = ADMIN_PASSWORD;
+    }
     
-    // Hash both passwords to ensure buffers are same length for timingSafeEqual
-    const passwordHash = createHash('sha256').update(passwordBuffer).digest();
-    const adminPasswordHash = createHash('sha256').update(adminPasswordBuffer).digest();
+    const passwordHash = await sha256(password);
     
-    return timingSafeEqual(passwordHash, adminPasswordHash);
+    return timingSafeEqual(passwordHash, adminPasswordHashCache);
   } catch (error) {
     // If comparison fails for any reason, return false
     return false;
@@ -147,16 +156,14 @@ export function clearLoginAttempts(ip: string): void {
 export async function createSession(): Promise<void> {
   const cookieStore = await cookies();
   
-  // Generate a secure random session token
-  const sessionToken = randomBytes(32).toString('hex');
+  // Generate a secure random session token (hex string)
+  const sessionTokenHex = randomBytes(32);
   
   // Sign the token with the session secret
   const secret = getSessionSecret();
-  const signature = createHash('sha256')
-    .update(sessionToken + secret)
-    .digest('hex');
+  const signature = await sha256(sessionTokenHex + secret);
   
-  const signedToken = `${sessionToken}.${signature}`;
+  const signedToken = `${sessionTokenHex}.${signature}`;
   
   cookieStore.set(AUTH_COOKIE_NAME, signedToken, {
     httpOnly: true,
@@ -194,15 +201,11 @@ export async function isAuthenticated(): Promise<boolean> {
   
   const [token, signature] = parts;
   const secret = getSessionSecret();
-  const expectedSignature = createHash('sha256')
-    .update(token + secret)
-    .digest('hex');
+  const expectedSignature = await sha256(token + secret);
   
   // Use timing-safe comparison for signature validation
   try {
-    const signatureBuffer = Buffer.from(signature, 'hex');
-    const expectedSignatureBuffer = Buffer.from(expectedSignature, 'hex');
-    return timingSafeEqual(signatureBuffer, expectedSignatureBuffer);
+    return timingSafeEqual(signature, expectedSignature);
   } catch (error) {
     return false;
   }

@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 // Copyright 2025 John Brosnihan
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,36 +33,36 @@ describe('Auth', () => {
   });
 
   describe('validatePassword', () => {
-    it('should return false when ADMIN_PASSWORD is not set', () => {
+    it('should return false when ADMIN_PASSWORD is not set', async () => {
       delete process.env.ADMIN_PASSWORD;
-      expect(validatePassword('any-password')).toBe(false);
+      expect(await validatePassword('any-password')).toBe(false);
     });
 
-    it('should return false when ADMIN_PASSWORD is default value', () => {
+    it('should return false when ADMIN_PASSWORD is default value', async () => {
       process.env.ADMIN_PASSWORD = 'CHANGE_ME_USE_STRONG_PASSWORD_MIN_16_CHARS';
-      expect(validatePassword('CHANGE_ME_USE_STRONG_PASSWORD_MIN_16_CHARS')).toBe(false);
+      expect(await validatePassword('CHANGE_ME_USE_STRONG_PASSWORD_MIN_16_CHARS')).toBe(false);
     });
 
-    it('should return true when password matches ADMIN_PASSWORD', () => {
+    it('should return true when password matches ADMIN_PASSWORD', async () => {
       process.env.ADMIN_PASSWORD = 'correct-password-123';
-      expect(validatePassword('correct-password-123')).toBe(true);
+      expect(await validatePassword('correct-password-123')).toBe(true);
     });
 
-    it('should return false when password does not match', () => {
+    it('should return false when password does not match', async () => {
       process.env.ADMIN_PASSWORD = 'correct-password-123';
-      expect(validatePassword('wrong-password')).toBe(false);
+      expect(await validatePassword('wrong-password')).toBe(false);
     });
 
-    it('should be case-sensitive', () => {
+    it('should be case-sensitive', async () => {
       process.env.ADMIN_PASSWORD = 'Password123';
-      expect(validatePassword('password123')).toBe(false);
-      expect(validatePassword('Password123')).toBe(true);
+      expect(await validatePassword('password123')).toBe(false);
+      expect(await validatePassword('Password123')).toBe(true);
     });
 
-    it('should use timing-safe comparison (same length passwords)', () => {
+    it('should use timing-safe comparison (same length passwords)', async () => {
       process.env.ADMIN_PASSWORD = 'password1';
       // Both passwords are same length but different - should still return false
-      expect(validatePassword('password2')).toBe(false);
+      expect(await validatePassword('password2')).toBe(false);
     });
   });
 

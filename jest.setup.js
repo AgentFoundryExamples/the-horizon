@@ -12,3 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import '@testing-library/jest-dom'
+
+// Polyfill Web Crypto API for Node.js test environment
+const { webcrypto } = require('crypto');
+const { TextEncoder, TextDecoder } = require('util');
+
+// Set up Web Crypto API polyfill for test environment
+if (typeof global !== 'undefined') {
+  if (!global.crypto) {
+    global.crypto = webcrypto;
+  }
+  if (!global.TextEncoder) {
+    global.TextEncoder = TextEncoder;
+  }
+  if (!global.TextDecoder) {
+    global.TextDecoder = TextDecoder;
+  }
+}

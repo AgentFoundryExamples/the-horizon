@@ -17,7 +17,7 @@
  * Uses GitHub REST API to create branches, commit files, and open pull requests
  */
 
-import { createHash } from 'crypto';
+import { sha256 } from './crypto';
 
 export interface GitHubConfig {
   token: string;
@@ -292,9 +292,7 @@ export async function pushUniverseChanges(
 
     // Optimistic locking: check if content has changed since user loaded it
     if (currentHash) {
-      const actualHash = createHash('sha256')
-        .update(fileData.content)
-        .digest('hex');
+      const actualHash = await sha256(fileData.content);
       
       if (actualHash !== currentHash) {
         return {
@@ -410,9 +408,7 @@ export async function fetchCurrentUniverse(): Promise<{
       return null;
     }
 
-    const hash = createHash('sha256')
-      .update(fileData.content)
-      .digest('hex');
+    const hash = await sha256(fileData.content);
 
     return {
       content: fileData.content,

@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (validatePassword(password)) {
+    if (await validatePassword(password)) {
       // Clear failed attempts on successful login
       clearLoginAttempts(clientIp);
       await createSession();

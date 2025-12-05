@@ -166,13 +166,15 @@ The admin interface includes multiple layers of security protection:
 **Timing-Safe Password Validation**
 - Uses constant-time comparison to prevent timing attacks
 - Password hashes are compared with `timingSafeEqual` to avoid leaking password length
+- Web Crypto API ensures Edge Runtime compatibility
 
 **Signed Session Tokens**
-- Session cookies use cryptographically signed random tokens
-- Prevents session forgery by validating HMAC-SHA256 signatures
+- Session cookies use cryptographically signed random tokens with SHA-256 (Web Crypto API)
+- Prevents session forgery by validating signatures on every request
 - Tokens are validated in middleware on every protected route
 - Uses dedicated SESSION_SECRET (or falls back to ADMIN_PASSWORD)
 - Changing SESSION_SECRET invalidates all existing sessions
+- Compatible with Edge Runtime for serverless deployments
 
 **Rate Limiting**
 - Maximum 5 failed login attempts per IP address
@@ -185,6 +187,11 @@ The admin interface includes multiple layers of security protection:
 - No tokens or sensitive data exposed in error messages
 - Generic error responses prevent information leakage
 - Detailed errors logged server-side only
+
+**Edge Runtime Support**
+- All authentication functions use Web Crypto API
+- Compatible with serverless Edge deployments on Vercel and other platforms
+- No Node.js-specific crypto dependencies
 
 ## How Admin Changes Work
 
