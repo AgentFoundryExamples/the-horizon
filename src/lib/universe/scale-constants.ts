@@ -42,7 +42,8 @@ export const PLANET_SCALE = {
   
   /**
    * Base size used for planet calculations
-   * Scales with number of moons
+   * Currently not used in calculatePlanetSize() which starts from MIN_SIZE
+   * Kept for potential future use or custom implementations
    */
   BASE_SIZE: 1.0,
   

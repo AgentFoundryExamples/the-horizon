@@ -16,7 +16,7 @@ Located in `PLANET_SCALE`:
 PLANET_SCALE = {
   MIN_SIZE: 0.8,           // Minimum radius (ensures ~44-50px tap target)
   MAX_SIZE: 1.8,           // Maximum radius (prevents visual dominance)
-  BASE_SIZE: 1.0,          // Base radius for calculations
+  BASE_SIZE: 1.0,          // Reserved for future use (not currently used)
   MOON_MULTIPLIER: 0.1,    // Size increase per moon
   MOON_SIZE_RATIO: 0.4,    // Moon size as ratio of minimum planet size
 }
@@ -26,6 +26,7 @@ PLANET_SCALE = {
 - `MIN_SIZE` of 0.8 Three.js units translates to approximately 44-50 CSS pixels at default zoom, meeting WCAG 2.1 Level AA touch target requirements (44×44px minimum)
   - Note: This conversion assumes default Three.js camera settings and viewport size. Changes to camera FOV, position, or viewport dimensions may affect actual CSS pixel size.
 - `MAX_SIZE` prevents large planets from obscuring other UI elements or smaller planets
+- `BASE_SIZE` is reserved for potential future use (currently not used in calculations)
 - `MOON_MULTIPLIER` creates visual variety: planets with more moons appear slightly larger
 - `MOON_SIZE_RATIO` of 0.4 means moons are 40% the size of the minimum planet, maintaining visual hierarchy
 
