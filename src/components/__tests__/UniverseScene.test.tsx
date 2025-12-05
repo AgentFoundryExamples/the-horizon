@@ -2,7 +2,11 @@
  * Integration tests for UniverseScene - Welcome Message Display
  * 
  * Note: These tests focus on the welcome message visibility logic.
- * Full 3D scene rendering is tested manually due to complex Three.js mocking requirements.
+ * Full 3D scene rendering (Three.js canvas, camera animations, particle effects) 
+ * requires complex mocking and is best validated through:
+ * - Manual browser testing (npm run dev)
+ * - Visual regression testing (if implemented)
+ * - End-to-end tests with actual browser rendering
  */
 
 import { render } from '@testing-library/react';
