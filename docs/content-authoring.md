@@ -362,11 +362,11 @@ Before committing changes:
 
 ## Welcome Message Customization
 
-The Horizon welcome message appears when users navigate to a galaxy view. This provides context-aware branding and navigation hints.
+The Horizon welcome message appears on the universe landing page when users first visit. This provides branding and navigation guidance.
 
 ### Location
 
-The welcome message is rendered by the `WelcomeMessage` component in `src/components/WelcomeMessage.tsx` and is displayed only when `focusLevel === 'galaxy'` in the navigation state.
+The welcome message is rendered by the `WelcomeMessage` component in `src/components/WelcomeMessage.tsx` and is displayed on the main universe landing page (`src/app/page.tsx`). It appears at the top center of the screen when users first load the application.
 
 ### Customizing Content
 
@@ -374,15 +374,19 @@ To change the welcome message text, edit `src/components/WelcomeMessage.tsx`:
 
 ```typescript
 <h2>Welcome to the Horizon</h2>
-<p>You are now exploring {galaxyName}</p>
-<p>Click on solar systems to discover planets and moons</p>
+<p>Click a galaxy to explore</p>
 ```
 
 ### Styling
 
 The welcome message uses responsive typography with `clamp()` for fluid scaling:
 - Heading: `clamp(1.5rem, 4vw, 2.5rem)` - scales from 1.5rem to 2.5rem
-- Body: `clamp(0.9rem, 2vw, 1.1rem)` - scales from 0.9rem to 1.1rem
+- Body: `clamp(0.8rem, 1.8vw, 1rem)` - scales from 0.8rem to 1rem
+
+The message is positioned at the top center of the screen:
+- Position: `absolute` with `top: 2rem` and `left: 50%`
+- Transform: `translateX(-50%)` for centering
+- Padding: `1rem 2rem` for compact appearance
 
 To adjust styling:
 ```typescript
@@ -392,8 +396,26 @@ color: '#CCCCCC',  // Body text
 
 // Adjust sizing
 maxWidth: '90%',   // Maximum width (responsive)
-width: '500px',    // Preferred width
-padding: '2rem',   // Internal spacing
+width: 'auto',     // Auto width for compact display
+padding: '1rem 2rem', // Compact spacing
+```
+
+Responsive adjustments are defined in `src/app/globals.css`:
+```css
+@media (max-width: 768px) {
+  .welcome-message {
+    padding: 0.75rem 1.5rem !important;
+    top: 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-message {
+    padding: 0.5rem 1rem !important;
+    top: 0.5rem !important;
+    max-width: 95% !important;
+  }
+}
 ```
 
 ### Localization
@@ -403,7 +425,6 @@ To support multiple languages, you can:
 1. **Add language prop**:
 ```typescript
 interface WelcomeMessageProps {
-  galaxyName: string;
   locale?: string;
 }
 ```
@@ -413,13 +434,11 @@ interface WelcomeMessageProps {
 const translations = {
   en: {
     title: 'Welcome to the Horizon',
-    exploring: 'You are now exploring',
-    instruction: 'Click on solar systems to discover planets and moons'
+    instruction: 'Click a galaxy to explore'
   },
   es: {
     title: 'Bienvenido al Horizonte',
-    exploring: 'Ahora estás explorando',
-    instruction: 'Haz clic en los sistemas solares para descubrir planetas y lunas'
+    instruction: 'Haz clic en una galaxia para explorar'
   }
 };
 ```
@@ -438,14 +457,15 @@ The welcome message includes:
 - `pointerEvents: 'none'` - doesn't block interaction with the scene
 - Responsive text sizing for readability on all devices
 
-### Conditional Display
+### Display Behavior
 
-The message only appears when:
-- `focusLevel === 'galaxy'` (not on universe, solar-system, or planet views)
-- A galaxy is currently focused
-- The user is not transitioning between views
+The message appears:
+- On the universe landing page when the app first loads
+- At the top center, providing context without obscuring the 3D scene
+- With compact styling to minimize visual footprint
+- Only on the main landing page, not on galaxy detail views
 
-This ensures the welcome message provides context without being intrusive.
+This ensures the welcome message provides context for first-time visitors without being intrusive during exploration.
 
 ## Contributing
 

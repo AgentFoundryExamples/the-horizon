@@ -1,7 +1,7 @@
 /**
- * Integration tests for UniverseScene - Welcome Message Display
+ * Integration tests for UniverseScene - Navigation State
  * 
- * Note: These tests focus on the welcome message visibility logic.
+ * Note: These tests focus on navigation state management.
  * Full 3D scene rendering (Three.js canvas, camera animations, particle effects) 
  * requires complex mocking and is best validated through:
  * - Manual browser testing (npm run dev)
@@ -9,22 +9,9 @@
  * - End-to-end tests with actual browser rendering
  */
 
-import { render } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react';
 import { useNavigationStore } from '@/lib/store';
 import type { Galaxy } from '@/lib/universe/types';
-
-// Mock the WelcomeMessage component for focused testing
-jest.mock('../WelcomeMessage', () => {
-  return function WelcomeMessage({ galaxyName }: { galaxyName: string }) {
-    return (
-      <div className="welcome-message" data-testid="welcome-message">
-        <h2>Welcome to the Horizon</h2>
-        <p>{galaxyName}</p>
-      </div>
-    );
-  };
-});
 
 // Mock galaxy data
 const mockGalaxies: Galaxy[] = [
@@ -48,7 +35,7 @@ const mockGalaxies: Galaxy[] = [
   },
 ];
 
-describe('UniverseScene - Welcome Message Integration', () => {
+describe('UniverseScene - Navigation State', () => {
   beforeEach(() => {
     // Reset store before each test
     const { result } = renderHook(() => useNavigationStore());
@@ -57,8 +44,16 @@ describe('UniverseScene - Welcome Message Integration', () => {
     });
   });
 
-  describe('Welcome Message Conditional Rendering', () => {
-    it('should render WelcomeMessage component when focusLevel is galaxy', () => {
+  describe('Navigation State Management', () => {
+    it('should be at universe level by default', () => {
+      const { result } = renderHook(() => useNavigationStore());
+      
+      const state = result.current;
+      expect(state.focusLevel).toBe('universe');
+      expect(state.focusedGalaxyId).toBe(null);
+    });
+
+    it('should navigate to galaxy level', () => {
       const { result } = renderHook(() => useNavigationStore());
       
       // Set navigation state to galaxy view
@@ -77,19 +72,7 @@ describe('UniverseScene - Welcome Message Integration', () => {
       expect(focusedGalaxy?.name).toBe('Milky Way');
     });
 
-    it('should not render WelcomeMessage when focusLevel is universe', () => {
-      const { result } = renderHook(() => useNavigationStore());
-      
-      const state = result.current;
-      expect(state.focusLevel).toBe('universe');
-      expect(state.focusedGalaxyId).toBe(null);
-      
-      // When focusLevel is universe, focusedGalaxy should be undefined
-      const focusedGalaxy = mockGalaxies.find((g) => g.id === state.focusedGalaxyId);
-      expect(focusedGalaxy).toBeUndefined();
-    });
-
-    it('should not render WelcomeMessage when focusLevel is solar-system', () => {
+    it('should navigate to solar system level', () => {
       const { result } = renderHook(() => useNavigationStore());
       
       // Navigate to solar system
@@ -102,10 +85,11 @@ describe('UniverseScene - Welcome Message Integration', () => {
 
       const state = result.current;
       expect(state.focusLevel).toBe('solar-system');
-      // focusedGalaxyId persists but focusLevel prevents welcome message
+      expect(state.focusedGalaxyId).toBe('milky-way');
+      expect(state.focusedSolarSystemId).toBe('sol-system');
     });
 
-    it('should not render WelcomeMessage when focusLevel is planet', () => {
+    it('should navigate to planet level', () => {
       const { result } = renderHook(() => useNavigationStore());
       
       // Navigate to planet
@@ -120,9 +104,10 @@ describe('UniverseScene - Welcome Message Integration', () => {
 
       const state = result.current;
       expect(state.focusLevel).toBe('planet');
+      expect(state.focusedPlanetId).toBe('earth');
     });
 
-    it('should update galaxy name when switching galaxies', () => {
+    it('should update galaxy when switching galaxies', () => {
       const { result } = renderHook(() => useNavigationStore());
       
       // Navigate to first galaxy
@@ -158,7 +143,7 @@ describe('UniverseScene - Welcome Message Integration', () => {
       expect(state.focusLevel).toBe('galaxy');
       expect(state.focusedGalaxyId).toBe('non-existent-galaxy');
       
-      // focusedGalaxy would be undefined, preventing welcome message render
+      // focusedGalaxy would be undefined
       const focusedGalaxy = mockGalaxies.find((g) => g.id === state.focusedGalaxyId);
       expect(focusedGalaxy).toBeUndefined();
     });
@@ -188,7 +173,7 @@ describe('UniverseScene - Welcome Message Integration', () => {
   });
 
   describe('Navigation State Requirements', () => {
-    it('should require both focusLevel=galaxy and valid focusedGalaxyId', () => {
+    it('should maintain state consistency at universe level', () => {
       const { result } = renderHook(() => useNavigationStore());
       
       // Default state - universe with no galaxy
@@ -217,10 +202,6 @@ describe('UniverseScene - Welcome Message Integration', () => {
       
       expect(state.focusLevel).toBe('galaxy');
       expect(focusedGalaxy).toBeDefined();
-      
-      // Both conditions met - welcome should display
-      const shouldShowWelcome = state.focusLevel === 'galaxy' && !!focusedGalaxy;
-      expect(shouldShowWelcome).toBe(true);
     });
   });
 });
