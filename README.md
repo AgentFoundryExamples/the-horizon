@@ -64,6 +64,10 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 - ✅ Admin authentication working on Edge Runtime
 - ✅ No breaking changes
 
+**Deployment Notes:**
+- ⚠️ **New Environment Variable**: `SESSION_SECRET` is now recommended for enhanced security. Add this to your environment variables (see [.env.example](.env.example)). If not set, the system falls back to using `ADMIN_PASSWORD` (not recommended for production).
+- ℹ️ **Admin Re-login**: Adding `SESSION_SECRET` will invalidate existing admin sessions. Users will need to log in again after deployment.
+
 See [docs/roadmap.md](docs/roadmap.md) for detailed version history and future plans.
 
 ### v0.1.0 - Horizon Launch (December 2024)
