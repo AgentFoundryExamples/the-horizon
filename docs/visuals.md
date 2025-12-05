@@ -445,7 +445,7 @@ The indicator uses:
 Edit `getTransitionMessage()` in `src/components/SceneHUD.tsx`:
 
 ```typescript
-const getTransitionMessage = () => {
+const getTransitionMessage = (focusLevel: FocusLevel): string => {
   if (focusLevel === 'galaxy') return '🚀 Jumping to lightspeed...';
   if (focusLevel === 'solar-system') return '🌟 Entering system...';
   if (focusLevel === 'planet') return '🛸 Approaching surface...';
