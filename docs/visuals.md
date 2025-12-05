@@ -309,11 +309,11 @@ function calculateGalaxyScale(galaxyCount: number): {
 **Examples:**
 
 ```typescript
-calculateGalaxyScale(1)   // { minRadius: 3, maxRadius: 15 }
-calculateGalaxyScale(5)   // { minRadius: 2.2, maxRadius: 11 }
-calculateGalaxyScale(10)  // { minRadius: 1.6, maxRadius: 8 }
-calculateGalaxyScale(50)  // { minRadius: 0.8, maxRadius: 4 }
-calculateGalaxyScale(100) // { minRadius: 0.8, maxRadius: 4 }
+calculateGalaxyScale(1)   // { minRadius: 3.0, maxRadius: 15.0 }
+calculateGalaxyScale(5)   // { minRadius: 2.2, maxRadius: 11.0 }
+calculateGalaxyScale(10)  // { minRadius: 1.7, maxRadius: 8.7 }
+calculateGalaxyScale(50)  // { minRadius: 0.8, maxRadius: 4.0 }
+calculateGalaxyScale(100) // { minRadius: 0.8, maxRadius: 4.0 }
 ```
 
 ### Manual Size Overrides
@@ -400,9 +400,10 @@ Expected output shows gradual decrease:
 ```
 1 galaxies: 15.00 units
 2 galaxies: 15.00 units
-3 galaxies: 13.28 units
-4 galaxies: 11.95 units
-5 galaxies: 10.85 units
+3 galaxies: 12.90 units
+4 galaxies: 11.78 units
+5 galaxies: 10.97 units
+6 galaxies: 10.35 units
 ...
 ```
 
