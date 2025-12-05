@@ -102,6 +102,22 @@ describe('Universe Mutations', () => {
     it('should handle multiple spaces', () => {
       expect(generateId('  Multiple   Spaces  ')).toBe('multiple-spaces');
     });
+
+    it('should return empty string for empty input', () => {
+      expect(generateId('')).toBe('');
+      expect(generateId('   ')).toBe('');
+    });
+
+    it('should handle unicode characters', () => {
+      expect(generateId('Café Galaxy')).toBe('cafe-galaxy');
+      expect(generateId('São Paulo')).toBe('sao-paulo');
+      expect(generateId('Ñoño System')).toBe('nono-system');
+    });
+
+    it('should handle mixed case and symbols', () => {
+      expect(generateId('The "Great" Galaxy!')).toBe('the-great-galaxy');
+      expect(generateId('Galaxy @#$%^& 42')).toBe('galaxy-42');
+    });
   });
 
   describe('isIdUnique', () => {
@@ -165,6 +181,71 @@ describe('Universe Mutations', () => {
       const result = createGalaxy(testUniverse, newGalaxy);
       expect(result.galaxies).toHaveLength(2);
       expect(result.galaxies[1]).toEqual(newGalaxy);
+    });
+
+    it('should auto-generate ID from name when ID is empty', () => {
+      const newGalaxy: Galaxy = {
+        id: '',
+        name: 'Andromeda Galaxy',
+        description: 'A new galaxy',
+        theme: 'purple',
+        particleColor: '#9B59B6',
+        stars: [],
+        solarSystems: [],
+      };
+
+      const result = createGalaxy(testUniverse, newGalaxy);
+      expect(result.galaxies).toHaveLength(2);
+      expect(result.galaxies[1].id).toBe('andromeda-galaxy');
+      expect(result.galaxies[1].name).toBe('Andromeda Galaxy');
+    });
+
+    it('should auto-generate ID from name when ID is whitespace', () => {
+      const newGalaxy: Galaxy = {
+        id: '   ',
+        name: 'Triangulum Galaxy',
+        description: 'A new galaxy',
+        theme: 'blue',
+        particleColor: '#4A90E2',
+        stars: [],
+        solarSystems: [],
+      };
+
+      const result = createGalaxy(testUniverse, newGalaxy);
+      expect(result.galaxies).toHaveLength(2);
+      expect(result.galaxies[1].id).toBe('triangulum-galaxy');
+    });
+
+    it('should throw error for missing name', () => {
+      const invalidGalaxy: Galaxy = {
+        id: 'invalid',
+        name: '',
+        description: 'A galaxy',
+        theme: 'blue',
+        particleColor: '#000000',
+        stars: [],
+        solarSystems: [],
+      };
+
+      expect(() => createGalaxy(testUniverse, invalidGalaxy)).toThrow(
+        'Galaxy name is required'
+      );
+    });
+
+    it('should throw error for missing description', () => {
+      const invalidGalaxy: Galaxy = {
+        id: 'invalid',
+        name: 'Invalid Galaxy',
+        description: '',
+        theme: 'blue',
+        particleColor: '#000000',
+        stars: [],
+        solarSystems: [],
+      };
+
+      expect(() => createGalaxy(testUniverse, invalidGalaxy)).toThrow(
+        'Galaxy description is required'
+      );
     });
 
     it('should throw error for duplicate galaxy ID', () => {

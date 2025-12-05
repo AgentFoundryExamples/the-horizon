@@ -34,9 +34,19 @@ import {
 
 /**
  * Generates a unique ID based on name (kebab-case)
+ * Handles unicode characters by normalizing them
  */
 export function generateId(name: string): string {
-  return name
+  if (!name || typeof name !== 'string') {
+    return '';
+  }
+  
+  // Normalize unicode characters (e.g., é -> e, ñ -> n)
+  const normalized = name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  
+  return normalized
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, '')
@@ -86,18 +96,24 @@ export function getAllIds(universe: Universe, type: 'galaxy' | 'solarSystem' | '
 // Galaxy mutations
 
 export function createGalaxy(universe: Universe, galaxy: Galaxy): Universe {
-  const validation = validateGalaxy(galaxy, 'New Galaxy');
+  // Auto-generate ID from name if ID is empty or invalid
+  const galaxyWithId = {
+    ...galaxy,
+    id: galaxy.id && galaxy.id.trim() ? galaxy.id : generateId(galaxy.name),
+  };
+  
+  const validation = validateGalaxy(galaxyWithId, 'New Galaxy');
   if (!validation.valid) {
     throw new Error(`Invalid galaxy: ${validation.errors.join(', ')}`);
   }
 
-  if (!isIdUnique(universe, galaxy.id, 'galaxy')) {
-    throw new Error(`Galaxy ID '${galaxy.id}' already exists`);
+  if (!isIdUnique(universe, galaxyWithId.id, 'galaxy')) {
+    throw new Error(`Galaxy ID '${galaxyWithId.id}' already exists`);
   }
 
   return {
     ...universe,
-    galaxies: [...universe.galaxies, galaxy],
+    galaxies: [...universe.galaxies, galaxyWithId],
   };
 }
 

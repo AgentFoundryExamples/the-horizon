@@ -48,13 +48,20 @@ interface Galaxy {
 ```
 
 **Fields:**
-- `id` (required): Unique identifier (kebab-case recommended)
-- `name` (required): Display name
-- `description` (required): Description of the galaxy
-- `theme` (required): Visual theme identifier (e.g., "blue-white", "purple-white")
-- `particleColor` (required): Hex color code for particle effects (e.g., "#4A90E2")
-- `stars` (required): Array of free-floating Star objects
-- `solarSystems` (required): Array of SolarSystem objects
+- `id` (required): Unique identifier (kebab-case recommended). If empty or whitespace, will be auto-generated from the name.
+- `name` (required): Display name. Cannot be empty.
+- `description` (required): Description of the galaxy. Cannot be empty.
+- `theme` (required): Visual theme identifier (e.g., "blue-white", "purple-white"). Cannot be empty.
+- `particleColor` (required): Hex color code for particle effects (e.g., "#4A90E2"). Cannot be empty.
+- `stars` (required): Array of free-floating Star objects (can be empty array)
+- `solarSystems` (required): Array of SolarSystem objects (can be empty array)
+
+**ID Generation:**
+- If the `id` field is empty, whitespace, or not provided, it will be automatically generated from the `name` field
+- Auto-generated IDs are converted to kebab-case (lowercase with hyphens)
+- Unicode characters are normalized (e.g., "Café" → "cafe", "São Paulo" → "sao-paulo")
+- Special characters are removed (e.g., "Galaxy #42!" → "galaxy-42")
+- Multiple spaces are collapsed to single hyphens
 
 ### Star
 
@@ -185,11 +192,35 @@ Themes are arbitrary string identifiers used for visual styling. Common themes:
 
 The application validates all universe data at runtime using the following rules:
 
-1. All required fields must be present and non-empty
-2. IDs must be unique within their scope
-3. Arrays (galaxies, stars, solarSystems, planets, moons) must be valid arrays
-4. Markdown content must not be empty strings
-5. Color codes should be valid hex colors
+1. **Required Fields**: All required fields must be present and non-empty (after trimming whitespace)
+   - Galaxy: `name`, `description`, `theme`, `particleColor`
+   - Solar System: `name`, `theme`, `mainStar`
+   - Star: `name`, `theme`
+   - Planet: `name`, `theme`, `summary`, `contentMarkdown`
+   - Moon: `name`, `contentMarkdown`
+
+2. **ID Validation**:
+   - IDs must be unique within their scope (e.g., all galaxy IDs must be unique)
+   - Empty or whitespace-only IDs will be auto-generated from the entity's name
+   - Auto-generated IDs use kebab-case and handle unicode characters safely
+
+3. **Array Validation**:
+   - Arrays (galaxies, stars, solarSystems, planets, moons) must be valid arrays
+   - Empty arrays are valid (e.g., a galaxy with no solar systems)
+
+4. **Markdown Content**:
+   - Markdown content fields must not be empty strings after trimming
+   - Content is sanitized before rendering to prevent XSS attacks
+
+5. **Color Codes**:
+   - Color codes should be valid hex colors (e.g., "#4A90E2")
+   - The format is not strictly validated but should follow hex color conventions
+
+**Validation Errors:**
+- Validation errors are descriptive and indicate which field and entity failed
+- Client-side validation prevents submission of invalid data with inline error messages
+- Server-side validation rejects invalid payloads with HTTP 400 Bad Request
+- Validation errors include the field name and entity context (e.g., "Galaxy[0] (Milky Way): Galaxy name is required")
 
 **Validation Warnings:**
 - The application will log validation warnings to the console
