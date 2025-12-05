@@ -1,6 +1,6 @@
 {
   "name": "the-horizon",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A 3D interactive universe explorer featuring galaxies, solar systems, planets, and moons.",
   "private": true,
   "scripts": {

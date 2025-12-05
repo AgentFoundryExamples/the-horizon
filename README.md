@@ -19,6 +19,53 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 ## Changelog
 
+### v0.1.1 - Security & Performance Update (December 2024)
+
+*This release includes critical security patches, dependency updates, and minor UI improvements.*
+
+**Security & Dependencies:**
+- 🔒 **Next.js Security Updates**: Upgraded from 14.2.15 to 14.2.33, addressing:
+  - Authorization Bypass in Next.js Middleware (GHSA-f82v-jwr5-mffw, CVSS 9.1)
+  - Cache Key Confusion for Image Optimization API Routes (GHSA-g5qg-72qw-gw5v, CVSS 6.2)
+  - Improper Middleware Redirect Handling Leading to SSRF (GHSA-4342-x723-ch2f, CVSS 6.5)
+  - Content Injection Vulnerability for Image Optimization (GHSA-xv57-4mr9-wg8v, CVSS 4.3)
+  - Race Condition to Cache Poisoning (GHSA-qpjv-v59x-3qc4, CVSS 3.7)
+  - Denial of Service (DoS) with Server Actions (GHSA-7m27-7ghc-44w9, CVSS 5.3)
+  - Information exposure in dev server (GHSA-3h52-269p-cp9r)
+- 🔒 **Glob Vulnerability Fix**: Added npm overrides to force glob@10.5.0 (fixes command injection GHSA-5j98-mcp5-4vw2)
+- ✅ **Zero npm audit vulnerabilities** after all updates
+- 📦 Upgraded eslint-config-next to 14.2.33
+
+**Authentication Improvements:**
+- 🔐 **Edge Runtime Compatibility**: Migrated authentication from Node.js crypto to Web Crypto API
+  - Timing-safe password validation using Web Crypto API primitives
+  - Session tokens signed with HMAC-SHA256 via Web Crypto API
+  - Compatible with Edge Runtime for serverless deployments on Vercel and similar platforms
+  - All 164 tests updated and passing with Web Crypto polyfills
+
+**UI & UX Enhancements:**
+- 🎨 **Welcome Message**: Added context-aware welcome message when exploring galaxies
+  - Responsive typography with fluid scaling using `clamp()`
+  - Accessible with `role="complementary"` and proper ARIA labels
+  - Non-intrusive overlay that doesn't block scene interactions
+- 🎬 **Animation Refinements**: Improved camera transitions and scene animations
+- 🏷️ **Label Behavior**: Enhanced visual feedback for interactive elements
+- 📐 **Scale Tweaks**: Adjusted scene proportions for better visual hierarchy
+
+**Testing & Documentation:**
+- ✅ All 164 unit tests passing
+- 📚 Updated deployment guide with Edge Runtime security details
+- 📚 Enhanced roadmap with complete security update documentation
+- 📚 Added welcome message customization guide to content-authoring.md
+
+**Verification:**
+- ✅ Project builds without errors
+- ✅ All tests pass
+- ✅ Admin authentication working on Edge Runtime
+- ✅ No breaking changes
+
+See [docs/roadmap.md](docs/roadmap.md) for detailed version history and future plans.
+
 ### v0.1.0 - Horizon Launch (December 2024)
 
 *This release establishes the semantic versioning baseline at 0.1.0, representing the first feature-complete iteration before the 1.0 stable release.*
@@ -265,6 +312,7 @@ cp .env.example .env.local
 
 **For Admin Interface**:
 - `ADMIN_PASSWORD` - Password for admin access (min 16 characters recommended)
+- `SESSION_SECRET` - Secret for signing session tokens (generate with `openssl rand -base64 32`)
 - `GITHUB_TOKEN` - Personal access token with `repo` scope
 - `GITHUB_OWNER` - Repository owner (e.g., 'AgentFoundryExamples')
 - `GITHUB_REPO` - Repository name (e.g., 'the-horizon')
@@ -287,6 +335,7 @@ cp .env.example .env.local
 2. Import project in Vercel dashboard
 3. Configure environment variables:
    - `ADMIN_PASSWORD` - Strong password for admin access
+   - `SESSION_SECRET` - Secret for signing session tokens
    - `GITHUB_TOKEN` - GitHub personal access token
    - `GITHUB_OWNER` - Your GitHub username or organization
    - `GITHUB_REPO` - Repository name

@@ -2,7 +2,7 @@
 
 This document outlines the current state of The Horizon, what has been shipped, known limitations, and planned future enhancements.
 
-## Current Release: v0.1.0 (December 2024)
+## Current Release: v0.1.1 (December 2024)
 
 ### ✅ Shipped Features
 
@@ -445,5 +445,5 @@ Have ideas for future features? Here's how to contribute:
 ---
 
 *Last Updated: December 2024*  
-*Version: 0.1.0*  
+*Version: 0.1.1*  
 *Maintained by: Agent Foundry and John Brosnihan*
