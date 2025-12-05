@@ -24,3 +24,50 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+/* Transition Indicator Animations */
+.transition-indicator {
+  animation: fadeIn 0.2s ease-in;
+}
+
+.transition-indicator-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(74, 144, 226, 0.3);
+  border-top-color: #4A90E2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .transition-indicator {
+    animation: none;
+  }
+  
+  .transition-indicator-spinner {
+    animation: none;
+    /* Show a simple circle instead of spinning */
+    border: 2px solid rgba(74, 144, 226, 0.6);
+  }
+}

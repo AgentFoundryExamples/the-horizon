@@ -279,6 +279,222 @@ graph TD
 2. **Galaxy View**: Shows a single galaxy's solar systems and free-floating stars with orbital mechanics
 3. **Solar System View**: (Future) Detailed view of planets and moons
 
+## Transition Indicator
+
+The transition indicator provides visual feedback during navigation between different focus levels. The indicator appears centered on the screen with themed messaging that reinforces the travel narrative.
+
+### Behavior
+
+- **Visibility**: Only renders during active transitions (when `isTransitioning` state is `true`)
+- **Position**: Fixed center of viewport (50% top, 50% left with transform centering)
+- **Duration**: Visible throughout the camera animation (default 1.5 seconds)
+- **Auto-dismiss**: Automatically fades out when transition completes
+
+### Themed Messages
+
+The indicator displays contextual messages based on the destination:
+
+- **Galaxy level**: "Warping to galaxy..."
+- **Solar System level**: "Traveling to system..."
+- **Planet level**: "Landing on surface..."
+- **Default**: "Traveling..."
+
+### Styling
+
+The indicator uses a semi-transparent dark background with blue accent border:
+
+```css
+.transition-indicator {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 1.5rem 2.5rem;
+  background-color: rgba(0, 0, 0, 0.85);
+  border: 2px solid rgba(74, 144, 226, 0.6);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+}
+```
+
+#### Customizing Appearance
+
+To customize the indicator appearance, edit the inline styles in `src/components/SceneHUD.tsx`:
+
+**Change colors:**
+```typescript
+backgroundColor: 'rgba(0, 0, 0, 0.9)',  // Darker background
+border: '2px solid rgba(255, 100, 100, 0.6)',  // Red border
+```
+
+**Adjust size:**
+```typescript
+padding: '2rem 3rem',  // Larger padding
+fontSize: '1.5rem',    // Larger text
+```
+
+**Modify position:**
+```typescript
+top: '40%',  // Position higher on screen
+```
+
+### Animation
+
+The indicator includes two animations:
+
+1. **Fade In**: Smooth entrance with scale effect (0.2s)
+2. **Spinner**: Rotating loading indicator (1s loop)
+
+```css
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+```
+
+### Accessibility
+
+The transition indicator includes comprehensive accessibility features:
+
+#### Screen Reader Support
+
+```html
+<div
+  className="transition-indicator"
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+>
+```
+
+- **`role="status"`**: Indicates this is a status message
+- **`aria-live="polite"`**: Screen readers announce changes when user is idle
+- **`aria-atomic="true"`**: Full message is read (not just changes)
+
+#### Reduced Motion Support
+
+Users with `prefers-reduced-motion` enabled experience:
+
+- **No entrance animation** (instant appearance)
+- **Static spinner** (no rotation animation)
+- **Uniform border** for static visual indicator
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .transition-indicator {
+    animation: none;
+  }
+  
+  .transition-indicator-spinner {
+    animation: none;
+    border-color: rgba(74, 144, 226, 0.6);
+  }
+}
+```
+
+#### Keyboard Navigation
+
+The indicator is non-interactive (`pointer-events: none`) and does not trap keyboard focus, ensuring navigation controls remain accessible during transitions.
+
+### Edge Cases
+
+The indicator handles various edge cases gracefully:
+
+#### Rapid Consecutive Transitions
+
+When users click multiple destinations rapidly, the navigation store queues transitions. The indicator:
+- Remains visible throughout the queue
+- Updates message for each queued transition
+- Never flickers or shows overlapping indicators
+
+#### Server-Side Rendering
+
+On initial server render, `isTransitioning` is `false` by default, so the indicator is not rendered. It only appears for client-side navigation transitions.
+
+#### Route Errors
+
+If a transition fails or is cancelled:
+1. Camera animator completion callback still fires
+2. `finishTransition()` sets `isTransitioning` to `false`
+3. Indicator gracefully hides via conditional rendering
+
+#### Performance
+
+The indicator uses:
+- **Fixed positioning** (no layout reflow)
+- **CSS transforms** for smooth GPU-accelerated animations
+- **Conditional rendering** (completely removed from DOM when not transitioning)
+
+### Customization Examples
+
+#### Change Message Logic
+
+Edit `getTransitionMessage()` in `src/components/SceneHUD.tsx`:
+
+```typescript
+const getTransitionMessage = (focusLevel: FocusLevel): string => {
+  if (focusLevel === 'galaxy') return '🚀 Jumping to lightspeed...';
+  if (focusLevel === 'solar-system') return '🌟 Entering system...';
+  if (focusLevel === 'planet') return '🛸 Approaching surface...';
+  return '✨ Traveling...';
+};
+```
+
+#### Add Custom Styling Classes
+
+Create custom styles in `src/app/globals.css`:
+
+```css
+.transition-indicator.custom-theme {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 2px solid #ffffff;
+}
+```
+
+Then add the class in SceneHUD.tsx:
+```typescript
+className="transition-indicator custom-theme"
+```
+
+#### Disable Backdrop Blur
+
+For better performance on low-end devices:
+```typescript
+backdropFilter: 'none',  // Remove blur effect
+```
+
+### Testing
+
+To test the transition indicator:
+
+1. **Visual appearance**: Click any galaxy/solar system/planet
+2. **Accessibility**: Enable screen reader and verify announcements
+3. **Reduced motion**: Enable in OS settings and verify static animation
+4. **Edge cases**: Rapidly click multiple destinations to test queueing
+
+### Future Enhancements
+
+Potential improvements for the transition indicator:
+
+1. **Progress bar**: Show completion percentage during long transitions
+2. **Destination preview**: Display target name or thumbnail
+3. **Sound effects**: Audio cue for immersive experience
+4. **Custom transitions**: Different animations for forward vs backward navigation
+5. **Loading states**: Integrate with data loading for async content
+
 ## Camera System
 
 ### Camera Animations
