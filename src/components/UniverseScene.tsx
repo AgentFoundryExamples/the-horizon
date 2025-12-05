@@ -175,20 +175,27 @@ function GalaxyParticles({ galaxy, position, onClick, isActive, animationConfig 
         <Html distanceFactor={50} center>
           <div
             style={{
-              background: 'rgba(0, 0, 0, 0.9)',
+              background: 'rgba(0, 0, 0, 0.95)',
               color: '#FFFFFF',
-              padding: '0.5rem 0.75rem',
-              borderRadius: '4px',
-              border: '1px solid rgba(74, 144, 226, 0.5)',
-              fontSize: '0.875rem',
+              padding: '0.75rem 1rem',
+              borderRadius: '8px',
+              border: '2px solid rgba(74, 144, 226, 0.7)',
+              fontSize: '1rem',
               whiteSpace: 'nowrap',
               pointerEvents: 'none',
               userSelect: 'none',
+              boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(4px)',
+              transform: 'translateY(-40px)', // Position above galaxy
+              minWidth: '120px',
+              textAlign: 'center',
             }}
+            role="tooltip"
+            aria-live="polite"
           >
-            <strong>{galaxy.name}</strong>
+            <strong style={{ fontSize: '1.1rem' }}>{galaxy.name}</strong>
             {galaxy.solarSystems && galaxy.solarSystems.length > 0 && (
-              <div style={{ fontSize: '0.75rem', marginTop: '0.25rem', opacity: 0.8 }}>
+              <div style={{ fontSize: '0.85rem', marginTop: '0.25rem', opacity: 0.9 }}>
                 {galaxy.solarSystems.length} solar system{galaxy.solarSystems.length !== 1 ? 's' : ''}
               </div>
             )}

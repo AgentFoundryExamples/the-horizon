@@ -19,8 +19,9 @@
  * Extends the existing GalaxyView with planet interaction
  */
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import type { SolarSystem, Planet } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
@@ -57,6 +58,7 @@ function PlanetMesh({
   totalPlanets: number;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState(false);
 
   // Calculate orbital parameters
   const orbitalData = useMemo(() => {
@@ -107,20 +109,64 @@ function PlanetMesh({
   });
 
   return (
-    <mesh ref={meshRef} onClick={onClick}>
-      <sphereGeometry args={[orbitalData.size, 16, 16]} />
-      <meshStandardMaterial
-        color={
-          planet.theme === 'blue-green'
-            ? '#2E86AB'
-            : planet.theme === 'red'
-            ? '#E63946'
-            : planet.theme === 'earth-like'
-            ? '#4A90E2'
-            : '#CCCCCC'
-        }
-      />
-    </mesh>
+    <>
+      <mesh
+        ref={meshRef}
+        onClick={onClick}
+        onPointerOver={() => setHovered(true)}
+        onPointerOut={() => setHovered(false)}
+      >
+        <sphereGeometry args={[orbitalData.size, 16, 16]} />
+        <meshStandardMaterial
+          color={
+            planet.theme === 'blue-green'
+              ? '#2E86AB'
+              : planet.theme === 'red'
+              ? '#E63946'
+              : planet.theme === 'earth-like'
+              ? '#4A90E2'
+              : '#CCCCCC'
+          }
+        />
+      </mesh>
+      {hovered && meshRef.current && (
+        <Html
+          position={[
+            meshRef.current.position.x,
+            meshRef.current.position.y + orbitalData.size + 1,
+            meshRef.current.position.z,
+          ]}
+          distanceFactor={10}
+          center
+        >
+          <div
+            style={{
+              background: 'rgba(0, 0, 0, 0.95)',
+              color: '#FFFFFF',
+              padding: '0.75rem 1rem',
+              borderRadius: '8px',
+              border: '2px solid rgba(74, 144, 226, 0.7)',
+              fontSize: '0.95rem',
+              whiteSpace: 'nowrap',
+              pointerEvents: 'none',
+              userSelect: 'none',
+              boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(4px)',
+              textAlign: 'center',
+            }}
+            role="tooltip"
+            aria-live="polite"
+          >
+            <strong>{planet.name}</strong>
+            {planet.moons && planet.moons.length > 0 && (
+              <div style={{ fontSize: '0.75rem', marginTop: '0.25rem', opacity: 0.9 }}>
+                {planet.moons.length} moon{planet.moons.length !== 1 ? 's' : ''}
+              </div>
+            )}
+          </div>
+        </Html>
+      )}
+    </>
   );
 }
 
@@ -130,19 +176,56 @@ function PlanetMesh({
 export default function SolarSystemView({ solarSystem, position }: SolarSystemViewProps) {
   const { navigateToPlanet } = useNavigationStore();
   const totalPlanets = (solarSystem.planets || []).length;
+  const [starHovered, setStarHovered] = useState(false);
 
   return (
     <group position={position}>
       {/* Central star */}
-      <mesh>
-        <sphereGeometry args={[STAR_SCALE.RADIUS, 16, 16]} />
-        <meshBasicMaterial color="#FDB813" />
-        <pointLight
-          color="#FDB813"
-          intensity={STAR_SCALE.LIGHT_INTENSITY}
-          distance={STAR_SCALE.LIGHT_DISTANCE}
-        />
-      </mesh>
+      <group>
+        <mesh
+          onPointerOver={() => setStarHovered(true)}
+          onPointerOut={() => setStarHovered(false)}
+        >
+          <sphereGeometry args={[STAR_SCALE.RADIUS, 16, 16]} />
+          <meshBasicMaterial color="#FDB813" />
+          <pointLight
+            color="#FDB813"
+            intensity={STAR_SCALE.LIGHT_INTENSITY}
+            distance={STAR_SCALE.LIGHT_DISTANCE}
+          />
+        </mesh>
+        {starHovered && (
+          <Html
+            position={[0, STAR_SCALE.RADIUS + 1.5, 0]}
+            distanceFactor={10}
+            center
+          >
+            <div
+              style={{
+                background: 'rgba(0, 0, 0, 0.95)',
+                color: '#FFFFFF',
+                padding: '0.75rem 1rem',
+                borderRadius: '8px',
+                border: '2px solid rgba(251, 184, 19, 0.7)',
+                fontSize: '1rem',
+                whiteSpace: 'nowrap',
+                pointerEvents: 'none',
+                userSelect: 'none',
+                boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5)',
+                backdropFilter: 'blur(4px)',
+                textAlign: 'center',
+              }}
+              role="tooltip"
+              aria-live="polite"
+            >
+              <strong>{solarSystem.name}</strong>
+              <div style={{ fontSize: '0.75rem', marginTop: '0.25rem', opacity: 0.9 }}>
+                Star
+              </div>
+            </div>
+          </Html>
+        )}
+      </group>
 
       {/* Planets */}
       {(solarSystem.planets || []).map((planet, index) => (

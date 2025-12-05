@@ -272,6 +272,81 @@ describe('Tooltip', () => {
         unmount();
       });
     });
+
+    it('should support custom offsets', async () => {
+      render(
+        <Tooltip content="Test tooltip" offsetX={10} offsetY={20} delay={0}>
+          <button>Offset test</button>
+        </Tooltip>
+      );
+
+      const trigger = screen.getByText('Offset test').parentElement!;
+      fireEvent.mouseEnter(trigger);
+      jest.advanceTimersByTime(0);
+
+      // Tooltip should be rendered (testing that offsets don't break rendering)
+      await waitFor(() => {
+        expect(screen.getByText('Test tooltip')).toBeInTheDocument();
+      });
+    });
+
+    it('should support custom fontSize', async () => {
+      render(
+        <Tooltip content="Test tooltip" fontSize="1.5rem" delay={0}>
+          <button>Font size test</button>
+        </Tooltip>
+      );
+
+      const trigger = screen.getByText('Font size test').parentElement!;
+      fireEvent.mouseEnter(trigger);
+      jest.advanceTimersByTime(0);
+
+      await waitFor(() => {
+        const tooltip = screen.getByRole('tooltip');
+        expect(tooltip).toBeInTheDocument();
+        // Check that fontSize is applied via style
+        expect(tooltip).toHaveStyle({ fontSize: '1.5rem' });
+      });
+    });
+
+    it('should support custom maxWidth', async () => {
+      render(
+        <Tooltip content="Test tooltip" maxWidth="400px" delay={0}>
+          <button>Max width test</button>
+        </Tooltip>
+      );
+
+      const trigger = screen.getByText('Max width test').parentElement!;
+      fireEvent.mouseEnter(trigger);
+      jest.advanceTimersByTime(0);
+
+      await waitFor(() => {
+        const tooltip = screen.getByRole('tooltip');
+        expect(tooltip).toBeInTheDocument();
+        expect(tooltip).toHaveStyle({ maxWidth: '400px' });
+      });
+    });
+
+    it('should support fixed screen coordinates', async () => {
+      render(
+        <Tooltip
+          content="Test tooltip"
+          screenCoordinates={{ x: 100, y: 200 }}
+          delay={0}
+        >
+          <button>Screen coords test</button>
+        </Tooltip>
+      );
+
+      const trigger = screen.getByText('Screen coords test').parentElement!;
+      fireEvent.mouseEnter(trigger);
+      jest.advanceTimersByTime(0);
+
+      // Tooltip should be rendered with fixed coordinates
+      await waitFor(() => {
+        expect(screen.getByText('Test tooltip')).toBeInTheDocument();
+      });
+    });
   });
 
   describe('Cleanup', () => {
