@@ -21,54 +21,33 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 ### v0.1.1 - Security & Performance Update (December 2024)
 
-*This release includes critical security patches, dependency updates, and minor UI improvements.*
+*This release includes critical security patches, dependency updates, and UI improvements.*
 
-**Security & Dependencies:**
-- 🔒 **Next.js Security Updates**: Upgraded from 14.2.15 to 14.2.33, addressing:
-  - Authorization Bypass in Next.js Middleware (GHSA-f82v-jwr5-mffw, CVSS 9.1)
-  - Cache Key Confusion for Image Optimization API Routes (GHSA-g5qg-72qw-gw5v, CVSS 6.2)
-  - Improper Middleware Redirect Handling Leading to SSRF (GHSA-4342-x723-ch2f, CVSS 6.5)
-  - Content Injection Vulnerability for Image Optimization (GHSA-xv57-4mr9-wg8v, CVSS 4.3)
-  - Race Condition to Cache Poisoning (GHSA-qpjv-v59x-3qc4, CVSS 3.7)
-  - Denial of Service (DoS) with Server Actions (GHSA-7m27-7ghc-44w9, CVSS 5.3)
-  - Information exposure in dev server (GHSA-3h52-269p-cp9r)
-- 🔒 **Glob Vulnerability Fix**: Added npm overrides to force glob@10.5.0 (fixes command injection GHSA-5j98-mcp5-4vw2)
-- ✅ **Zero npm audit vulnerabilities** after all updates
-- 📦 Upgraded eslint-config-next to 14.2.33
+**Key Highlights:**
+- **Security Updates**: Upgraded Next.js from 14.2.15 to 14.2.33, addressing 7 critical vulnerabilities (CVSS up to 9.1)
+- **Edge Runtime Compatibility**: Migrated authentication to Web Crypto API for serverless deployment support
+- **UI Enhancements**: Added context-aware welcome message, improved animations, and enhanced visual feedback
+- **Zero Vulnerabilities**: All npm audit vulnerabilities resolved
 
-**Authentication Improvements:**
-- 🔐 **Edge Runtime Compatibility**: Migrated authentication from Node.js crypto to Web Crypto API
-  - Timing-safe password validation using Web Crypto API primitives
-  - Session tokens signed with HMAC-SHA256 via Web Crypto API
-  - Compatible with Edge Runtime for serverless deployments on Vercel and similar platforms
-  - All 164 tests updated and passing with Web Crypto polyfills
-
-**UI & UX Enhancements:**
-- 🎨 **Welcome Message**: Added context-aware welcome message when exploring galaxies
-  - Responsive typography with fluid scaling using `clamp()`
-  - Accessible with `role="complementary"` and proper ARIA labels
-  - Non-intrusive overlay that doesn't block scene interactions
-- 🎬 **Animation Refinements**: Improved camera transitions and scene animations
-- 🏷️ **Label Behavior**: Enhanced visual feedback for interactive elements
-- 📐 **Scale Tweaks**: Adjusted scene proportions for better visual hierarchy
-
-**Testing & Documentation:**
-- ✅ All 164 unit tests passing
-- 📚 Updated deployment guide with Edge Runtime security details
-- 📚 Enhanced roadmap with complete security update documentation
-- 📚 Added welcome message customization guide to content-authoring.md
-
-**Verification:**
-- ✅ Project builds without errors
-- ✅ All tests pass
-- ✅ Admin authentication working on Edge Runtime
-- ✅ No breaking changes
+**What's New:**
+- Timing-safe password validation using Web Crypto API
+- Session tokens signed with HMAC-SHA256 for enhanced security
+- `SESSION_SECRET` environment variable for independent session signing (recommended for production)
+- Context-aware welcome message when exploring galaxies
+- Improved camera transitions and scene animations
+- Enhanced interactive labels and tooltips
+- Adjusted scene proportions for better visual hierarchy
 
 **Deployment Notes:**
-- ⚠️ **New Environment Variable**: `SESSION_SECRET` is now recommended for enhanced security. Add this to your environment variables (see [.env.example](.env.example)). If not set, the system falls back to using `ADMIN_PASSWORD` (not recommended for production).
-- ℹ️ **Admin Re-login**: Adding `SESSION_SECRET` will invalidate existing admin sessions. Users will need to log in again after deployment.
+- **New Environment Variable**: `SESSION_SECRET` is recommended for enhanced security (see [.env.example](.env.example))
+- **Admin Re-login Required**: Adding `SESSION_SECRET` will invalidate existing sessions
 
-See [docs/roadmap.md](docs/roadmap.md) for detailed version history and future plans.
+**Technical Details:**
+- All 164 unit tests passing with Web Crypto polyfills
+- Build verified with no breaking changes
+- Updated documentation for Edge Runtime security features
+
+See [docs/roadmap.md](docs/roadmap.md) for complete security vulnerability details and version history.
 
 ### v0.1.0 - Horizon Launch (December 2024)
 
