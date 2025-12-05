@@ -358,6 +358,10 @@
                     },
                     {
                       "type": "file",
+                      "name": "persist.test.ts"
+                    },
+                    {
+                      "type": "file",
                       "name": "scale-constants.test.ts"
                     },
                     {
@@ -377,6 +381,10 @@
                 {
                   "type": "file",
                   "name": "mutate.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "persist.ts"
                 },
                 {
                   "type": "file",

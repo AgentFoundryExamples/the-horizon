@@ -63,13 +63,17 @@
       "path": "src/app/api/admin/universe/route.ts",
       "type": "file",
       "external_dependencies": {
-        "stdlib": [],
+        "stdlib": [
+          "fs/promises",
+          "path"
+        ],
         "third-party": [
           "@/../public/universe/universe.json",
           "@/lib/auth",
           "@/lib/crypto",
           "@/lib/github",
           "@/lib/universe/mutate",
+          "@/lib/universe/persist",
           "next/server"
         ]
       }
@@ -224,6 +228,19 @@
       }
     },
     {
+      "id": "src/lib/universe/__tests__/persist.test.ts",
+      "path": "src/lib/universe/__tests__/persist.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [
+          "fs/promises",
+          "os",
+          "path"
+        ],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/universe/__tests__/scale-constants.test.ts",
       "path": "src/lib/universe/__tests__/scale-constants.test.ts",
       "type": "file",
@@ -268,6 +285,19 @@
       "type": "file",
       "external_dependencies": {
         "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/universe/persist.ts",
+      "path": "src/lib/universe/persist.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [
+          "crypto",
+          "fs/promises",
+          "path"
+        ],
         "third-party": []
       }
     },
@@ -355,6 +385,14 @@
       "target": "src/lib/universe/types.ts"
     },
     {
+      "source": "src/lib/universe/__tests__/persist.test.ts",
+      "target": "src/lib/universe/persist.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/persist.test.ts",
+      "target": "src/lib/universe/types.ts"
+    },
+    {
       "source": "src/lib/universe/__tests__/scale-constants.test.ts",
       "target": "src/lib/universe/scale-constants.ts"
     },
@@ -371,6 +409,14 @@
       "target": "src/lib/universe/types.ts"
     },
     {
+      "source": "src/lib/universe/persist.ts",
+      "target": "src/lib/universe/types.ts"
+    },
+    {
+      "source": "src/lib/universe/persist.ts",
+      "target": "src/lib/universe/mutate.ts"
+    },
+    {
       "source": "src/middleware.ts",
       "target": "src/lib/crypto.ts"
     }
@@ -379,6 +425,7 @@
     "stdlib": [
       "crypto",
       "fs/promises",
+      "os",
       "path",
       "util"
     ],
@@ -388,6 +435,7 @@
       "@/lib/crypto",
       "@/lib/github",
       "@/lib/universe/mutate",
+      "@/lib/universe/persist",
       "@testing-library/jest-dom",
       "@testing-library/react",
       "next/headers",
@@ -397,7 +445,7 @@
       "three",
       "zustand"
     ],
-    "stdlib_count": 4,
-    "third-party_count": 13
+    "stdlib_count": 5,
+    "third-party_count": 14
   }
 }
