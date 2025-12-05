@@ -31,6 +31,11 @@ a {
 }
 
 .transition-indicator-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(74, 144, 226, 0.3);
+  border-top-color: #4A90E2;
+  border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
@@ -63,6 +68,6 @@ a {
   .transition-indicator-spinner {
     animation: none;
     /* Show a simple circle instead of spinning */
-    border-color: rgba(74, 144, 226, 0.6);
+    border: 2px solid rgba(74, 144, 226, 0.6);
   }
 }

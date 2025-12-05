@@ -156,13 +156,6 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div
               className="transition-indicator-spinner"
-              style={{
-                width: '16px',
-                height: '16px',
-                border: '2px solid rgba(74, 144, 226, 0.3)',
-                borderTopColor: '#4A90E2',
-                borderRadius: '50%',
-              }}
               aria-hidden="true"
             />
             <span>{getTransitionMessage(focusLevel)}</span>
