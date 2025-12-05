@@ -5,7 +5,7 @@
  * Uses instanced meshes for performance
  */
 
-import { useRef, useMemo, useState } from 'react';
+import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { Galaxy, SolarSystem, Star } from '@/lib/universe/types';
@@ -331,6 +331,11 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
       );
     });
   }, [galaxy.stars]);
+
+  // Reset original positions when galaxy changes to avoid using stale data
+  useEffect(() => {
+    originalPositionsRef.current = null;
+  }, [galaxy]);
 
   // Gentle rotation and particle drift
   useFrame((state) => {

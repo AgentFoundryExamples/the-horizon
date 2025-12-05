@@ -108,8 +108,13 @@ export default function Tooltip({
     hideTooltip();
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (enableTouch) {
+  const handleClick = (e: React.MouseEvent) => {
+    // This check is for touch devices, where we want tap-to-toggle behavior.
+    // 'pointerType' is available on React's synthetic PointerEvents.
+    // We cast the native event to check its type.
+    const isTouchEvent = (e.nativeEvent as PointerEvent).pointerType === 'touch';
+
+    if (enableTouch && isTouchEvent) {
       e.preventDefault();
       if (isVisible) {
         hideTooltip();
@@ -193,7 +198,7 @@ export default function Tooltip({
         onMouseLeave={handleMouseLeave}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        onTouchStart={handleTouchStart}
+        onClick={handleClick}
         style={{ display: 'inline-block', cursor: 'pointer' }}
         tabIndex={0}
         role="button"
