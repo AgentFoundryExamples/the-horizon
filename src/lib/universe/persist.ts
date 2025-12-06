@@ -74,8 +74,11 @@ export async function persistUniverseToFile(
       process.env.UNIVERSE_DATA_PATH || 
       'public/universe/universe.json';
     
+    console.log('[persistUniverseToFile] Persisting to:', targetPath);
+    
     // Validate file path to prevent path traversal attacks
     if (!validateFilePath(targetPath)) {
+      console.error('[persistUniverseToFile] Path validation failed:', targetPath);
       return {
         success: false,
         error: 'Invalid file path: path traversal not allowed',
@@ -83,35 +86,44 @@ export async function persistUniverseToFile(
     }
     
     // Validate before persisting
+    console.log('[persistUniverseToFile] Validating universe data...');
     const validation = validateUniverse(universe);
     if (!validation.valid) {
+      console.error('[persistUniverseToFile] Validation failed:', validation.errors.join(', '));
       return {
         success: false,
         error: `Validation failed: ${validation.errors.join(', ')}`,
       };
     }
+    console.log('[persistUniverseToFile] Validation passed');
 
     // Serialize universe with pretty formatting
     const content = serializeUniverse(universe);
+    console.log('[persistUniverseToFile] Serialized universe, size:', content.length, 'bytes');
 
     // Resolve the absolute path
     const absolutePath = path.resolve(process.cwd(), targetPath);
 
     // Ensure directory exists
     const dir = path.dirname(absolutePath);
+    console.log('[persistUniverseToFile] Ensuring directory exists:', dir);
     await fs.mkdir(dir, { recursive: true });
 
     // Write to file atomically with unique temp file name
     const uniqueSuffix = crypto.randomBytes(8).toString('hex');
     tempPath = `${absolutePath}.tmp.${uniqueSuffix}`;
     
+    console.log('[persistUniverseToFile] Writing to temp file:', tempPath);
     await fs.writeFile(tempPath, content, 'utf-8');
+    
+    console.log('[persistUniverseToFile] Renaming temp file to:', absolutePath);
     await fs.rename(tempPath, absolutePath);
     tempPath = null; // Successfully renamed, no cleanup needed
 
+    console.log('[persistUniverseToFile] Success - file persisted');
     return { success: true };
   } catch (error) {
-    console.error('Error persisting universe to file:', error);
+    console.error('[persistUniverseToFile] Error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -119,6 +131,7 @@ export async function persistUniverseToFile(
   } finally {
     // Ensure temporary file is cleaned up if it still exists
     if (tempPath) {
+      console.log('[persistUniverseToFile] Cleaning up temp file:', tempPath);
       await fs.unlink(tempPath).catch(() => {
         // Ignore errors if file doesn't exist
       });
