@@ -352,16 +352,8 @@ function SceneContent({ galaxies }: SceneContentProps) {
         // Camera should be positioned to frame the planet on the left side
         const planetPos = PLANET_SURFACE_POSITION;
         const targetPos = {
-          position: new THREE.Vector3(
-            planetPos.x + PLANET_CAMERA_OFFSET.x,
-            planetPos.y + PLANET_CAMERA_OFFSET.y,
-            planetPos.z + PLANET_CAMERA_OFFSET.z
-          ),
-          lookAt: new THREE.Vector3(
-            planetPos.x + PLANET_CAMERA_LOOKAT_OFFSET.x,
-            planetPos.y + PLANET_CAMERA_LOOKAT_OFFSET.y,
-            planetPos.z + PLANET_CAMERA_LOOKAT_OFFSET.z
-          ),
+          position: planetPos.clone().add(PLANET_CAMERA_OFFSET),
+          lookAt: planetPos.clone().add(PLANET_CAMERA_LOOKAT_OFFSET),
         };
         
         animatorRef.current = new CameraAnimator(
