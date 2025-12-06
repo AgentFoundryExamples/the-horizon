@@ -116,12 +116,19 @@ describe('Tooltip Constants', () => {
     });
 
     it('should have compact padding smaller than default padding', () => {
-      // Compare padding values (rough comparison since they're strings)
-      const defaultPadding = TOOLTIP_PADDING.DEFAULT.match(/[\d.]+/g)?.map(Number) || [];
-      const compactPadding = TOOLTIP_PADDING.COMPACT.match(/[\d.]+/g)?.map(Number) || [];
-      
-      expect(compactPadding[0]).toBeLessThan(defaultPadding[0]); // vertical
-      expect(compactPadding[1]).toBeLessThan(defaultPadding[1]); // horizontal
+      const parsePadding = (padding: string): [number, number] => {
+        const parts = padding.split(' ').map(p => parseFloat(p.replace('rem', '')));
+        if (parts.length === 2 && !parts.some(isNaN)) {
+          return [parts[0], parts[1]];
+        }
+        return [0, 0];
+      };
+
+      const [defaultVertical, defaultHorizontal] = parsePadding(TOOLTIP_PADDING.DEFAULT);
+      const [compactVertical, compactHorizontal] = parsePadding(TOOLTIP_PADDING.COMPACT);
+
+      expect(compactVertical).toBeLessThan(defaultVertical);
+      expect(compactHorizontal).toBeLessThan(defaultHorizontal);
     });
   });
 });

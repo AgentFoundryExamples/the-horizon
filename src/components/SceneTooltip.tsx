@@ -56,6 +56,20 @@ export default function SceneTooltip({
 }: SceneTooltipProps) {
   if (!visible) return null;
 
+  // Build inline styles only for values that differ from CSS defaults
+  // This allows CSS media queries to work for responsive sizing
+  const inlineStyles: React.CSSProperties = {
+    border: `2px solid ${borderColor}`,
+  };
+  
+  // Only override CSS if custom values provided
+  if (fontSize !== TOOLTIP_TYPOGRAPHY.FONT_SIZE) {
+    inlineStyles.fontSize = fontSize;
+  }
+  if (maxWidth !== TOOLTIP_TYPOGRAPHY.MAX_WIDTH) {
+    inlineStyles.maxWidth = maxWidth;
+  }
+
   return (
     <group position={worldPosition}>
       <Html
@@ -69,18 +83,7 @@ export default function SceneTooltip({
       >
         <div
           className={className ? `scene-tooltip ${className}` : 'scene-tooltip'}
-          style={{
-            fontSize: fontSize,
-            maxWidth: maxWidth,
-            border: `2px solid ${borderColor}`,
-            padding: TOOLTIP_PADDING.DEFAULT,
-            backgroundColor: TOOLTIP_COLORS.BACKGROUND_COLOR,
-            color: TOOLTIP_COLORS.TEXT_COLOR,
-            borderRadius: '8px',
-            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5)',
-            backdropFilter: 'blur(4px)',
-            textAlign: 'center',
-          }}
+          style={inlineStyles}
           role="tooltip"
           aria-live="polite"
         >
