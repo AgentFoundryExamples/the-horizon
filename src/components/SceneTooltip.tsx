@@ -22,7 +22,7 @@ export interface SceneTooltipProps {
   worldPosition: THREE.Vector3;
   /** Whether tooltip is visible */
   visible: boolean;
-  /** Vertical offset in pixels (positive = up) */
+  /** Vertical offset in pixels (negative = up, positive = down, following screen coordinates) */
   offsetY?: number;
   /** Horizontal offset in pixels (positive = right) */
   offsetX?: number;
@@ -68,7 +68,7 @@ export default function SceneTooltip({
         }}
       >
         <div
-          className={`scene-tooltip ${className}`}
+          className={className ? `scene-tooltip ${className}` : 'scene-tooltip'}
           style={{
             fontSize: fontSize,
             maxWidth: maxWidth,
