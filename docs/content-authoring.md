@@ -6,6 +6,8 @@ This guide covers how to create and manage markdown content for planets and moon
 
 The admin interface uses a two-step workflow to ensure content changes are safe and reviewable. This separation provides better control and reliability for managing universe content.
 
+> **Note**: This workflow was restored and stabilized in v0.1.2 (ISS-4). Previous versions had issues with the disk save operation that prevented proper persistence of universe data. See [docs/roadmap.md](./roadmap.md) for complete fix details and troubleshooting steps.
+
 ### Admin Editor Layout
 
 The admin markdown editor has been designed to provide a spacious editing experience:

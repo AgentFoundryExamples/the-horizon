@@ -8,6 +8,8 @@ This document describes the 3D scene controls, camera animations, and performanc
 
 Planet detail pages use a two-column layout that prioritizes textual content while maintaining an engaging 3D visualization. This design ensures markdown content receives appropriate prominence for storytelling while the planet rendering complements the narrative.
 
+> **Note**: This layout was aligned and standardized in v0.1.2 (ISS-5) to ensure consistent 30/70 split across all devices with proper camera positioning. Previous versions had layout inconsistencies that caused poor UX on tablets and mobile. See [docs/roadmap.md](./roadmap.md) for complete fix details.
+
 ### Layout Structure
 
 The planet surface view consists of two main areas:
@@ -2144,6 +2146,8 @@ useEffect(() => {
 ## Standardized Hover Label System
 
 The Horizon uses a unified hover label system across all scenes, ensuring consistent appearance, positioning, and accessibility. All interactive celestial objects use the same `SceneTooltip` component with shared constants for styling.
+
+> **Note**: This system was standardized in v0.1.2 (ISS-6) to resolve inconsistent tooltip styling, sizing, and positioning across different scenes. Previous versions had varying font sizes (0.875rem), inconsistent colors, and tooltips that overlapped objects. See [docs/roadmap.md](./roadmap.md) for complete fix details.
 
 ### Shared Tooltip Constants
 

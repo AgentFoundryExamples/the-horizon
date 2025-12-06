@@ -197,6 +197,8 @@ The admin interface includes multiple layers of security protection:
 
 Understanding the two-step workflow helps troubleshoot issues:
 
+> **Note**: This workflow was restored in v0.1.2 (ISS-4) after critical fixes to the save and commit operations. Previous versions had issues with disk persistence that prevented proper content updates. See [docs/roadmap.md](./roadmap.md) for complete fix details.
+
 ```mermaid
 graph TD
     A[Admin Edits in Browser] --> B[Step 1: Save to Disk]

@@ -2,16 +2,32 @@
 
 This document outlines the current state of The Horizon, what has been shipped, known limitations, and planned future enhancements.
 
-## Current Release: v0.1.2 (December 2024)
+## Current Release: v0.1.2 (December 2025)
 
-This release captures comprehensive documentation improvements and UX refinements completed across recent iterations (ISS-1 through ISS-7). All documentation has been synchronized to reflect the current state of admin workflows, visual enhancements, layout systems, and scaling behaviors.
+This release includes three critical UX fixes that restore and enhance key workflows, plus comprehensive documentation updates. These fixes addressed fundamental usability issues preventing effective content management and exploration.
 
-**Key Improvements Documented:**
-- **Admin Save/Commit Flow**: Two-step workflow with disk save and GitHub commit clearly documented
-- **Layout Refinements**: Planet surface 30/70 split, responsive behavior, accessibility features
-- **Hover States**: Interactive tooltips for galaxies, solar systems, planets, and stars
-- **Galaxy Scaling**: Dynamic size adjustment based on total galaxy count (1-2 to 50+)
-- **Form Validation**: Inline error messages and required field indicators
+**Critical Fixes Shipped:**
+- **Admin Save Flow Restoration (ISS-4)**: Fixed broken two-step save/commit workflow that was failing to persist universe data to disk and GitHub. Added comprehensive logging for troubleshooting.
+- **Planet Layout Alignment (ISS-5)**: Corrected planet surface layout to consistent 30/70 split with proper camera positioning and responsive behavior across all devices.
+- **Hover Label Standardization (ISS-6)**: Unified all tooltips across scenes using shared constants, improved readability (1rem font), and ensured consistent positioning above objects.
+
+**Why Larger Changes Were Acceptable:**
+These fixes required broader changes than typical patches because they addressed critical, user-blocking issues:
+- Admin workflow was completely broken, preventing any content updates via the UI
+- Inconsistent layouts created confusion and poor UX across different viewport sizes  
+- Tooltip variations caused accessibility violations and readability problems across scenes
+
+The larger scope was necessary and acceptable because:
+- Users could not perform core workflows (content editing) without the admin fix
+- Inconsistent layouts damaged trust and usability across different devices
+- Accessibility violations needed immediate resolution to meet standards
+- Partial fixes would have left the application in a worse state
+
+**Documentation Synchronization:**
+- Updated content-authoring.md with complete admin save/commit workflow, troubleshooting steps, and logging details
+- Enhanced visuals.md with planet layout specifications, tooltip constants, and responsive behavior guidelines
+- Synchronized deployment.md with admin workflow monitoring, log filtering, and verification steps
+- Clarified roadmap.md to distinguish completed fixes from planned enhancements
 
 ### ✅ Shipped Features
 
@@ -244,24 +260,37 @@ Before deploying a new version, complete these verification steps:
 
 ## Version History
 
-### v0.1.2 - Documentation and UX Refinements (December 2024)
-- **Documentation Enhancements**:
-  - Complete admin workflow guide with two-step save/commit process
-  - Planet surface layout documentation with responsive design patterns
-  - Galaxy scale system with dynamic sizing based on total count
-  - Enhanced tooltip system with accessibility and positioning documentation
-  - Comprehensive animation tuning and hover state guides
-- **User Experience Documentation**:
-  - Admin editor layout improvements (full-width, flexible height, side-by-side preview)
-  - Enhanced tooltip system (larger text, positioned above objects, no overlap)
-  - Galaxy scaling behavior (automatic sizing from 1-2 galaxies to 50+)
-  - Form validation improvements (inline errors, required field indicators)
-  - Interactive hover labels for all celestial objects
-- **Documentation Synchronization**:
-  - content-authoring.md: Updated with admin save/commit workflow and validation
-  - visuals.md: Enhanced with layout, scaling, and tooltip documentation
-  - deployment.md: Verified Edge Runtime and security features current
-  - roadmap.md: Clarified shipped vs planned features
+### v0.1.2 - Critical UX Fixes and Documentation (December 2025)
+
+**Critical Fixes:**
+- **Admin Save Flow Restoration (ISS-4)**:
+  - Fixed broken two-step save/commit workflow
+  - Resolved `persistUniverseToFile` failures preventing disk writes
+  - Ensured GitHub commit step correctly reads saved data
+  - Added comprehensive logging: `[PATCH /api/admin/universe]`, `[POST /api/admin/universe]`, `[persistUniverseToFile]`
+  - Manual verification steps added to deployment.md
+- **Planet Layout Alignment (ISS-5)**:
+  - Corrected planet surface to consistent 30/70 split (planet left, content right)
+  - Fixed camera positioning with `PLANET_SURFACE_POSITION` and offset constants
+  - Restored responsive behavior for tablet (35/65 split) and mobile (single column)
+  - Enhanced accessibility with proper touch targets (44px desktop, 48px tablet, 52px mobile)
+  - Layout specification documented in visuals.md
+- **Hover Label Standardization (ISS-6)**:
+  - Standardized all tooltips using shared constants in `src/lib/tooltip-constants.ts`
+  - Increased font size from 0.875rem to 1rem for better readability
+  - Positioned tooltips consistently above objects (offsetY: -40px)
+  - Unified colors, padding, borders across all interactive elements
+  - Created `SceneTooltip` component with distance-based scaling
+  - Comprehensive tooltip guidelines added to visuals.md
+
+**Context for Larger Changes:**
+See "Why Larger Changes Were Acceptable" in the Current Release section above for detailed rationale on why these fixes required broader changes than typical patches.
+
+**Documentation Synchronization:**
+- content-authoring.md: Admin save/commit workflow with troubleshooting and logging
+- visuals.md: Planet layout specs, tooltip constants, responsive behavior, verification steps
+- deployment.md: Admin workflow monitoring, log filtering, two-step verification
+- roadmap.md: Clarified completed fixes vs planned enhancements with historical context
 
 ### v0.1.1 - Security & Performance Update (December 2024)
 - **Dependency Security Updates**:
