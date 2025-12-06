@@ -286,13 +286,37 @@ The Horizon includes a password-protected admin interface for editing universe c
 
 ### Using the Admin Interface
 
-1. **Login**: Navigate to `/admin` and enter your admin password
-2. **Edit Content**: Click "Edit" on any galaxy to modify its properties
-3. **Add New Items**: Use the "+" buttons to create new galaxies, solar systems, planets, or moons
-4. **Preview Changes**: Markdown content shows a live preview as you type
-5. **Commit to GitHub**: Write a commit message and choose to either:
+The admin interface uses a **two-step workflow** for safe content management:
+
+**Step 1: Save to Disk**
+1. Navigate to `/admin` and log in with your admin password
+2. Click "Edit" on any galaxy to modify its properties
+3. Make your changes in the editor
+4. Click "Save Changes" to save to memory
+5. Click "💾 Save to Disk" to persist changes to `public/universe/universe.json`
+6. Verify success message appears
+
+**Step 2: Commit to GitHub** (requires GitHub credentials)
+1. Enter a descriptive commit message
+2. Choose to either:
    - Create a Pull Request (recommended for review)
    - Commit directly to the main branch
+3. Click "🔀 Create PR" or "✓ Commit to GitHub"
+4. Changes will be pushed to GitHub and trigger automatic redeployment
+
+**Why Two Steps?**
+- **Safety**: Test changes locally before committing
+- **Flexibility**: Make multiple edits and save incrementally
+- **Review**: Create PRs for team review
+- **Recovery**: Changes persist even if session expires
+
+**Monitoring**:
+- Check server logs for detailed operation tracking
+- Look for `[PATCH /api/admin/universe]` and `[POST /api/admin/universe]` log messages
+- Verify `public/universe/universe.json` was updated locally
+- Check GitHub for commits or PRs
+
+See [docs/content-authoring.md](docs/content-authoring.md) for complete workflow documentation.
 
 ### Manual Content Editing
 
