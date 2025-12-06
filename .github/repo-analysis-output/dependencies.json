@@ -219,6 +219,19 @@
       }
     },
     {
+      "id": "src/lib/universe/__tests__/integration-save-workflow.test.ts",
+      "path": "src/lib/universe/__tests__/integration-save-workflow.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [
+          "fs/promises",
+          "os",
+          "path"
+        ],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/universe/__tests__/mutate.test.ts",
       "path": "src/lib/universe/__tests__/mutate.test.ts",
       "type": "file",
@@ -374,6 +387,18 @@
     },
     {
       "source": "src/lib/universe/__tests__/edge-cases.test.ts",
+      "target": "src/lib/universe/types.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/integration-save-workflow.test.ts",
+      "target": "src/lib/universe/mutate.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/integration-save-workflow.test.ts",
+      "target": "src/lib/universe/persist.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/integration-save-workflow.test.ts",
       "target": "src/lib/universe/types.ts"
     },
     {

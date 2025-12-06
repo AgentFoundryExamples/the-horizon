@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 31,
+  "total_files": 32,
   "files": [
     {
       "schema_version": "2.0",
@@ -81,8 +81,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 7006,
-        "loc": 194,
+        "size_bytes": 10990,
+        "loc": 243,
         "todo_count": 0
       }
     },
@@ -284,6 +284,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/universe/__tests__/integration-save-workflow.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 9960,
+        "loc": 180,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/universe/__tests__/mutate.test.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -389,8 +403,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 4182,
-        "loc": 82,
+        "size_bytes": 5264,
+        "loc": 96,
         "todo_count": 0
       }
     },
