@@ -4,7 +4,7 @@ This guide covers how to create and manage markdown content for planets and moon
 
 ## Admin Workflow: Save vs Commit
 
-The admin interface uses a two-step workflow to ensure content changes are safe and reviewable:
+The admin interface uses a two-step workflow to ensure content changes are safe and reviewable. This separation provides better control and reliability for managing universe content.
 
 ### Admin Editor Layout
 
@@ -18,25 +18,99 @@ The admin markdown editor has been designed to provide a spacious editing experi
 
 The editor provides a comfortable workspace for creating and editing content while maintaining a clear preview of how the markdown will render.
 
+### Two-Step Workflow Overview
+
+```mermaid
+graph LR
+    A[Edit Content] --> B[Save to Disk]
+    B --> C{Test Locally}
+    C -->|Looks Good| D[Commit to GitHub]
+    C -->|Need Changes| A
+    D --> E{Create PR?}
+    E -->|Yes| F[Review & Merge]
+    E -->|No| G[Direct Commit]
+    F --> H[Changes Live]
+    G --> H
+```
+
 ### Step 1: Save to Disk
+
 When you edit universe content (galaxies, solar systems, planets, or moons), your changes are initially stored only in the browser's memory. To persist these changes:
 
-1. Click the **"💾 Save to Disk"** button in the admin interface
-2. This saves your edits to `public/universe/universe.json` on the server
-3. Changes are validated before being written to prevent corrupted data
-4. Your changes are now persisted locally but **not yet committed to version control**
+1. **Make your edits** in the admin interface
+2. **Click "Save Changes"** within the specific editor (galaxy, solar system, planet, or moon)
+3. **Click "💾 Save to Disk"** in the main admin interface
+4. **Verify success**: Look for the green success message "Changes saved to disk successfully"
 
-**Important:** Saving to disk does **not** create a Git commit. Your changes are only saved to the local file system.
+**What happens**:
+- Changes are validated to prevent corrupted data
+- Data is written to `public/universe/universe.json` on the server
+- A new hash is generated for optimistic locking (prevents concurrent edit conflicts)
+- Changes are now persisted locally but **not yet committed to version control**
+
+**API Endpoint**: `PATCH /api/admin/universe`
+
+**Server Logs**:
+```
+[PATCH /api/admin/universe] Request received - saving to disk
+[PATCH /api/admin/universe] Payload parsed - galaxies: 2
+[PATCH /api/admin/universe] Validating universe data...
+[PATCH /api/admin/universe] Validation passed
+[persistUniverseToFile] Persisting to: public/universe/universe.json
+[persistUniverseToFile] Success - file persisted
+[PATCH /api/admin/universe] Success - new hash: a1b2c3d4...
+```
+
+**Manual Verification**:
+```bash
+# Check that the file was updated
+cat public/universe/universe.json | grep "your-change-text"
+
+# Check file modification time
+ls -lh public/universe/universe.json
+```
 
 ### Step 2: Commit to GitHub
+
 After you've saved your changes and verified they work correctly:
 
-1. Enter a descriptive commit message explaining your changes
-2. Choose whether to create a Pull Request (recommended) or commit directly to main
-3. Click **"✓ Commit to GitHub"** or **"🔀 Create PR"**
-4. Your saved changes will be committed to the repository
+1. **Enter a descriptive commit message** explaining your changes
+2. **Choose commit type**:
+   - ✅ Check "Create Pull Request" (recommended for review)
+   - ⬜ Leave unchecked to commit directly to main branch
+3. **Click the appropriate button**:
+   - "🔀 Create PR" if creating a pull request
+   - "✓ Commit to GitHub" if committing directly
+4. **Verify success**: Look for success message with optional PR URL
 
-**Best Practice:** Always test your changes locally before committing to GitHub.
+**What happens**:
+- System reads the saved file from `public/universe/universe.json`
+- Data is validated again before committing
+- Content is pushed to GitHub via API
+- If PR selected: creates branch, commits file, opens PR
+- If direct commit: commits directly to main branch
+- Vercel automatically redeploys when PR is merged or commit is pushed
+
+**API Endpoint**: `POST /api/admin/universe`
+
+**Server Logs**:
+```
+[POST /api/admin/universe] Request received - committing to GitHub
+[POST /api/admin/universe] Reading from file: public/universe/universe.json
+[POST /api/admin/universe] File read successfully, size: 5578 bytes
+[POST /api/admin/universe] Validating persisted data...
+[POST /api/admin/universe] Validation passed
+[POST /api/admin/universe] Pushing to GitHub...
+[POST /api/admin/universe] GitHub push successful: sha: a1b2c3d4, prUrl: https://...
+```
+
+**Manual Verification**:
+```bash
+# Check your GitHub repository
+# - Look for new branch (admin-edit-timestamp)
+# - Look for new PR or commit
+# - Verify changes in public/universe/universe.json
+```
 
 ### Why Two Steps?
 
@@ -44,20 +118,136 @@ This workflow provides several benefits:
 
 - **Safety**: Validate changes before they reach version control
 - **Iteration**: Make multiple edits and save incrementally without cluttering Git history
+- **Testing**: Test your changes locally in the running application before committing
 - **Review**: Create PRs for team review before merging to main
 - **Recovery**: Disk-saved changes persist even if your browser session ends
+- **Rollback**: Easy to discard local changes before committing
+
+### Common Scenarios
+
+**Scenario 1: Quick Fix**
+```
+1. Edit galaxy description
+2. Save to disk
+3. Verify change in UI
+4. Commit directly to main
+```
+
+**Scenario 2: Major Content Update**
+```
+1. Edit multiple galaxies and planets
+2. Save to disk after each major edit
+3. Test navigation and content display
+4. Create PR for team review
+5. Address feedback if needed
+6. Merge PR when approved
+```
+
+**Scenario 3: Experimental Changes**
+```
+1. Edit content experimentally
+2. Save to disk
+3. Preview changes locally
+4. If not satisfied: refresh page to discard
+5. If satisfied: commit to GitHub
+```
 
 ### Error Handling
 
-The admin interface validates all changes before saving:
+The admin interface validates all changes before saving and provides detailed error messages:
 
-- **Validation Errors**: If your universe data is invalid (e.g., missing required fields), you'll see an error message
-  - Required fields are marked with an asterisk (*) in the form
-  - Inline validation messages appear below fields that fail validation
-  - Fix all validation errors before the form can be submitted
-- **Disk Write Failures**: If the server can't write to disk (e.g., out of space), you'll be notified and your in-memory edits preserved
-- **Concurrent Edits**: If another admin modifies the same data, you'll be warned about conflicts and asked to refresh
-- **Authentication**: Unauthenticated or expired sessions will be rejected with clear messaging
+#### Validation Errors
+
+If your universe data is invalid (e.g., missing required fields), you'll see clear error messages:
+
+- **Required fields** are marked with an asterisk (*) in the form
+- **Inline validation messages** appear below fields that fail validation
+- **Fix all validation errors** before the form can be submitted
+- **Server-side validation** also runs when saving to catch any issues
+
+**Example Error Messages**:
+```
+Validation failed: Galaxy name is required, Galaxy description is required
+```
+
+**Server Logs**:
+```
+[PATCH /api/admin/universe] Validation failed: Galaxy[0]: Galaxy name is required
+```
+
+#### Disk Write Failures
+
+If the server can't write to disk, you'll receive actionable error messages:
+
+**Common Causes**:
+- Insufficient disk space
+- File permissions issues
+- File system errors
+
+**Error Message Example**:
+```
+Failed to save universe data to disk
+Error: ENOSPC: no space left on device
+```
+
+**Server Logs**:
+```
+[persistUniverseToFile] Error: Error: ENOSPC: no space left on device
+```
+
+**Resolution**:
+- Check available disk space
+- Verify file permissions on `public/universe/` directory
+- Check server logs for detailed error information
+- Contact system administrator if permissions issue
+
+#### Concurrent Edit Conflicts
+
+If another admin modifies the same data while you're editing, optimistic locking prevents data loss:
+
+**What Happens**:
+1. System detects hash mismatch (file changed since you loaded it)
+2. Returns 409 Conflict error
+3. Your in-memory edits are preserved
+
+**Error Message**:
+```
+Conflict detected: The file has been modified by another user. Please refresh and try again.
+```
+
+**Server Logs**:
+```
+[PATCH /api/admin/universe] Conflict detected - hash mismatch
+```
+
+**Resolution**:
+1. Copy your changes to a safe location (if needed)
+2. Refresh the page to load the latest version
+3. Reapply your changes
+4. Save again
+
+**Prevention**: Use Pull Requests for collaborative editing to review changes before merging
+
+#### Authentication Failures
+
+If your session expires or authentication fails:
+
+**Error Message**:
+```
+Unauthorized
+```
+
+**Server Logs**:
+```
+[PATCH /api/admin/universe] Authentication failed
+```
+
+**Resolution**:
+1. You'll be automatically redirected to `/admin/login`
+2. Log in again with your admin password
+3. Your unsaved changes will be lost - the page will reload
+
+**Prevention**: Save frequently to avoid losing work if your session expires
 
 ## Adding Galaxies
 
