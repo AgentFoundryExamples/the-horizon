@@ -139,6 +139,15 @@
       }
     },
     {
+      "id": "src/lib/__tests__/tooltip-constants.test.ts",
+      "path": "src/lib/__tests__/tooltip-constants.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/animation.ts",
       "path": "src/lib/animation.ts",
       "type": "file",
@@ -198,6 +207,15 @@
         "third-party": [
           "zustand"
         ]
+      }
+    },
+    {
+      "id": "src/lib/tooltip-constants.ts",
+      "path": "src/lib/tooltip-constants.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
       }
     },
     {
@@ -368,6 +386,10 @@
     {
       "source": "src/lib/__tests__/store.test.ts",
       "target": "src/lib/store.ts"
+    },
+    {
+      "source": "src/lib/__tests__/tooltip-constants.test.ts",
+      "target": "src/lib/tooltip-constants.ts"
     },
     {
       "source": "src/lib/auth.ts",

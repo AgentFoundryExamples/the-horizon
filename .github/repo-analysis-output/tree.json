@@ -341,6 +341,10 @@
                 {
                   "type": "file",
                   "name": "store.test.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "tooltip-constants.test.ts"
                 }
               ]
             },
@@ -431,6 +435,10 @@
             {
               "type": "file",
               "name": "store.ts"
+            },
+            {
+              "type": "file",
+              "name": "tooltip-constants.ts"
             }
           ]
         },

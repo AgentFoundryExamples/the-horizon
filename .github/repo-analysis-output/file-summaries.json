@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 32,
+  "total_files": 34,
   "files": [
     {
       "schema_version": "2.0",
@@ -172,6 +172,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/__tests__/tooltip-constants.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 5165,
+        "loc": 107,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/animation.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -251,6 +265,20 @@
       "metrics": {
         "size_bytes": 6732,
         "loc": 167,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/tooltip-constants.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 2209,
+        "loc": 53,
         "todo_count": 0
       }
     },

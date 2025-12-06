@@ -74,7 +74,8 @@
       ├── camera.test.ts
       ├── crypto.test.ts
       ├── github.test.ts
-      └── store.test.ts
+      ├── store.test.ts
+      └── tooltip-constants.test.ts
     ├── universe
       ├── __tests__
         ├── data-service.test.ts
@@ -95,7 +96,8 @@
     ├── camera.ts
     ├── crypto.ts
     ├── github.ts
-    └── store.ts
+    ├── store.ts
+    └── tooltip-constants.ts
   ├── styles
     └── planet.css
   └── middleware.ts
