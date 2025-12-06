@@ -2,7 +2,7 @@
 
 This document outlines the current state of The Horizon, what has been shipped, known limitations, and planned future enhancements.
 
-## Current Release: v0.1.2 (December 2024)
+## Current Release: v0.1.2 (December 2025)
 
 This release includes three critical UX fixes that restore and enhance key workflows, plus comprehensive documentation updates. These fixes addressed fundamental usability issues preventing effective content management and exploration.
 
@@ -16,6 +16,12 @@ These fixes required broader changes than typical patches because they addressed
 - Admin workflow was completely broken, preventing any content updates via the UI
 - Inconsistent layouts created confusion and poor UX across different viewport sizes  
 - Tooltip variations caused accessibility violations and readability problems across scenes
+
+The larger scope was necessary and acceptable because:
+- Users could not perform core workflows (content editing) without the admin fix
+- Inconsistent layouts damaged trust and usability across different devices
+- Accessibility violations needed immediate resolution to meet standards
+- Partial fixes would have left the application in a worse state
 
 **Documentation Synchronization:**
 - Updated content-authoring.md with complete admin save/commit workflow, troubleshooting steps, and logging details
@@ -254,7 +260,7 @@ Before deploying a new version, complete these verification steps:
 
 ## Version History
 
-### v0.1.2 - Critical UX Fixes and Documentation (December 2024)
+### v0.1.2 - Critical UX Fixes and Documentation (December 2025)
 
 **Critical Fixes:**
 - **Admin Save Flow Restoration (ISS-4)**:
@@ -278,16 +284,7 @@ Before deploying a new version, complete these verification steps:
   - Comprehensive tooltip guidelines added to visuals.md
 
 **Context for Larger Changes:**
-These fixes required broader changes than typical patches because they addressed critical, user-blocking issues:
-- Admin workflow was fundamentally broken, preventing content updates via UI
-- Layout inconsistencies created poor UX and accessibility violations across devices
-- Tooltip variations violated WCAG guidelines and caused readability problems
-
-The larger scope was necessary and acceptable because:
-- Users could not perform core workflows (content editing) without the admin fix
-- Inconsistent layouts damaged trust and usability across different devices
-- Accessibility violations needed immediate resolution to meet standards
-- Partial fixes would have left the application in a worse state
+See "Why Larger Changes Were Acceptable" in the Current Release section above for detailed rationale on why these fixes required broader changes than typical patches.
 
 **Documentation Synchronization:**
 - content-authoring.md: Admin save/commit workflow with troubleshooting and logging
