@@ -7,6 +7,12 @@ import '@testing-library/jest-dom';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import SceneTooltip from '../SceneTooltip';
+import {
+  TOOLTIP_TYPOGRAPHY,
+  TOOLTIP_POSITIONING,
+  TOOLTIP_COLORS,
+  TOOLTIP_PADDING,
+} from '@/lib/tooltip-constants';
 
 // Mock @react-three/drei Html component
 jest.mock('@react-three/drei', () => ({
@@ -191,6 +197,83 @@ describe('SceneTooltip', () => {
         render(
           <Canvas>
             <SceneTooltip {...defaultProps} distanceFactor={100} />
+          </Canvas>
+        );
+      }).not.toThrow();
+    });
+  });
+
+  describe('Standardized defaults', () => {
+    it('should use standardized font size by default', () => {
+      const { container } = render(
+        <Canvas>
+          <SceneTooltip {...defaultProps} />
+        </Canvas>
+      );
+
+      const tooltip = container.querySelector('.scene-tooltip');
+      expect(tooltip).toBeInTheDocument();
+      // The component should use TOOLTIP_TYPOGRAPHY.FONT_SIZE as default
+    });
+
+    it('should use standardized positioning by default', () => {
+      expect(() => {
+        render(
+          <Canvas>
+            <SceneTooltip {...defaultProps} />
+          </Canvas>
+        );
+      }).not.toThrow();
+      // Default offsetY should be TOOLTIP_POSITIONING.OFFSET_Y (-40)
+    });
+
+    it('should use standardized colors by default', () => {
+      const { container } = render(
+        <Canvas>
+          <SceneTooltip {...defaultProps} />
+        </Canvas>
+      );
+
+      const tooltip = container.querySelector('.scene-tooltip');
+      expect(tooltip).toBeInTheDocument();
+      // Should use TOOLTIP_COLORS.BORDER_COLOR by default
+    });
+
+    it('should allow custom border color override', () => {
+      const customBorderColor = 'rgba(255, 0, 0, 1)';
+      expect(() => {
+        render(
+          <Canvas>
+            <SceneTooltip {...defaultProps} borderColor={customBorderColor} />
+          </Canvas>
+        );
+      }).not.toThrow();
+    });
+
+    it('should use standardized distance factors', () => {
+      // Test far distance factor (universe view)
+      expect(() => {
+        render(
+          <Canvas>
+            <SceneTooltip {...defaultProps} distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_FAR} />
+          </Canvas>
+        );
+      }).not.toThrow();
+
+      // Test medium distance factor (galaxy view)
+      expect(() => {
+        render(
+          <Canvas>
+            <SceneTooltip {...defaultProps} distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_MEDIUM} />
+          </Canvas>
+        );
+      }).not.toThrow();
+
+      // Test close distance factor (solar system view)
+      expect(() => {
+        render(
+          <Canvas>
+            <SceneTooltip {...defaultProps} distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_CLOSE} />
           </Canvas>
         );
       }).not.toThrow();

@@ -7,7 +7,7 @@
 
 import { useEffect, useRef, useMemo, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Html } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Galaxy } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
@@ -19,9 +19,11 @@ import {
 } from '@/lib/camera';
 import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG as DEFAULT_ANIM_CONFIG } from '@/lib/animation';
 import { calculateGalaxyScaleWithOverride } from '@/lib/universe/scale-constants';
+import { TOOLTIP_POSITIONING, TOOLTIP_TYPOGRAPHY } from '@/lib/tooltip-constants';
 import GalaxyView from './GalaxyView';
 import SolarSystemView from './SolarSystemView';
 import { PlanetSurface3D, PlanetSurfaceOverlay } from './PlanetSurface';
+import SceneTooltip from './SceneTooltip';
 import '../styles/planet.css';
 
 // Planet surface view constants
@@ -182,37 +184,23 @@ function GalaxyParticles({ galaxy, position, onClick, isActive, animationConfig,
           blending={THREE.AdditiveBlending}
         />
       </points>
-      {hovered && (
-        <Html distanceFactor={50} center>
-          <div
-            style={{
-              background: 'rgba(0, 0, 0, 0.95)',
-              color: '#FFFFFF',
-              padding: '0.75rem 1rem',
-              borderRadius: '8px',
-              border: '2px solid rgba(74, 144, 226, 0.7)',
-              fontSize: '1rem',
-              whiteSpace: 'nowrap',
-              pointerEvents: 'none',
-              userSelect: 'none',
-              boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5)',
-              backdropFilter: 'blur(4px)',
-              transform: 'translateY(-40px)', // Position above galaxy
-              minWidth: '120px',
-              textAlign: 'center',
-            }}
-            role="tooltip"
-            aria-live="polite"
-          >
+      
+      {/* Use SceneTooltip component for consistent styling */}
+      <SceneTooltip
+        visible={hovered}
+        worldPosition={position}
+        distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_FAR}
+        content={
+          <>
             <strong style={{ fontSize: '1.1rem' }}>{galaxy.name}</strong>
             {galaxy.solarSystems && galaxy.solarSystems.length > 0 && (
-              <div style={{ fontSize: '0.85rem', marginTop: '0.25rem', opacity: 0.9 }}>
+              <div style={{ fontSize: TOOLTIP_TYPOGRAPHY.SUBTITLE_FONT_SIZE, marginTop: '0.25rem', opacity: 0.9 }}>
                 {galaxy.solarSystems.length} solar system{galaxy.solarSystems.length !== 1 ? 's' : ''}
               </div>
             )}
-          </div>
-        </Html>
-      )}
+          </>
+        }
+      />
     </group>
   );
 }

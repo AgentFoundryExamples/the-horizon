@@ -2141,13 +2141,106 @@ useEffect(() => {
 5. **Ambient Occlusion**: Enhanced depth perception
 6. **VR Support**: Immersive exploration mode
 
-## Enhanced Tooltip System
+## Standardized Hover Label System
 
-The Horizon features an improved tooltip system designed for optimal readability and accessibility in 3D scenes. Tooltips now render larger labels above celestial objects with no overlap.
+The Horizon uses a unified hover label system across all scenes, ensuring consistent appearance, positioning, and accessibility. All interactive celestial objects use the same `SceneTooltip` component with shared constants for styling.
+
+### Shared Tooltip Constants
+
+All tooltip styling is centralized in `src/lib/tooltip-constants.ts`:
+
+```typescript
+import {
+  TOOLTIP_TYPOGRAPHY,
+  TOOLTIP_POSITIONING,
+  TOOLTIP_COLORS,
+  TOOLTIP_PADDING,
+} from '@/lib/tooltip-constants';
+```
+
+**Typography Constants:**
+- `FONT_SIZE`: `'1rem'` - Base font size for all tooltips
+- `FONT_WEIGHT`: `'bold'` - Standard weight for object names
+- `SUBTITLE_FONT_SIZE`: `'0.85rem'` - Smaller size for details
+- `MAX_WIDTH`: `'300px'` - Maximum tooltip width
+
+**Positioning Constants:**
+- `OFFSET_Y`: `-40` - Default vertical offset (pixels above object)
+- `OFFSET_X`: `0` - Default horizontal offset
+- `DISTANCE_FACTOR_FAR`: `50` - For universe view (far zoom)
+- `DISTANCE_FACTOR_MEDIUM`: `30` - For galaxy view (medium zoom)
+- `DISTANCE_FACTOR_CLOSE`: `10` - For solar system view (close zoom)
+
+**Color Constants:**
+- `BORDER_COLOR`: `'rgba(74, 144, 226, 0.7)'` - Default blue border
+- `STAR_BORDER_COLOR`: `'rgba(251, 184, 19, 0.7)'` - Gold for stars
+- `BACKGROUND_COLOR`: `'rgba(0, 0, 0, 0.95)'` - Nearly opaque black
+- `TEXT_COLOR`: `'#FFFFFF'` - Pure white text
+
+**Padding Constants:**
+- `DEFAULT`: `'0.75rem 1rem'` - Standard padding
+- `COMPACT`: `'0.5rem 0.75rem'` - For smaller tooltips
 
 ### Tooltip Components
 
-#### Standard Tooltip Component
+#### SceneTooltip Component (Primary)
+
+The `SceneTooltip` component (`src/components/SceneTooltip.tsx`) is the standard for all 3D scene tooltips:
+
+```typescript
+import SceneTooltip from '@/components/SceneTooltip';
+import { TOOLTIP_POSITIONING, TOOLTIP_COLORS } from '@/lib/tooltip-constants';
+
+<SceneTooltip
+  content="Galaxy name"
+  worldPosition={new THREE.Vector3(0, 10, 0)}
+  visible={isHovered}
+  distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_FAR}
+/>
+```
+
+**Features:**
+- **Standardized defaults**: Uses shared constants automatically
+- **3D-to-2D projection**: Automatically projects 3D world coordinates to screen space
+- **Distance-based scaling**: Uses `distanceFactor` to maintain readability at different zoom levels
+- **Positioned above objects**: Default `offsetY={-40}` renders tooltips above celestial bodies
+- **Non-intrusive**: `pointerEvents: 'none'` ensures tooltips don't block interactions
+- **Consistent styling**: All visual properties match shared constants
+
+**Common Usage Patterns:**
+
+Universe view (galaxies):
+```typescript
+<SceneTooltip
+  visible={hovered}
+  worldPosition={galaxyPosition}
+  distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_FAR}
+  content={<strong>{galaxy.name}</strong>}
+/>
+```
+
+Galaxy view (stars):
+```typescript
+<SceneTooltip
+  visible={hovered}
+  worldPosition={starPosition}
+  distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_MEDIUM}
+  borderColor={TOOLTIP_COLORS.STAR_BORDER_COLOR}
+  content={solarSystem.name}
+/>
+```
+
+Solar system view (planets):
+```typescript
+<SceneTooltip
+  visible={hovered}
+  worldPosition={planetPosition}
+  distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_CLOSE}
+  content={planet.name}
+/>
+```
+
+#### Standard Tooltip Component (2D UI)
 
 The standard `Tooltip` component (`src/components/Tooltip.tsx`) is used for 2D UI elements:
 
@@ -2173,77 +2266,83 @@ import Tooltip from '@/components/Tooltip';
 - **3D coordinate support**: `screenCoordinates` prop for fixed positioning
 - **Accessibility**: Full ARIA support and keyboard navigation
 
-#### SceneTooltip Component
-
-The `SceneTooltip` component (`src/components/SceneTooltip.tsx`) is specialized for 3D Three.js scenes:
-
-```typescript
-import SceneTooltip from '@/components/SceneTooltip';
-
-<SceneTooltip
-  content="Galaxy name"
-  worldPosition={new THREE.Vector3(0, 10, 0)}
-  visible={isHovered}
-  offsetY={-40}
-  distanceFactor={50}
-/>
-```
-
-**Features:**
-- **3D-to-2D projection**: Automatically projects 3D world coordinates to screen space
-- **Distance-based scaling**: Uses `distanceFactor` to maintain readability at different zoom levels
-- **Positioned above objects**: Default `offsetY={-40}` renders tooltips above celestial bodies
-- **Non-intrusive**: `pointerEvents: 'none'` ensures tooltips don't block interactions
-
 ### Tooltip Styling Guidelines
 
 #### Typography
 
-All tooltips use consistent typography for readability:
+All tooltips use standardized typography from shared constants for readability:
 
-```css
-{
-  fontSize: '1rem',           /* Base size (16px) */
-  fontWeight: 'bold',         /* For object names */
-  color: '#FFFFFF',           /* High contrast on dark background */
-  textAlign: 'center',        /* Centered for symmetry */
-}
+```typescript
+import { TOOLTIP_TYPOGRAPHY } from '@/lib/tooltip-constants';
+
+// Standard font size: 1rem (16px)
+fontSize: TOOLTIP_TYPOGRAPHY.FONT_SIZE
+
+// Bold weight for object names
+fontWeight: TOOLTIP_TYPOGRAPHY.FONT_WEIGHT
+
+// Subtitle/detail text: 0.85rem (13.6px)
+fontSize: TOOLTIP_TYPOGRAPHY.SUBTITLE_FONT_SIZE
 ```
 
-**Responsive sizing:**
-- **Desktop**: `1rem` (16px)
-- **Tablet**: `0.9rem` (14.4px)
-- **Mobile**: `0.85rem` (13.6px)
+**Design rationale:**
+- **Desktop**: `1rem` (16px) - Clear and readable at all zoom levels
+- **Tablet**: `0.9rem` (14.4px) - Maintains readability on medium screens
+- **Mobile**: `0.85rem` (13.6px) - Optimized for small screens and touch
+- **Subtitle**: `0.85rem` - Secondary information slightly smaller than main text
 
 #### Color and Contrast
 
-Tooltips meet WCAG 2.1 Level AA contrast requirements:
+All tooltips use standardized colors from shared constants, meeting WCAG 2.1 Level AA contrast requirements:
 
-```css
-{
-  background: 'rgba(0, 0, 0, 0.95)',           /* Nearly opaque black */
-  color: '#FFFFFF',                            /* Pure white text */
-  border: '2px solid rgba(74, 144, 226, 0.7)', /* Blue accent border */
-}
+```typescript
+import { TOOLTIP_COLORS } from '@/lib/tooltip-constants';
+
+// Standard blue border for celestial objects
+borderColor: TOOLTIP_COLORS.BORDER_COLOR
+
+// Gold border for stars and solar systems
+borderColor: TOOLTIP_COLORS.STAR_BORDER_COLOR
+
+// Nearly opaque black background
+backgroundColor: TOOLTIP_COLORS.BACKGROUND_COLOR
+
+// Pure white text
+color: TOOLTIP_COLORS.TEXT_COLOR
 ```
 
 **Contrast ratios:**
-- Text: 21:1 (exceeds AAA requirement of 7:1)
-- Border: Provides visual delineation without affecting text contrast
+- Text on background: 21:1 (exceeds AAA requirement of 7:1)
+- Border provides visual delineation without affecting text contrast
+- Star tooltips use gold border (rgba(251, 184, 19, 0.7)) for visual distinction
 
 #### Visual Effects
 
-Tooltips use modern CSS features for polish:
+Tooltips use standardized styling with modern CSS features:
 
-```css
+```typescript
+import { TOOLTIP_PADDING } from '@/lib/tooltip-constants';
+
+// Standard styling (automatically applied by SceneTooltip)
 {
-  backdropFilter: 'blur(4px)',              /* Subtle blur behind tooltip */
-  boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5)', /* Depth perception */
-  borderRadius: '8px',                       /* Rounded corners */
+  padding: TOOLTIP_PADDING.DEFAULT,          // '0.75rem 1rem'
+  backgroundColor: TOOLTIP_COLORS.BACKGROUND_COLOR,
+  color: TOOLTIP_COLORS.TEXT_COLOR,
+  border: `2px solid ${TOOLTIP_COLORS.BORDER_COLOR}`,
+  borderRadius: '8px',
+  boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5)',
+  backdropFilter: 'blur(4px)',
+  textAlign: 'center',
 }
 ```
 
-**Performance note:** `backdropFilter` can be disabled on low-end devices by removing the property.
+**Design notes:**
+- `backdropFilter: 'blur(4px)'` - Subtle blur behind tooltip for depth
+- `boxShadow` - Provides depth perception and separation from 3D scene
+- `borderRadius: '8px'` - Rounded corners for modern appearance
+- `textAlign: 'center'` - Centered text for symmetry
+
+**Performance note:** `backdropFilter` can be disabled on low-end devices by passing custom styles without the property.
 
 ### Positioning System
 
@@ -2623,32 +2722,86 @@ To test tooltip appearance across browsers:
 
 ### Customization Guide
 
-#### Change Tooltip Colors
+#### Adding Tooltips to New Objects
 
-Edit inline styles in components or create CSS classes:
+When adding hover labels to new celestial objects, follow this pattern:
 
 ```typescript
-// Warm color theme
-{
-  background: 'rgba(40, 20, 0, 0.95)',
-  border: '2px solid rgba(255, 165, 0, 0.7)',
-  color: '#FFA500',
+import SceneTooltip from '@/components/SceneTooltip';
+import { TOOLTIP_POSITIONING, TOOLTIP_COLORS } from '@/lib/tooltip-constants';
+
+function NewCelestialObject({ object, position }: Props) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <group position={position}>
+      <mesh
+        onPointerOver={() => setHovered(true)}
+        onPointerOut={() => setHovered(false)}
+      >
+        <sphereGeometry args={[radius, 32, 32]} />
+        <meshStandardMaterial color={objectColor} />
+      </mesh>
+      
+      <SceneTooltip
+        visible={hovered}
+        worldPosition={position}
+        distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_MEDIUM}
+        content={object.name}
+      />
+    </group>
+  );
 }
+```
+
+**Best practices:**
+1. Always use `SceneTooltip` for 3D objects
+2. Import and use shared constants instead of hardcoded values
+3. Choose appropriate `distanceFactor` based on zoom level:
+   - `DISTANCE_FACTOR_FAR` (50) for universe-scale objects
+   - `DISTANCE_FACTOR_MEDIUM` (30) for galaxy-scale objects
+   - `DISTANCE_FACTOR_CLOSE` (10) for solar system-scale objects
+4. Use `TOOLTIP_COLORS.STAR_BORDER_COLOR` for stars/suns
+5. Use default `TOOLTIP_COLORS.BORDER_COLOR` for other objects
+
+#### Change Tooltip Colors
+
+To customize colors, update the shared constants in `src/lib/tooltip-constants.ts`:
+
+```typescript
+// For app-wide color changes
+export const TOOLTIP_COLORS = {
+  BORDER_COLOR: 'rgba(100, 200, 100, 0.7)', // Green theme
+  STAR_BORDER_COLOR: 'rgba(255, 200, 0, 0.7)', // Brighter gold
+  BACKGROUND_COLOR: 'rgba(0, 0, 0, 0.95)',
+  TEXT_COLOR: '#FFFFFF',
+} as const;
+```
+
+For one-off overrides, pass custom values:
+
+```typescript
+<SceneTooltip
+  {...props}
+  borderColor="rgba(255, 0, 0, 0.7)" // Red border for this specific tooltip
+/>
 ```
 
 #### Adjust Positioning
 
-Modify offset values for different positioning:
+Modify offset values for different positioning needs:
 
 ```typescript
+import { TOOLTIP_POSITIONING } from '@/lib/tooltip-constants';
+
 // Further above object
-offsetY={-60}
+offsetY={TOOLTIP_POSITIONING.OFFSET_Y - 20}  // -60 instead of -40
 
 // To the right of object
 offsetX={40}
 
 // Below object (for top-heavy scenes)
-offsetY={40}
+offsetY={Math.abs(TOOLTIP_POSITIONING.OFFSET_Y)}  // 40 (positive = down)
 ```
 
 #### Change Typography

@@ -678,6 +678,70 @@ When adding new content:
 3. Update this guide if adding new features
 4. Consider accessibility in all changes
 
+## Hover Labels and Tooltips
+
+The Horizon uses a standardized hover label system for all interactive celestial objects. When users hover over galaxies, stars, planets, or moons, consistent tooltips appear above the objects.
+
+### For Content Authors
+
+As a content author, you generally don't need to configure tooltips directly - they are automatically applied to all celestial objects. However, understanding the system helps when:
+
+- **Creating new object types**: Follow the patterns in existing components
+- **Debugging display issues**: Tooltips use object names from `universe.json`
+- **Requesting features**: Understand what's configurable vs. fixed
+
+### Tooltip Behavior
+
+**What appears in tooltips:**
+- **Galaxies**: Name + number of solar systems
+- **Stars**: Solar system name
+- **Planets**: Planet name + number of moons (if any)
+- **Moons**: Moon name
+
+**How they appear:**
+- Positioned 40 pixels above the object
+- Consistent font size (1rem/16px) for readability
+- White text on dark background (21:1 contrast ratio)
+- Blue border for objects, gold border for stars
+
+### Best Practices for Object Names
+
+Since object names appear in tooltips, follow these guidelines:
+
+1. **Keep names concise**: Tooltips have a 300px max width, but shorter is better
+2. **Use proper capitalization**: "Andromeda Galaxy" not "andromeda galaxy"
+3. **Avoid special characters**: Stick to alphanumeric and basic punctuation
+4. **Be descriptive but brief**: "HD 189733 b" is better than "The Hot Jupiter Orbiting HD 189733"
+
+**Example good names:**
+- "Milky Way"
+- "Alpha Centauri"
+- "Earth"
+- "Europa"
+
+**Example names to avoid:**
+- "The Really Amazing Super Duper Galaxy That Has Lots Of Stars" (too long)
+- "galaxy-001" (not descriptive)
+- "M@rx Pl@n3t" (special characters)
+
+### Technical Details
+
+For developers implementing new object types, tooltips are standardized via:
+
+```typescript
+import SceneTooltip from '@/components/SceneTooltip';
+import { TOOLTIP_POSITIONING } from '@/lib/tooltip-constants';
+
+<SceneTooltip
+  visible={isHovered}
+  worldPosition={objectPosition}
+  distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_MEDIUM}
+  content={object.name}
+/>
+```
+
+See [visuals.md](./visuals.md#standardized-hover-label-system) for complete technical documentation.
+
 ---
 
 **Need Help?** Open an issue on GitHub or check the main [README](../README.md) for contact information.
