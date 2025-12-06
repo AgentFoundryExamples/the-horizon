@@ -25,7 +25,9 @@ import path from 'path';
 import os from 'os';
 
 describe('Admin Save Workflow Integration', () => {
-  const testDir = path.join(os.tmpdir(), 'test-workflow');
+  // Use unique directory per test run to ensure isolation
+  const testRunId = `test-workflow-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+  const testDir = path.join(os.tmpdir(), testRunId);
   const testFile = path.join(testDir, 'universe.json');
 
   let testUniverse: Universe;

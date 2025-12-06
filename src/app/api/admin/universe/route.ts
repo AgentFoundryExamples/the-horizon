@@ -44,7 +44,8 @@ export async function GET() {
     const githubData = await fetchCurrentUniverse();
     
     if (githubData) {
-      console.log('[GET /api/admin/universe] Loaded from GitHub, hash:', githubData.hash.substring(0, 8) + '...');
+      const hashPreview = githubData.hash?.substring(0, 8) || 'unknown';
+      console.log('[GET /api/admin/universe] Loaded from GitHub, hash:', hashPreview + '...');
       const { universe, errors } = parseAndValidateUniverse(githubData.content);
       return NextResponse.json({
         universe,
@@ -103,7 +104,8 @@ export async function PATCH(request: NextRequest) {
 
     // Optimistic locking: verify current hash if provided
     if (currentHash) {
-      console.log('[PATCH /api/admin/universe] Checking optimistic lock with hash:', currentHash.substring(0, 8) + '...');
+      const hashPreview = currentHash?.substring(0, 8) || 'unknown';
+      console.log('[PATCH /api/admin/universe] Checking optimistic lock with hash:', hashPreview + '...');
       const targetPath = process.env.UNIVERSE_DATA_PATH || 'public/universe/universe.json';
       const absolutePath = path.resolve(process.cwd(), targetPath);
       
@@ -153,7 +155,8 @@ export async function PATCH(request: NextRequest) {
       const persistedContent = await fs.readFile(absolutePath, 'utf-8');
       const hash = await sha256(persistedContent);
 
-      console.log('[PATCH /api/admin/universe] Success - new hash:', hash.substring(0, 8) + '...');
+      const hashPreview = hash?.substring(0, 8) || 'unknown';
+      console.log('[PATCH /api/admin/universe] Success - new hash:', hashPreview + '...');
       return NextResponse.json({
         success: true,
         message: 'Universe data saved successfully',
@@ -197,7 +200,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const { commitMessage, createPR, currentHash } = await request.json();
-    console.log('[POST /api/admin/universe] Payload:', { commitMessage: commitMessage?.substring(0, 50), createPR, hasHash: !!currentHash });
+    const messagePreview = commitMessage?.substring(0, 50) || '';
+    console.log('[POST /api/admin/universe] Payload:', { commitMessage: messagePreview, createPR, hasHash: !!currentHash });
 
     if (!commitMessage) {
       console.error('[POST /api/admin/universe] No commit message provided');
@@ -240,6 +244,19 @@ export async function POST(request: NextRequest) {
     }
     console.log('[POST /api/admin/universe] Validation passed');
 
+    // Verify hash before committing to prevent race conditions
+    const onDiskHash = await sha256(content);
+    if (currentHash && onDiskHash !== currentHash) {
+      console.warn('[POST /api/admin/universe] Conflict detected - hash mismatch before commit');
+      return NextResponse.json(
+        {
+          error: 'Conflict detected',
+          message: 'The file has been modified since you last saved. Please refresh, re-apply your changes, save, and then commit again.',
+        },
+        { status: 409 }
+      );
+    }
+
     // Push to GitHub
     console.log('[POST /api/admin/universe] Pushing to GitHub...');
     const result = await pushUniverseChanges(
@@ -250,7 +267,8 @@ export async function POST(request: NextRequest) {
     );
 
     if (result.success) {
-      console.log('[POST /api/admin/universe] GitHub push successful:', { sha: result.sha?.substring(0, 8), prUrl: result.prUrl });
+      const shaPreview = result.sha?.substring(0, 8) || 'unknown';
+      console.log('[POST /api/admin/universe] GitHub push successful:', { sha: shaPreview, prUrl: result.prUrl });
       return NextResponse.json({
         success: true,
         message: result.message,

@@ -132,8 +132,12 @@ export async function persistUniverseToFile(
     // Ensure temporary file is cleaned up if it still exists
     if (tempPath) {
       console.log('[persistUniverseToFile] Cleaning up temp file:', tempPath);
-      await fs.unlink(tempPath).catch(() => {
-        // Ignore errors if file doesn't exist
+      await fs.unlink(tempPath).catch((err) => {
+        // Ignore 'file not found' errors, but log others
+        if (err.code !== 'ENOENT') {
+          console.error('[persistUniverseToFile] Failed to clean up temp file:', err);
+          // Not re-throwing to avoid masking the original error
+        }
       });
     }
   }
