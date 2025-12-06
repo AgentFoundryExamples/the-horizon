@@ -19,31 +19,50 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 ## Changelog
 
-### v0.1.2 - Documentation and UX Refinements (December 2024)
+### v0.1.2 - Critical UX Fixes and Documentation (December 2024)
 
-*This release focuses on comprehensive documentation updates and user experience improvements documented throughout the iteration.*
+*This release includes three critical fixes that restore and enhance key workflows, plus comprehensive documentation of all changes.*
 
-**Documentation Enhancements:**
-- **Complete Admin Workflow Documentation**: Detailed two-step save/commit process in content-authoring.md
-- **Layout and Scaling Guides**: Comprehensive planet surface layout documentation with responsive behavior
-- **Galaxy Scale System**: Dynamic galaxy scaling based on total count with full customization guide
-- **Interactive Labels**: Enhanced tooltip system documentation with accessibility features
-- **Visual Scene Controls**: Complete animation tuning and hover state documentation
+**Critical Fixes Implemented:**
 
-**User Experience Improvements:**
-- **Admin Editor Layout**: Full-width markdown editor with flexible height and side-by-side preview
-- **Enhanced Tooltips**: Larger, more readable labels positioned above celestial objects
-- **Improved Validation**: Inline form validation with clear error messages for required fields
-- **Galaxy Scaling**: Automatic size adjustment from sparse (1-2 galaxies) to crowded (50+) universes
-- **Hover States**: Interactive labels for galaxies, solar systems, planets, and stars
+1. **Admin Save Flow Restoration** (ISS-4)
+   - Fixed two-step save/commit workflow to properly persist changes
+   - Resolved disk save operation that was failing to write `universe.json`
+   - Ensured GitHub commit step correctly reads saved data from disk
+   - Added comprehensive logging for troubleshooting save operations
+   - **Verification**: Admin can now save changes locally, then commit to GitHub without data loss
+
+2. **Planet Layout Alignment** (ISS-5)
+   - Aligned planet surface to 30/70 split layout (planet left, content right)
+   - Fixed responsive behavior for tablet and mobile devices
+   - Corrected camera positioning to properly frame planets on left side
+   - Enhanced accessibility with proper touch targets (44-52px minimum)
+   - **Verification**: Planet pages now display with consistent layout across all viewport sizes
+
+3. **Hover Label Standardization** (ISS-6)
+   - Standardized all tooltips across scenes using shared constants
+   - Increased font size from 0.875rem to 1rem for better readability
+   - Positioned tooltips consistently above objects to prevent overlap
+   - Unified colors, padding, and borders across all interactive elements
+   - Added `SceneTooltip` component with distance-based scaling
+   - **Verification**: All celestial objects show consistent, readable labels on hover
+
+**Why These Changes Were Necessary:**
+These fixes addressed critical usability issues that prevented users from effectively managing content and exploring the universe. The scope was larger than typical patches because:
+- Admin workflow was fundamentally broken, preventing content updates
+- Layout inconsistencies created confusing user experiences across devices
+- Tooltip variations caused accessibility and readability problems
 
 **Documentation Updates:**
-- Updated content-authoring.md with admin save/commit workflow and validation details
-- Enhanced visuals.md with planet layout, galaxy scaling, and tooltip system documentation
-- Synchronized deployment.md with current security features and Edge Runtime support
-- Refreshed roadmap.md with completed features and clear shipped vs planned work
+- Updated content-authoring.md with complete admin save/commit workflow and troubleshooting
+- Enhanced visuals.md with planet layout specifications, tooltip system, and responsive behavior
+- Synchronized deployment.md with admin workflow monitoring and log filtering
+- Refreshed roadmap.md to clearly distinguish shipped fixes from planned enhancements
 
-**No Code Changes**: This is a documentation-only release capturing work completed in previous iterations.
+**Testing:**
+- All 164 unit tests updated to reflect new tooltip constants and layout behavior
+- Build verified successful with no breaking changes
+- Manual verification of admin save flow, planet layout, and tooltip standardization across scenes
 
 See [docs/roadmap.md](docs/roadmap.md) for complete feature status and future plans.
 
