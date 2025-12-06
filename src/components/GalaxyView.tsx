@@ -11,7 +11,8 @@ import * as THREE from 'three';
 import type { Galaxy, SolarSystem, Star } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
 import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG } from '@/lib/animation';
-import { Html } from '@react-three/drei';
+import { TOOLTIP_POSITIONING, TOOLTIP_COLORS } from '@/lib/tooltip-constants';
+import SceneTooltip from './SceneTooltip';
 
 interface OrbitRingProps {
   radius: number;
@@ -147,25 +148,13 @@ function PlanetInstance({ solarSystem, systemPosition, animationConfig }: Planet
           <meshBasicMaterial color="#FDB813" />
           <pointLight color="#FDB813" intensity={1} distance={20} />
         </mesh>
-        {hovered === -1 && (
-          <Html distanceFactor={10} center>
-            <div
-              style={{
-                background: 'rgba(0, 0, 0, 0.9)',
-                color: '#FFFFFF',
-                padding: '0.5rem 0.75rem',
-                borderRadius: '4px',
-                border: '1px solid rgba(74, 144, 226, 0.5)',
-                fontSize: '0.875rem',
-                whiteSpace: 'nowrap',
-                pointerEvents: 'none',
-                userSelect: 'none',
-              }}
-            >
-              {solarSystem.name}
-            </div>
-          </Html>
-        )}
+        <SceneTooltip
+          visible={hovered === -1}
+          worldPosition={systemPosition}
+          distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_MEDIUM}
+          borderColor={TOOLTIP_COLORS.STAR_BORDER_COLOR}
+          content={solarSystem.name}
+        />
       </group>
 
       {/* Orbit rings */}
@@ -193,25 +182,12 @@ function PlanetInstance({ solarSystem, systemPosition, animationConfig }: Planet
                 emissiveIntensity={hovered === index ? 0.3 : 0}
               />
             </mesh>
-            {hovered === index && (
-              <Html distanceFactor={10} center>
-                <div
-                  style={{
-                    background: 'rgba(0, 0, 0, 0.9)',
-                    color: '#FFFFFF',
-                    padding: '0.5rem 0.75rem',
-                    borderRadius: '4px',
-                    border: '1px solid rgba(74, 144, 226, 0.5)',
-                    fontSize: '0.875rem',
-                    whiteSpace: 'nowrap',
-                    pointerEvents: 'none',
-                    userSelect: 'none',
-                  }}
-                >
-                  {data.planet.name}
-                </div>
-              </Html>
-            )}
+            <SceneTooltip
+              visible={hovered === index}
+              worldPosition={systemPosition}
+              distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_MEDIUM}
+              content={data.planet.name}
+            />
           </group>
         ))}
       </group>
@@ -261,25 +237,13 @@ function StarInstance({ star, position, animationConfig }: StarInstanceProps) {
           distance={10}
         />
       </mesh>
-      {hovered && (
-        <Html distanceFactor={10} center>
-          <div
-            style={{
-              background: 'rgba(0, 0, 0, 0.9)',
-              color: '#FFFFFF',
-              padding: '0.5rem 0.75rem',
-              borderRadius: '4px',
-              border: '1px solid rgba(74, 144, 226, 0.5)',
-              fontSize: '0.875rem',
-              whiteSpace: 'nowrap',
-              pointerEvents: 'none',
-              userSelect: 'none',
-            }}
-          >
-            {star.name}
-          </div>
-        </Html>
-      )}
+      <SceneTooltip
+        visible={hovered}
+        worldPosition={position}
+        distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_MEDIUM}
+        borderColor={TOOLTIP_COLORS.STAR_BORDER_COLOR}
+        content={star.name}
+      />
     </group>
   );
 }

@@ -8,6 +8,12 @@
 import { ReactNode } from 'react';
 import * as THREE from 'three';
 import { Html } from '@react-three/drei';
+import {
+  TOOLTIP_TYPOGRAPHY,
+  TOOLTIP_POSITIONING,
+  TOOLTIP_COLORS,
+  TOOLTIP_PADDING,
+} from '@/lib/tooltip-constants';
 
 export interface SceneTooltipProps {
   /** Content to display in tooltip */
@@ -40,12 +46,12 @@ export default function SceneTooltip({
   content,
   worldPosition,
   visible,
-  offsetY = -40,
-  offsetX = 0,
-  fontSize = '1rem',
-  maxWidth = '300px',
-  distanceFactor = 50,
-  borderColor = 'rgba(74, 144, 226, 0.7)',
+  offsetY = TOOLTIP_POSITIONING.OFFSET_Y,
+  offsetX = TOOLTIP_POSITIONING.OFFSET_X,
+  fontSize = TOOLTIP_TYPOGRAPHY.FONT_SIZE,
+  maxWidth = TOOLTIP_TYPOGRAPHY.MAX_WIDTH,
+  distanceFactor = TOOLTIP_POSITIONING.DISTANCE_FACTOR_FAR,
+  borderColor = TOOLTIP_COLORS.BORDER_COLOR,
   className = '',
 }: SceneTooltipProps) {
   if (!visible) return null;
@@ -67,6 +73,13 @@ export default function SceneTooltip({
             fontSize: fontSize,
             maxWidth: maxWidth,
             border: `2px solid ${borderColor}`,
+            padding: TOOLTIP_PADDING.DEFAULT,
+            backgroundColor: TOOLTIP_COLORS.BACKGROUND_COLOR,
+            color: TOOLTIP_COLORS.TEXT_COLOR,
+            borderRadius: '8px',
+            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5)',
+            backdropFilter: 'blur(4px)',
+            textAlign: 'center',
           }}
           role="tooltip"
           aria-live="polite"
