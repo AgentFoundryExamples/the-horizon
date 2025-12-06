@@ -412,7 +412,10 @@ The application can be deployed to any platform that supports Next.js.
 - **Mouse Wheel**: Zoom in/out (universe view only)
 - **Click Galaxy**: Transition to galaxy detail view with orbiting solar systems
 - **Click Solar System**: Zoom into solar system with orbiting planets
-- **Click Planet**: Land on planet surface to view markdown content
+- **Click Planet**: Land on planet surface to view markdown content with a two-column layout
+  - Planet renders on the left (30% width) with 3D visualization
+  - Content displays on the right (70% width) with markdown, title, and moon navigation
+  - Layout is fully responsive and adapts to mobile devices
 - **Click Moon (in skybox)**: Hop to moon and view its content
 - **Back Button**: Return to previous level with animated transition
 - **Breadcrumbs**: Navigate hierarchy via top navigation bar

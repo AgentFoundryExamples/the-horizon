@@ -24,6 +24,11 @@ import SolarSystemView from './SolarSystemView';
 import { PlanetSurface3D, PlanetSurfaceOverlay } from './PlanetSurface';
 import '../styles/planet.css';
 
+// Planet surface view constants
+const PLANET_SURFACE_POSITION = new THREE.Vector3(-3, 0, 0);
+const PLANET_CAMERA_OFFSET = new THREE.Vector3(2, 0, 8); // Offset from planet position
+const PLANET_CAMERA_LOOKAT_OFFSET = new THREE.Vector3(1, 0, 0); // Look-at point offset from planet
+
 /**
  * Particle shader for galaxy rendering
  */
@@ -341,31 +346,31 @@ function SceneContent({ galaxies }: SceneContentProps) {
       }
     } else if (focusLevel === 'planet' && focusedPlanetId) {
       // Focus on planet surface
-      const galaxyPos = galaxyPositions.get(focusedGalaxyId || '');
-      if (galaxyPos) {
-        const targetPos = {
-          position: new THREE.Vector3(galaxyPos.x + 5, galaxyPos.y + 3, galaxyPos.z + 5),
-          lookAt: galaxyPos,
-        };
-        
-        animatorRef.current = new CameraAnimator(
-          {
-            position: camera.position.clone(),
-            lookAt: new THREE.Vector3(0, 0, 0),
-          },
-          targetPos,
-          DEFAULT_ANIMATION_CONFIG,
-          true
-        );
+      // Planet is positioned at PLANET_SURFACE_POSITION in absolute world coordinates
+      // Camera should be positioned to frame the planet on the left side
+      const planetPos = PLANET_SURFACE_POSITION;
+      const targetPos = {
+        position: planetPos.clone().add(PLANET_CAMERA_OFFSET),
+        lookAt: planetPos.clone().add(PLANET_CAMERA_LOOKAT_OFFSET),
+      };
+      
+      animatorRef.current = new CameraAnimator(
+        {
+          position: camera.position.clone(),
+          lookAt: new THREE.Vector3(0, 0, 0),
+        },
+        targetPos,
+        DEFAULT_ANIMATION_CONFIG,
+        true
+      );
 
-        animatorRef.current.setOnComplete(() => {
-          finishTransition();
-          animatorRef.current = null;
-        });
+      animatorRef.current.setOnComplete(() => {
+        finishTransition();
+        animatorRef.current = null;
+      });
 
-        if (controlsRef.current) {
-          controlsRef.current.enabled = false;
-        }
+      if (controlsRef.current) {
+        controlsRef.current.enabled = false;
       }
     }
   }, [focusLevel, focusedGalaxyId, focusedSolarSystemId, focusedPlanetId, camera, galaxyPositions, finishTransition]);
@@ -421,7 +426,7 @@ function SceneContent({ galaxies }: SceneContentProps) {
         <PlanetSurface3D
           planet={focusedPlanet}
           solarSystem={focusedSolarSystem}
-          position={new THREE.Vector3(-3, 0, 0)}
+          position={PLANET_SURFACE_POSITION}
         />
       )}
 
