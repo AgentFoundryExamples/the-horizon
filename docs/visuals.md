@@ -30,7 +30,7 @@ The planet surface view consists of two main areas:
 - **Width**: 30% of viewport (max 400px)
 - **Content**: 3D planet rendering with moons in skybox
 - **Planet Size**: Reduced to radius 1.5 units for proportional display
-- **Position**: Left-aligned at (-3, 0, 0) in 3D space relative to galaxy position
+- **Position**: Positioned at (-3, 0, 0) in absolute world coordinates
 - **Camera Setup**: Positioned to frame the planet on the left side of the viewport
   - Camera position: 2 units right, 8 units in front of the planet
   - Look-at point: 1 unit right of planet center
@@ -174,7 +174,7 @@ Edit `src/styles/planet.css`:
 
 #### Changing Planet Position
 
-The planet is positioned using the `PLANET_SURFACE_POSITION` constant (default: `(-3, 0, 0)`) relative to the galaxy position, which places it on the left side of the view. The camera is positioned to frame the planet properly using `PLANET_CAMERA_OFFSET` and `PLANET_CAMERA_LOOKAT_OFFSET`.
+The planet is positioned using the `PLANET_SURFACE_POSITION` constant (default: `(-3, 0, 0)`) in absolute world coordinates, which places it on the left side of the view. The camera is positioned to frame the planet properly using `PLANET_CAMERA_OFFSET` and `PLANET_CAMERA_LOOKAT_OFFSET`.
 
 Edit `src/components/UniverseScene.tsx` to adjust planet position:
 
@@ -194,11 +194,11 @@ const PLANET_SURFACE_POSITION = new THREE.Vector3(3, 0, 0);
 **Camera Offset Configuration:**
 
 ```typescript
-// Camera position relative to planet
-const PLANET_CAMERA_OFFSET = { x: 2, y: 0, z: 8 };
+// Camera position relative to planet (all as THREE.Vector3)
+const PLANET_CAMERA_OFFSET = new THREE.Vector3(2, 0, 8);
 
 // Look-at point relative to planet
-const PLANET_CAMERA_LOOKAT_OFFSET = { x: 1, y: 0, z: 0 };
+const PLANET_CAMERA_LOOKAT_OFFSET = new THREE.Vector3(1, 0, 0);
 ```
 
 The camera is positioned:

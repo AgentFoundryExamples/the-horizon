@@ -26,8 +26,8 @@ import '../styles/planet.css';
 
 // Planet surface view constants
 const PLANET_SURFACE_POSITION = new THREE.Vector3(-3, 0, 0);
-const PLANET_CAMERA_OFFSET = { x: 2, y: 0, z: 8 }; // Offset from planet position
-const PLANET_CAMERA_LOOKAT_OFFSET = { x: 1, y: 0, z: 0 }; // Look-at point offset from planet
+const PLANET_CAMERA_OFFSET = new THREE.Vector3(2, 0, 8); // Offset from planet position
+const PLANET_CAMERA_LOOKAT_OFFSET = new THREE.Vector3(1, 0, 0); // Look-at point offset from planet
 
 /**
  * Particle shader for galaxy rendering
@@ -348,13 +348,9 @@ function SceneContent({ galaxies }: SceneContentProps) {
       // Focus on planet surface
       const galaxyPos = galaxyPositions.get(focusedGalaxyId || '');
       if (galaxyPos) {
-        // Planet is positioned at PLANET_SURFACE_POSITION relative to galaxy
+        // Planet is positioned at PLANET_SURFACE_POSITION in absolute world coordinates
         // Camera should be positioned to frame the planet on the left side
-        const planetPos = new THREE.Vector3(
-          galaxyPos.x + PLANET_SURFACE_POSITION.x,
-          galaxyPos.y + PLANET_SURFACE_POSITION.y,
-          galaxyPos.z + PLANET_SURFACE_POSITION.z
-        );
+        const planetPos = PLANET_SURFACE_POSITION;
         const targetPos = {
           position: new THREE.Vector3(
             planetPos.x + PLANET_CAMERA_OFFSET.x,
