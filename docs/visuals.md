@@ -113,6 +113,13 @@ Respects `prefers-reduced-motion` setting:
 
 ### Edge Cases
 
+#### Camera Positioning Across Viewports
+The camera positioning system ensures the planet remains visible across all viewport sizes:
+- **Desktop**: Planet positioned at (-3, 0, 0), camera at (planetPos.x + 2, planetPos.y, planetPos.z + 8)
+- **Tablet/Mobile**: Same 3D positioning, CSS handles responsive layout with single-column stacking
+- **High-DPI displays**: Camera positioning is resolution-independent, scales correctly
+- **Zoom levels**: Planet remains properly framed due to relative camera positioning
+
 #### Planets Without Markdown
 When a planet has no `contentMarkdown`:
 - Fallback message: "# [Planet Name]\n\nNo content available."
@@ -139,6 +146,13 @@ When a planet has no moons:
 - Content area remains properly sized
 - No empty space where moons would be
 
+#### SSR/Hydration
+Server-rendered markup matches client layout:
+- Camera position set during client-side useEffect
+- No layout shift or flicker on hydration
+- Transition state properly initialized
+- Content overlay renders consistently
+
 ### Customization
 
 #### Adjusting Column Widths
@@ -160,36 +174,37 @@ Edit `src/styles/planet.css`:
 
 #### Changing Planet Position
 
-The planet is positioned at `(-3, 0, 0)` relative to the galaxy position, which places it on the left side of the view. The camera is positioned to frame the planet properly.
+The planet is positioned using the `PLANET_SURFACE_POSITION` constant (default: `(-3, 0, 0)`) relative to the galaxy position, which places it on the left side of the view. The camera is positioned to frame the planet properly using `PLANET_CAMERA_OFFSET` and `PLANET_CAMERA_LOOKAT_OFFSET`.
 
 Edit `src/components/UniverseScene.tsx` to adjust planet position:
 
 ```typescript
+// At the top of the file, update the constants:
+
 // Further left
-position={new THREE.Vector3(-4, 0, 0)}
+const PLANET_SURFACE_POSITION = new THREE.Vector3(-4, 0, 0);
 
 // More centered
-position={new THREE.Vector3(-2, 0, 0)}
+const PLANET_SURFACE_POSITION = new THREE.Vector3(-2, 0, 0);
 
 // Right side
-position={new THREE.Vector3(3, 0, 0)}
+const PLANET_SURFACE_POSITION = new THREE.Vector3(3, 0, 0);
 ```
 
-**Important:** When changing the planet position, also update the camera positioning logic:
+**Camera Offset Configuration:**
 
 ```typescript
-// In UniverseScene.tsx, planet view camera setup
-const planetPos = new THREE.Vector3(galaxyPos.x - 3, galaxyPos.y, galaxyPos.z);
-const targetPos = {
-  position: new THREE.Vector3(planetPos.x + 2, planetPos.y, planetPos.z + 8),
-  lookAt: new THREE.Vector3(planetPos.x + 1, planetPos.y, planetPos.z),
-};
+// Camera position relative to planet
+const PLANET_CAMERA_OFFSET = { x: 2, y: 0, z: 8 };
+
+// Look-at point relative to planet
+const PLANET_CAMERA_LOOKAT_OFFSET = { x: 1, y: 0, z: 0 };
 ```
 
 The camera is positioned:
-- 2 units to the right of the planet
-- 8 units in front of the planet
-- Looking at a point 1 unit to the right of the planet center
+- `PLANET_CAMERA_OFFSET.x` (2) units to the right of the planet
+- `PLANET_CAMERA_OFFSET.z` (8) units in front of the planet
+- Looking at a point `PLANET_CAMERA_LOOKAT_OFFSET.x` (1) unit to the right of the planet center
 
 This ensures the planet appears on the left side of the screen with the content overlay on the right.
 
