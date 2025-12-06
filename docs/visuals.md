@@ -30,7 +30,11 @@ The planet surface view consists of two main areas:
 - **Width**: 30% of viewport (max 400px)
 - **Content**: 3D planet rendering with moons in skybox
 - **Planet Size**: Reduced to radius 1.5 units for proportional display
-- **Position**: Left-aligned at (-3, 0, 0) in 3D space
+- **Position**: Left-aligned at (-3, 0, 0) in 3D space relative to galaxy position
+- **Camera Setup**: Positioned to frame the planet on the left side of the viewport
+  - Camera position: 2 units right, 8 units in front of the planet
+  - Look-at point: 1 unit right of planet center
+  - This ensures the planet is visible on the left with content on the right
 - **Label**: Planet name displayed below visualization
 
 #### Right Column - Content Area
@@ -156,7 +160,9 @@ Edit `src/styles/planet.css`:
 
 #### Changing Planet Position
 
-Edit `src/components/UniverseScene.tsx`:
+The planet is positioned at `(-3, 0, 0)` relative to the galaxy position, which places it on the left side of the view. The camera is positioned to frame the planet properly.
+
+Edit `src/components/UniverseScene.tsx` to adjust planet position:
 
 ```typescript
 // Further left
@@ -168,6 +174,24 @@ position={new THREE.Vector3(-2, 0, 0)}
 // Right side
 position={new THREE.Vector3(3, 0, 0)}
 ```
+
+**Important:** When changing the planet position, also update the camera positioning logic:
+
+```typescript
+// In UniverseScene.tsx, planet view camera setup
+const planetPos = new THREE.Vector3(galaxyPos.x - 3, galaxyPos.y, galaxyPos.z);
+const targetPos = {
+  position: new THREE.Vector3(planetPos.x + 2, planetPos.y, planetPos.z + 8),
+  lookAt: new THREE.Vector3(planetPos.x + 1, planetPos.y, planetPos.z),
+};
+```
+
+The camera is positioned:
+- 2 units to the right of the planet
+- 8 units in front of the planet
+- Looking at a point 1 unit to the right of the planet center
+
+This ensures the planet appears on the left side of the screen with the content overlay on the right.
 
 #### Modifying Planet Size
 

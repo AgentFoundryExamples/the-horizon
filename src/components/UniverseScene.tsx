@@ -343,9 +343,12 @@ function SceneContent({ galaxies }: SceneContentProps) {
       // Focus on planet surface
       const galaxyPos = galaxyPositions.get(focusedGalaxyId || '');
       if (galaxyPos) {
+        // Planet is positioned at (-3, 0, 0) relative to galaxy
+        // Camera should be positioned to frame the planet on the left side
+        const planetPos = new THREE.Vector3(galaxyPos.x - 3, galaxyPos.y, galaxyPos.z);
         const targetPos = {
-          position: new THREE.Vector3(galaxyPos.x + 5, galaxyPos.y + 3, galaxyPos.z + 5),
-          lookAt: galaxyPos,
+          position: new THREE.Vector3(planetPos.x + 2, planetPos.y, planetPos.z + 8),
+          lookAt: new THREE.Vector3(planetPos.x + 1, planetPos.y, planetPos.z),
         };
         
         animatorRef.current = new CameraAnimator(
