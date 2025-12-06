@@ -195,39 +195,112 @@ The admin interface includes multiple layers of security protection:
 
 ## How Admin Changes Work
 
-Understanding the workflow helps troubleshoot issues:
+Understanding the two-step workflow helps troubleshoot issues:
 
 ```mermaid
 graph TD
-    A[Admin Edits in Browser] --> B[Save with Commit Message]
-    B --> C{Create PR?}
-    C -->|Yes| D[GitHub API: Create Branch]
-    D --> E[GitHub API: Commit File]
-    E --> F[GitHub API: Create PR]
-    F --> G[Manual Review & Merge]
-    G --> H[Vercel Redeploys Automatically]
-    C -->|No| I[GitHub API: Commit to Main]
-    I --> H
-    H --> J[Changes Live on Site]
+    A[Admin Edits in Browser] --> B[Step 1: Save to Disk]
+    B --> C[PATCH /api/admin/universe]
+    C --> D[Validate & Write to universe.json]
+    D --> E{Success?}
+    E -->|No| F[Error: Check Logs]
+    E -->|Yes| G[Changes Saved Locally]
+    G --> H[Step 2: Commit to GitHub]
+    H --> I[Enter Commit Message]
+    I --> J{Create PR?}
+    J -->|Yes| K[POST /api/admin/universe]
+    K --> L[GitHub API: Create Branch]
+    L --> M[GitHub API: Commit File]
+    M --> N[GitHub API: Create PR]
+    N --> O[Manual Review & Merge]
+    O --> P[Vercel Redeploys Automatically]
+    J -->|No| Q[POST /api/admin/universe]
+    Q --> R[GitHub API: Commit to Main]
+    R --> P
+    P --> S[Changes Live on Site]
 ```
 
-### Commit Workflow
+### Two-Step Save Workflow
+
+The admin interface uses a **two-step workflow** for safety and flexibility:
+
+**Step 1: Save to Disk (PATCH /api/admin/universe)**
+1. Admin makes changes in the browser
+2. Clicks "💾 Save to Disk"
+3. System validates the universe data
+4. Writes changes to `public/universe/universe.json`
+5. Returns success with new hash for optimistic locking
+6. **Changes are persisted locally but NOT yet in GitHub**
+
+**Step 2: Commit to GitHub (POST /api/admin/universe)**
+1. Admin enters a commit message
+2. Chooses to create a PR or commit directly
+3. System reads the saved file from disk
+4. Validates the content again
+5. Pushes to GitHub via API
+
+**Why Two Steps?**
+- **Safety**: Validate changes before they reach version control
+- **Iteration**: Make multiple edits and save incrementally
+- **Review**: Create PRs for team review before merging
+- **Recovery**: Disk-saved changes persist even if session ends
+- **Testing**: Test changes locally before committing
+
+### Logging and Debugging
+
+The admin save workflow includes comprehensive logging for troubleshooting:
+
+**Server Logs** (visible in server console or deployment logs):
+```
+[GET /api/admin/universe] Request received - fetching universe data
+[GET /api/admin/universe] Loaded local file, galaxies: 2
+[PATCH /api/admin/universe] Request received - saving to disk
+[PATCH /api/admin/universe] Payload parsed - galaxies: 2
+[PATCH /api/admin/universe] Validating universe data...
+[PATCH /api/admin/universe] Validation passed
+[persistUniverseToFile] Persisting to: public/universe/universe.json
+[persistUniverseToFile] Serialized universe, size: 5578 bytes
+[persistUniverseToFile] Success - file persisted
+[PATCH /api/admin/universe] Success - new hash: a1b2c3d4...
+[POST /api/admin/universe] Request received - committing to GitHub
+[POST /api/admin/universe] Reading from file: public/universe/universe.json
+[POST /api/admin/universe] File read successfully, size: 5578 bytes
+[POST /api/admin/universe] GitHub push successful
+```
+
+**Log Filtering**: Use grep to filter logs by operation:
+```bash
+# View all admin save operations
+grep "\[PATCH /api/admin/universe\]" logs.txt
+
+# View all GitHub commit operations
+grep "\[POST /api/admin/universe\]" logs.txt
+
+# View file persistence operations
+grep "\[persistUniverseToFile\]" logs.txt
+```
+
+### Commit Workflow Options
 
 **Option 1: Pull Request (Recommended)**
 1. Admin makes changes in the interface
-2. Clicks "Create PR"
-3. System creates a new branch (e.g., `admin-edit-1234567890`)
-4. Commits changes to the new branch
-5. Opens a Pull Request
-6. Team reviews PR
-7. PR is merged
-8. Vercel automatically redeploys
+2. Clicks "💾 Save to Disk" to persist locally
+3. Enters commit message and checks "Create Pull Request"
+4. Clicks "🔀 Create PR"
+5. System creates a new branch (e.g., `admin-edit-1234567890`)
+6. Commits changes to the new branch
+7. Opens a Pull Request
+8. Team reviews PR
+9. PR is merged
+10. Vercel automatically redeploys
 
 **Option 2: Direct Commit**
 1. Admin makes changes in the interface
-2. Clicks "Commit to GitHub"
-3. System commits directly to main branch
-4. Vercel automatically redeploys
+2. Clicks "💾 Save to Disk" to persist locally
+3. Enters commit message (leave "Create PR" unchecked)
+4. Clicks "✓ Commit to GitHub"
+5. System commits directly to main branch
+6. Vercel automatically redeploys
 
 ## Automatic Redeployment
 
@@ -258,26 +331,98 @@ After deployment, verify everything works:
 4. Should redirect to admin dashboard
 5. Verify stats are displayed correctly
 
-### 3. Test Admin Functionality
+### 3. Test Admin Save Workflow
 
+#### Step 1: Save to Disk
 1. Click "Edit" on a galaxy
 2. Make a small change (e.g., update description)
-3. Save changes
-4. Add a commit message
-5. Choose "Create Pull Request"
-6. Verify the PR is created on GitHub
+3. Click "Save Changes" in the editor
+4. Click "💾 Save to Disk" in the main interface
+5. Verify success message appears
+6. **Verify locally**: Check that `public/universe/universe.json` has been updated
+   ```bash
+   # In development
+   cat public/universe/universe.json | grep "your-change"
+   ```
+
+#### Step 2: Commit to GitHub
+1. Enter a commit message (e.g., "Update galaxy description")
+2. Check "Create Pull Request" (recommended)
+3. Click "🔀 Create PR" (or "✓ Commit to GitHub" if not creating PR)
+4. Verify success message with PR URL appears
 
 ### 4. Verify GitHub Integration
 
 1. Go to your GitHub repository
 2. Check for the new branch (e.g., `admin-edit-1234567890`)
 3. Check for the new Pull Request
-4. Review the changes in the PR
+4. Review the changes in the PR - verify `public/universe/universe.json` was updated
 5. Merge the PR
-6. Wait for Vercel to redeploy
+6. Wait for Vercel to redeploy (usually 1-3 minutes)
 7. Verify changes appear on the production site
 
+### 5. Monitor Logs
+
+**In Development**:
+Watch the server console for log messages:
+```
+[PATCH /api/admin/universe] Request received - saving to disk
+[persistUniverseToFile] Success - file persisted
+[POST /api/admin/universe] GitHub push successful
+```
+
+**In Production (Vercel)**:
+1. Go to your Vercel project
+2. Click on "Deployments"
+3. Click on the most recent deployment
+4. Click "View Function Logs"
+5. Filter for `/api/admin/universe` to see save/commit operations
+
+**Common Log Messages**:
+- `Authentication failed`: Check ADMIN_PASSWORD
+- `Validation failed`: Fix validation errors in form
+- `No saved data found`: Must save to disk before committing
+- `GitHub push failed`: Check GITHUB_TOKEN and permissions
+
 ## Troubleshooting
+
+### Admin Save Workflow Issues
+
+**Symptom**: "Failed to save changes" error
+
+**Solutions**:
+1. **Check server logs** for detailed error messages:
+   - Development: Check terminal running `npm run dev`
+   - Production: Check Vercel function logs
+2. **Look for specific log messages**:
+   - `[PATCH /api/admin/universe] Validation failed`: Fix validation errors displayed in UI
+   - `[persistUniverseToFile] Error`: Check file permissions or disk space
+   - `path traversal not allowed`: Don't modify UNIVERSE_DATA_PATH
+3. **Verify file permissions**: Ensure server can write to `public/universe/` directory
+4. **Check disk space**: Ensure adequate space for writing files
+5. **Try again**: Temporary file system issues may resolve on retry
+
+**Symptom**: Changes saved but not appearing after commit
+
+**Solutions**:
+1. **Verify two-step process**: Must save to disk BEFORE committing
+2. **Check commit logs**:
+   ```
+   [POST /api/admin/universe] No saved data found
+   ```
+   This means you didn't save to disk first - click "💾 Save to Disk"
+3. **Verify file was written**: Check `public/universe/universe.json` locally
+4. **Check GitHub**: Verify commit or PR was created
+5. **Wait for deployment**: Vercel takes 1-3 minutes to redeploy
+
+**Symptom**: "Conflict detected" error when saving
+
+**Solutions**:
+- Another admin modified the file concurrently
+- Click browser refresh to load latest version
+- Reapply your changes
+- Save again
+- This is expected behavior (optimistic locking)
 
 ### Admin Login Fails
 
