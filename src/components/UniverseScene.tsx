@@ -346,34 +346,31 @@ function SceneContent({ galaxies }: SceneContentProps) {
       }
     } else if (focusLevel === 'planet' && focusedPlanetId) {
       // Focus on planet surface
-      const galaxyPos = galaxyPositions.get(focusedGalaxyId || '');
-      if (galaxyPos) {
-        // Planet is positioned at PLANET_SURFACE_POSITION in absolute world coordinates
-        // Camera should be positioned to frame the planet on the left side
-        const planetPos = PLANET_SURFACE_POSITION;
-        const targetPos = {
-          position: planetPos.clone().add(PLANET_CAMERA_OFFSET),
-          lookAt: planetPos.clone().add(PLANET_CAMERA_LOOKAT_OFFSET),
-        };
-        
-        animatorRef.current = new CameraAnimator(
-          {
-            position: camera.position.clone(),
-            lookAt: new THREE.Vector3(0, 0, 0),
-          },
-          targetPos,
-          DEFAULT_ANIMATION_CONFIG,
-          true
-        );
+      // Planet is positioned at PLANET_SURFACE_POSITION in absolute world coordinates
+      // Camera should be positioned to frame the planet on the left side
+      const planetPos = PLANET_SURFACE_POSITION;
+      const targetPos = {
+        position: planetPos.clone().add(PLANET_CAMERA_OFFSET),
+        lookAt: planetPos.clone().add(PLANET_CAMERA_LOOKAT_OFFSET),
+      };
+      
+      animatorRef.current = new CameraAnimator(
+        {
+          position: camera.position.clone(),
+          lookAt: new THREE.Vector3(0, 0, 0),
+        },
+        targetPos,
+        DEFAULT_ANIMATION_CONFIG,
+        true
+      );
 
-        animatorRef.current.setOnComplete(() => {
-          finishTransition();
-          animatorRef.current = null;
-        });
+      animatorRef.current.setOnComplete(() => {
+        finishTransition();
+        animatorRef.current = null;
+      });
 
-        if (controlsRef.current) {
-          controlsRef.current.enabled = false;
-        }
+      if (controlsRef.current) {
+        controlsRef.current.enabled = false;
       }
     }
   }, [focusLevel, focusedGalaxyId, focusedSolarSystemId, focusedPlanetId, camera, galaxyPositions, finishTransition]);
