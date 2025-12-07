@@ -433,9 +433,9 @@ describe('Scale Constants', () => {
       const scale5to6 = Math.abs(calculateGalaxyScale(6).maxRadius - calculateGalaxyScale(5).maxRadius);
       const scale20to21 = Math.abs(calculateGalaxyScale(21).maxRadius - calculateGalaxyScale(20).maxRadius);
       
-      // Both transitions should be relatively smooth
-      expect(scale5to6).toBeLessThan(1.5);
-      expect(scale20to21).toBeLessThan(0.5);
+      // Both transitions should be relatively smooth (adjusted for larger scale)
+      expect(scale5to6).toBeLessThan(2.0);
+      expect(scale20to21).toBeLessThan(0.7);
     });
   });
 
@@ -501,8 +501,8 @@ describe('Scale Constants', () => {
     it('should handle sparse universe (1 galaxy)', () => {
       const scale = calculateGalaxyScale(1);
       
-      // Single galaxy should fill canvas nicely
-      expect(scale.maxRadius).toBeGreaterThan(10);
+      // Single galaxy should fill canvas nicely (increased from 10 to 15)
+      expect(scale.maxRadius).toBeGreaterThan(15);
       expect(scale.maxRadius).toBeLessThanOrEqual(GALAXY_SCALE.MAX_RADIUS);
     });
 
@@ -525,8 +525,8 @@ describe('Scale Constants', () => {
       const scale = calculateGalaxyScale(100);
       
       // Even at minimum, should be large enough to click
-      // Assuming ~50px per unit at default zoom, 4 units = ~200px diameter
-      expect(scale.maxRadius).toBeGreaterThanOrEqual(4);
+      // Assuming ~50px per unit at default zoom, 6 units = ~300px diameter
+      expect(scale.maxRadius).toBeGreaterThanOrEqual(6);
     });
 
     it('should prevent overlaps with grid layout', () => {
@@ -534,9 +534,9 @@ describe('Scale Constants', () => {
       const galaxyCount = 10;
       const scale = calculateGalaxyScale(galaxyCount);
       const cols = Math.ceil(Math.sqrt(galaxyCount));
-      const spacing = 30; // From UniverseScene.tsx
+      const spacing = 50; // Updated from 30 to accommodate larger galaxies
       
-      // Galaxy radius should be less than half the spacing
+      // Galaxy diameter should be less than spacing
       expect(scale.maxRadius * 2).toBeLessThan(spacing);
     });
   });

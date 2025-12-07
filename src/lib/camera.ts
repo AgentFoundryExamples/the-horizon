@@ -63,14 +63,18 @@ export interface CameraPosition {
 
 /**
  * Default camera positions for different focus levels
+ * Adjusted for improved galaxy focus with increased galaxy scale
  */
 export const DEFAULT_CAMERA_POSITIONS = {
   universe: {
-    position: new THREE.Vector3(0, 50, 100),
+    // Pulled back further to accommodate larger galaxies (MAX_RADIUS increased to 22)
+    // Increased Z from 100 to 130 for better framing of the universe view
+    position: new THREE.Vector3(0, 60, 130),
     lookAt: new THREE.Vector3(0, 0, 0),
   },
   galaxy: {
-    position: new THREE.Vector3(0, 20, 40),
+    // Slightly adjusted to maintain good framing for individual galaxy focus
+    position: new THREE.Vector3(0, 25, 50),
     lookAt: new THREE.Vector3(0, 0, 0),
   },
   solarSystem: {

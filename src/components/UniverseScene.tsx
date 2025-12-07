@@ -233,7 +233,9 @@ function SceneContent({ galaxies }: SceneContentProps) {
   // Position galaxies in a grid
   const galaxyPositions = useMemo(() => {
     const positions = new Map<string, THREE.Vector3>();
-    const spacing = 30;
+    // Spacing increased to 50 units to accommodate larger galaxy sizes (max diameter ~44 units)
+    // This ensures adequate separation even with maximum-sized galaxies
+    const spacing = 50;
     const cols = Math.ceil(Math.sqrt(galaxies.length));
 
     galaxies.forEach((galaxy, index) => {
@@ -286,7 +288,8 @@ function SceneContent({ galaxies }: SceneContentProps) {
       // Focus on specific galaxy
       const galaxyPos = galaxyPositions.get(focusedGalaxyId);
       if (galaxyPos) {
-        const targetPos = calculateFocusPosition(galaxyPos, 25, 35);
+        // Adjusted distance to accommodate larger galaxies (previously 25, 35)
+        const targetPos = calculateFocusPosition(galaxyPos, 35, 40);
         
         animatorRef.current = new CameraAnimator(
           {
@@ -424,8 +427,8 @@ function SceneContent({ galaxies }: SceneContentProps) {
         enabled={!isTransitioning && focusLevel === 'universe'}
         enableDamping
         dampingFactor={0.05}
-        minDistance={20}
-        maxDistance={200}
+        minDistance={30}
+        maxDistance={250}
         maxPolarAngle={Math.PI / 2}
       />
     </>
@@ -451,7 +454,7 @@ export default function UniverseScene({ galaxies }: UniverseSceneProps) {
     <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
       <Canvas
         camera={{
-          position: [0, 50, 100],
+          position: [0, 60, 130],
           fov: 75,
         }}
         style={{ background: '#000000' }}
