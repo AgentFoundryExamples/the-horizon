@@ -61,7 +61,15 @@ export async function GET(request: NextRequest) {
           source: 'github',
         });
       } else {
-        console.warn('[GET /api/admin/universe] GitHub sync requested but unavailable, falling back to local');
+        // Explicit GitHub sync failed - return error instead of falling back
+        console.error('[GET /api/admin/universe] Explicit GitHub sync failed');
+        return NextResponse.json(
+          { 
+            error: 'GitHub sync failed',
+            message: 'Unable to sync from GitHub. Check GitHub configuration and network connectivity.'
+          },
+          { status: 503 }
+        );
       }
     }
 
@@ -70,13 +78,23 @@ export async function GET(request: NextRequest) {
     const targetPath = process.env.UNIVERSE_DATA_PATH || 'public/universe/universe.json';
     const absolutePath = path.resolve(process.cwd(), targetPath);
     
-    let content: string;
     try {
-      content = await fs.readFile(absolutePath, 'utf-8');
+      const content = await fs.readFile(absolutePath, 'utf-8');
       console.log('[GET /api/admin/universe] Local file read successfully');
+      const hash = await sha256(content);
+      const { universe, errors } = parseAndValidateUniverse(content);
+      const hashPreview = hash?.substring(0, 8) || 'unknown';
+      console.log('[GET /api/admin/universe] Loaded local file, hash:', hashPreview + '...', 'galaxies:', universe.galaxies.length);
+      return NextResponse.json({
+        universe,
+        hash,
+        validationErrors: errors,
+        source: 'local',
+      });
     } catch (error) {
       // If local file doesn't exist, try GitHub as fallback
-      console.warn('[GET /api/admin/universe] Local file not found, attempting GitHub fallback');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.warn('[GET /api/admin/universe] Local file read failed:', errorMessage, 'Attempting GitHub fallback');
       const githubData = await fetchCurrentUniverse();
       
       if (githubData) {
@@ -94,21 +112,19 @@ export async function GET(request: NextRequest) {
       
       // Last resort: use imported data
       console.warn('[GET /api/admin/universe] Both local file and GitHub unavailable, using imported data');
-      content = JSON.stringify(universeData, null, 2);
+      const content = JSON.stringify(universeData, null, 2);
+      const hash = await sha256(content);
+      const { universe, errors } = parseAndValidateUniverse(content);
+      const hashPreview = hash?.substring(0, 8) || 'unknown';
+      console.log('[GET /api/admin/universe] Loaded imported data, hash:', hashPreview + '...', 'galaxies:', universe.galaxies.length);
+      return NextResponse.json({
+        universe,
+        hash,
+        validationErrors: errors,
+        source: 'default',
+        warning: 'Local file and GitHub unavailable, loaded default data',
+      });
     }
-
-    const hash = await sha256(content);
-    const { universe, errors } = parseAndValidateUniverse(content);
-
-    const hashPreview = hash?.substring(0, 8) || 'unknown';
-    console.log('[GET /api/admin/universe] Loaded local file, hash:', hashPreview + '...', 'galaxies:', universe.galaxies.length);
-    
-    return NextResponse.json({
-      universe,
-      hash,
-      validationErrors: errors,
-      source: 'local',
-    });
   } catch (error) {
     console.error('[GET /api/admin/universe] Unexpected error:', error);
     return NextResponse.json(

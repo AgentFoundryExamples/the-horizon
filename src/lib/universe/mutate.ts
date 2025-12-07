@@ -109,7 +109,7 @@ export function getAllIds(universe: Universe, type: 'galaxy' | 'solarSystem' | '
  */
 export function ensureGalaxyId(galaxy: Galaxy): Galaxy {
   if (!galaxy.name || !galaxy.name.trim()) {
-    throw new Error('Galaxy name is required to generate ID');
+    throw new Error('Galaxy name is required');
   }
   
   const id = galaxy.id?.trim();
