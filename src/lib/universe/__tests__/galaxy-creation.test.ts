@@ -199,7 +199,7 @@ describe('Galaxy Creation Edge Cases', () => {
         solarSystems: [],
       };
 
-      expect(() => createGalaxy(testUniverse, invalidGalaxy)).toThrow('Invalid galaxy');
+      expect(() => createGalaxy(testUniverse, invalidGalaxy)).toThrow('Galaxy name is required');
     });
 
     it('should reject galaxy with empty description', () => {

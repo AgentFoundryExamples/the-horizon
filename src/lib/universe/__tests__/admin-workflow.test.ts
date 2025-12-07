@@ -9,7 +9,18 @@ import type { Universe } from '../types';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
-import { sha256 } from '@/lib/crypto';
+
+// Mock sha256 for testing since Web Crypto API is not available in Jest
+jest.mock('@/lib/crypto', () => ({
+  sha256: jest.fn((data: string) => {
+    // Create a simple but deterministic hash based on content
+    // Use a basic checksum that changes with content
+    const crypto = require('crypto');
+    return Promise.resolve(crypto.createHash('sha256').update(data).digest('hex'));
+  }),
+}));
+
+const { sha256 } = require('@/lib/crypto');
 
 describe('Admin API Persistence Workflow', () => {
   const testRunId = `test-api-${Date.now()}-${Math.random().toString(36).substring(7)}`;
