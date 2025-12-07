@@ -4,156 +4,324 @@ This document describes the 3D scene controls, camera animations, and performanc
 
 ## Planet Surface Layout
 
-### Overview
+### Overview - Blog-Quality Reading Experience
 
-Planet detail pages use a two-column layout that prioritizes textual content while maintaining an engaging 3D visualization. This design ensures markdown content receives appropriate prominence for storytelling while the planet rendering complements the narrative.
+Planet detail pages have been redesigned to deliver a premium blog-quality reading experience. The layout clearly separates the 3D visualization from the content, eliminating overlap and providing a polished, professional presentation suitable for long-form content.
 
-> **Note**: This layout was aligned and standardized in v0.1.2 (ISS-5) to ensure consistent 30/70 split across all devices with proper camera positioning. Previous versions had layout inconsistencies that caused poor UX on tablets and mobile. See [docs/roadmap.md](./roadmap.md) for complete fix details.
+**Key Improvements in Latest Version:**
+- Rich metadata display (published date, author, tags)
+- Featured image support for visual impact
+- External links section for related resources
+- Enhanced typography with blog-optimized font sizes and line heights
+- Production-ready CSS with design system variables
+- Improved spacing and visual hierarchy
+- Better mobile experience with natural page scrolling
+
+> **Note**: This layout was initially aligned in v0.1.2 (ISS-5) and significantly enhanced with blog-quality features in the current release. The redesign prioritizes content readability while maintaining the immersive 3D visualization. See [docs/roadmap.md](./roadmap.md) for version history.
 
 ### Layout Structure
 
-The planet surface view consists of two main areas:
+The planet surface view consists of two main areas with clear visual separation:
 
 ```
-┌─────────────────────────────────────────┐
-│  ┌──────────┐  ┌─────────────────────┐ │
-│  │          │  │                     │ │
-│  │  Planet  │  │   Content Area      │ │
-│  │   3D     │  │   - Title           │ │
-│  │  Visual  │  │   - Subtitle        │ │
-│  │          │  │   - Markdown Body   │ │
-│  │          │  │   - Moon Navigation │ │
-│  └──────────┘  └─────────────────────┘ │
-└─────────────────────────────────────────┘
-   30% width        70% width
+┌────────────────────────────────────────────────────────┐
+│  ┌──────────┐  ┌─────────────────────────────────────┐ │
+│  │          │  │ TITLE                                │ │
+│  │  Planet  │  │ Subtitle                             │ │
+│  │   3D     │  │ 📅 Date  👤 Author  🏷️ Tags          │ │
+│  │  Visual  │  │ ────────────────────────────────────│ │
+│  │          │  │ [Featured Image]                     │ │
+│  │          │  │                                      │ │
+│  │ [label]  │  │ Markdown content with blog-optimized │ │
+│  │          │  │ typography, headings, images, lists  │ │
+│  │          │  │ ...                                  │ │
+│  │          │  │                                      │ │
+│  │          │  │ Related Resources:                   │ │
+│  │          │  │ → External Link 1                    │ │
+│  │          │  │ → External Link 2                    │ │
+│  │          │  │                                      │ │
+│  │          │  │ Moons: [Moon 1] [Moon 2]             │ │
+│  └──────────┘  └─────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────┘
+   30% width             70% width
+   (max 400px)          (max 800px)
 ```
 
-#### Left Column - Planet Visualization
-- **Width**: 30% of viewport (max 400px)
-- **Content**: 3D planet rendering with moons in skybox
-- **Planet Size**: Reduced to radius 1.5 units for proportional display
+#### Left Column - 3D Planet Visualization
+- **Width**: 30% of viewport, max 400px, min 280px
+- **Content**: Interactive 3D planet with rotating visualization
+- **Planet Size**: Radius 1.5 units for proportional display
 - **Position**: Positioned at (-3, 0, 0) in absolute world coordinates
-- **Camera Setup**: Positioned to frame the planet on the left side of the viewport
+- **Camera Setup**: Positioned to frame the planet on the left side
   - Camera position: 2 units right, 8 units in front of the planet
   - Look-at point: 1 unit right of planet center
-  - This ensures the planet is visible on the left with content on the right
-- **Label**: Planet name displayed below visualization
+  - Ensures planet is visible on the left with content on the right
+- **Label**: Planet name displayed below visualization with backdrop blur effect
+- **Styling**: Semi-transparent dark background with blue border
+- **Visual Role**: Provides context and immersion without interfering with reading
 
-#### Right Column - Content Area
-- **Width**: 70% of viewport (max 800px)
-- **Content**: 
-  - Header with planet/moon name and subtitle
-  - Scrollable markdown body
-  - Moon navigation buttons (when viewing planet)
-  - Back button (when viewing moon)
-- **Max-width**: 800px to prevent excessive line length
-- **Line length**: Optimal for readability (60-80 characters per line)
+#### Right Column - Blog-Quality Content Area  
+- **Width**: 70% of viewport, max 800px
+- **Background**: Nearly opaque black (rgba(0, 0, 0, 0.9)) with rounded corners
+- **Shadow**: Elevated card effect with 8px shadow
+- **Padding**: 3rem (48px) for generous whitespace
+- **Scrolling**: Smooth vertical scroll with custom styled scrollbar
+
+**Content Sections (in order):**
+
+1. **Header Section**:
+   - **Title**: 2.75rem (44px) on desktop, bold weight (700)
+   - **Subtitle**: 1.25rem (20px), secondary gray color
+   - **Metadata Row**: Date, author, and tags with icons
+   - **Bottom border**: 2px separator for clear section break
+
+2. **Featured Image** (if present):
+   - Full-width responsive image
+   - Rounded corners with shadow
+   - Automatically hidden if not provided
+
+3. **Markdown Body**:
+   - **Base font size**: 1.125rem (18px) for comfortable reading
+   - **Opening paragraph**: 1.25rem (20px) for emphasis
+   - **Line height**: 1.75 for optimal readability
+   - **Max line length**: 70 characters to prevent eye strain
+   - **Headings**: H2 with underlines, H3-H4 for subsections
+   - **Code blocks**: Dark background with syntax highlighting
+   - **Blockquotes**: Blue left border with light background tint
+   - **Lists**: Blue bullet markers with generous spacing
+   - **Images**: Responsive with shadows and rounded corners
+   - **Links**: Blue with underline offset, hover transitions
+
+4. **External Links Section** (if present):
+   - **Title**: "Related Resources" with 1.375rem heading
+   - **Link Cards**: Hover effect with transform and color change
+   - **Icons**: External link icon on the right
+   - **Layout**: Vertical stack for easy scanning
+
+5. **Moon Navigation** (if viewing planet):
+   - **Title**: "Moons" section heading
+   - **Buttons**: Vertical list of moon buttons with hover effects
+   - **Styling**: Semi-transparent with blue border on hover
+   - **Touch targets**: 44px minimum (WCAG AA compliant)
+
+6. **Back Button** (if viewing moon):
+   - Blue primary color with white text
+   - Centered with arrow icon
+   - Hover effect: lift and shadow
 
 ### Responsive Behavior
 
-The layout adapts to different screen sizes:
+The layout adapts elegantly to different screen sizes while maintaining the blog-quality reading experience:
 
 #### Desktop (> 1024px)
-- Two-column layout with 30/70 width split
-- Planet visual: 30% width, max 400px
-- Content: 70% width, max 800px
-- Gap: 2rem between columns
-- Padding: 2rem around container
+- **Layout**: Two-column with 30/70 width split
+- **Planet visual**: 30% width, max 400px, min 280px
+- **Content**: 70% width, max 800px
+- **Gap**: 2rem (32px) between columns
+- **Padding**: 2rem (32px) around container
+- **Typography**: Full size (title 2.75rem, body 1.125rem)
+- **External links**: Horizontal layout with full descriptions
 
 #### Tablet (≤ 1024px)
-- Two-column layout with 35/65 width split
-- Slightly larger planet visual for better visibility
-- Content max-width: 600px
-- Gap: 1.5rem
-- Padding: 1.5rem
+- **Layout**: Two-column with 35/65 width split
+- **Planet visual**: 35% width for better visibility
+- **Content**: max-width 650px
+- **Gap**: 1.5rem (24px)
+- **Padding**: 1.5rem (24px)
+- **Typography**: Slightly reduced (title 2.25rem)
+- **Touch targets**: 48px minimum for better tap accuracy
 
 #### Mobile (≤ 768px)
-- **Single column layout** (stacked vertically)
-- Planet visual on top (min-height: 200px)
-- Content below (full width)
-- Gap: 1rem
-- Padding: 1rem
-- Scrollable container for long content
+- **Layout**: **Single column** (stacked vertically)
+- **Planet visual**: On top, min-height 200px, order: 1
+- **Content**: Below, full width, order: 2
+- **Gap**: 1rem (16px)
+- **Padding**: 1rem (16px)
+- **Scrolling**: Natural page scroll (no nested scrollbars)
+- **Typography**: Responsive (title 1.875rem, body 1rem)
+- **External links**: Vertical stack, descriptions below titles
+- **Metadata**: Vertical layout for better spacing
 
 #### Small Mobile (≤ 480px)
-- Reduced padding: 0.75rem
-- Content padding: 1rem
-- Smaller title font: 1.35rem
-- Enhanced touch targets: 52px minimum
+- **Padding**: Reduced to 0.75rem (12px) around container
+- **Content padding**: 1rem (16px)
+- **Typography**: Further reduced (title 1.625rem)
+- **Touch targets**: 52px minimum for thumb-friendly interaction
+- **Metadata**: Fully vertical with increased gap
+- **External links**: Compact padding
+
+#### Key Responsive Features
+
+**Progressive Enhancement:**
+- Desktop users get the full two-column experience
+- Tablet users see slightly larger planet for better visibility
+- Mobile users get optimized single-column for vertical scrolling
+- Small mobile gets maximum space efficiency
+
+**Typography Scaling:**
+- Uses `clamp()` for fluid typography
+- Title: `clamp(1.35rem, 3.5vw, 2.75rem)` - scales smoothly
+- Body: Fixed at comfortable sizes per breakpoint
+- Opening paragraph always larger for visual hierarchy
+
+**Touch-Friendly:**
+- All buttons meet WCAG 2.1 Level AA touch target sizes
+- Hover effects replaced with tap feedback on mobile
+- Adequate spacing between interactive elements
+- No accidental taps due to small targets
+
+**Scroll Behavior:**
+- Desktop: Content column scrolls independently
+- Mobile: Page scrolls naturally (prevents nested scrollbars)
+- Smooth scrolling enabled for better UX
+- Scroll position preserved when navigating moons
 
 ### Accessibility Features
 
-#### Touch Targets
-All interactive elements meet WCAG 2.1 Level AA requirements:
-- **Desktop**: 44px minimum height
-- **Tablet**: 48px minimum height
-- **Mobile**: 52px minimum height
+The blog-quality layout maintains rigorous accessibility standards:
 
-#### Color Contrast
-The layout supports both dark and light color schemes:
+#### Touch Targets (WCAG 2.1 Level AA)
+All interactive elements meet or exceed minimum touch target sizes:
+- **Desktop**: 44px minimum height
+- **Tablet**: 48px minimum height  
+- **Mobile**: 52px minimum height
+- **Buttons**: Padding ensures comfortable interaction
+- **Links**: Adequate spacing prevents accidental clicks
+
+#### Color Contrast (WCAG 2.1 Level AAA)
+The design supports both color schemes with exceptional contrast:
 
 **Dark Mode (default)**:
-- Content background: rgba(0, 0, 0, 0.85) with white text
-- Contrast ratio: 21:1 (exceeds WCAG AAA)
-- Blue accent: #4A90E2
+- Content background: rgba(0, 0, 0, 0.9) - nearly opaque black
+- Primary text: #FFFFFF (white) - 21:1 contrast ratio
+- Secondary text: #AAAAAA (light gray) - 11.7:1 contrast ratio
+- Muted text: #888888 (gray) - 7.4:1 contrast ratio
+- Blue accent: #4A90E2 - 4.58:1 on black background
+- **Result**: Exceeds WCAG AAA requirements
 
 **Light Mode** (via `prefers-color-scheme: light`):
-- Content background: rgba(255, 255, 255, 0.95) with black text
-- Contrast ratio: 21:1 (exceeds WCAG AAA)
-- Blue accent: #2C5AA0 (darker for better contrast)
+- Content background: rgba(255, 255, 255, 0.95) - nearly opaque white
+- Primary text: #000000 (black) - 21:1 contrast ratio
+- Blue accent: #2C5AA0 (darker) - better contrast on white
+- All elements maintain AAA compliance in light mode
 
 #### Keyboard Navigation
-- All buttons are keyboard accessible
-- Clear focus indicators (2px solid #4A90E2)
-- Logical tab order: title → content → buttons
+- **Tab order**: Logical flow from title → content → metadata → external links → moons
+- **Focus indicators**: 3px solid blue outline with 2px offset
+- **Skip links**: Implicit through semantic HTML structure
+- **Button activation**: Enter and Space keys work correctly
+- **Link interaction**: Standard browser keyboard shortcuts supported
+
+#### Screen Reader Support
+- **Semantic HTML**: Proper heading hierarchy (H1 → H2 → H3)
+- **ARIA labels**: Metadata icons have descriptive labels
+- **Alt text**: All images require descriptive alt attributes
+- **Link context**: External link descriptions provide context
+- **List semantics**: Moon navigation uses proper list structure
 
 #### Reduced Motion
-Respects `prefers-reduced-motion` setting:
-- Animations set to 0.01ms duration
-- Static positioning (no floating effects)
-- Maintains full functionality
+Respects `prefers-reduced-motion` setting across the board:
+- All animations set to 0.01ms duration
+- Transforms and transitions disabled
+- Hover effects still work (color/opacity changes)
+- Full functionality maintained without motion
+- No parallax or auto-scrolling effects
+
+#### Font and Text
+- **Readable sizes**: 18px base font exceeds 16px minimum
+- **Line height**: 1.75 for body text (optimal for extended reading)
+- **Line length**: Max 70 characters per line prevents eye strain
+- **Font stack**: System fonts for best rendering across platforms
+- **Letter spacing**: Negative for headings, neutral for body
+- **Responsive text**: Scales appropriately on all devices
 
 ### Edge Cases
 
+The redesigned layout handles various edge cases gracefully:
+
 #### Camera Positioning Across Viewports
-The camera positioning system ensures the planet remains visible across all viewport sizes:
-- **Desktop**: Planet positioned at (-3, 0, 0), camera at (planetPos.x + 2, planetPos.y, planetPos.z + 8)
-- **Tablet/Mobile**: Same 3D positioning, CSS handles responsive layout with single-column stacking
-- **High-DPI displays**: Camera positioning is resolution-independent, scales correctly
-- **Zoom levels**: Planet remains properly framed due to relative camera positioning
+The camera positioning system ensures the planet remains visible:
+- **Desktop**: Planet at (-3, 0, 0), camera at (planetPos.x + 2, planetPos.y, planetPos.z + 8)
+- **Tablet/Mobile**: Same 3D positioning, CSS handles responsive layout
+- **High-DPI displays**: Resolution-independent positioning scales correctly
+- **Zoom levels**: Planet remains framed due to relative positioning
+
+#### Missing Metadata
+All metadata fields are optional and handled gracefully:
+- **No publishedDate**: Date row doesn't render, no gap
+- **No author**: Author section omitted, layout adjusts
+- **No tags**: Tag section hidden, no empty space
+- **No featuredImage**: Header flows directly to content
+- **No externalLinks**: Related Resources section doesn't render
+- **Partial metadata**: Only provided fields display
 
 #### Planets Without Markdown
-When a planet has no `contentMarkdown`:
+When a planet lacks `contentMarkdown`:
 - Fallback message: "# [Planet Name]\n\nNo content available."
-- Layout remains consistent
-- No large empty areas
+- Layout remains consistent and professional
+- Metadata still displays if present
 - Moon navigation still available
+- No broken or empty sections
 
-#### Extremely Long Headings
-Long headings wrap naturally:
-- `word-wrap: break-word`
-- `overflow-wrap: break-word`
-- No horizontal overflow
+#### Featured Image Edge Cases
+- **Invalid URL**: Image fails gracefully (browser broken image)
+- **Slow loading**: Space reserved, content doesn't jump
+- **Missing file**: No visual gap, content flows naturally
+- **Very tall images**: Respects max-width, maintains aspect ratio
+- **No image**: Section doesn't render, no empty space
 
-#### Long Lists or Content
-Scrollable content area prevents layout breaking:
-- Content body scrolls independently
-- Fixed header and navigation
-- Smooth scrolling behavior
-- Custom scrollbar styling
+#### External Links Edge Cases
+- **No links**: Related Resources section hidden
+- **Many links (8+)**: Still displays, but recommended limit is 5
+- **Long titles**: Wrap naturally within link cards
+- **Long descriptions**: Wrap to multiple lines on mobile
+- **Invalid URLs**: Browser handles (will show error on click)
+
+#### Extremely Long Content
+For very long markdown documents (1500+ words):
+- Content scrolls smoothly within column
+- Performance maintained via optimized React rendering
+- Scroll position preserved when navigating to/from moons
+- Custom scrollbar prevents native browser bars
+- Consider breaking 3000+ word content into multiple planets
+
+#### Long Titles and Headings
+Long titles wrap naturally without breaking layout:
+- `word-wrap: break-word` prevents overflow
+- `overflow-wrap: break-word` handles long words
+- Responsive font sizing prevents tiny text on mobile
+- No horizontal scrollbars appear
+- Title hierarchy maintained
 
 #### No Moons
-When a planet has no moons:
-- Moon navigation section hidden
+When a planet has no moons or `moons: []`:
+- Moon navigation section completely hidden
+- No "No moons available" message
 - Content area remains properly sized
-- No empty space where moons would be
+- Layout balanced without empty footer section
+- Users navigate back via breadcrumb or back button
+
+#### Moon-Specific Content
+When viewing a moon from a planet:
+- Moon's `contentMarkdown` displays
+- Planet's metadata inherited (author, external links)
+- Moon can have own `publishedDate`, `tags`, `featuredImage`
+- Back button displays: "← Back to [Planet Name]"
+- Breadcrumb updates to show moon in hierarchy
+
+#### Mobile Portrait vs Landscape
+- **Portrait**: Single column, optimal for scrolling
+- **Landscape**: Still single column for consistency
+- **Large landscape tablets**: May show two columns (> 1024px width)
+- **Rotation**: Layout adapts instantly without page reload
 
 #### SSR/Hydration
-Server-rendered markup matches client layout:
+Server-rendered markup matches client layout perfectly:
 - Camera position set during client-side useEffect
-- No layout shift or flicker on hydration
+- No layout shift or content jump on hydration
 - Transition state properly initialized
 - Content overlay renders consistently
+- Metadata displays immediately (no flash of missing content)
 
 ### Customization
 

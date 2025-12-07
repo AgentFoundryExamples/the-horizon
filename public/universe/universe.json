@@ -41,6 +41,25 @@
                   "name": "Luna",
                   "contentMarkdown": "# Luna (The Moon)\n\n**Luna**, commonly known as the Moon, is Earth's only natural satellite. It is the fifth-largest satellite in the Solar System.\n\n## Characteristics\n\n- Diameter: 3,474 km\n- Distance from Earth: ~384,400 km\n- Orbital period: 27.3 days\n- Surface: Cratered and dusty\n\n## Exploration\n\nThe Moon was first visited by humans in 1969 during the Apollo 11 mission."
                 }
+              ],
+              "publishedDate": "2024-12-01T00:00:00Z",
+              "author": "The Horizon Team",
+              "tags": [
+                "terrestrial",
+                "habitable",
+                "home-world"
+              ],
+              "externalLinks": [
+                {
+                  "title": "NASA Earth Observatory",
+                  "url": "https://earthobservatory.nasa.gov/",
+                  "description": "Satellite imagery and scientific data about Earth"
+                },
+                {
+                  "title": "Blue Marble",
+                  "url": "https://visibleearth.nasa.gov/collection/1484/blue-marble",
+                  "description": "Famous photographs of Earth from space"
+                }
               ]
             },
             {
@@ -59,6 +78,20 @@
                   "id": "deimos",
                   "name": "Deimos",
                   "contentMarkdown": "# Deimos\n\n**Deimos** is the smaller and outer moon of Mars. Named after the Greek god of terror.\n\n## Details\n\n- Diameter: ~12.4 km\n- Smoother surface than Phobos\n- Takes about 30 hours to orbit Mars"
+                }
+              ],
+              "publishedDate": "2024-12-05T00:00:00Z",
+              "author": "The Horizon Team",
+              "tags": [
+                "terrestrial",
+                "exploration",
+                "colonization"
+              ],
+              "externalLinks": [
+                {
+                  "title": "Mars Exploration Program",
+                  "url": "https://mars.nasa.gov/",
+                  "description": "NASA's Mars exploration missions and discoveries"
                 }
               ]
             }
@@ -96,7 +129,21 @@
               "theme": "earth-like",
               "summary": "A super-Earth exoplanet orbiting within the habitable zone of its star.",
               "contentMarkdown": "# Kepler-442b\n\n**Kepler-442b** is a confirmed near-Earth-sized exoplanet orbiting within the habitable zone of Kepler-442, about 1,206 light-years from Earth.\n\n## Characteristics\n\n- **Type**: Super-Earth\n- **Mass**: ~2.3 Earth masses\n- **Radius**: ~1.34 Earth radii\n- **Habitability**: High Earth Similarity Index\n\n## Potential\n\nThis planet receives about 70% of the light Earth gets from the Sun, making it a prime candidate for harboring liquid water and potentially life.",
-              "moons": []
+              "moons": [],
+              "publishedDate": "2024-12-10T00:00:00Z",
+              "author": "The Horizon Team",
+              "tags": [
+                "exoplanet",
+                "habitable-zone",
+                "super-earth"
+              ],
+              "externalLinks": [
+                {
+                  "title": "Kepler Mission",
+                  "url": "https://www.nasa.gov/kepler",
+                  "description": "NASA's planet-hunting telescope mission"
+                }
+              ]
             }
           ]
         }

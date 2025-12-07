@@ -14,32 +14,31 @@ const mockGalaxies: Galaxy[] = [
     id: 'milky-way',
     name: 'Milky Way',
     description: 'Our home galaxy',
+    theme: 'blue-white',
     particleColor: '#4A90E2',
+    stars: [],
     solarSystems: [
       {
         id: 'sol-system',
         name: 'Solar System',
-        description: 'Our solar system',
-        position: { x: 0, y: 0, z: 0 },
-        starColor: '#FFD700',
+        theme: 'yellow-star',
+        mainStar: {
+          id: 'sol',
+          name: 'Sol',
+          theme: 'yellow-dwarf'
+        },
         planets: [
           {
             id: 'earth',
             name: 'Earth',
-            description: 'Our home planet',
-            orbitalRadius: 5,
-            orbitalPeriod: 365,
-            size: 1,
-            color: '#4A90E2',
-            content: '# Earth',
+            theme: 'blue-green',
+            summary: 'Our home planet',
+            contentMarkdown: '# Earth\n\nOur home planet',
             moons: [
               {
                 id: 'luna',
                 name: 'Luna',
-                description: "Earth's moon",
-                size: 0.3,
-                color: '#CCCCCC',
-                content: '# Luna',
+                contentMarkdown: '# Luna\n\nEarth\'s moon',
               },
             ],
           },
