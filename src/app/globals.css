@@ -76,12 +76,13 @@ a {
 .scene-tooltip {
   background: rgba(0, 0, 0, 0.95);
   color: #FFFFFF;
-  padding: 0.75rem 1rem;
+  padding: 1rem 1.5rem;
   border-radius: 8px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  font-size: 1rem;
-  max-width: 300px;
+  font-size: 1.25rem;
+  font-weight: bold;
+  max-width: 350px;
   word-wrap: break-word;
   white-space: normal;
   text-align: center;
@@ -92,17 +93,17 @@ a {
 /* Responsive tooltip sizing */
 @media (max-width: 768px) {
   .scene-tooltip {
-    font-size: 0.9rem;
-    padding: 0.6rem 0.85rem;
-    max-width: 250px;
+    font-size: 1.1rem;
+    padding: 0.85rem 1.25rem;
+    max-width: 300px;
   }
 }
 
 @media (max-width: 480px) {
   .scene-tooltip {
-    font-size: 0.85rem;
-    padding: 0.5rem 0.75rem;
-    max-width: 200px;
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    max-width: 250px;
   }
 }
 
@@ -110,9 +111,28 @@ a {
 @media (prefers-contrast: high) {
   .scene-tooltip {
     background: #000000;
-    border-width: 3px;
+    border-width: 4px;
     border-color: #4A90E2;
   }
+}
+
+/* Tooltip connector arrow - positioned below tooltip pointing to object */
+.scene-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid rgba(74, 144, 226, 0.9);
+}
+
+/* Star tooltips use gold arrow */
+.scene-tooltip.star-tooltip::after {
+  border-top-color: rgba(251, 184, 19, 0.9);
 }
 
 /* Welcome message styling */

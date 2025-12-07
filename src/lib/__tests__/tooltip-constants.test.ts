@@ -25,7 +25,7 @@ import {
 describe('Tooltip Constants', () => {
   describe('TOOLTIP_TYPOGRAPHY', () => {
     it('should define standard font size', () => {
-      expect(TOOLTIP_TYPOGRAPHY.FONT_SIZE).toBe('1rem');
+      expect(TOOLTIP_TYPOGRAPHY.FONT_SIZE).toBe('1.25rem');
     });
 
     it('should define font weight', () => {
@@ -33,11 +33,11 @@ describe('Tooltip Constants', () => {
     });
 
     it('should define subtitle font size', () => {
-      expect(TOOLTIP_TYPOGRAPHY.SUBTITLE_FONT_SIZE).toBe('0.85rem');
+      expect(TOOLTIP_TYPOGRAPHY.SUBTITLE_FONT_SIZE).toBe('1rem');
     });
 
     it('should define maximum width', () => {
-      expect(TOOLTIP_TYPOGRAPHY.MAX_WIDTH).toBe('300px');
+      expect(TOOLTIP_TYPOGRAPHY.MAX_WIDTH).toBe('350px');
     });
   });
 
@@ -65,11 +65,11 @@ describe('Tooltip Constants', () => {
 
   describe('TOOLTIP_COLORS', () => {
     it('should define default border color', () => {
-      expect(TOOLTIP_COLORS.BORDER_COLOR).toBe('rgba(74, 144, 226, 0.7)');
+      expect(TOOLTIP_COLORS.BORDER_COLOR).toBe('rgba(74, 144, 226, 0.9)');
     });
 
     it('should define star/solar system border color', () => {
-      expect(TOOLTIP_COLORS.STAR_BORDER_COLOR).toBe('rgba(251, 184, 19, 0.7)');
+      expect(TOOLTIP_COLORS.STAR_BORDER_COLOR).toBe('rgba(251, 184, 19, 0.9)');
     });
 
     it('should define background color', () => {
@@ -83,11 +83,11 @@ describe('Tooltip Constants', () => {
 
   describe('TOOLTIP_PADDING', () => {
     it('should define default padding', () => {
-      expect(TOOLTIP_PADDING.DEFAULT).toBe('0.75rem 1rem');
+      expect(TOOLTIP_PADDING.DEFAULT).toBe('1rem 1.5rem');
     });
 
     it('should define compact padding', () => {
-      expect(TOOLTIP_PADDING.COMPACT).toBe('0.5rem 0.75rem');
+      expect(TOOLTIP_PADDING.COMPACT).toBe('0.75rem 1rem');
     });
   });
 
