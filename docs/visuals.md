@@ -1158,32 +1158,68 @@ Potential improvements for the transition indicator:
 
 ## Welcome Message
 
-The welcome message provides context-aware branding when users enter galaxy view, replacing the previous bottom-right disclaimer that appeared globally.
+The welcome message provides friendly branding and guidance when users first arrive at the universe view, helping orient them to the experience.
+
+> **Note**: As of ISS-XX, the welcome message scope has been clarified and documented. It only appears on the universe view (main page), not on deeper navigation levels, ensuring clear visual hierarchy and preventing overlay clutter.
 
 ### Purpose
 
-- **Branding**: Establishes "The Horizon" identity at the appropriate narrative moment
-- **Context**: Confirms which galaxy the user is exploring
-- **Guidance**: Provides navigation hints for discovering solar systems
+- **Branding**: Establishes "The Horizon" identity at the initial entry point
+- **Guidance**: Provides clear instructions for getting started ("Click a galaxy to explore")
+- **Context**: Welcomes users to the experience without blocking content
 
 ### Behavior
 
-- **Visibility**: Only renders when `focusLevel === 'galaxy'`
-- **Position**: Centered on viewport (non-blocking, pointer-events disabled)
-- **Display Duration**: Remains visible throughout galaxy exploration
-- **Transitions**: Hidden during camera transitions, reappears when settled
+- **Visibility**: Only renders on the universe view (src/app/page.tsx)
+- **Position**: Top-center of viewport (non-blocking, pointer-events disabled)
+- **Display Duration**: Remains visible throughout universe-level exploration
+- **Scope**: Does NOT appear when navigating to galaxy, solar system, or planet views
 
 ### Conditional Rendering
 
-The welcome message displays only when:
+The welcome message is only imported and rendered in `src/app/page.tsx`:
+
 ```typescript
-focusLevel === 'galaxy' && focusedGalaxy
+import WelcomeMessage from '@/components/WelcomeMessage';
+
+export default async function HomePage() {
+  const galaxies = await getGalaxies();
+
+  return (
+    <main>
+      <WelcomeMessage />
+      <UniverseScene galaxies={galaxies} />
+      <SceneHUD galaxies={galaxies} />
+    </main>
+  );
+}
 ```
 
 This ensures:
-- Universe view has no branding overlay (clean exploration)
-- Solar system and planet views are unobstructed
-- Message appears contextually when entering a galaxy
+- **Universe view**: Welcome message appears at top to orient users
+- **Galaxy/system/planet views**: No welcome message overlay (clean, focused UI)
+- **Navigation clarity**: Message only shows at the "entry point" of the experience
+- **Visual hierarchy**: Deeper views have dedicated HUD elements (breadcrumbs, back button)
+
+### Why Universe View Only?
+
+The welcome message is intentionally scoped to only the universe view for several UX reasons:
+
+1. **First Impressions**: The universe view is the entry point - users need context
+2. **Avoid Redundancy**: Once users navigate deeper, they understand the interface
+3. **Prevent Clutter**: Galaxy/system/planet views already have tooltips, HUD, and content overlays
+4. **Progressive Disclosure**: Information is revealed as users progress, not repeated
+5. **Focus**: Deeper views should focus on the celestial content, not app branding
+
+### Routing Architecture
+
+The application uses Next.js App Router with distinct routes:
+
+- `/` (page.tsx) - Universe view with WelcomeMessage ✅
+- `/galaxy/[id]` - Static galaxy detail pages (no 3D scene, no WelcomeMessage)
+- In-scene navigation uses Zustand store to manage focus levels within the 3D canvas
+
+The WelcomeMessage component is **not** conditionally rendered based on `focusLevel` state. Instead, it's statically included in the universe page, which is the only page that renders the 3D UniverseScene component.
 
 ### Styling
 
@@ -2147,7 +2183,7 @@ useEffect(() => {
 
 The Horizon uses a unified hover label system across all scenes, ensuring consistent appearance, positioning, and accessibility. All interactive celestial objects use the same `SceneTooltip` component with shared constants for styling.
 
-> **Note**: This system was standardized in v0.1.2 (ISS-6) to resolve inconsistent tooltip styling, sizing, and positioning across different scenes. Previous versions had varying font sizes (0.875rem), inconsistent colors, and tooltips that overlapped objects. See [docs/roadmap.md](./roadmap.md) for complete fix details.
+> **Note**: This system was standardized in v0.1.2 (ISS-6) to resolve inconsistent tooltip styling, sizing, and positioning across different scenes. Enhanced in ISS-XX with larger, more legible text (1rem→1.25rem), stronger visual contrast (border opacity 0.7→0.9, width 2px→3px), and CSS arrow connectors pointing from tooltips to objects. See [docs/roadmap.md](./roadmap.md) for complete fix details.
 
 ### Shared Tooltip Constants
 
@@ -2163,10 +2199,10 @@ import {
 ```
 
 **Typography Constants:**
-- `FONT_SIZE`: `'1rem'` - Base font size for all tooltips
+- `FONT_SIZE`: `'1.25rem'` - Base font size for all tooltips (increased for better readability)
 - `FONT_WEIGHT`: `'bold'` - Standard weight for object names
-- `SUBTITLE_FONT_SIZE`: `'0.85rem'` - Smaller size for details
-- `MAX_WIDTH`: `'300px'` - Maximum tooltip width
+- `SUBTITLE_FONT_SIZE`: `'1rem'` - Smaller size for details (increased from 0.85rem)
+- `MAX_WIDTH`: `'350px'` - Maximum tooltip width (increased from 300px)
 
 **Positioning Constants:**
 - `OFFSET_Y`: `-40` - Default vertical offset (pixels above object)
@@ -2176,14 +2212,56 @@ import {
 - `DISTANCE_FACTOR_CLOSE`: `10` - For solar system view (close zoom)
 
 **Color Constants:**
-- `BORDER_COLOR`: `'rgba(74, 144, 226, 0.7)'` - Default blue border
-- `STAR_BORDER_COLOR`: `'rgba(251, 184, 19, 0.7)'` - Gold for stars
+- `BORDER_COLOR`: `'rgba(74, 144, 226, 0.9)'` - Default blue border (increased opacity from 0.7)
+- `STAR_BORDER_COLOR`: `'rgba(251, 184, 19, 0.9)'` - Gold for stars (increased opacity from 0.7)
 - `BACKGROUND_COLOR`: `'rgba(0, 0, 0, 0.95)'` - Nearly opaque black
 - `TEXT_COLOR`: `'#FFFFFF'` - Pure white text
 
 **Padding Constants:**
-- `DEFAULT`: `'0.75rem 1rem'` - Standard padding
-- `COMPACT`: `'0.5rem 0.75rem'` - For smaller tooltips
+- `DEFAULT`: `'1rem 1.5rem'` - Standard padding (increased for better touch targets)
+- `COMPACT`: `'0.75rem 1rem'` - For smaller tooltips
+
+### Visual Enhancements
+
+#### Connector Arrows
+
+Tooltips now include CSS-based arrow connectors that point from the tooltip to the hovered object, providing clear visual linkage:
+
+```css
+/* Default blue arrow for celestial objects */
+.scene-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid rgba(74, 144, 226, 0.9);
+}
+
+/* Gold arrow for star tooltips */
+.scene-tooltip.star-tooltip::after {
+  border-top-color: rgba(251, 184, 19, 0.9);
+}
+```
+
+The arrow color automatically matches the tooltip border color, ensuring visual consistency. Use the `isStar={true}` prop on `SceneTooltip` to enable gold arrows for star tooltips.
+
+#### Improved Readability
+
+Recent enhancements ensure tooltips are legible across all devices:
+
+- **Larger text**: Base font increased from 1rem to 1.25rem (25% larger)
+- **Stronger borders**: Border width increased from 2px to 3px
+- **Higher contrast**: Border opacity increased from 0.7 to 0.9
+- **Better spacing**: Padding increased from 0.75rem×1rem to 1rem×1.5rem
+- **Responsive sizing**: Mobile/tablet tooltips automatically scale appropriately
+
+**Before/After Comparison:**
+- Desktop: 16px → 20px base font (25% larger)
+- Tablet: 14.4px → 17.6px (22% larger)
+- Mobile: 13.6px → 16px (18% larger)
 
 ### Tooltip Components
 
@@ -2230,6 +2308,7 @@ Galaxy view (stars):
   worldPosition={starPosition}
   distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_MEDIUM}
   borderColor={TOOLTIP_COLORS.STAR_BORDER_COLOR}
+  isStar={true}
   content={solarSystem.name}
 />
 ```
@@ -2279,21 +2358,21 @@ All tooltips use standardized typography from shared constants for readability:
 ```typescript
 import { TOOLTIP_TYPOGRAPHY } from '@/lib/tooltip-constants';
 
-// Standard font size: 1rem (16px)
+// Standard font size: 1.25rem (20px)
 fontSize: TOOLTIP_TYPOGRAPHY.FONT_SIZE
 
 // Bold weight for object names
 fontWeight: TOOLTIP_TYPOGRAPHY.FONT_WEIGHT
 
-// Subtitle/detail text: 0.85rem (13.6px)
+// Subtitle/detail text: 1rem (16px)
 fontSize: TOOLTIP_TYPOGRAPHY.SUBTITLE_FONT_SIZE
 ```
 
 **Design rationale:**
-- **Desktop**: `1rem` (16px) - Clear and readable at all zoom levels
-- **Tablet**: `0.9rem` (14.4px) - Maintains readability on medium screens
-- **Mobile**: `0.85rem` (13.6px) - Optimized for small screens and touch
-- **Subtitle**: `0.85rem` - Secondary information slightly smaller than main text
+- **Desktop**: `1.25rem` (20px) - Clear and readable at all zoom levels
+- **Tablet**: `1.1rem` (17.6px) - Maintains readability on medium screens
+- **Mobile**: `1rem` (16px) - Optimized for small screens and touch
+- **Subtitle**: `1rem` - Secondary information appropriately sized relative to main text
 
 #### Color and Contrast
 
