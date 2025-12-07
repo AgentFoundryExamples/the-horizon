@@ -317,8 +317,8 @@ Total files: 36
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 7.16 KB  
-**LOC:** 202  
+**Size:** 7.76 KB  
+**LOC:** 215  
 **TODOs/FIXMEs:** 0  
 
 ## src/middleware.ts
