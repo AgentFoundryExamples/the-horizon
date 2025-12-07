@@ -292,13 +292,19 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
 function formatDate(isoDate: string): string {
   try {
     const date = new Date(isoDate);
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      console.warn(`Invalid date format: ${isoDate}`);
+      return 'Date unavailable';
+    }
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
-  } catch (e) {
-    return isoDate;
+  } catch (error) {
+    console.error(`Error parsing date: ${isoDate}`, error);
+    return 'Date unavailable';
   }
 }
 
