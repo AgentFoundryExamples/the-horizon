@@ -15,6 +15,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Universe, Galaxy } from '@/lib/universe/types';
 import { generateId } from '@/lib/universe/mutate';
 import GalaxyEditor from './GalaxyEditor';
@@ -32,6 +33,7 @@ export default function UniverseEditor({
   currentHash,
   onUpdate,
 }: UniverseEditorProps) {
+  const router = useRouter();
   const [editingGalaxy, setEditingGalaxy] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [committing, setCommitting] = useState(false);
@@ -80,9 +82,9 @@ export default function UniverseEditor({
           type: 'error',
           message: 'Unauthorized. Please log in again.',
         });
-        // Redirect to login after a short delay
+        // Redirect to login after a short delay using Next.js router
         setTimeout(() => {
-          window.location.href = '/admin/login';
+          router.push('/admin/login');
         }, 2000);
       } else {
         setNotification({
@@ -145,7 +147,7 @@ export default function UniverseEditor({
           message: 'Unauthorized. Please log in again.',
         });
         setTimeout(() => {
-          window.location.href = '/admin/login';
+          router.push('/admin/login');
         }, 2000);
       } else {
         setNotification({
