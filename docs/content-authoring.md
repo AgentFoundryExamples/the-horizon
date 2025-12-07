@@ -567,16 +567,85 @@ All markdown content is **sanitized** before rendering to prevent XSS attacks:
 
 ## Content Structure
 
-### Planet Content
+### Planet Content - Blog-Quality Posts
 
-Each planet has a `contentMarkdown` field that should include:
+The redesigned planet viewer provides a blog-quality reading experience with support for rich metadata, featured images, and external links. Each planet is now a polished post with clear separation between the 3D visualization and content.
 
-1. **Title** (H1): Planet name
-2. **Introduction**: Brief description
-3. **Key Features** (H2): Bulleted list of notable characteristics
-4. **Additional Sections**: History, geology, atmosphere, etc.
+#### Required Fields
 
-Example:
+1. **id** (string): Unique identifier in kebab-case (e.g., "earth")
+2. **name** (string): Display name (e.g., "Earth")
+3. **theme** (string): Visual theme identifier (e.g., "blue-green")
+4. **summary** (string): Brief one-line description (appears as subtitle)
+5. **contentMarkdown** (string): Main blog post content in markdown format
+6. **moons** (array): Array of moon objects (can be empty)
+
+#### Optional Metadata Fields (Blog Enhancement)
+
+7. **publishedDate** (string): ISO 8601 date string (e.g., "2024-12-01T00:00:00Z")
+   - Displays as formatted date (e.g., "December 1, 2024")
+   - Appears in metadata section with calendar icon
+   
+8. **author** (string): Content author name (e.g., "The Horizon Team")
+   - Displays in metadata section with user icon
+   - Useful for attributing content creators
+   
+9. **tags** (array of strings): Categorization tags (e.g., ["terrestrial", "habitable", "home-world"])
+   - Displayed as clickable pills in metadata section
+   - Use 2-4 tags per planet for best results
+   - Keep tags lowercase with hyphens
+   
+10. **featuredImage** (string): URL or path to featured image
+    - Displays prominently below the header
+    - Use high-quality images (recommended: 1200x600px)
+    - Path format: "/universe/assets/earth-hero.jpg" or external URL
+    
+11. **externalLinks** (array of objects): Related resources and references
+    - Each link has: `title`, `url`, and optional `description`
+    - Displays in "Related Resources" section
+    - Opens in new tab with appropriate security attributes
+
+#### Example Planet with Full Metadata
+
+```json
+{
+  "id": "earth",
+  "name": "Earth",
+  "theme": "blue-green",
+  "summary": "The third planet from Sol and the only known world to harbor life.",
+  "publishedDate": "2024-12-01T00:00:00Z",
+  "author": "The Horizon Team",
+  "tags": ["terrestrial", "habitable", "home-world"],
+  "featuredImage": "/universe/assets/earth-from-space.jpg",
+  "externalLinks": [
+    {
+      "title": "NASA Earth Observatory",
+      "url": "https://earthobservatory.nasa.gov/",
+      "description": "Satellite imagery and scientific data about Earth"
+    },
+    {
+      "title": "Blue Marble",
+      "url": "https://visibleearth.nasa.gov/collection/1484/blue-marble",
+      "description": "Famous photographs of Earth from space"
+    }
+  ],
+  "contentMarkdown": "# Earth\n\n**Earth** is the third planet from the Sun...",
+  "moons": [...]
+}
+```
+
+#### Markdown Content Structure
+
+Your `contentMarkdown` should follow blog post conventions:
+
+1. **Opening paragraph**: Engaging introduction (18px font, slightly larger)
+2. **Section headings (H2)**: Major topics with underline separator
+3. **Subsections (H3, H4)**: Supporting details
+4. **Body text**: Well-spaced paragraphs optimized for 70 characters per line
+5. **Visual elements**: Images, code blocks, blockquotes for variety
+6. **Lists**: Use for key facts and features
+
+Example markdown structure:
 ```markdown
 # Earth
 
@@ -585,39 +654,75 @@ Example:
 ## Key Features
 
 - **Atmosphere**: Rich in nitrogen and oxygen
-- **Life**: Diverse biosphere spanning millions of species
+- **Life**: Diverse biosphere spanning millions of species  
 - **Climate**: Temperate zones supporting complex ecosystems
 
 ## History
 
-Earth formed approximately 4.5 billion years ago...
+Earth formed approximately 4.5 billion years ago and is the densest planet in the Solar System. Life appeared on its surface within one billion years.
+
+> "The Earth is the cradle of humanity, but mankind cannot stay in the cradle forever." — Konstantin Tsiolkovsky
+
+## Exploration
+
+Humanity has explored Earth from pole to pole, mapping its surface with satellites and studying its complex systems.
 ```
 
 ### Moon Content
 
-Moons have similar structure but shorter content:
+Moons inherit some metadata from their parent planet but can have their own:
 
-```markdown
-# Luna (The Moon)
+#### Moon-Specific Optional Fields
 
-**Luna**, commonly known as the Moon, is Earth's only natural satellite.
+- **publishedDate** (string): If different from planet
+- **tags** (array of strings): Additional tags for the moon
+- **featuredImage** (string): Moon-specific hero image
 
-## Characteristics
+Moons do NOT support:
+- `author` field (inherited from planet)
+- `externalLinks` (use planet-level links)
 
-- Diameter: 3,474 km
-- Distance from Earth: ~384,400 km
-- Orbital period: 27.3 days
-
-## Exploration
-
-The Moon was first visited by humans in 1969...
+Example moon structure:
+```json
+{
+  "id": "luna",
+  "name": "Luna",
+  "publishedDate": "2024-12-02T00:00:00Z",
+  "tags": ["natural-satellite", "explored"],
+  "featuredImage": "/universe/assets/luna-surface.jpg",
+  "contentMarkdown": "# Luna (The Moon)\n\n**Luna**, commonly known as the Moon..."
+}
 ```
 
 ## Asset Management
 
-### Images
+### Featured Images
 
-To include images in markdown:
+Featured images display prominently at the top of planet posts:
+
+**Best Practices:**
+- **Dimensions**: 1200x600px (2:1 aspect ratio) recommended
+- **File size**: < 500KB for optimal loading
+- **Format**: WebP or JPEG for best compression
+- **Location**: Place in `public/universe/assets/` directory
+
+**Setting Featured Images:**
+```json
+{
+  "featuredImage": "/universe/assets/earth-from-space.jpg"
+}
+```
+
+Or use external URLs:
+```json
+{
+  "featuredImage": "https://example.com/images/earth.jpg"
+}
+```
+
+### Inline Images in Markdown
+
+To include images within your markdown content:
 
 1. **Local Images**: Place in `public/universe/assets/` directory
    ```markdown
@@ -629,65 +734,253 @@ To include images in markdown:
    ![Hubble image](https://example.com/image.jpg)
    ```
 
-### Best Practices
+### Image Optimization Tips
 
 - Use descriptive alt text for accessibility
-- Optimize images (< 500KB recommended)
-- Use WebP or modern formats when possible
+- Compress images before uploading (< 500KB recommended)
+- Use modern formats (WebP, AVIF) with JPEG fallbacks
 - Provide fallback text if images fail to load
+- Consider responsive images for different screen sizes
+
+### External Links
+
+External links provide references to related resources:
+
+```json
+{
+  "externalLinks": [
+    {
+      "title": "NASA Earth Observatory",
+      "url": "https://earthobservatory.nasa.gov/",
+      "description": "Satellite imagery and scientific data about Earth"
+    }
+  ]
+}
+```
+
+**Best Practices:**
+- Keep titles concise (3-6 words)
+- Always include URLs with HTTPS
+- Add descriptions for context (optional but recommended)
+- Limit to 3-5 links per planet to avoid overwhelming readers
+- Choose authoritative, reliable sources
 
 ## Styling Guidelines
 
-### Markdown Styling
+### Blog-Quality Typography
 
-The rendered markdown automatically includes:
-- Responsive font sizes
-- Proper spacing between elements
-- Code syntax highlighting
-- Link colors matching the theme (#4A90E2)
+The redesigned planet viewer uses a carefully crafted typography system for optimal readability:
+
+**Font Sizes:**
+- Title: 2.75rem (44px) on desktop, responsive down to 2rem (32px) on mobile
+- Subtitle: 1.25rem (20px)
+- Body text: 1.125rem (18px) - larger than typical for comfortable reading
+- First paragraph: 1.25rem (20px) - emphasis on opening
+- Metadata: 0.875rem (14px) - subtle and unobtrusive
+
+**Line Heights:**
+- Body: 1.75 (optimal for extended reading)
+- Headings: 1.2 (tighter for visual hierarchy)
+
+**Line Length:**
+- Body paragraphs max out at 70 characters for optimal readability
+- Prevents eye strain on wide screens
+
+### Color System
+
+The viewer uses a sophisticated dark mode color palette:
+
+- **Primary**: #4A90E2 (blue) - links, accents, tags
+- **Text Primary**: #FFFFFF (white) - titles and headings
+- **Text Secondary**: #AAAAAA (light gray) - body text
+- **Text Muted**: #888888 (gray) - metadata
+- **Background**: rgba(0, 0, 0, 0.9) - nearly opaque black
+- **Borders**: #444 (medium gray) - subtle separation
+
+**Light mode** is also supported via `prefers-color-scheme: light` with appropriate contrast adjustments.
+
+### Markdown Element Styling
+
+The system provides rich styling for markdown elements:
+
+- **Headings**: Bold weight (700), letter-spacing -0.01em
+- **H2**: Underlined with subtle border
+- **Code blocks**: Dark background with inset shadow, syntax-aware
+- **Inline code**: Pink highlight (#E06C75) with light border
+- **Blockquotes**: Left border with blue accent, light background tint
+- **Lists**: Blue bullet markers, generous spacing
+- **Links**: Underlined with offset, hover transitions
+- **Tables**: Bordered with blue header background
 
 ### Custom Styling
 
-If you need custom styles, you can:
-1. Modify `src/styles/planet.css`
-2. Add inline styles via HTML (use sparingly)
-3. Use CSS classes in the markdown renderer
+If you need additional styles beyond the defaults:
+
+1. **Modify global styles**: Edit `src/styles/planet.css`
+2. **Component-level styles**: Update `src/components/PlanetSurface.tsx`
+3. **Markdown overrides**: Customize `src/components/MarkdownContent.tsx`
+
+**Note**: The system is designed to require minimal custom styling. Most content looks great with default styles.
 
 ## Content Guidelines
 
-### Writing Style
+### Writing Style for Blog Posts
 
-- **Concise**: Users view content in a sidebar; keep it scannable
-- **Structured**: Use headings to organize information
-- **Visual**: Include images and code examples where relevant
-- **Accessible**: Provide alt text and descriptive links
+With the redesigned viewer, planets are now full blog posts. Follow these guidelines:
+
+**Opening Paragraph:**
+- Start with a compelling hook or summary statement
+- Bold the first sentence or key terms for emphasis
+- Keep it to 2-3 sentences max
+- This paragraph renders larger (1.25rem) for visual hierarchy
+
+**Section Structure:**
+- Use H2 (##) for major sections
+- Use H3 (###) for subsections
+- H2 sections automatically get underlines for clear separation
+- Keep headings short and descriptive (3-6 words)
+
+**Body Paragraphs:**
+- Aim for 3-4 sentences per paragraph
+- Use shorter paragraphs for scanability
+- Include visual variety (lists, blockquotes, images) every 2-3 paragraphs
+- Keep lines under 70 characters when possible (automatic on desktop)
+
+**Tone:**
+- **Informative**: Focus on facts and insights
+- **Engaging**: Use active voice and vivid descriptions
+- **Accessible**: Explain technical terms when first introduced
+- **Professional**: Maintain consistent quality across all planets
 
 ### Length Recommendations
 
-- **Planets**: 300-800 words
-- **Moons**: 100-300 words
-- **Code Examples**: Keep under 20 lines
+With the blog layout, you have more space for detailed content:
 
-### Frontmatter (Optional)
+- **Planets**: 500-1200 words (optimal for blog-style reading)
+- **Short planets**: 300-500 words (acceptable for smaller bodies)
+- **Long planets**: 1200-2000 words (for major worlds with rich content)
+- **Moons**: 200-500 words (supporting content)
 
-While not currently implemented, you can prepare for frontmatter support:
+### Visual Content Strategy
 
-```markdown
+- **Featured Image**: Always include for major planets (Earth, Mars, etc.)
+- **Inline Images**: 1-3 images per 500 words of text
+- **Code Blocks**: Use sparingly (only for technical planets)
+- **Blockquotes**: Great for notable quotes or key takeaways
+- **Lists**: Ideal for features, characteristics, or key facts
+
+### Metadata Strategy
+
+**Tags:**
+- Use 2-4 tags per planet
+- Choose from a consistent taxonomy:
+  - Type: `terrestrial`, `gas-giant`, `exoplanet`, `ice-giant`
+  - Features: `habitable`, `habitable-zone`, `rings`, `atmosphere`
+  - Status: `explored`, `colonization`, `discovery`
+  - Special: `home-world`, `super-earth`, `hot-jupiter`
+
+**External Links:**
+- Include 2-5 authoritative sources
+- NASA, ESA, and scientific institutions preferred
+- Provide context in descriptions
+- Link to imagery, data, or mission pages
+
+**Author:**
+- Use consistent attribution ("The Horizon Team" recommended)
+- Or credit specific researchers/writers
+
+**Date:**
+- Use ISO 8601 format: "2024-12-01T00:00:00Z"
+- Dates help readers understand content freshness
+- Update dates when making significant revisions
+
+### Frontmatter (Not Currently Supported)
+
+While the system uses JSON for metadata rather than frontmatter, here's how the data maps:
+
+**YAML Frontmatter (conceptual):**
+```yaml
 ---
 title: Earth
-author: John Doe
+author: The Horizon Team
 date: 2024-12-01
-tags: [terrestrial, habitable, third-planet]
+tags: [terrestrial, habitable, home-world]
+featured_image: /universe/assets/earth.jpg
 ---
+```
 
-# Earth
-
-Content here...
+**Actual JSON Implementation:**
+```json
+{
+  "name": "Earth",
+  "author": "The Horizon Team",
+  "publishedDate": "2024-12-01T00:00:00Z",
+  "tags": ["terrestrial", "habitable", "home-world"],
+  "featuredImage": "/universe/assets/earth.jpg"
+}
 ```
 
 ## Edge Cases
 
 ### Missing Content
+
+If a planet lacks `contentMarkdown`:
+- A default heading will show using the planet name
+- Message displays: "No content available."
+- Layout remains intact with metadata (if present)
+- Users can still navigate to moons
+
+### Missing Metadata
+
+All metadata fields are optional:
+- **No publishedDate**: Date section doesn't render
+- **No author**: Author section doesn't render
+- **No tags**: Tag section doesn't render
+- **No featuredImage**: Header flows directly to content
+- **No externalLinks**: Related Resources section doesn't render
+
+The layout gracefully adapts to whatever metadata is present.
+
+### Planets Without Moons
+
+If a planet has no moons or `moons: []`:
+- The moon navigation UI is automatically hidden
+- Content area remains properly sized
+- No empty space where moons would be
+- Users can navigate back using breadcrumb or back button
+
+### Planets Without Featured Images
+
+When `featuredImage` is not provided:
+- No gap or broken image appears
+- Header flows directly to markdown content
+- Layout remains balanced without the image
+- Consider this acceptable for minor moons or distant exoplanets
+
+### Long Documents
+
+For very long markdown documents (1500+ words):
+- Content remains scrollable within the column
+- Performance is maintained via optimized rendering
+- Scroll position preserved when navigating to/from moons
+- Consider breaking extremely long content (3000+ words) into multiple planets or adding subheadings for navigation
+
+### Mobile Considerations
+
+On mobile devices (≤ 768px):
+- Layout switches to single column (planet on top, content below)
+- Full page scrolls naturally (no nested scrollbars)
+- Featured images scale responsively
+- External links stack vertically for better touch targets
+- Font sizes reduce appropriately (clamp() ensures readability)
+
+### External Link Limits
+
+While there's no hard limit on external links:
+- **Recommended**: 2-5 links per planet
+- **Maximum practical**: 8-10 links
+- Too many links can overwhelm readers
+- Consider quality over quantity
 
 If a planet lacks `contentMarkdown`:
 - A default heading will show using the planet name
