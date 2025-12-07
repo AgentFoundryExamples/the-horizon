@@ -18,7 +18,7 @@ import {
   DEFAULT_ANIMATION_CONFIG,
 } from '@/lib/camera';
 import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG as DEFAULT_ANIM_CONFIG } from '@/lib/animation';
-import { calculateGalaxyScaleWithOverride } from '@/lib/universe/scale-constants';
+import { calculateGalaxyScaleWithOverride, calculateGalaxyScale } from '@/lib/universe/scale-constants';
 import { TOOLTIP_POSITIONING, TOOLTIP_TYPOGRAPHY } from '@/lib/tooltip-constants';
 import GalaxyView from './GalaxyView';
 import SolarSystemView from './SolarSystemView';
@@ -233,10 +233,22 @@ function SceneContent({ galaxies }: SceneContentProps) {
   // Position galaxies in a grid
   const galaxyPositions = useMemo(() => {
     const positions = new Map<string, THREE.Vector3>();
-    // Spacing increased to 50 units to accommodate larger galaxy sizes (max diameter ~44 units)
-    // This ensures adequate separation even with maximum-sized galaxies
+    // Spacing must be > 2× GALAXY_SCALE.MAX_RADIUS to prevent overlap
+    // Current: MAX_RADIUS=22, so spacing must be > 44. Using 50 for safety margin.
+    // IMPORTANT: If GALAXY_SCALE.MAX_RADIUS changes, update this spacing accordingly
     const spacing = 50;
     const cols = Math.ceil(Math.sqrt(galaxies.length));
+    
+    // Runtime validation: ensure spacing accommodates maximum galaxy diameter
+    if (process.env.NODE_ENV !== 'production') {
+      const maxDiameter = calculateGalaxyScale(1).maxRadius * 2;
+      if (spacing <= maxDiameter) {
+        console.warn(
+          `Grid spacing (${spacing}) is too small for max galaxy diameter (${maxDiameter}). ` +
+          `Increase spacing to at least ${Math.ceil(maxDiameter + 6)}`
+        );
+      }
+    }
 
     galaxies.forEach((galaxy, index) => {
       const col = index % cols;
@@ -454,7 +466,7 @@ export default function UniverseScene({ galaxies }: UniverseSceneProps) {
     <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
       <Canvas
         camera={{
-          position: [0, 60, 130],
+          position: DEFAULT_CAMERA_POSITIONS.universe.position.toArray() as [number, number, number],
           fov: 75,
         }}
         style={{ background: '#000000' }}

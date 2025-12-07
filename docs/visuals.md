@@ -496,9 +496,13 @@ GALAXY_SCALE = {
 - `BASE_RADIUS` increased from 8 to 12 units (+50%) to maintain proportional balance
 - Grid spacing increased from 30 to 50 units to prevent overlap with larger galaxies
 - Camera positions adjusted to accommodate larger scale:
-  - Universe view: Z position 100 → 130, Y position 50 → 60
-  - Galaxy focus: distance 25 → 35, angle 35° → 40°
+  - Universe view: position (0, 50, 100) → (0, 60, 130)
+  - Galaxy view: position (0, 20, 40) → (0, 25, 50)
+  - Galaxy focus uses: `calculateFocusPosition(galaxyPos, distance=35, angle=40°)`
 - OrbitControls ranges updated: minDistance 20 → 30, maxDistance 200 → 250
+- Added runtime validation in development mode to warn if grid spacing is insufficient
+
+**Performance Note**: Larger galaxies use the same particle count but occupy more screen space. Initial estimates suggest ~5-10% increase in GPU time from increased screen coverage. Target frame rates: 60 FPS desktop, 30 FPS mobile. Monitor frame rates on lower-end devices if increasing beyond these values.
 
 **Why These Values:**
 
@@ -535,8 +539,7 @@ To further adjust galaxy scale for your needs:
    - Grid spacing in `UniverseScene.tsx`: Set to at least `2 × MAX_RADIUS + 6`
    - Camera positions in `camera.ts`: Increase universe view Z by `(newMax - 22) × 5`
    - OrbitControls max distance: Increase proportionally to maintain zoom range
-
-**Performance Note**: Larger galaxies use the same particle count but occupy more screen space. Monitor frame rates on lower-end devices if increasing beyond these values.
+   - Runtime validation will warn in development if spacing becomes insufficient
 
 ### Galaxy Size Calculation
 
