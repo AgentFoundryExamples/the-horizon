@@ -50,6 +50,8 @@ When you edit universe content (galaxies, solar systems, planets, or moons), you
 - A new hash is generated for optimistic locking (prevents concurrent edit conflicts)
 - Changes are now persisted locally but **not yet committed to version control**
 
+**Important**: The GET endpoint now reads from the local file by default, preventing GitHub fetches from overwriting your unsaved edits. This ensures your work is not lost if another admin commits changes while you're editing.
+
 **API Endpoint**: `PATCH /api/admin/universe`
 
 **Server Logs**:
@@ -124,6 +126,31 @@ This workflow provides several benefits:
 - **Review**: Create PRs for team review before merging to main
 - **Recovery**: Disk-saved changes persist even if your browser session ends
 - **Rollback**: Easy to discard local changes before committing
+- **No Data Loss**: GET endpoint reads from local file by default, preventing GitHub fetches from overwriting unsaved work
+
+### GitHub Sync Behavior
+
+**Default Behavior (Recommended)**:
+- When you load the admin interface, it reads from your local `universe.json` file
+- This prevents GitHub fetches from overwriting any unsaved edits you've made
+- Your work-in-progress changes are safe even if another admin commits to GitHub
+
+**Explicit GitHub Sync**:
+- If you want to pull the latest committed version from GitHub (e.g., another admin committed changes), you can explicitly request a sync
+- This is useful when coordinating with other admins or when you want to discard local changes and start fresh
+- To sync from GitHub: Use the "Sync from GitHub" button in the admin interface (if available) or manually clear your local file
+- Technical: GET endpoint with `?syncFromGitHub=true` query parameter
+
+**When to Sync from GitHub**:
+- You want to see changes committed by another admin
+- You want to discard your local edits and start over
+- You're starting a new editing session and want the latest version
+- Your local file is corrupted or missing
+
+**When NOT to Sync from GitHub**:
+- You have unsaved edits in progress (they will be overwritten)
+- You're in the middle of an editing session
+- You've saved changes locally but haven't committed yet (unless you want to discard them)
 
 ### Common Scenarios
 

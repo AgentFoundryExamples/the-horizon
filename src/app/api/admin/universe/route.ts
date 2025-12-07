@@ -25,8 +25,10 @@ import path from 'path';
 /**
  * GET /api/admin/universe
  * Returns the current universe data with hash for optimistic locking
+ * Query params:
+ *   - syncFromGitHub: if 'true', fetches latest from GitHub instead of local file
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   const authenticated = await isAuthenticated();
   if (!authenticated) {
     console.error('[GET /api/admin/universe] Authentication failed');
@@ -39,31 +41,73 @@ export async function GET() {
   console.log('[GET /api/admin/universe] Request received - fetching universe data');
 
   try {
-    // Try to fetch from GitHub first for latest version
-    console.log('[GET /api/admin/universe] Attempting to fetch from GitHub...');
-    const githubData = await fetchCurrentUniverse();
-    
-    if (githubData) {
-      const hashPreview = githubData.hash?.substring(0, 8) || 'unknown';
-      console.log('[GET /api/admin/universe] Loaded from GitHub, hash:', hashPreview + '...');
-      const { universe, errors } = parseAndValidateUniverse(githubData.content);
-      return NextResponse.json({
-        universe,
-        hash: githubData.hash,
-        validationErrors: errors,
-      });
+    // Check if explicit GitHub sync is requested
+    const { searchParams } = new URL(request.url);
+    const syncFromGitHub = searchParams.get('syncFromGitHub') === 'true';
+
+    if (syncFromGitHub) {
+      // Explicitly requested GitHub sync
+      console.log('[GET /api/admin/universe] Explicit GitHub sync requested');
+      const githubData = await fetchCurrentUniverse();
+      
+      if (githubData) {
+        const hashPreview = githubData.hash?.substring(0, 8) || 'unknown';
+        console.log('[GET /api/admin/universe] Loaded from GitHub, hash:', hashPreview + '...');
+        const { universe, errors } = parseAndValidateUniverse(githubData.content);
+        return NextResponse.json({
+          universe,
+          hash: githubData.hash,
+          validationErrors: errors,
+          source: 'github',
+        });
+      } else {
+        console.warn('[GET /api/admin/universe] GitHub sync requested but unavailable, falling back to local');
+      }
     }
 
-    // Fallback to local file
-    console.log('[GET /api/admin/universe] GitHub unavailable, falling back to local file');
-    const content = JSON.stringify(universeData, null, 2);
-    const hash = await sha256(content);
+    // Default: read from local persisted file
+    console.log('[GET /api/admin/universe] Reading from local file');
+    const targetPath = process.env.UNIVERSE_DATA_PATH || 'public/universe/universe.json';
+    const absolutePath = path.resolve(process.cwd(), targetPath);
+    
+    let content: string;
+    try {
+      content = await fs.readFile(absolutePath, 'utf-8');
+      console.log('[GET /api/admin/universe] Local file read successfully');
+    } catch (error) {
+      // If local file doesn't exist, try GitHub as fallback
+      console.warn('[GET /api/admin/universe] Local file not found, attempting GitHub fallback');
+      const githubData = await fetchCurrentUniverse();
+      
+      if (githubData) {
+        const hashPreview = githubData.hash?.substring(0, 8) || 'unknown';
+        console.log('[GET /api/admin/universe] Loaded from GitHub fallback, hash:', hashPreview + '...');
+        const { universe, errors } = parseAndValidateUniverse(githubData.content);
+        return NextResponse.json({
+          universe,
+          hash: githubData.hash,
+          validationErrors: errors,
+          source: 'github',
+          warning: 'Local file not found, loaded from GitHub',
+        });
+      }
+      
+      // Last resort: use imported data
+      console.warn('[GET /api/admin/universe] Both local file and GitHub unavailable, using imported data');
+      content = JSON.stringify(universeData, null, 2);
+    }
 
-    console.log('[GET /api/admin/universe] Loaded local file, galaxies:', universeData.galaxies.length);
+    const hash = await sha256(content);
+    const { universe, errors } = parseAndValidateUniverse(content);
+
+    const hashPreview = hash?.substring(0, 8) || 'unknown';
+    console.log('[GET /api/admin/universe] Loaded local file, hash:', hashPreview + '...', 'galaxies:', universe.galaxies.length);
+    
     return NextResponse.json({
-      universe: universeData,
+      universe,
       hash,
-      validationErrors: [],
+      validationErrors: errors,
+      source: 'local',
     });
   } catch (error) {
     console.error('[GET /api/admin/universe] Unexpected error:', error);

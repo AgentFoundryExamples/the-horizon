@@ -104,6 +104,7 @@ export function getAllIds(universe: Universe, type: 'galaxy' | 'solarSystem' | '
 
 /**
  * Ensures a galaxy has a valid ID, auto-generating from name if needed
+ * Also provides default values for optional fields
  * @throws Error if galaxy.name is missing or empty
  */
 export function ensureGalaxyId(galaxy: Galaxy): Galaxy {
@@ -112,9 +113,19 @@ export function ensureGalaxyId(galaxy: Galaxy): Galaxy {
   }
   
   const id = galaxy.id?.trim();
+  const generatedId = id || generateId(galaxy.name);
+  
+  // Validate generated ID is not empty
+  if (!generatedId) {
+    throw new Error(`Failed to generate valid ID from galaxy name: "${galaxy.name}"`);
+  }
+  
   return {
     ...galaxy,
-    id: id || generateId(galaxy.name),
+    id: generatedId,
+    // Ensure arrays are initialized
+    stars: galaxy.stars || [],
+    solarSystems: galaxy.solarSystems || [],
   };
 }
 
