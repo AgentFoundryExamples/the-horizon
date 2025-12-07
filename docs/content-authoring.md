@@ -2,6 +2,100 @@
 
 This guide covers how to create and manage markdown content for planets and moons in The Horizon universe explorer.
 
+## Redesigned Admin Interface (v0.1.3+)
+
+The admin interface has been redesigned to provide a blog-style authoring experience with clear navigation, immediate feedback, and intuitive workflows.
+
+### Key Features
+
+**Modal-Based Editing**
+- Content editors now open in modal dialogs
+- Editors automatically close after successful save operations
+- Clear visual separation between browsing and editing modes
+
+**Real-Time Feedback**
+- Toast-style notifications for all operations
+- Success messages confirm completed actions
+- Error messages provide context and guidance
+- Network failures display retry options
+- Auth failures redirect to login automatically
+
+**Breadcrumb Navigation**
+- Clear navigation hierarchy: Galaxies → Systems → Planets → Moons
+- Click breadcrumbs to navigate back through levels
+- Current location always visible
+
+**Content Cards**
+- Visual cards display content with hover effects
+- Quick actions (Edit/Delete) on each item
+- Shows metadata (e.g., planet count, moon count)
+- Empty state messages guide first-time authors
+
+**Improved Validation**
+- Inline validation feedback
+- Required fields marked with asterisks
+- Disabled submit buttons prevent invalid submissions
+- Character counters for markdown content
+
+### Authoring Workflow
+
+```mermaid
+graph TB
+    A[Dashboard] --> B[Select Galaxy]
+    B --> C{Edit Galaxy Info}
+    C --> D[Add/Edit Solar System]
+    D --> E[Add/Edit Planet]
+    E --> F[Add/Edit Moon]
+    F --> G[Save Changes]
+    G --> H{Success?}
+    H -->|Yes| I[Modal Auto-Closes]
+    H -->|No| J[Show Error & Retry]
+    I --> K[💾 Save to Disk]
+    K --> L[🔀 Commit to GitHub]
+```
+
+### Creating Content
+
+1. **Navigate to Dashboard**: Log in to the admin interface at `/admin`
+2. **Browse Galaxies**: View all galaxies in card format with metadata
+3. **Edit or Create**: Click "Edit Galaxy" or "+ Add New Galaxy"
+4. **Modal Opens**: Editor appears in a modal dialog with breadcrumb navigation
+5. **Make Changes**: Edit in organized tabs (Info, Systems, Content, etc.)
+6. **Save**: Click "Save Changes" - modal auto-closes on success
+7. **Repeat**: Continue editing other content as needed
+8. **Persist**: Click "💾 Save to Disk" to persist all changes locally
+9. **Publish**: Click "🔀 Commit to GitHub" to make changes live
+
+### Navigation Tips
+
+- **Breadcrumbs**: Click any level to navigate back (e.g., "All Galaxies" > "Andromeda")
+- **Tabs**: Use tabs within editors to organize related fields
+- **Close Button**: X in top-right corner or click backdrop to close modal
+- **ESC Key**: Press Escape to close any modal
+- **Auto-Close**: Successful saves automatically close the editor
+
+### Error Handling
+
+**Network Failures**
+- Modal stays open preserving your edits
+- Error message displays with retry guidance
+- Your work is never lost due to network issues
+
+**Validation Errors**
+- Red borders highlight invalid fields
+- Error messages appear below fields
+- Submit buttons disabled until errors resolved
+
+**Authentication Errors**
+- Automatic redirect to login page
+- 2-second grace period to read error message
+- Return to work after re-authentication
+
+**Conflict Detection**
+- Optimistic locking prevents data loss
+- Clear message if another admin made changes
+- Guidance to refresh and reapply edits
+
 ## Admin Workflow: Save vs Commit
 
 The admin interface uses a two-step workflow to ensure content changes are safe and reviewable. This separation provides better control and reliability for managing universe content.
@@ -35,17 +129,31 @@ graph LR
     G --> H
 ```
 
-### Step 1: Save to Disk
+### Step 1: Edit and Save to Disk
 
-When you edit universe content (galaxies, solar systems, planets, or moons), your changes are initially stored only in the browser's memory. To persist these changes:
+The redesigned admin interface makes it easy to edit content with a clear, modal-based workflow:
 
-1. **Make your edits** in the admin interface
-2. **Click "Save Changes"** within the specific editor (galaxy, solar system, planet, or moon)
-3. **Click "💾 Save to Disk"** in the main admin interface
-4. **Verify success**: Look for the green success message "Changes saved to disk successfully"
+**Editing Content:**
+1. **Navigate**: From the dashboard, click "Edit Galaxy" on any galaxy card
+2. **Modal Opens**: The galaxy editor appears in a full-screen modal
+3. **Edit Fields**: Fill in or update galaxy information in the "Basic Info" tab
+4. **Add Systems**: Switch to "Solar Systems" tab, click "+ Add Solar System"
+5. **Nested Editing**: Each system/planet opens in its own modal with breadcrumb navigation
+6. **Save Individual Items**: Click "Save Changes" in any editor
+   - ✅ Success: Modal closes automatically with confirmation notification
+   - ❌ Error: Modal stays open with inline validation feedback
+7. **Repeat**: Continue editing other galaxies, systems, or planets as needed
 
-**What happens**:
-- Changes are validated to prevent corrupted data
+**Persisting Changes:**
+After making all your edits, scroll to the "💾 Save Changes" section:
+
+1. **Click "💾 Save to Disk"** button
+2. **Wait for confirmation**: A green notification banner appears
+3. **Success message**: "Changes saved successfully! Your edits are now persisted locally."
+4. **Error handling**: If save fails, the editor stays open with a detailed error message
+
+**What happens during save**:
+- All edited content is validated to prevent corrupted data
 - Data is written to `public/universe/universe.json` on the server
 - A new hash is generated for optimistic locking (prevents concurrent edit conflicts)
 - Changes are now persisted locally but **not yet committed to version control**
@@ -76,24 +184,37 @@ ls -lh public/universe/universe.json
 
 ### Step 2: Commit to GitHub
 
-After you've saved your changes and verified they work correctly:
+After saving your changes locally and verifying they work correctly:
 
-1. **Enter a descriptive commit message** explaining your changes
-2. **Choose commit type**:
-   - ✅ Check "Create Pull Request" (recommended for review)
-   - ⬜ Leave unchecked to commit directly to main branch
-3. **Click the appropriate button**:
-   - "🔀 Create PR" if creating a pull request
-   - "✓ Commit to GitHub" if committing directly
-4. **Verify success**: Look for success message with optional PR URL
+**Committing Process:**
+1. **Scroll to "🔀 Commit to GitHub"** section on the dashboard
+2. **Enter commit message**: Describe your changes (required field)
+   - Example: "Add Andromeda galaxy with 3 solar systems"
+   - Field highlights in red if empty when attempting to commit
+3. **Choose commit type**:
+   - ✅ **Create Pull Request** (recommended): Creates a branch and PR for team review
+   - ⬜ **Direct Commit**: Commits directly to main branch (use with caution)
+4. **Click the button**:
+   - "🔀 Create Pull Request" if checkbox is selected
+   - "✓ Commit to Main Branch" if checkbox is unchecked
+5. **Wait for confirmation**: Button shows "Committing..." with loading spinner
+6. **Success notification**: Green banner with confirmation message
+   - For PR: Includes link to the created pull request
+   - For direct commit: Confirms commit was successful
 
-**What happens**:
+**What happens during commit**:
 - System reads the saved file from `public/universe/universe.json`
-- Data is validated again before committing
+- Data is validated again before committing (safety check)
 - Content is pushed to GitHub via API
-- If PR selected: creates branch, commits file, opens PR
-- If direct commit: commits directly to main branch
+- **If PR selected**: Creates new branch, commits file, opens pull request
+- **If direct commit**: Commits directly to main branch
 - Vercel automatically redeploys when PR is merged or commit is pushed
+
+**Success Indicators**:
+- ✅ Green notification banner at top of page
+- 📝 Success message with next steps
+- 🔗 PR link (if PR was created)
+- ✓ Commit confirmed message
 
 **API Endpoint**: `POST /api/admin/universe`
 
@@ -187,48 +308,71 @@ The admin interface validates all changes before saving and provides detailed er
 
 #### Validation Errors
 
-If your universe data is invalid (e.g., missing required fields), you'll see clear error messages:
+The redesigned interface provides immediate, inline validation feedback:
 
-- **Required fields** are marked with an asterisk (*) in the form
-- **Inline validation messages** appear below fields that fail validation
-- **Fix all validation errors** before the form can be submitted
-- **Server-side validation** also runs when saving to catch any issues
+**Real-Time Validation**:
+- **Red borders**: Invalid fields are highlighted with red borders
+- **Error messages**: Specific error text appears below each field
+- **Disabled buttons**: "Save Changes" button is disabled until all errors are resolved
+- **Field hints**: Helper text guides you on expected format
 
-**Example Error Messages**:
-```
-Validation failed: Galaxy name is required, Galaxy description is required
-```
+**Example Validation Rules**:
+- Required fields marked with asterisk (*) cannot be empty
+- Galaxy names must not be blank or whitespace-only
+- Commit messages must not be empty
+- IDs should be in kebab-case format (auto-generated from name)
 
-**Server Logs**:
-```
-[PATCH /api/admin/universe] Validation failed: Galaxy[0]: Galaxy name is required
-```
+**When Validation Fails**:
+1. **Editor stays open**: Your edits are preserved
+2. **Fields highlight**: Invalid fields show red border
+3. **Error text appears**: Message explains what's wrong
+4. **Fix and retry**: Correct the errors and click "Save Changes" again
+5. **Success**: Modal closes automatically when validation passes
 
-#### Disk Write Failures
+**Server-Side Validation**:
+Even if client-side validation passes, the server performs additional checks:
 
-If the server can't write to disk, you'll receive actionable error messages:
+- **Success**: Green notification, "Changes saved successfully!"
+- **Failure**: Red notification with detailed error message
+- **Example**: "Validation failed: Galaxy[0]: Galaxy name is required"
 
-**Common Causes**:
-- Insufficient disk space
-- File permissions issues
-- File system errors
+**Best Practices**:
+- Fill all required fields (marked with *)
+- Use descriptive names for galaxies, systems, and planets
+- Provide meaningful commit messages
+- Review inline errors before retrying save
 
-**Error Message Example**:
-```
-Failed to save universe data to disk
-Error: ENOSPC: no space left on device
-```
+#### Network Failures
 
-**Server Logs**:
-```
-[persistUniverseToFile] Error: Error: ENOSPC: no space left on device
-```
+The redesigned interface handles network failures gracefully, ensuring your work is never lost:
 
-**Resolution**:
-- Check available disk space
-- Verify file permissions on `public/universe/` directory
-- Check server logs for detailed error information
-- Contact system administrator if permissions issue
+**What Happens on Network Failure**:
+1. **Editor stays open**: Your edits remain in the modal
+2. **Error notification**: Red banner with detailed message
+   - Example: "Network error: Unable to connect to the server. Connection timeout"
+3. **Retry UI appears**: Helpful guidance on what to do next
+4. **Your work is safe**: All edits are preserved in browser memory
+
+**Recovery Options**:
+- **Check connection**: Verify your network is working
+- **Click retry**: Try the operation again by clicking the same button
+- **Wait and retry**: Network issues often resolve themselves
+- **Copy content**: For long markdown, consider copying to clipboard as backup
+
+**Network Error Types**:
+- **Connection timeout**: Server took too long to respond
+- **Connection refused**: Server is not reachable
+- **DNS errors**: Cannot resolve server hostname
+- **General network errors**: Other connectivity issues
+
+**Best Practices**:
+- Save frequently to minimize loss risk
+- For large markdown content, periodically copy to a text editor
+- Check network status indicator before major edits
+- Use offline markdown editor for drafting, then paste into admin
+
+**Auto-Retry**:
+The system does NOT automatically retry failed requests to avoid overwhelming the server. You must manually click the save/commit button again after resolving network issues.
 
 #### Concurrent Edit Conflicts
 
@@ -259,65 +403,124 @@ Conflict detected: The file has been modified by another user. Please refresh an
 
 #### Authentication Failures
 
-If your session expires or authentication fails:
+The redesigned interface automatically handles authentication issues:
 
-**Error Message**:
-```
-Unauthorized
-```
+**What Happens on Auth Failure**:
+1. **Error notification**: Red banner with message "Unauthorized. Please log in again."
+2. **Auto-redirect**: After 2 seconds, you're automatically redirected to `/admin/login`
+3. **Session expires**: Your login session has timed out or been invalidated
+4. **Work may be lost**: Unsaved edits in browser memory will be lost after redirect
 
-**Server Logs**:
-```
-[PATCH /api/admin/universe] Authentication failed
-```
+**Common Causes**:
+- Session timeout (inactive for extended period)
+- Admin password changed on server
+- Browser cookies cleared
+- Multiple admin sessions (logged in elsewhere)
 
-**Resolution**:
-1. You'll be automatically redirected to `/admin/login`
-2. Log in again with your admin password
-3. Your unsaved changes will be lost - the page will reload
+**Prevention Tips**:
+- **Save frequently**: Click "💾 Save to Disk" every few minutes
+- **Stay active**: Don't leave admin page idle for long periods
+- **One session**: Avoid logging in from multiple browsers/tabs
+- **Draft elsewhere**: For long markdown, draft in a text editor first
 
-**Prevention**: Save frequently to avoid losing work if your session expires
+**Recovery Process**:
+1. **Redirected to login**: You'll see the login page after 2 seconds
+2. **Enter password**: Log in with your admin credentials
+3. **Return to dashboard**: You'll be back at the dashboard
+4. **Lost edits**: Any unsaved changes in the browser are gone
+5. **Saved work preserved**: Changes saved to disk are still there
+6. **Resume work**: Continue from where you saved last
+
+**Best Practice**:
+Set up a regular save cadence:
+- Edit content → Save in editor (modal closes)
+- Edit more content → Save again
+- Every 10-15 minutes: Click "💾 Save to Disk"
+- Reduces risk of losing work to auth timeout
 
 ## Adding Galaxies
 
-When creating a new galaxy through the admin interface:
+The redesigned admin interface makes galaxy creation intuitive with clear visual feedback:
 
-1. **Click "Add Galaxy"** in the Universe Dashboard
-2. **Fill in Required Fields** (marked with *):
-   - **Name**: Display name for the galaxy (e.g., "Andromeda Galaxy")
-   - **Description**: Brief description of the galaxy (required, cannot be empty)
-   - **Theme**: Visual theme identifier (e.g., "blue-white", "purple-white")
-   - **Particle Color**: Hex color code for particle effects (e.g., "#4A90E2")
+### Creating a New Galaxy
 
-3. **Optional Fields**:
-   - **ID**: Unique identifier (kebab-case). If left empty, it will be auto-generated from the name
-     - Example: "Andromeda Galaxy" → "andromeda-galaxy"
+1. **Access Dashboard**: Navigate to `/admin` and log in
+2. **Click "+ Add New Galaxy"**: Large button at top of Content Management section
+3. **Modal Opens**: Galaxy editor appears with three tabs
+4. **Fill Basic Info Tab**:
+   - **Name*** (required): Display name (e.g., "Andromeda Galaxy")
+     - Auto-generates ID in kebab-case if not manually set
+     - Red border and error if left empty
+   - **Description*** (required): Brief description of the galaxy
+     - Cannot be empty or whitespace-only
+     - Red border and error if invalid
+   - **Theme*** (required): Visual theme identifier
+     - Examples: "blue-white", "purple-white", "red-orange"
+     - Affects particle colors and visual styling
+   - **Particle Color*** (required): Hex color code for particle effects
+     - Color picker provided for easy selection
+     - Text input for manual entry (e.g., "#4A90E2")
+     - Must be valid hex color format
+   - **ID** (optional): Unique kebab-case identifier
+     - Auto-generated from name if not provided
      - Unicode names are normalized: "Café Galaxy" → "cafe-galaxy"
+     - Can be manually edited if auto-generation is not desired
 
-4. **Validation Feedback**:
-   - Fields with errors show a red border and error message
-   - Fix all errors before clicking "Save Changes"
-   - The form prevents submission until all required fields are valid
+5. **Add Solar Systems** (Solar Systems tab):
+   - Click "+ Add Solar System" to create systems within the galaxy
+   - Each system opens in its own modal with breadcrumb navigation
+   - Systems can contain multiple planets and moons
 
-5. **Save Process**:
-   - Click "Save Changes" to save the galaxy to memory
-   - Click "💾 Save to Disk" to persist changes locally
-   - Click "✓ Commit to GitHub" when ready to publish
+6. **Add Background Stars** (Background Stars tab):
+   - Click "+ Add Star" to add decorative background stars
+   - Quick inline editing for star properties
+   - Stars are visual elements, not interactive
 
-### Galaxy Validation Rules
+7. **Save Galaxy**: Click "Save Changes" button
+   - ✅ Success: Modal closes automatically with confirmation
+   - ❌ Error: Validation messages appear inline
+   - Fix errors and retry
 
-- **Name**: Cannot be empty or whitespace-only
-- **Description**: Cannot be empty or whitespace-only
-- **Theme**: Cannot be empty or whitespace-only
-- **Particle Color**: Cannot be empty; should be a valid hex color code
-- **ID Uniqueness**: Galaxy IDs must be unique across all galaxies
-- **Duplicate Names**: While duplicate names are allowed, they may cause confusion and are not recommended
+8. **Persist Changes**: Back on dashboard, click "💾 Save to Disk"
+9. **Publish**: Click "🔀 Commit to GitHub" when ready
 
-### Edge Cases
+### Visual Feedback During Creation
 
-- **Duplicate galaxy names**: The system will create unique IDs but won't prevent duplicate names. Consider using unique names for clarity.
-- **Names with spaces or unicode**: These are handled correctly during ID generation (spaces → hyphens, unicode → normalized ASCII)
-- **Empty fields**: Required fields cannot be empty; validation will prevent saving until all fields are filled
+**Empty State**:
+When no galaxies exist, you'll see:
+- Centered message: "No galaxies yet"
+- Helpful subtext: "Get started by creating your first galaxy"
+- Large "+ Create First Galaxy" button
+
+**Content Cards**:
+After creating galaxies, each appears as a card showing:
+- **Galaxy name** in bold
+- **Metadata**: "X solar systems · Y stars"
+- **Description**: Brief preview of galaxy description
+- **Actions**: "Edit Galaxy" and "Delete" buttons
+- **Hover effect**: Card highlights on mouse over
+
+### Inline Validation
+
+**Real-Time Feedback**:
+- Red border appears immediately on invalid fields
+- Error text displays below problematic fields
+- "Save Changes" button disables until all errors fixed
+
+**Validation Rules**:
+| Field | Rule | Error Message |
+|-------|------|---------------|
+| Name | Cannot be empty | "Name is required" |
+| Description | Cannot be empty | "Description is required" |
+| Theme | Cannot be empty | "Theme is required" |
+| Particle Color | Must be valid hex | "Particle color is required" |
+| ID | Must be unique | Auto-handled by system |
+
+**Character Counter**:
+While not enforced, keep in mind:
+- Galaxy names: 10-50 characters recommended
+- Descriptions: 50-200 characters recommended
+- Longer descriptions may be truncated in card view
 
 
 ## Overview
