@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { SolarSystem, Planet } from '@/lib/universe/types';
 import { generateId } from '@/lib/universe/mutate';
 import PlanetEditor from './PlanetEditor';
+import Modal from './Modal';
 
 interface SolarSystemEditorProps {
   solarSystem: SolarSystem;
@@ -97,14 +98,20 @@ export default function SolarSystemEditor({
 
   return (
     <div>
-      <h4>Edit Solar System: {solarSystem.name}</h4>
+      <div className="breadcrumb" style={{ marginBottom: '1.5rem' }}>
+        <span className="breadcrumb-item" onClick={onClose} style={{ cursor: 'pointer' }}>
+          Back to Galaxy
+        </span>
+        <span className="breadcrumb-separator">›</span>
+        <span className="breadcrumb-current">{solarSystem.name}</span>
+      </div>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--admin-border)' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--admin-border)', paddingBottom: '0.5rem' }}>
         <button
           onClick={() => setActiveTab('info')}
           className={`btn btn-small ${activeTab === 'info' ? '' : 'btn-secondary'}`}
         >
-          Info
+          System Info
         </button>
         <button
           onClick={() => setActiveTab('planets')}
@@ -178,19 +185,26 @@ export default function SolarSystemEditor({
 
       {activeTab === 'planets' && (
         <>
-          <div className="entity-list">
+          <div className="content-list">
             {(localSystem.planets || []).map((planet) => (
-              <div key={planet.id} className="entity-item">
-                <div className="entity-info">
-                  <h4>{planet.name}</h4>
-                  <p>{planet.moons?.length || 0} moons</p>
+              <div key={planet.id} className="content-card">
+                <div className="content-card-header">
+                  <div>
+                    <h4 className="content-card-title">{planet.name}</h4>
+                    <p className="content-card-meta">{planet.moons?.length || 0} moons</p>
+                  </div>
                 </div>
-                <div className="entity-actions">
+                {planet.summary && (
+                  <p style={{ color: 'var(--admin-text-muted)', fontSize: '0.9rem', margin: '0.5rem 0' }}>
+                    {planet.summary}
+                  </p>
+                )}
+                <div className="content-card-actions">
                   <button
                     onClick={() => setEditingPlanet(planet.id)}
-                    className="btn btn-small btn-secondary"
+                    className="btn btn-small"
                   >
-                    Edit
+                    Edit Planet
                   </button>
                   <button
                     onClick={() => handleDeletePlanet(planet.id)}
@@ -202,19 +216,38 @@ export default function SolarSystemEditor({
               </div>
             ))}
           </div>
+          
+          {(localSystem.planets || []).length === 0 && (
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--admin-text-muted)' }}>
+              <p style={{ marginBottom: '1rem' }}>No planets in this system yet</p>
+              <p style={{ fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                Planets are the main content destinations users can explore
+              </p>
+            </div>
+          )}
+          
           <button onClick={handleAddPlanet} className="btn" style={{ marginTop: '1rem' }}>
             + Add Planet
           </button>
 
-          {editingPlanet && (
-            <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--admin-surface)', borderRadius: '4px', border: '1px solid var(--admin-border)' }}>
+          {/* Planet Editor Modal */}
+          <Modal
+            isOpen={!!editingPlanet}
+            onClose={() => setEditingPlanet(null)}
+            title={editingPlanet ? `Edit: ${(localSystem.planets || []).find((p) => p.id === editingPlanet)?.name}` : 'Edit Planet'}
+            size="large"
+          >
+            {editingPlanet && (
               <PlanetEditor
                 planet={(localSystem.planets || []).find((p) => p.id === editingPlanet)!}
-                onUpdate={handleUpdatePlanet}
+                onUpdate={(updated) => {
+                  handleUpdatePlanet(updated);
+                  setEditingPlanet(null); // Auto-close on save
+                }}
                 onClose={() => setEditingPlanet(null)}
               />
-            </div>
-          )}
+            )}
+          </Modal>
         </>
       )}
 

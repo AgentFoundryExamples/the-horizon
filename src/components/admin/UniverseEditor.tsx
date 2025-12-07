@@ -15,9 +15,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Universe, Galaxy } from '@/lib/universe/types';
 import { generateId } from '@/lib/universe/mutate';
 import GalaxyEditor from './GalaxyEditor';
+import Modal from './Modal';
+import NotificationBanner, { NotificationType } from './NotificationBanner';
 
 interface UniverseEditorProps {
   universe: Universe;
@@ -30,17 +33,20 @@ export default function UniverseEditor({
   currentHash,
   onUpdate,
 }: UniverseEditorProps) {
+  const router = useRouter();
   const [editingGalaxy, setEditingGalaxy] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [committing, setCommitting] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [notification, setNotification] = useState<{ type: NotificationType; message: string } | null>(null);
   const [commitMessage, setCommitMessage] = useState('');
   const [createPR, setCreatePR] = useState(false);
   const [localHash, setLocalHash] = useState(currentHash);
+  const [retrying, setRetrying] = useState(false);
 
   const handleSaveToFile = async () => {
     setSaving(true);
-    setMessage(null);
+    setNotification(null);
+    setRetrying(false);
 
     try {
       const response = await fetch('/api/admin/universe', {
@@ -57,9 +63,9 @@ export default function UniverseEditor({
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setMessage({
+        setNotification({
           type: 'success',
-          text: 'Changes saved to disk successfully. Remember to commit when ready!',
+          message: 'Changes saved successfully! Your edits are now persisted locally.',
         });
         // Update local hash to the new hash from the server
         if (data.hash) {
@@ -67,21 +73,32 @@ export default function UniverseEditor({
         }
         onUpdate(universe);
       } else if (response.status === 409) {
-        setMessage({
+        setNotification({
           type: 'error',
-          text: data.message || 'Conflict detected. Please refresh the page and try again.',
+          message: data.message || 'Conflict detected: The file has been modified by another user. Please refresh and try again.',
         });
-      } else {
-        setMessage({
+      } else if (response.status === 401) {
+        setNotification({
           type: 'error',
-          text: data.error || data.message || 'Failed to save changes',
+          message: 'Unauthorized. Please log in again.',
+        });
+        // Redirect to login after 5 seconds to give users time to read the message
+        setTimeout(() => {
+          router.push('/admin/login');
+        }, 5000);
+      } else {
+        setNotification({
+          type: 'error',
+          message: data.error || data.message || 'Failed to save changes. Please try again.',
         });
       }
     } catch (err) {
-      setMessage({
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setNotification({
         type: 'error',
-        text: 'Failed to connect to server',
+        message: `Network error: Unable to connect to the server. ${errorMessage}`,
       });
+      setRetrying(true);
     } finally {
       setSaving(false);
     }
@@ -89,12 +106,13 @@ export default function UniverseEditor({
 
   const handleCommit = async () => {
     if (!commitMessage.trim()) {
-      setMessage({ type: 'error', text: 'Commit message is required' });
+      setNotification({ type: 'error', message: 'Commit message is required. Please describe your changes.' });
       return;
     }
 
     setCommitting(true);
-    setMessage(null);
+    setNotification(null);
+    setRetrying(false);
 
     try {
       const response = await fetch('/api/admin/universe', {
@@ -112,25 +130,38 @@ export default function UniverseEditor({
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setMessage({
+        const prMessage = createPR && data.prUrl
+          ? ` View your pull request: ${data.prUrl}`
+          : '';
+        setNotification({
           type: 'success',
-          text: createPR
-            ? `Pull request created successfully! ${data.prUrl}`
-            : 'Changes committed to GitHub successfully',
+          message: createPR
+            ? `Pull request created successfully!${prMessage}`
+            : 'Changes committed to GitHub successfully. Your updates are now live.',
         });
         setCommitMessage('');
         onUpdate(universe);
-      } else {
-        setMessage({
+      } else if (response.status === 401) {
+        setNotification({
           type: 'error',
-          text: data.error || data.message || 'Failed to commit changes',
+          message: 'Unauthorized. Please log in again.',
+        });
+        setTimeout(() => {
+          router.push('/admin/login');
+        }, 5000);
+      } else {
+        setNotification({
+          type: 'error',
+          message: data.error || data.message || 'Failed to commit changes. Please try again.',
         });
       }
     } catch (err) {
-      setMessage({
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setNotification({
         type: 'error',
-        text: 'Failed to connect to server',
+        message: `Network error: Unable to connect to the server. ${errorMessage}`,
       });
+      setRetrying(true);
     } finally {
       setCommitting(false);
     }
@@ -161,6 +192,12 @@ export default function UniverseEditor({
         g.id === updatedGalaxy.id ? updatedGalaxy : g
       ),
     });
+    // Auto-close the modal after successful update
+    setEditingGalaxy(null);
+    setNotification({
+      type: 'success',
+      message: `Galaxy "${updatedGalaxy.name}" updated successfully. Remember to save your changes!`,
+    });
   };
 
   const handleDeleteGalaxy = (galaxyId: string) => {
@@ -180,31 +217,49 @@ export default function UniverseEditor({
 
   return (
     <div>
-      <div className="admin-card">
-        <h2>Galaxies</h2>
-        
-        {message && (
-          <div className={`alert alert-${message.type}`}>
-            {message.text}
-          </div>
-        )}
+      {/* Global notification banner */}
+      {notification && (
+        <NotificationBanner
+          type={notification.type}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+          autoClose={notification.type === 'success'}
+          autoCloseDelay={5000}
+        />
+      )}
 
-        <div className="entity-list">
+      <div className="admin-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h2>Content Management</h2>
+          <button onClick={handleAddGalaxy} className="btn">
+            + Add New Galaxy
+          </button>
+        </div>
+        
+        <p style={{ color: 'var(--admin-text-muted)', marginBottom: '1.5rem' }}>
+          Manage your galaxies, solar systems, and planets. Click on any galaxy to edit its details.
+        </p>
+
+        <div className="content-list">
           {universe.galaxies.map((galaxy) => (
-            <div key={galaxy.id} className="entity-item">
-              <div className="entity-info">
-                <h4>{galaxy.name}</h4>
-                <p>
-                  {galaxy.solarSystems?.length || 0} solar systems,{' '}
-                  {galaxy.stars?.length || 0} stars
-                </p>
+            <div key={galaxy.id} className="content-card">
+              <div className="content-card-header">
+                <div>
+                  <h3 className="content-card-title">{galaxy.name}</h3>
+                  <p className="content-card-meta">
+                    {galaxy.solarSystems?.length || 0} solar systems · {galaxy.stars?.length || 0} stars
+                  </p>
+                </div>
               </div>
-              <div className="entity-actions">
+              <p style={{ color: 'var(--admin-text-muted)', fontSize: '0.9rem', margin: '0.5rem 0' }}>
+                {galaxy.description}
+              </p>
+              <div className="content-card-actions">
                 <button
                   onClick={() => setEditingGalaxy(galaxy.id)}
-                  className="btn btn-small btn-secondary"
+                  className="btn btn-small"
                 >
-                  Edit
+                  Edit Galaxy
                 </button>
                 <button
                   onClick={() => handleDeleteGalaxy(galaxy.id)}
@@ -217,56 +272,89 @@ export default function UniverseEditor({
           ))}
         </div>
 
-        <button onClick={handleAddGalaxy} className="btn" style={{ marginTop: '1rem' }}>
-          + Add Galaxy
-        </button>
+        {universe.galaxies.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--admin-text-muted)' }}>
+            <p style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>No galaxies yet</p>
+            <p style={{ marginBottom: '1.5rem' }}>Get started by creating your first galaxy</p>
+            <button onClick={handleAddGalaxy} className="btn">
+              + Create First Galaxy
+            </button>
+          </div>
+        )}
       </div>
 
-      {editingGalaxy && (
-        <div className="admin-card">
+      {/* Galaxy Editor Modal */}
+      <Modal
+        isOpen={!!editingGalaxy}
+        onClose={() => setEditingGalaxy(null)}
+        title={editingGalaxy ? `Edit: ${universe.galaxies.find((g) => g.id === editingGalaxy)?.name}` : 'Edit Galaxy'}
+        size="large"
+      >
+        {editingGalaxy && (
           <GalaxyEditor
             galaxy={universe.galaxies.find((g) => g.id === editingGalaxy)!}
             onUpdate={handleUpdateGalaxy}
             onClose={() => setEditingGalaxy(null)}
           />
-        </div>
-      )}
+        )}
+      </Modal>
 
       <div className="admin-card">
-        <h3>Save Changes</h3>
-        <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
-          Save your edits to disk first, then commit to GitHub when ready.
+        <h3>💾 Save Changes</h3>
+        <p style={{ marginBottom: '1rem', color: 'var(--admin-text-muted)' }}>
+          Save your edits to disk. Your changes will be persisted locally and ready for commit.
         </p>
         
+        {retrying && (
+          <div className="retry-container" style={{ padding: '1rem', margin: '1rem 0' }}>
+            <p className="retry-message">
+              Unable to save. Check your network connection and try again.
+            </p>
+          </div>
+        )}
+
         <button
           onClick={handleSaveToFile}
           className="btn"
           disabled={saving}
-          style={{ marginBottom: '1rem' }}
         >
-          {saving ? 'Saving...' : '💾 Save to Disk'}
+          {saving ? (
+            <>
+              <span className="loading-spinner"></span>
+              Saving...
+            </>
+          ) : (
+            '💾 Save to Disk'
+          )}
         </button>
         
-        <span className="form-hint" style={{ display: 'block', marginBottom: '1.5rem' }}>
+        <span className="form-hint" style={{ display: 'block', marginTop: '0.5rem' }}>
           Saves changes to local universe.json without committing to GitHub
         </span>
       </div>
 
       <div className="admin-card">
-        <h3>Commit Changes to GitHub</h3>
+        <h3>🔀 Commit to GitHub</h3>
+        <p style={{ marginBottom: '1rem', color: 'var(--admin-text-muted)' }}>
+          After saving locally, commit your changes to GitHub to make them live.
+        </p>
+
         <div className="form-group">
-          <label htmlFor="commitMessage">Commit Message</label>
+          <label htmlFor="commitMessage">Commit Message *</label>
           <input
             type="text"
             id="commitMessage"
             value={commitMessage}
             onChange={(e) => setCommitMessage(e.target.value)}
-            placeholder="Describe your changes..."
+            placeholder="e.g., Add new Andromeda galaxy with 3 solar systems"
             required
+            className={!commitMessage.trim() && committing ? 'error' : ''}
           />
-          <span className="form-hint">
-            Describe what changes you made to the universe
-          </span>
+          {!commitMessage.trim() && (
+            <span className="form-hint" style={{ color: 'var(--admin-warning)' }}>
+              A commit message is required to describe your changes
+            </span>
+          )}
         </div>
 
         <div className="form-group">
@@ -277,10 +365,10 @@ export default function UniverseEditor({
               onChange={(e) => setCreatePR(e.target.checked)}
               style={{ marginRight: '0.5rem' }}
             />
-            Create Pull Request (recommended for review)
+            Create Pull Request (recommended for team review)
           </label>
           <span className="form-hint">
-            If unchecked, changes will be committed directly to main branch
+            Creates a new branch and pull request for review before merging
           </span>
         </div>
 
@@ -289,7 +377,16 @@ export default function UniverseEditor({
           className="btn"
           disabled={committing || !commitMessage.trim()}
         >
-          {committing ? 'Committing...' : createPR ? '🔀 Create PR' : '✓ Commit to GitHub'}
+          {committing ? (
+            <>
+              <span className="loading-spinner"></span>
+              Committing...
+            </>
+          ) : createPR ? (
+            '🔀 Create Pull Request'
+          ) : (
+            '✓ Commit to Main Branch'
+          )}
         </button>
       </div>
     </div>

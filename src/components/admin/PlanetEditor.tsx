@@ -83,14 +83,20 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
 
   return (
     <div>
-      <h4>Edit Planet: {planet.name}</h4>
+      <div className="breadcrumb" style={{ marginBottom: '1.5rem' }}>
+        <span className="breadcrumb-item" onClick={onClose} style={{ cursor: 'pointer' }}>
+          Back to System
+        </span>
+        <span className="breadcrumb-separator">›</span>
+        <span className="breadcrumb-current">{planet.name}</span>
+      </div>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--admin-border)' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--admin-border)', paddingBottom: '0.5rem' }}>
         <button
           onClick={() => setActiveTab('info')}
           className={`btn btn-small ${activeTab === 'info' ? '' : 'btn-secondary'}`}
         >
-          Info
+          Basic Info
         </button>
         <button
           onClick={() => setActiveTab('content')}
@@ -151,18 +157,23 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
       {activeTab === 'content' && (
         <div className="editor-container">
           <div className="editor-panel">
-            <h4>Markdown Editor</h4>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h4 style={{ margin: 0 }}>Markdown Editor</h4>
+              <span className="form-hint" style={{ margin: 0, fontSize: '0.85rem' }}>
+                {localPlanet.contentMarkdown.length} characters
+              </span>
+            </div>
             <textarea
               value={localPlanet.contentMarkdown}
               onChange={(e) => handleChange('contentMarkdown', e.target.value)}
               placeholder="# Planet Name&#10;&#10;Add your markdown content here..."
             />
             <span className="form-hint">
-              Supports GitHub-flavored markdown. Use headers, lists, bold, italics, etc.
+              Supports GitHub-flavored markdown. Use headers, lists, bold, italics, code blocks, and more.
             </span>
           </div>
           <div className="editor-panel">
-            <h4>Preview</h4>
+            <h4>Live Preview</h4>
             <div className="markdown-preview">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {localPlanet.contentMarkdown}

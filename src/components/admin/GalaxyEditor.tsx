@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { Galaxy, SolarSystem, Star } from '@/lib/universe/types';
 import { generateId, ensureGalaxyId } from '@/lib/universe/mutate';
 import SolarSystemEditor from './SolarSystemEditor';
+import Modal from './Modal';
 
 interface GalaxyEditorProps {
   galaxy: Galaxy;
@@ -186,14 +187,20 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
 
   return (
     <div>
-      <h3>Edit Galaxy: {galaxy.name}</h3>
+      <div className="breadcrumb" style={{ marginBottom: '1.5rem' }}>
+        <span className="breadcrumb-item" onClick={onClose} style={{ cursor: 'pointer' }}>
+          All Galaxies
+        </span>
+        <span className="breadcrumb-separator">›</span>
+        <span className="breadcrumb-current">{galaxy.name}</span>
+      </div>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--admin-border)' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--admin-border)', paddingBottom: '0.5rem' }}>
         <button
           onClick={() => setActiveTab('info')}
           className={`btn btn-small ${activeTab === 'info' ? '' : 'btn-secondary'}`}
         >
-          Info
+          Basic Info
         </button>
         <button
           onClick={() => setActiveTab('systems')}
@@ -205,7 +212,7 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
           onClick={() => setActiveTab('stars')}
           className={`btn btn-small ${activeTab === 'stars' ? '' : 'btn-secondary'}`}
         >
-          Stars ({localGalaxy.stars?.length || 0})
+          Background Stars ({localGalaxy.stars?.length || 0})
         </button>
       </div>
 
@@ -311,19 +318,21 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
 
       {activeTab === 'systems' && (
         <>
-          <div className="entity-list">
+          <div className="content-list">
             {(localGalaxy.solarSystems || []).map((system) => (
-              <div key={system.id} className="entity-item">
-                <div className="entity-info">
-                  <h4>{system.name}</h4>
-                  <p>{system.planets?.length || 0} planets</p>
+              <div key={system.id} className="content-card">
+                <div className="content-card-header">
+                  <div>
+                    <h4 className="content-card-title">{system.name}</h4>
+                    <p className="content-card-meta">{system.planets?.length || 0} planets</p>
+                  </div>
                 </div>
-                <div className="entity-actions">
+                <div className="content-card-actions">
                   <button
                     onClick={() => setEditingSystem(system.id)}
-                    className="btn btn-small btn-secondary"
+                    className="btn btn-small"
                   >
-                    Edit
+                    Edit System
                   </button>
                   <button
                     onClick={() => handleDeleteSolarSystem(system.id)}
@@ -335,19 +344,38 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
               </div>
             ))}
           </div>
+          
+          {(localGalaxy.solarSystems || []).length === 0 && (
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--admin-text-muted)' }}>
+              <p style={{ marginBottom: '1rem' }}>No solar systems in this galaxy yet</p>
+              <p style={{ fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                Solar systems contain planets and moons for users to explore
+              </p>
+            </div>
+          )}
+          
           <button onClick={handleAddSolarSystem} className="btn" style={{ marginTop: '1rem' }}>
             + Add Solar System
           </button>
 
-          {editingSystem && (
-            <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--admin-bg)', borderRadius: '4px' }}>
+          {/* Solar System Editor Modal */}
+          <Modal
+            isOpen={!!editingSystem}
+            onClose={() => setEditingSystem(null)}
+            title={editingSystem ? `Edit: ${(localGalaxy.solarSystems || []).find((s) => s.id === editingSystem)?.name}` : 'Edit Solar System'}
+            size="large"
+          >
+            {editingSystem && (
               <SolarSystemEditor
                 solarSystem={(localGalaxy.solarSystems || []).find((s) => s.id === editingSystem)!}
-                onUpdate={handleUpdateSolarSystem}
+                onUpdate={(updated) => {
+                  handleUpdateSolarSystem(updated);
+                  setEditingSystem(null); // Auto-close on save
+                }}
                 onClose={() => setEditingSystem(null)}
               />
-            </div>
-          )}
+            )}
+          </Modal>
         </>
       )}
 
