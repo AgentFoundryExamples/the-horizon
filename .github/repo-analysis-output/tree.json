@@ -255,8 +255,30 @@
               "name": "admin",
               "children": [
                 {
+                  "type": "directory",
+                  "name": "__tests__",
+                  "children": [
+                    {
+                      "type": "file",
+                      "name": "Modal.test.tsx"
+                    },
+                    {
+                      "type": "file",
+                      "name": "NotificationBanner.test.tsx"
+                    }
+                  ]
+                },
+                {
                   "type": "file",
                   "name": "GalaxyEditor.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "Modal.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "NotificationBanner.tsx"
                 },
                 {
                   "type": "file",
@@ -489,6 +511,10 @@
     {
       "type": "file",
       "name": "LICENSE"
+    },
+    {
+      "type": "file",
+      "name": "MANUAL_TESTING.md"
     },
     {
       "type": "file",

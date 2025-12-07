@@ -54,7 +54,12 @@
       ├── UniverseScene.test.tsx
       └── WelcomeMessage.test.tsx
     ├── admin
+      ├── __tests__
+        ├── Modal.test.tsx
+        └── NotificationBanner.test.tsx
       ├── GalaxyEditor.tsx
+      ├── Modal.tsx
+      ├── NotificationBanner.tsx
       ├── PlanetEditor.tsx
       ├── SolarSystemEditor.tsx
       └── UniverseEditor.tsx
@@ -109,6 +114,7 @@
 ├── jest.config.js
 ├── jest.setup.js
 ├── LICENSE
+├── MANUAL_TESTING.md
 ├── next.config.js
 ├── package-lock.json
 ├── package.json
