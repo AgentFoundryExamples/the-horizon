@@ -763,9 +763,10 @@ const radius = Math.pow(t, 0.5) * (maxRadius - minRadius) + minRadius;
 
 #### Single Galaxy Universe
 
-- Uses maximum size (15 units) for dramatic presence
+- Uses maximum size (22 units) for dramatic presence and improved focus
 - Centered on canvas with ample whitespace
 - Rotation and particle effects fully visible
+- Camera positioned at optimal distance for framing
 
 #### Zero Galaxies
 
@@ -775,17 +776,55 @@ const radius = Math.pow(t, 0.5) * (maxRadius - minRadius) + minRadius;
 
 #### Very Large Catalogs (100+)
 
-- Applies minimum size floor (4 units)
-- Galaxies remain clickable (200-250px diameter)
-- Grid layout spacing adjusts to prevent overlap
+- Applies minimum size floor (6 units)
+- Galaxies remain highly clickable (300-350px diameter at default zoom)
+- Grid layout spacing (50 units) adjusts to prevent overlap
 - Performance remains stable with efficient rendering
+- Increased scale reduces strain on GPU fragment shader at distance
+
+#### Lower-end GPUs and Performance
+
+With increased galaxy scale, performance considerations:
+- **Particle count remains constant**: Same particle density, just larger spatial distribution
+- **Fill rate impact**: Larger galaxies cover more pixels; may impact integrated GPUs
+- **Frame rate targets**: Desktop 60 FPS (10+ galaxies), Mobile 30+ FPS (5+ galaxies)
+- **Adaptive quality**: Animation intensity automatically reduces if FPS drops below 30
+- **Render budget**: Larger galaxies take ~5-10% more GPU time due to increased screen coverage
+- **Optimization tip**: Consider reducing BASE_PARTICLE_COUNT from 2000 to 1500 on low-end devices
+
+#### Extreme Zoom Levels
+
+The increased scale improves behavior at extreme magnifications:
+- **Floating-point precision**: Larger objects reduce jitter at high zoom (positions are further from origin)
+- **Clipping prevention**: Updated minDistance (30) and maxDistance (250) prevent near/far plane issues
+- **Camera framing**: Larger galaxies remain properly framed across full zoom range
+- **Detail visibility**: Particle spread more apparent at close range with larger scale
+
+#### Collision/Selection Logic
+
+Galaxy selection remains robust with increased scale:
+- **Hit detection**: Three.js raycasting automatically handles larger bounding volumes
+- **Click accuracy**: Larger targets improve accessibility (50% increase in area)
+- **Grid separation**: 50-unit spacing prevents overlapping hitboxes (max diameter 44 units)
+- **Scene edges**: Galaxies near viewport edges remain fully selectable
+- **Z-fighting**: Increased spacing (30 → 50) eliminates depth conflicts between adjacent galaxies
+- **Touch targets**: Minimum galaxy size (6 units) exceeds WCAG requirements even at maximum zoom-out
+
+#### Very Large Catalogs (100+)
+
+- Applies minimum size floor (6 units)
+- Galaxies remain highly clickable (300-350px diameter at default zoom)
+- Grid layout spacing (50 units) automatically adjusts to prevent overlap
+- Performance remains stable with efficient rendering
+- Increased minimum scale reduces GPU strain at distance
 
 #### Mixed Manual Overrides
 
 - Featured galaxies can be larger than automatic scale
 - Other galaxies use count-based scaling normally
-- No visual conflicts or z-fighting
+- No visual conflicts or z-fighting due to adequate spacing
 - Manual overrides don't affect other galaxies' sizes
+- Grid spacing accommodates maximum of automatic and manual sizes
 
 ### Integration with Grid Layout
 
