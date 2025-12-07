@@ -146,8 +146,8 @@ Total files: 36
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 5.85 KB  
-**LOC:** 195  
+**Size:** 6.15 KB  
+**LOC:** 196  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/crypto.ts
@@ -254,7 +254,7 @@ Total files: 36
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 22.38 KB  
+**Size:** 22.45 KB  
 **LOC:** 437  
 **TODOs/FIXMEs:** 0  
 
@@ -308,8 +308,8 @@ Total files: 36
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 8.36 KB  
-**LOC:** 219  
+**Size:** 8.88 KB  
+**LOC:** 228  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/types.ts
