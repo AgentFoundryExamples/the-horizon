@@ -36,6 +36,8 @@ export interface SceneTooltipProps {
   borderColor?: string;
   /** Additional CSS class name */
   className?: string;
+  /** Whether this is a star tooltip (affects arrow color) */
+  isStar?: boolean;
 }
 
 /**
@@ -53,13 +55,15 @@ export default function SceneTooltip({
   distanceFactor = TOOLTIP_POSITIONING.DISTANCE_FACTOR_FAR,
   borderColor = TOOLTIP_COLORS.BORDER_COLOR,
   className = '',
+  isStar = false,
 }: SceneTooltipProps) {
   if (!visible) return null;
 
   // Build inline styles only for values that differ from CSS defaults
   // This allows CSS media queries to work for responsive sizing
   const inlineStyles: React.CSSProperties = {
-    border: `2px solid ${borderColor}`,
+    border: `3px solid ${borderColor}`,
+    color: borderColor, // Sets the color for the ::after pseudo-element's arrow border
   };
   
   // Only override CSS if custom values provided
@@ -69,6 +73,13 @@ export default function SceneTooltip({
   if (maxWidth !== TOOLTIP_TYPOGRAPHY.MAX_WIDTH) {
     inlineStyles.maxWidth = maxWidth;
   }
+
+  // Build class name with star modifier if needed
+  const tooltipClassName = [
+    'scene-tooltip',
+    isStar && 'star-tooltip',
+    className,
+  ].filter(Boolean).join(' ');
 
   return (
     <group position={worldPosition}>
@@ -82,7 +93,7 @@ export default function SceneTooltip({
         }}
       >
         <div
-          className={className ? `scene-tooltip ${className}` : 'scene-tooltip'}
+          className={tooltipClassName}
           style={inlineStyles}
           role="tooltip"
           aria-live="polite"

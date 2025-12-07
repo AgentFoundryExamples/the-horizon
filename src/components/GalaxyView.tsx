@@ -168,6 +168,7 @@ function PlanetInstance({ solarSystem, systemPosition, animationConfig }: Planet
           worldPosition={systemPosition}
           distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_MEDIUM}
           borderColor={TOOLTIP_COLORS.STAR_BORDER_COLOR}
+          isStar={true}
           content={solarSystem.name}
         />
       </group>

@@ -32,6 +32,10 @@ import {
   ORBITAL_SPACING,
   STAR_SCALE,
 } from '@/lib/universe/scale-constants';
+import {
+  TOOLTIP_TYPOGRAPHY,
+  TOOLTIP_COLORS,
+} from '@/lib/tooltip-constants';
 
 interface SolarSystemViewProps {
   solarSystem: SolarSystem;
@@ -218,13 +222,14 @@ export default function SolarSystemView({ solarSystem, position }: SolarSystemVi
             hoveredObject.position.z
           )}
           distanceFactor={10}
-          fontSize={hoveredObject.type === 'star' ? '1rem' : '0.95rem'}
-          borderColor={hoveredObject.type === 'star' ? 'rgba(251, 184, 19, 0.7)' : undefined}
+          fontSize={hoveredObject.type === 'star' ? TOOLTIP_TYPOGRAPHY.FONT_SIZE : TOOLTIP_TYPOGRAPHY.SUBTITLE_FONT_SIZE}
+          borderColor={hoveredObject.type === 'star' ? TOOLTIP_COLORS.STAR_BORDER_COLOR : undefined}
+          isStar={hoveredObject.type === 'star'}
           content={
             hoveredObject.type === 'star' ? (
               <>
                 <strong>{solarSystem.name}</strong>
-                <div style={{ fontSize: '0.75rem', marginTop: '0.25rem', opacity: 0.9 }}>
+                <div style={{ fontSize: TOOLTIP_TYPOGRAPHY.SUBTITLE_FONT_SIZE, marginTop: '0.25rem', opacity: 0.9 }}>
                   Star
                 </div>
               </>
@@ -232,7 +237,7 @@ export default function SolarSystemView({ solarSystem, position }: SolarSystemVi
               <>
                 <strong>{hoveredPlanet.name}</strong>
                 {hoveredPlanet.moons && hoveredPlanet.moons.length > 0 && (
-                  <div style={{ fontSize: '0.75rem', marginTop: '0.25rem', opacity: 0.9 }}>
+                  <div style={{ fontSize: TOOLTIP_TYPOGRAPHY.SUBTITLE_FONT_SIZE, marginTop: '0.25rem', opacity: 0.9 }}>
                     {hoveredPlanet.moons.length} moon{hoveredPlanet.moons.length !== 1 ? 's' : ''}
                   </div>
                 )}
