@@ -193,11 +193,11 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
   
   // Metadata - moons inherit from planet when not specified
   const publishedDate = currentMoon ? currentMoon.publishedDate || planet.publishedDate : planet.publishedDate;
-  const author = currentMoon ? planet.author : planet.author; // Moons inherit author from planet
+  const author = planet.author; // Moons always inherit author from planet
   const tags = currentMoon ? currentMoon.tags || planet.tags : planet.tags;
   const rawFeaturedImage = currentMoon ? currentMoon.featuredImage || planet.featuredImage : planet.featuredImage;
   const featuredImage = sanitizeUrl(rawFeaturedImage); // Validate URL for security
-  const rawExternalLinks = currentMoon ? planet.externalLinks || [] : planet.externalLinks || [];
+  const rawExternalLinks = planet.externalLinks || []; // Moons inherit external links from planet
   const externalLinks = rawExternalLinks.filter(link => isValidUrl(link.url)); // Filter valid URLs only
 
   return (
