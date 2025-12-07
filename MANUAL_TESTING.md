@@ -1,0 +1,307 @@
+# Manual Testing Guide for Admin UI Redesign
+
+This guide helps reviewers manually test the redesigned admin interface.
+
+## Prerequisites
+
+1. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+2. Navigate to `http://localhost:3000/admin/login`
+
+3. Set admin password in `.env.local`:
+   ```
+   ADMIN_PASSWORD=your-test-password
+   ```
+
+## Test Scenarios
+
+### 1. Dashboard and Navigation
+
+**Test:** View dashboard with existing content
+- ✅ Expected: See stat cards showing galaxy/system/planet counts
+- ✅ Expected: See content cards for each galaxy with hover effects
+- ✅ Expected: Each card shows galaxy name, description, and metadata
+
+**Test:** Empty state (if no galaxies exist)
+- ✅ Expected: See "No galaxies yet" message
+- ✅ Expected: See "+ Create First Galaxy" button
+- ✅ Expected: Centered, helpful messaging
+
+### 2. Creating a Galaxy
+
+**Test:** Open galaxy creation modal
+1. Click "+ Add New Galaxy" button
+- ✅ Expected: Modal opens with full-screen overlay
+- ✅ Expected: Modal title shows "Edit: [Galaxy Name]"
+- ✅ Expected: Three tabs visible: Basic Info, Solar Systems, Background Stars
+
+**Test:** Fill in galaxy information
+1. Fill in Name field
+- ✅ Expected: ID field auto-populates with kebab-case version
+- ✅ Expected: No red borders if valid
+2. Leave Description empty and click Save
+- ✅ Expected: Red border appears on Description field
+- ✅ Expected: Error message appears below field
+- ✅ Expected: Save button may be disabled or shows validation error
+3. Fill in all required fields correctly
+4. Click "Save Changes"
+- ✅ Expected: Modal closes automatically
+- ✅ Expected: Green toast notification appears at top
+- ✅ Expected: Message: "Galaxy '[Name]' updated successfully. Remember to save your changes!"
+- ✅ Expected: New galaxy appears in dashboard card list
+
+### 3. Editing Existing Galaxy
+
+**Test:** Open galaxy editor
+1. Click "Edit Galaxy" on any galaxy card
+- ✅ Expected: Modal opens with galaxy data pre-filled
+- ✅ Expected: Breadcrumb shows "All Galaxies > [Galaxy Name]"
+
+**Test:** Navigate with breadcrumb
+1. Click "All Galaxies" in breadcrumb
+- ✅ Expected: Modal closes
+- ✅ Expected: Return to dashboard view
+
+**Test:** Use Escape key
+1. Open galaxy editor
+2. Press Escape key
+- ✅ Expected: Modal closes
+- ✅ Expected: Unsaved changes are discarded
+
+### 4. Adding Solar Systems (Nested Modal)
+
+**Test:** Create solar system within galaxy
+1. Open galaxy editor
+2. Click "Solar Systems" tab
+3. Click "+ Add Solar System"
+- ✅ Expected: New modal opens on top of galaxy modal
+- ✅ Expected: Solar system editor appears
+- ✅ Expected: Breadcrumb shows "Back to Galaxy > [System Name]"
+4. Fill in system info and click "Save Changes"
+- ✅ Expected: System modal closes automatically
+- ✅ Expected: Galaxy modal remains open
+- ✅ Expected: New system appears in systems list
+
+### 5. Adding Planets (Double-Nested Modal)
+
+**Test:** Create planet within solar system
+1. Open galaxy editor → Solar Systems tab
+2. Click "Edit System" on a system
+3. In system modal, click "Planets" tab
+4. Click "+ Add Planet"
+- ✅ Expected: Planet modal opens
+- ✅ Expected: Breadcrumb shows navigation path
+5. Fill planet info, go to "Content" tab
+- ✅ Expected: Side-by-side markdown editor and preview
+- ✅ Expected: Character counter updates in real-time
+6. Type markdown in editor
+- ✅ Expected: Live preview renders markdown immediately
+7. Click "Save Changes"
+- ✅ Expected: Planet modal closes
+- ✅ Expected: System modal still open
+- ✅ Expected: Planet appears in planets list
+
+### 6. Saving to Disk
+
+**Test:** Persist changes locally
+1. Make several edits (galaxy, system, planet)
+2. Scroll to "💾 Save Changes" section
+3. Click "💾 Save to Disk"
+- ✅ Expected: Button shows "Saving..." with spinner
+- ✅ Expected: Button disabled during save
+- ✅ Expected: Green notification: "Changes saved successfully!"
+- ✅ Expected: Toast auto-closes after 5 seconds
+
+### 7. Committing to GitHub
+
+**Test:** Commit without message
+1. Leave "Commit Message" field empty
+2. Try to click commit button
+- ✅ Expected: Button is disabled
+- ✅ Expected: Warning hint appears in yellow
+
+**Test:** Commit with valid message
+1. Enter commit message: "Test commit from manual testing"
+2. Check "Create Pull Request" checkbox
+3. Click "🔀 Create Pull Request"
+- ✅ Expected: Button shows "Committing..." with spinner
+- ✅ Expected: Green notification appears
+- ✅ Expected: Message includes PR URL (if configured)
+- ✅ Expected: Toast auto-closes after 5 seconds
+
+### 8. Error Handling - Network Failure
+
+**Test:** Simulate network failure
+1. Open browser DevTools → Network tab
+2. Set throttling to "Offline"
+3. Make an edit and click "💾 Save to Disk"
+- ✅ Expected: Red notification appears
+- ✅ Expected: Message: "Network error: Unable to connect to the server..."
+- ✅ Expected: Retry UI appears with guidance
+- ✅ Expected: Modal stays open with edits preserved
+4. Turn network back online
+5. Click "💾 Save to Disk" again
+- ✅ Expected: Save succeeds
+- ✅ Expected: Green notification appears
+
+### 9. Error Handling - Validation
+
+**Test:** Submit invalid data
+1. Create new galaxy
+2. Fill Name: "Test Galaxy"
+3. Leave Description empty
+4. Leave Theme empty
+5. Click "Save Changes"
+- ✅ Expected: Red borders on empty required fields
+- ✅ Expected: Error messages below each field
+- ✅ Expected: Modal stays open
+- ✅ Expected: No notification appears
+6. Fix all errors
+7. Click "Save Changes"
+- ✅ Expected: Modal closes
+- ✅ Expected: Green notification appears
+
+### 10. Error Handling - Authentication
+
+**Test:** Session timeout (if testable)
+1. Wait for session to expire (or manually clear auth)
+2. Try to save changes
+- ✅ Expected: Red notification: "Unauthorized. Please log in again."
+- ✅ Expected: After 2 seconds, redirect to /admin/login
+- ✅ Expected: Can log back in and resume work
+
+### 11. Modal Interactions
+
+**Test:** Click backdrop to close
+1. Open any modal
+2. Click the dark area outside the modal
+- ✅ Expected: Modal closes
+- ✅ Expected: Return to previous view
+
+**Test:** Multiple modals
+1. Open galaxy editor (modal 1)
+2. Open solar system editor (modal 2)
+3. Close system modal with X button
+- ✅ Expected: Only system modal closes
+- ✅ Expected: Galaxy modal still visible
+4. Close galaxy modal
+- ✅ Expected: Return to dashboard
+
+### 12. Content Cards
+
+**Test:** Hover effects
+1. Hover over any galaxy card
+- ✅ Expected: Card highlights with blue tint
+- ✅ Expected: Border changes color
+- ✅ Expected: Smooth transition
+
+**Test:** Empty states
+1. Create galaxy with no solar systems
+2. Open galaxy editor → Solar Systems tab
+- ✅ Expected: See "No solar systems in this galaxy yet" message
+- ✅ Expected: See helpful subtext
+- ✅ Expected: Centered layout
+
+### 13. Responsive Design
+
+**Test:** Mobile view
+1. Resize browser to mobile width (< 768px)
+- ✅ Expected: Modal takes full screen width
+- ✅ Expected: Editor panels stack vertically
+- ✅ Expected: Buttons remain accessible
+- ✅ Expected: Text remains readable
+
+**Test:** Tablet view
+1. Resize browser to tablet width (768px - 1024px)
+- ✅ Expected: Modal uses 95% width
+- ✅ Expected: Side-by-side editor still works
+- ✅ Expected: All features accessible
+
+### 14. Accessibility
+
+**Test:** Keyboard navigation
+1. Open modal
+2. Press Tab repeatedly
+- ✅ Expected: Focus moves through all interactive elements
+- ✅ Expected: Focus visible (outline or highlight)
+3. Press Escape
+- ✅ Expected: Modal closes
+
+**Test:** Screen reader (if available)
+1. Enable screen reader
+2. Navigate to modal
+- ✅ Expected: Modal announced as "dialog"
+- ✅ Expected: Title read correctly
+- ✅ Expected: Close button has aria-label
+
+### 15. Character Counter
+
+**Test:** Markdown editor counter
+1. Open planet editor → Content tab
+2. Type in markdown editor
+- ✅ Expected: Character counter updates in real-time
+- ✅ Expected: Shows total character count
+- ✅ Expected: No performance issues with large content
+
+## Common Issues and Solutions
+
+### Issue: Modal doesn't open
+- **Check:** Browser console for JavaScript errors
+- **Check:** React DevTools to verify state changes
+- **Solution:** Refresh page and try again
+
+### Issue: Save button disabled
+- **Check:** All required fields filled
+- **Check:** No validation errors visible
+- **Solution:** Look for red borders and error messages
+
+### Issue: Changes not persisting
+- **Check:** "💾 Save to Disk" was clicked after edits
+- **Check:** Green success notification appeared
+- **Check:** `public/universe/universe.json` file was updated
+
+### Issue: Network errors
+- **Check:** Dev server is running (`npm run dev`)
+- **Check:** No CORS errors in console
+- **Check:** API routes are accessible at `/api/admin/*`
+
+## Verification Checklist
+
+After testing, verify:
+- [ ] All modals open and close properly
+- [ ] Auto-close works on successful save
+- [ ] Notifications display correctly for all scenarios
+- [ ] Breadcrumb navigation works at all levels
+- [ ] Validation prevents invalid submissions
+- [ ] Network errors preserve user edits
+- [ ] Auth errors redirect properly
+- [ ] Keyboard navigation works (Tab, Escape)
+- [ ] Responsive design works on mobile/tablet
+- [ ] Character counter updates correctly
+- [ ] Content cards display and animate properly
+- [ ] Empty states appear when appropriate
+
+## Screenshots to Capture
+
+For documentation purposes, capture:
+1. Dashboard with multiple galaxies
+2. Empty state (no galaxies)
+3. Galaxy editor modal open
+4. Nested modal (system editor over galaxy)
+5. Markdown editor with live preview
+6. Success notification
+7. Error notification with validation
+8. Network error with retry UI
+9. Mobile view of modal
+10. Breadcrumb navigation example
+
+## Performance Notes
+
+- Modal animations should be smooth (no jank)
+- Character counter should not lag during typing
+- Multiple modals should not slow down UI
+- Toast notifications should fade in/out smoothly
+- Content cards hover effects should be immediate
