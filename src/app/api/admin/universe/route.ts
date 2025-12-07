@@ -25,8 +25,10 @@ import path from 'path';
 /**
  * GET /api/admin/universe
  * Returns the current universe data with hash for optimistic locking
+ * Query params:
+ *   - syncFromGitHub: if 'true', fetches latest from GitHub instead of local file
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   const authenticated = await isAuthenticated();
   if (!authenticated) {
     console.error('[GET /api/admin/universe] Authentication failed');
@@ -39,32 +41,90 @@ export async function GET() {
   console.log('[GET /api/admin/universe] Request received - fetching universe data');
 
   try {
-    // Try to fetch from GitHub first for latest version
-    console.log('[GET /api/admin/universe] Attempting to fetch from GitHub...');
-    const githubData = await fetchCurrentUniverse();
-    
-    if (githubData) {
-      const hashPreview = githubData.hash?.substring(0, 8) || 'unknown';
-      console.log('[GET /api/admin/universe] Loaded from GitHub, hash:', hashPreview + '...');
-      const { universe, errors } = parseAndValidateUniverse(githubData.content);
-      return NextResponse.json({
-        universe,
-        hash: githubData.hash,
-        validationErrors: errors,
-      });
+    // Check if explicit GitHub sync is requested
+    const { searchParams } = new URL(request.url);
+    const syncFromGitHub = searchParams.get('syncFromGitHub') === 'true';
+
+    if (syncFromGitHub) {
+      // Explicitly requested GitHub sync
+      console.log('[GET /api/admin/universe] Explicit GitHub sync requested');
+      const githubData = await fetchCurrentUniverse();
+      
+      if (githubData) {
+        const hashPreview = githubData.hash?.substring(0, 8) || 'unknown';
+        console.log('[GET /api/admin/universe] Loaded from GitHub, hash:', hashPreview + '...');
+        const { universe, errors } = parseAndValidateUniverse(githubData.content);
+        return NextResponse.json({
+          universe,
+          hash: githubData.hash,
+          validationErrors: errors,
+          source: 'github',
+        });
+      } else {
+        // Explicit GitHub sync failed - return error instead of falling back
+        console.error('[GET /api/admin/universe] Explicit GitHub sync failed');
+        return NextResponse.json(
+          { 
+            error: 'GitHub sync failed',
+            message: 'Unable to sync from GitHub. Check GitHub configuration and network connectivity.'
+          },
+          { status: 503 }
+        );
+      }
     }
 
-    // Fallback to local file
-    console.log('[GET /api/admin/universe] GitHub unavailable, falling back to local file');
-    const content = JSON.stringify(universeData, null, 2);
-    const hash = await sha256(content);
-
-    console.log('[GET /api/admin/universe] Loaded local file, galaxies:', universeData.galaxies.length);
-    return NextResponse.json({
-      universe: universeData,
-      hash,
-      validationErrors: [],
-    });
+    // Default: read from local persisted file
+    console.log('[GET /api/admin/universe] Reading from local file');
+    const targetPath = process.env.UNIVERSE_DATA_PATH || 'public/universe/universe.json';
+    const absolutePath = path.resolve(process.cwd(), targetPath);
+    
+    try {
+      const content = await fs.readFile(absolutePath, 'utf-8');
+      console.log('[GET /api/admin/universe] Local file read successfully');
+      const hash = await sha256(content);
+      const { universe, errors } = parseAndValidateUniverse(content);
+      const hashPreview = hash?.substring(0, 8) || 'unknown';
+      console.log('[GET /api/admin/universe] Loaded local file, hash:', hashPreview + '...', 'galaxies:', universe.galaxies.length);
+      return NextResponse.json({
+        universe,
+        hash,
+        validationErrors: errors,
+        source: 'local',
+      });
+    } catch (error) {
+      // If local file doesn't exist, try GitHub as fallback
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.warn('[GET /api/admin/universe] Local file read failed:', errorMessage, 'Attempting GitHub fallback');
+      const githubData = await fetchCurrentUniverse();
+      
+      if (githubData) {
+        const hashPreview = githubData.hash?.substring(0, 8) || 'unknown';
+        console.log('[GET /api/admin/universe] Loaded from GitHub fallback, hash:', hashPreview + '...');
+        const { universe, errors } = parseAndValidateUniverse(githubData.content);
+        return NextResponse.json({
+          universe,
+          hash: githubData.hash,
+          validationErrors: errors,
+          source: 'github',
+          warning: 'Local file not found, loaded from GitHub',
+        });
+      }
+      
+      // Last resort: use imported data
+      console.warn('[GET /api/admin/universe] Both local file and GitHub unavailable, using imported data');
+      const content = JSON.stringify(universeData, null, 2);
+      const hash = await sha256(content);
+      const { universe, errors } = parseAndValidateUniverse(content);
+      const hashPreview = hash?.substring(0, 8) || 'unknown';
+      console.log('[GET /api/admin/universe] Loaded imported data, hash:', hashPreview + '...', 'galaxies:', universe.galaxies.length);
+      return NextResponse.json({
+        universe,
+        hash,
+        validationErrors: errors,
+        source: 'default',
+        warning: 'Local file and GitHub unavailable, loaded default data',
+      });
+    }
   } catch (error) {
     console.error('[GET /api/admin/universe] Unexpected error:', error);
     return NextResponse.json(
