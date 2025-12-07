@@ -171,4 +171,71 @@ describe('NotificationBanner', () => {
 
     expect(mockOnClose).not.toHaveBeenCalled();
   });
+
+  it('should reset timer when message changes', () => {
+    const mockOnClose = jest.fn();
+    const { rerender } = render(
+      <NotificationBanner
+        type="success"
+        message="Original message"
+        onClose={mockOnClose}
+        autoClose={true}
+        autoCloseDelay={3000}
+      />
+    );
+
+    // Advance partway through the timer
+    jest.advanceTimersByTime(2000);
+
+    // Change the message - this should reset the timer
+    rerender(
+      <NotificationBanner
+        type="success"
+        message="Updated message"
+        onClose={mockOnClose}
+        autoClose={true}
+        autoCloseDelay={3000}
+      />
+    );
+
+    // Advance the original remainder - should not close yet
+    jest.advanceTimersByTime(1000);
+    expect(mockOnClose).not.toHaveBeenCalled();
+
+    // Advance the full new delay
+    jest.advanceTimersByTime(2000);
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reset timer when type changes', () => {
+    const mockOnClose = jest.fn();
+    const { rerender } = render(
+      <NotificationBanner
+        type="success"
+        message="Test message"
+        onClose={mockOnClose}
+        autoClose={true}
+        autoCloseDelay={3000}
+      />
+    );
+
+    jest.advanceTimersByTime(2000);
+
+    // Change the type - this should reset the timer
+    rerender(
+      <NotificationBanner
+        type="error"
+        message="Test message"
+        onClose={mockOnClose}
+        autoClose={true}
+        autoCloseDelay={3000}
+      />
+    );
+
+    jest.advanceTimersByTime(1000);
+    expect(mockOnClose).not.toHaveBeenCalled();
+
+    jest.advanceTimersByTime(2000);
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
 });

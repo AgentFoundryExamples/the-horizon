@@ -11,6 +11,13 @@
   --admin-success: #4caf50;
   --admin-error: #f44336;
   --admin-warning: #ff9800;
+  
+  /* Z-index layering system */
+  --z-nav: 100;
+  --z-modal-base: 1000;
+  --z-modal-nested-1: 1100;
+  --z-modal-nested-2: 1200;
+  --z-notification: 2000;
 }
 
 * {
@@ -44,7 +51,7 @@ body {
   align-items: center;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: var(--z-nav);
 }
 
 .admin-nav-header h1 {
@@ -425,7 +432,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-modal-base);
   padding: 1rem;
   overflow-y: auto;
 }
@@ -605,7 +612,7 @@ body {
   position: fixed;
   top: 1rem;
   right: 1rem;
-  z-index: 2000;
+  z-index: var(--z-notification);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;

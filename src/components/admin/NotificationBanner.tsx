@@ -27,7 +27,7 @@ export default function NotificationBanner({
 
       return () => clearTimeout(timer);
     }
-  }, [autoClose, autoCloseDelay, onClose]);
+  }, [autoClose, autoCloseDelay, onClose, message, type]);
 
   const getIcon = () => {
     switch (type) {

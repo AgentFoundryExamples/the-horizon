@@ -82,10 +82,10 @@ export default function UniverseEditor({
           type: 'error',
           message: 'Unauthorized. Please log in again.',
         });
-        // Redirect to login after a short delay using Next.js router
+        // Redirect to login after 5 seconds to give users time to read the message
         setTimeout(() => {
           router.push('/admin/login');
-        }, 2000);
+        }, 5000);
       } else {
         setNotification({
           type: 'error',
@@ -148,7 +148,7 @@ export default function UniverseEditor({
         });
         setTimeout(() => {
           router.push('/admin/login');
-        }, 2000);
+        }, 5000);
       } else {
         setNotification({
           type: 'error',

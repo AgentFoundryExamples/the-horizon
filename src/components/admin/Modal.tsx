@@ -32,7 +32,11 @@ export default function Modal({
       document.addEventListener('keydown', handleEscape);
       
       return () => {
-        document.body.style.overflow = '';
+        // Only restore scroll if this is the last modal being closed
+        const openModals = document.querySelectorAll('.modal-backdrop');
+        if (openModals.length <= 1) {
+          document.body.style.overflow = '';
+        }
         document.removeEventListener('keydown', handleEscape);
       };
     }
@@ -41,13 +45,15 @@ export default function Modal({
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only close if clicking directly on the backdrop, not on child elements
+    // This prevents closing nested modals when clicking the backdrop of a parent modal
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
   return (
-    <div className="modal-backdrop" onClick={handleBackdropClick}>
+    <div className="modal-backdrop" onClick={handleBackdropClick} data-modal-backdrop="true">
       <div className={`modal-container modal-${size}`} role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div className="modal-header">
           <h2 id="modal-title" className="modal-title">{title}</h2>
