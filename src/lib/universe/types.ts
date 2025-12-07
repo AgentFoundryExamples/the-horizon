@@ -21,6 +21,9 @@ export interface Moon {
   id: string;
   name: string;
   contentMarkdown: string;
+  publishedDate?: string; // ISO 8601 date string (optional)
+  tags?: string[]; // Array of tags for categorization (optional)
+  featuredImage?: string; // URL or path to featured image (optional)
 }
 
 export interface Planet {
@@ -30,6 +33,17 @@ export interface Planet {
   summary: string;
   contentMarkdown: string;
   moons: Moon[];
+  publishedDate?: string; // ISO 8601 date string (optional)
+  author?: string; // Content author name (optional)
+  tags?: string[]; // Array of tags for categorization (optional)
+  externalLinks?: ExternalLink[]; // Links to related resources (optional)
+  featuredImage?: string; // URL or path to featured image (optional)
+}
+
+export interface ExternalLink {
+  title: string;
+  url: string;
+  description?: string;
 }
 
 export interface Star {
