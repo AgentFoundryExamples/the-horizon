@@ -219,6 +219,22 @@
       }
     },
     {
+      "id": "src/lib/universe/__tests__/admin-workflow.test.ts",
+      "path": "src/lib/universe/__tests__/admin-workflow.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [
+          "crypto",
+          "fs/promises",
+          "os",
+          "path"
+        ],
+        "third-party": [
+          "@/lib/crypto"
+        ]
+      }
+    },
+    {
       "id": "src/lib/universe/__tests__/data-service.test.ts",
       "path": "src/lib/universe/__tests__/data-service.test.ts",
       "type": "file",
@@ -230,6 +246,15 @@
     {
       "id": "src/lib/universe/__tests__/edge-cases.test.ts",
       "path": "src/lib/universe/__tests__/edge-cases.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/universe/__tests__/galaxy-creation.test.ts",
+      "path": "src/lib/universe/__tests__/galaxy-creation.test.ts",
       "type": "file",
       "external_dependencies": {
         "stdlib": [],
@@ -400,6 +425,18 @@
       "target": "src/lib/crypto.ts"
     },
     {
+      "source": "src/lib/universe/__tests__/admin-workflow.test.ts",
+      "target": "src/lib/universe/persist.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/admin-workflow.test.ts",
+      "target": "src/lib/universe/mutate.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/admin-workflow.test.ts",
+      "target": "src/lib/universe/types.ts"
+    },
+    {
       "source": "src/lib/universe/__tests__/data-service.test.ts",
       "target": "src/lib/universe/data-service.ts"
     },
@@ -409,6 +446,14 @@
     },
     {
       "source": "src/lib/universe/__tests__/edge-cases.test.ts",
+      "target": "src/lib/universe/types.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/galaxy-creation.test.ts",
+      "target": "src/lib/universe/mutate.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/galaxy-creation.test.ts",
       "target": "src/lib/universe/types.ts"
     },
     {

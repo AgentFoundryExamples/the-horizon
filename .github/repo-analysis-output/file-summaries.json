@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 34,
+  "total_files": 36,
   "files": [
     {
       "schema_version": "2.0",
@@ -81,8 +81,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 10990,
-        "loc": 243,
+        "size_bytes": 13815,
+        "loc": 296,
         "todo_count": 0
       }
     },
@@ -284,6 +284,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/universe/__tests__/admin-workflow.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 12890,
+        "loc": 281,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/universe/__tests__/data-service.test.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -307,6 +321,20 @@
       "metrics": {
         "size_bytes": 2144,
         "loc": 35,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/universe/__tests__/galaxy-creation.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 10514,
+        "loc": 313,
         "todo_count": 0
       }
     },
@@ -417,8 +445,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 19070,
-        "loc": 499,
+        "size_bytes": 19414,
+        "loc": 506,
         "todo_count": 0
       }
     },

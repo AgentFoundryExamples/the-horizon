@@ -358,11 +358,19 @@
                   "children": [
                     {
                       "type": "file",
+                      "name": "admin-workflow.test.ts"
+                    },
+                    {
+                      "type": "file",
                       "name": "data-service.test.ts"
                     },
                     {
                       "type": "file",
                       "name": "edge-cases.test.ts"
+                    },
+                    {
+                      "type": "file",
+                      "name": "galaxy-creation.test.ts"
                     },
                     {
                       "type": "file",

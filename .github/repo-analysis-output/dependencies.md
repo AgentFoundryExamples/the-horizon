@@ -8,8 +8,8 @@ Includes classification of external dependencies as stdlib vs third-party.
 
 ## Statistics
 
-- **Total files**: 34
-- **Intra-repo dependencies**: 26
+- **Total files**: 36
+- **Intra-repo dependencies**: 31
 - **External stdlib dependencies**: 5
 - **External third-party dependencies**: 14
 
@@ -46,11 +46,11 @@ Total: 14 unique packages
 
 ## Most Depended Upon Files (Intra-Repo)
 
-- `src/lib/universe/types.ts` (8 dependents)
+- `src/lib/universe/types.ts` (10 dependents)
+- `src/lib/universe/mutate.ts` (5 dependents)
 - `src/lib/crypto.ts` (4 dependents)
-- `src/lib/universe/mutate.ts` (3 dependents)
+- `src/lib/universe/persist.ts` (3 dependents)
 - `src/lib/universe/data-service.ts` (2 dependents)
-- `src/lib/universe/persist.ts` (2 dependents)
 - `src/lib/animation.ts` (1 dependents)
 - `src/lib/auth.ts` (1 dependents)
 - `src/lib/camera.ts` (1 dependents)
@@ -59,13 +59,13 @@ Total: 14 unique packages
 
 ## Files with Most Dependencies (Intra-Repo)
 
+- `src/lib/universe/__tests__/admin-workflow.test.ts` (3 dependencies)
 - `src/lib/universe/__tests__/integration-save-workflow.test.ts` (3 dependencies)
 - `src/lib/universe/__tests__/edge-cases.test.ts` (2 dependencies)
+- `src/lib/universe/__tests__/galaxy-creation.test.ts` (2 dependencies)
 - `src/lib/universe/__tests__/mutate.test.ts` (2 dependencies)
 - `src/lib/universe/__tests__/persist.test.ts` (2 dependencies)
 - `src/lib/universe/persist.ts` (2 dependencies)
 - `src/lib/__tests__/animation.test.ts` (1 dependencies)
 - `src/lib/__tests__/auth.test.ts` (1 dependencies)
 - `src/lib/__tests__/camera.test.ts` (1 dependencies)
-- `src/lib/__tests__/crypto.test.ts` (1 dependencies)
-- `src/lib/__tests__/github.test.ts` (1 dependencies)
