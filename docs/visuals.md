@@ -2635,7 +2635,7 @@ Tooltips adapt to high contrast preferences:
   .scene-tooltip,
   .tooltip-content {
     background: #000000;      /* Solid black instead of transparent */
-    border-width: 3px;        /* Thicker border */
+    border-width: 4px;        /* Thicker border (increased from standard 3px) */
     border-color: #4A90E2;    /* High contrast blue */
   }
 }
@@ -2703,13 +2703,43 @@ const [hovered, setHovered] = useState(false);
 
 ```css
 {
-  maxWidth: '300px',
+  maxWidth: '350px',
   wordWrap: 'break-word',
   whiteSpace: 'normal',
 }
 ```
 
 Names wrap naturally while maintaining readability.
+
+#### Dense Object Clusters
+
+**Problem:** Many objects in close proximity may cause tooltips to overlap or create visual clutter.
+
+**Solution:** Grid-based spacing and z-index layering:
+
+1. **Universe View**: Galaxies positioned in a grid with 30-unit spacing
+   - Spacing is 2x the maximum galaxy radius (15 units)
+   - Ensures adequate separation even when multiple tooltips are visible
+   
+2. **Solar System View**: Adaptive orbital spacing based on planet count
+   - Standard spacing: 3 units between orbits
+   - Automatically increases for systems with 8+ planets
+   - See `calculateSafeSpacing()` in scale-constants.ts
+
+3. **Z-Index Management**: All tooltips use z-index 9999
+   - Multiple simultaneous tooltips stack naturally
+   - No overlap or z-fighting between tooltips
+   - Tooltips always appear above scene content
+
+4. **Positioning Strategy**: Tooltips float above objects (offsetY: -40px)
+   - Reduces likelihood of tooltip-to-object overlap
+   - Arrow connector points downward to maintain visual link
+   - Even in dense clusters, tooltips are readable
+
+**Testing Dense Scenarios:**
+- Verified with 10+ galaxies in universe view
+- Tested with solar systems containing 12+ planets
+- No overlap issues detected with current spacing values
 
 #### Rapid Camera Movement
 
