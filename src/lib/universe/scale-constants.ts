@@ -166,7 +166,7 @@ export function calculateSafeSpacing(planetCount: number): number {
  * 
  * TUNING GUIDE:
  * - To increase overall galaxy size: raise MIN_RADIUS and MAX_RADIUS proportionally
- * - Ensure grid spacing (30 units in UniverseScene) > 2× MAX_RADIUS to prevent overlap
+ * - Ensure grid spacing (50 units in UniverseScene) > 2× MAX_RADIUS to prevent overlap
  * - If changing MAX_RADIUS, verify camera positions still frame galaxies properly
  * - Test with 1, 5, 10, and 50+ galaxies to ensure smooth scaling
  */
