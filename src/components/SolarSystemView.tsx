@@ -222,7 +222,7 @@ export default function SolarSystemView({ solarSystem, position }: SolarSystemVi
             hoveredObject.position.z
           )}
           distanceFactor={10}
-          fontSize={hoveredObject.type === 'star' ? TOOLTIP_TYPOGRAPHY.FONT_SIZE : '1.1rem'}
+          fontSize={hoveredObject.type === 'star' ? TOOLTIP_TYPOGRAPHY.FONT_SIZE : TOOLTIP_TYPOGRAPHY.SUBTITLE_FONT_SIZE}
           borderColor={hoveredObject.type === 'star' ? TOOLTIP_COLORS.STAR_BORDER_COLOR : undefined}
           isStar={hoveredObject.type === 'star'}
           content={

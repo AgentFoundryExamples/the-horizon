@@ -77,6 +77,7 @@ a {
   background: rgba(0, 0, 0, 0.95);
   color: #FFFFFF;
   padding: 1rem 1.5rem;
+  border: 3px solid rgba(74, 144, 226, 0.9);
   border-radius: 8px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
@@ -127,12 +128,7 @@ a {
   height: 0;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-top: 8px solid rgba(74, 144, 226, 0.9);
-}
-
-/* Star tooltips use gold arrow */
-.scene-tooltip.star-tooltip::after {
-  border-top-color: rgba(251, 184, 19, 0.9);
+  border-top: 8px solid currentColor;
 }
 
 /* Welcome message styling */

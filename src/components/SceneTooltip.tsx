@@ -63,6 +63,7 @@ export default function SceneTooltip({
   // This allows CSS media queries to work for responsive sizing
   const inlineStyles: React.CSSProperties = {
     border: `3px solid ${borderColor}`,
+    color: borderColor, // Sets the color for the ::after pseudo-element's arrow border
   };
   
   // Only override CSS if custom values provided
