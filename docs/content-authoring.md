@@ -982,23 +982,6 @@ While there's no hard limit on external links:
 - Too many links can overwhelm readers
 - Consider quality over quantity
 
-If a planet lacks `contentMarkdown`:
-- A default heading will show using the planet name
-- Users will still see the planet's name and summary
-
-### Planets Without Moons
-
-If a planet has no moons:
-- The moon navigation UI is automatically hidden
-- Users can still navigate back using the breadcrumb or back button
-
-### Long Documents
-
-For very long markdown documents:
-- Content remains scrollable
-- Performance is maintained via optimized rendering
-- Consider breaking into multiple moons for better UX
-
 ## Example Data Structure
 
 ### In `universe.json`
