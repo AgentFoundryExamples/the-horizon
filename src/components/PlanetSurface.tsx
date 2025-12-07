@@ -27,6 +27,34 @@ import { useNavigationStore } from '@/lib/store';
 import MarkdownContent from './MarkdownContent';
 import { calculateMoonSize } from '@/lib/universe/scale-constants';
 
+/**
+ * Validate and sanitize URL to prevent XSS and malicious URLs
+ * Only allows http, https, and relative paths starting with /
+ */
+function isValidUrl(url: string): boolean {
+  if (!url || typeof url !== 'string') return false;
+  
+  // Allow relative paths starting with /
+  if (url.startsWith('/')) return true;
+  
+  // Validate absolute URLs
+  try {
+    const parsed = new URL(url);
+    // Only allow http and https protocols
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Sanitize URL by returning it only if valid, otherwise return undefined
+ */
+function sanitizeUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  return isValidUrl(url) ? url : undefined;
+}
+
 interface PlanetSurfaceProps {
   planet: Planet;
   solarSystem: SolarSystem;
@@ -163,12 +191,14 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
   const title = currentMoon ? currentMoon.name : planet.name;
   const subtitle = currentMoon ? `Moon of ${planet.name}` : planet.summary;
   
-  // Metadata (planet-level only, moons inherit from planet)
+  // Metadata - moons inherit from planet when not specified
   const publishedDate = currentMoon ? currentMoon.publishedDate || planet.publishedDate : planet.publishedDate;
-  const author = currentMoon ? undefined : planet.author;
+  const author = currentMoon ? planet.author : planet.author; // Moons inherit author from planet
   const tags = currentMoon ? currentMoon.tags || planet.tags : planet.tags;
-  const featuredImage = currentMoon ? currentMoon.featuredImage : planet.featuredImage;
-  const externalLinks = currentMoon ? [] : planet.externalLinks || [];
+  const rawFeaturedImage = currentMoon ? currentMoon.featuredImage || planet.featuredImage : planet.featuredImage;
+  const featuredImage = sanitizeUrl(rawFeaturedImage); // Validate URL for security
+  const rawExternalLinks = currentMoon ? planet.externalLinks || [] : planet.externalLinks || [];
+  const externalLinks = rawExternalLinks.filter(link => isValidUrl(link.url)); // Filter valid URLs only
 
   return (
     <div className="planet-surface-container">
@@ -290,22 +320,17 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
  * Format ISO date string to readable format
  */
 function formatDate(isoDate: string): string {
-  try {
-    const date = new Date(isoDate);
-    // Check if date is valid
-    if (isNaN(date.getTime())) {
-      console.warn(`Invalid date format: ${isoDate}`);
-      return 'Date unavailable';
-    }
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  } catch (error) {
-    console.error(`Error parsing date: ${isoDate}`, error);
+  const date = new Date(isoDate);
+  // Check if date is valid
+  if (isNaN(date.getTime())) {
+    console.warn(`Invalid date format: ${isoDate}`);
     return 'Date unavailable';
   }
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 }
 
 export default PlanetSurface3D;
