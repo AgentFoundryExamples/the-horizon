@@ -163,25 +163,34 @@ export function calculateSafeSpacing(planetCount: number): number {
 /**
  * Galaxy size configuration
  * Scales galaxies based on total count to optimize canvas usage
+ * 
+ * TUNING GUIDE:
+ * - To increase overall galaxy size: raise MIN_RADIUS and MAX_RADIUS proportionally
+ * - Ensure grid spacing (50 units in UniverseScene) > 2× MAX_RADIUS to prevent overlap
+ * - If changing MAX_RADIUS, verify camera positions still frame galaxies properly
+ * - Test with 1, 5, 10, and 50+ galaxies to ensure smooth scaling
  */
 export const GALAXY_SCALE = {
   /**
    * Minimum galaxy radius in Three.js units
    * Used when there are many galaxies (50+)
+   * Increased from 4 to 6 for better visibility and screen presence
    */
-  MIN_RADIUS: 4,
+  MIN_RADIUS: 6,
   
   /**
    * Maximum galaxy radius in Three.js units
    * Used when there are few galaxies (1-2)
+   * Increased from 15 to 22 for improved focus and immersion
    */
-  MAX_RADIUS: 15,
+  MAX_RADIUS: 22,
   
   /**
    * Base galaxy radius for reference
    * Used as default when no scaling is applied
+   * Adjusted proportionally to maintain balance
    */
-  BASE_RADIUS: 8,
+  BASE_RADIUS: 12,
   
   /**
    * Count threshold for minimum size
