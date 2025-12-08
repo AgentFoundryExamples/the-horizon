@@ -218,6 +218,11 @@ export default function UniverseEditor({
     }
   };
 
+  // Memoize galaxy lookup to avoid redundant array searches on every render
+  const editingGalaxyData = editingGalaxy 
+    ? universe.galaxies.find((g) => g.id === editingGalaxy)
+    : undefined;
+
   return (
     <div>
       {/* Global notification banner */}
@@ -287,38 +292,28 @@ export default function UniverseEditor({
       </div>
 
       {/* Galaxy Editor Modal */}
-      {/* Note: Galaxy lookup is performed twice (title and children) but is acceptable 
-          given small galaxy arrays (typically < 10 items). Caching would add complexity. */}
       <Modal
         isOpen={!!editingGalaxy}
         onClose={() => setEditingGalaxy(null)}
-        title={(() => {
-          if (!editingGalaxy) return 'Edit Galaxy';
-          const galaxy = universe.galaxies.find((g) => g.id === editingGalaxy);
-          return galaxy ? `Edit: ${galaxy.name}` : 'Edit Galaxy';
-        })()}
+        title={editingGalaxyData ? `Edit: ${editingGalaxyData.name}` : 'Edit Galaxy'}
         size="large"
       >
-        {editingGalaxy && (() => {
-          const galaxy = universe.galaxies.find((g) => g.id === editingGalaxy);
-          if (galaxy) {
-            return (
-              <GalaxyEditor
-                galaxy={galaxy}
-                onUpdate={handleUpdateGalaxy}
-                onClose={() => setEditingGalaxy(null)}
-              />
-            );
-          }
-          return (
+        {editingGalaxy && (
+          editingGalaxyData ? (
+            <GalaxyEditor
+              galaxy={editingGalaxyData}
+              onUpdate={handleUpdateGalaxy}
+              onClose={() => setEditingGalaxy(null)}
+            />
+          ) : (
             <div style={{ padding: '2rem', textAlign: 'center' }}>
               <p>Galaxy not found. This may be a temporary issue.</p>
               <button onClick={() => setEditingGalaxy(null)} className="btn" style={{ marginTop: '1rem' }}>
                 Close
               </button>
             </div>
-          );
-        })()}
+          )
+        )}
       </Modal>
 
       <div className="admin-card">

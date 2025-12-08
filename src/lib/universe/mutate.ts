@@ -153,11 +153,17 @@ export function ensureGalaxyId(galaxy: Galaxy, universe?: Universe): Galaxy {
   }
   
   const id = galaxy.id?.trim();
-  let generatedId = id || generateId(galaxy.name);
+  let generatedId: string;
   
-  // If ID is empty or invalid, use timestamp-based fallback
-  if (!generatedId) {
-    generatedId = `galaxy-${Date.now()}`;
+  // Generate ID from name if not provided or empty
+  if (!id) {
+    generatedId = generateId(galaxy.name);
+    // If generation fails (returns empty string), use timestamp-based fallback
+    if (!generatedId) {
+      generatedId = `galaxy-${Date.now()}`;
+    }
+  } else {
+    generatedId = id;
   }
   
   // If universe is provided, ensure ID is unique
