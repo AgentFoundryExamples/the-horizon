@@ -19,11 +19,9 @@ import {
 } from '@/lib/camera';
 import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG as DEFAULT_ANIM_CONFIG } from '@/lib/animation';
 import { calculateGalaxyScaleWithOverride, calculateGalaxyScale } from '@/lib/universe/scale-constants';
-import { TOOLTIP_POSITIONING, TOOLTIP_TYPOGRAPHY } from '@/lib/tooltip-constants';
 import GalaxyView from './GalaxyView';
 import SolarSystemView from './SolarSystemView';
 import { PlanetSurface3D, PlanetSurfaceOverlay } from './PlanetSurface';
-import SceneTooltip from './SceneTooltip';
 import '../styles/planet.css';
 
 // Planet surface view constants
@@ -184,23 +182,6 @@ function GalaxyParticles({ galaxy, position, onClick, isActive, animationConfig,
           blending={THREE.AdditiveBlending}
         />
       </points>
-      
-      {/* Use SceneTooltip component for consistent styling */}
-      <SceneTooltip
-        visible={hovered}
-        worldPosition={position}
-        distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_FAR}
-        content={
-          <>
-            <strong style={{ fontSize: '1.1rem' }}>{galaxy.name}</strong>
-            {galaxy.solarSystems && galaxy.solarSystems.length > 0 && (
-              <div style={{ fontSize: TOOLTIP_TYPOGRAPHY.SUBTITLE_FONT_SIZE, marginTop: '0.25rem', opacity: 0.9 }}>
-                {galaxy.solarSystems.length} solar system{galaxy.solarSystems.length !== 1 ? 's' : ''}
-              </div>
-            )}
-          </>
-        }
-      />
     </group>
   );
 }

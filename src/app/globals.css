@@ -72,65 +72,6 @@ a {
   }
 }
 
-/* Tooltip styles for 3D scene tooltips */
-.scene-tooltip {
-  background: rgba(0, 0, 0, 0.95);
-  color: #FFFFFF;
-  padding: 1rem 1.5rem;
-  border: 3px solid rgba(74, 144, 226, 0.9);
-  border-radius: 8px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  font-size: 1.25rem;
-  font-weight: bold;
-  max-width: 350px;
-  word-wrap: break-word;
-  white-space: normal;
-  text-align: center;
-  pointer-events: none;
-  user-select: none;
-}
-
-/* Responsive tooltip sizing */
-@media (max-width: 768px) {
-  .scene-tooltip {
-    font-size: 1.1rem;
-    padding: 0.85rem 1.25rem;
-    max-width: 300px;
-  }
-}
-
-@media (max-width: 480px) {
-  .scene-tooltip {
-    font-size: 1rem;
-    padding: 0.75rem 1rem;
-    max-width: 250px;
-  }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .scene-tooltip {
-    background: #000000;
-    border-width: 4px;
-    border-color: #4A90E2;
-  }
-}
-
-/* Tooltip connector arrow - positioned below tooltip pointing to object */
-.scene-tooltip::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-top: 8px solid currentColor;
-}
-
 /* Welcome message styling */
 .welcome-message {
   position: absolute;
