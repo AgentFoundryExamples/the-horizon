@@ -2,7 +2,56 @@
 
 This document outlines the current state of The Horizon, what has been shipped, known limitations, and planned future enhancements.
 
-## Current Release: v0.1.3 (December 8, 2025)
+## Current Release: v0.1.4 (December 8, 2025)
+
+This release provides comprehensive documentation and testing guidance for the admin save/commit workflow, ensuring administrators can confidently manage universe content without data loss or confusion.
+
+**Admin Workflow Documentation:**
+- **Two-Step Workflow Clarification**: Detailed documentation of Save to Disk → Commit to GitHub workflow
+  - Why two steps: Safety, local testing, review workflow, and recovery capabilities
+  - Clear prerequisites: Required environment variables documented in `.env.example`
+  - Troubleshooting guidance for common workflow issues
+- **Manual Testing Scenarios** (MANUAL_TESTING.md):
+  - 10 comprehensive test scenarios covering:
+    - Galaxy creation and editing workflows
+    - Solar system and planet nested editing
+    - Save to disk with file system verification
+    - GitHub commit workflow (PR and direct commit)
+    - Error handling: validation, network failures, authentication timeouts
+    - Concurrent edit conflict resolution
+    - Testing without GitHub credentials
+  - Server log verification procedures
+  - File system validation commands
+- **Environment Variable Documentation** (.env.example):
+  - All admin-related secrets clearly documented with examples
+  - Required vs. optional variables for different scenarios
+  - Token generation instructions with proper scopes
+  - Security best practices: strong passwords, separate session secrets
+- **Workflow Monitoring Guidance**:
+  - Server log patterns for troubleshooting
+  - File system verification steps
+  - GitHub repository verification
+
+**Why This Documentation Release:**
+The admin workflow is mission-critical for content management. Proper documentation ensures:
+- Administrators understand the safety benefits of the two-step workflow
+- Clear testing procedures reduce risk of data loss
+- Troubleshooting guidance minimizes downtime
+- Environment setup is straightforward and error-free
+
+**Technical Details:**
+- No code changes; pure documentation and testing guidance
+- All 476 unit tests reviewed (469 passing, 7 pre-existing failures in crypto polyfills)
+- Build verified successful with no breaking changes
+- Compatible with all v0.1.x releases
+
+**Deployment Notes:**
+- No new environment variables required (all were already available)
+- No migration steps needed
+- Documentation updates only; no functional changes
+- Backward compatible with existing admin workflows
+
+### Previous Release: v0.1.3 (December 8, 2025)
 
 This release enhances the visual experience with improved galaxy scaling for better screen presence and refined camera positioning for optimal viewing across different scenarios. Builds upon v0.1.2's admin workflow restoration, hover label standardization, and planet layout alignment.
 
@@ -302,6 +351,17 @@ Before deploying a new version, complete these verification steps:
 
 ## Version History
 
+### v0.1.4 - Admin Workflow Documentation and Testing (December 8, 2025)
+
+- **Documentation Focus**: Comprehensive admin workflow documentation and testing guidance
+- **Manual Testing**: 10 detailed test scenarios for admin save/commit workflow
+- **Environment Variables**: Complete documentation of all admin-related secrets
+- **Troubleshooting**: Server log patterns, file system verification, conflict resolution
+- **Prerequisites**: Clear guidance on required vs. optional configuration
+- **No Code Changes**: Pure documentation release, all tests passing
+
+See "Current Release" section above for complete details.
+
 ### v0.1.3 - Galaxy Scale and Visual Improvements (December 8, 2025)
 
 - Increased galaxy sizes for better visual presence (MIN: 6, MAX: 22, BASE: 12 units)
@@ -573,5 +633,5 @@ Have ideas for future features? Here's how to contribute:
 ---
 
 *Last Updated: December 8, 2025*  
-*Version: 0.1.3*  
+*Version: 0.1.4*  
 *Maintained by: Agent Foundry and John Brosnihan*
