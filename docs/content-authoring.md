@@ -110,6 +110,66 @@ The admin interface uses a two-step workflow to ensure content changes are safe 
 
 > **Note**: The admin modal save workflow was stabilized in v0.1.3+ to fix an issue where modal edits were lost due to premature data refetching. The system now properly maintains local edits until they are explicitly saved to disk. See the troubleshooting section below for details on how the fix works.
 
+> **Important**: As of v0.1.4+, the GitHub persistence flow has been stabilized to prevent "file has changed" errors. The system now fetches fresh SHA from GitHub multiple times during the commit process to ensure the most recent file state is used. See the SHA Refresh section below for details.
+
+### SHA Refresh and Conflict Prevention (v0.1.4+)
+
+The admin GitHub persistence flow has been enhanced to prevent "file has changed" errors that previously occurred when saving to disk followed by committing to GitHub. Here's how the stabilized flow works:
+
+**Problem (Fixed in v0.1.4+)**:
+Previously, if you saved changes to disk and then committed to GitHub, you might see "file has changed" errors. This happened because:
+1. Admin saves to disk → local file updated
+2. GitHub still has old version
+3. Commit operation would use stale SHA from the start
+4. GitHub API would reject the commit (SHA mismatch)
+
+**Solution: Multiple SHA Refresh Points**:
+The system now fetches fresh SHA from GitHub at multiple strategic points:
+
+1. **At start of commit operation**: Fetches current GitHub SHA
+   ```
+   [pushUniverseChanges] Fetching current SHA from GitHub...
+   [pushUniverseChanges] Current GitHub SHA: abc12345...
+   ```
+
+2. **For PR workflow**: Re-fetches SHA after branch creation
+   ```
+   [pushUniverseChanges] Branch created successfully
+   [pushUniverseChanges] Re-fetching SHA after branch creation...
+   [pushUniverseChanges] Fresh SHA after branch creation: abc12345...
+   ```
+
+3. **For direct commit**: Re-fetches SHA immediately before commit
+   ```
+   [pushUniverseChanges] Direct commit to main branch...
+   [pushUniverseChanges] Re-fetching SHA immediately before commit...
+   [pushUniverseChanges] Final SHA before commit: abc12345...
+   ```
+
+**Benefits**:
+- ✅ Prevents "file has changed" errors during save→commit workflow
+- ✅ Multiple refresh points ensure SHA is never stale
+- ✅ Comprehensive logging helps debug any issues
+- ✅ Optimistic locking still works to detect concurrent edits
+- ✅ File content from disk is always the authoritative source
+
+**Telemetry and Debugging**:
+The system now includes detailed logging for every step of the workflow:
+- Each operation is logged with context (e.g., `[pushUniverseChanges]`, `[POST /api/admin/universe]`)
+- SHA values are logged (first 8 characters for security)
+- Workflow steps are numbered and separated with clear boundaries
+- Error messages include actionable guidance for resolution
+
+You can monitor server logs to verify the workflow:
+```bash
+npm run dev
+# Watch for log messages starting with:
+# [PATCH /api/admin/universe] - Disk save operations
+# [POST /api/admin/universe] - GitHub commit operations
+# [pushUniverseChanges] - GitHub API interactions
+# [persistUniverseToFile] - File system operations
+```
+
 ### Admin Editor Layout
 
 The admin markdown editor has been designed to provide a spacious editing experience:
