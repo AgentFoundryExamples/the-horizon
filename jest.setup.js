@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import '@testing-library/jest-dom'
+import React from 'react';
 
 // Polyfill Web Crypto API for Node.js test environment
 const { webcrypto } = require('crypto');
@@ -29,3 +30,22 @@ if (typeof global !== 'undefined') {
     global.TextDecoder = TextDecoder;
   }
 }
+
+// Mock react-markdown to avoid ESM issues in tests
+jest.mock('react-markdown', () => {
+  return {
+    __esModule: true,
+    default: (props) => {
+      return React.createElement('div', {}, props.children);
+    },
+  };
+});
+
+// Mock remark-gfm
+jest.mock('remark-gfm', () => {
+  return {
+    __esModule: true,
+    default: () => {},
+  };
+});
+
