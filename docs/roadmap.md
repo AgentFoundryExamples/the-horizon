@@ -2,7 +2,86 @@
 
 This document outlines the current state of The Horizon, what has been shipped, known limitations, and planned future enhancements.
 
-## Current Release: v0.1.5 (December 8, 2025)
+## Current Release: v0.1.6 (December 8, 2025)
+
+This release focuses on documentation completeness, ensuring all recent improvements are thoroughly captured for long-term maintainability and operator clarity.
+
+**Documentation Enhancements:**
+
+1. **Comprehensive Admin Workflow Documentation**
+   - **Dual-Hash System**: Fully documented the separation of gitBaseHash (GitHub baseline) and localDiskHash (current file state)
+     - Prevents false conflicts during save→commit workflow
+     - Allows multiple local saves without requiring GitHub pushes
+     - Clear explanation of when each hash is used and updated
+   - **SHA Refresh Mechanism**: Detailed workflow diagrams showing multiple SHA fetch points
+     - Start of commit operation (both PR and direct commit)
+     - After branch creation (PR workflow only)
+     - Immediately before commit (direct commit workflow)
+     - Prevents "file has changed" errors from stale SHAs
+   - **Optimistic Locking**: Clarified behavior at both save (disk) and commit (GitHub) stages
+   - **Conflict Resolution**: Step-by-step guidance for resolving concurrent edit conflicts
+
+2. **Environment Variable Documentation**
+   - All admin-related variables documented in `.env.example` with examples
+   - `ADMIN_VERBOSE_LOGGING` and `GITHUB_VERBOSE_LOGGING` usage explained
+   - Security best practices for `SESSION_SECRET` highlighted
+   - Optional vs required variables clearly distinguished
+   - Workflow-specific requirements documented (save vs commit)
+
+3. **Visual Changes and Rationale**
+   - Hover label/tooltip removal fully documented with rationale
+   - Alternative context cues explained (breadcrumbs, transition messages, ARIA labels)
+   - Performance improvements quantified
+   - Future reconsideration criteria established
+   - Migration notes for developers extending the codebase
+
+4. **Testing Scenarios Expanded**
+   - SHA refresh verification test added to MANUAL_TESTING.md (Scenario 11)
+   - Dual-hash model verification test added (Scenario 12)
+   - Hover/tooltip removal verification added (Scenario 13)
+   - Expected server log outputs documented for each scenario
+   - File system verification commands provided
+
+5. **Cross-Reference Validation**
+   - All documentation cross-references verified
+   - Links to manual testing scenarios validated
+   - Environment variable references synchronized across docs
+   - Code examples updated to reflect current implementation
+
+**Why This Release:**
+
+Documentation quality directly impacts:
+- **Developer Productivity**: Clear docs reduce ramp-up time for new contributors
+- **Operational Confidence**: Operators understand the "why" behind configuration choices
+- **Troubleshooting Speed**: Detailed logs and error messages accelerate debugging
+- **Security Posture**: Security best practices are documented and discoverable
+- **Long-Term Maintenance**: Future developers understand design decisions and trade-offs
+
+**Technical Details:**
+- No code changes; pure documentation updates
+- Version bumped from 0.1.5 to 0.1.6 in package.json
+- All 469+ tests continue to pass
+- No migration steps needed
+- Compatible with all v0.1.x releases
+
+**Deployment Notes:**
+- No environment variable changes required
+- No redeployment necessary (documentation-only release)
+- Existing workflows remain unchanged
+- All documentation is backward-compatible
+
+**Verification:**
+- Review README.md changelog for v0.1.6 entry
+- Check docs/roadmap.md for version history update
+- Verify docs/content-authoring.md dual-hash documentation
+- Confirm MANUAL_TESTING.md scenarios 11-13 are present
+- Validate all cross-references between documentation files
+
+See [docs/content-authoring.md](./content-authoring.md#dual-hash-system-v015) for dual-hash details.
+See [MANUAL_TESTING.md](../MANUAL_TESTING.md#scenario-11-sha-refresh-mechanism-verification) for SHA refresh testing.
+See [docs/deployment.md](./deployment.md#two-step-save-workflow) for workflow documentation.
+
+### Previous Release: v0.1.5 (December 8, 2025)
 
 This release stabilizes the admin GitHub persistence workflow with fresh SHA fetching to prevent commit failures, and removes deprecated hover/tooltip UI elements for a cleaner, more performant user experience.
 
@@ -412,6 +491,17 @@ Before deploying a new version, complete these verification steps:
 
 ## Version History
 
+### v0.1.6 - Documentation Completeness and Version Tracking (December 8, 2025)
+
+- **Comprehensive Documentation**: Dual-hash system, SHA refresh mechanism, and workflow steps fully documented
+- **Testing Scenarios**: SHA refresh verification, dual-hash testing, and hover removal verification added
+- **Environment Variables**: All admin-related variables documented with security best practices
+- **Rationale Capture**: Hover label removal rationale and alternative context cues documented
+- **Cross-References**: All documentation links validated and synchronized
+- **Version Management**: Version bumped from 0.1.5 to 0.1.6 with changelog entry
+
+See "Current Release" section above for complete details.
+
 ### v0.1.5 - GitHub Persistence Stabilization and UI Cleanup (December 8, 2025)
 
 - **GitHub Persistence**: Fresh SHA fetching before every commit to prevent "file has changed" errors
@@ -705,5 +795,5 @@ Have ideas for future features? Here's how to contribute:
 ---
 
 *Last Updated: December 8, 2025*  
-*Version: 0.1.4*  
+*Version: 0.1.6*  
 *Maintained by: Agent Foundry and John Brosnihan*
