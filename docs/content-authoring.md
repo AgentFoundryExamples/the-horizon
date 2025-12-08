@@ -1431,7 +1431,7 @@ Galaxy descriptions come from the `description` field in `universe.json`:
 ```
 
 **Guidelines for descriptions:**
-- Keep descriptions between 50-200 characters
+- Keep descriptions between 50-200 characters (recommended, not enforced)
 - Be concise but descriptive
 - Avoid markdown formatting (plain text only)
 - Focus on key characteristics or interesting facts

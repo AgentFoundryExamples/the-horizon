@@ -41,7 +41,8 @@ export default function ContextualWelcomeMessage({ galaxies }: ContextualWelcome
     description = currentGalaxy.description || 'A vast collection of stars and worlds';
   } else if (focusLevel === 'solar-system' && currentSolarSystem) {
     title = `Navigating ${currentSolarSystem.name}`;
-    description = `A star system with ${currentSolarSystem.planets?.length || 0} planet${currentSolarSystem.planets?.length === 1 ? '' : 's'}`;
+    const planetCount = currentSolarSystem.planets?.length || 0;
+    description = `A star system with ${planetCount} planet${planetCount === 1 ? '' : 's'}`;
   }
 
   return (
