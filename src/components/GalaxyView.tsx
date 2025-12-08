@@ -65,7 +65,6 @@ const KEPLER_ITERATION_COUNT = 5;
  */
 function PlanetInstance({ solarSystem, systemPosition, animationConfig }: PlanetInstanceProps) {
   const planetsRef = useRef<THREE.Group>(null);
-  const [hovered, setHovered] = useState<number | null>(null);
 
   const planetData = useMemo(() => {
     // Seeded pseudo-random number generator for deterministic orbits
@@ -141,10 +140,7 @@ function PlanetInstance({ solarSystem, systemPosition, animationConfig }: Planet
     <group position={systemPosition}>
       {/* Central star */}
       <group>
-        <mesh
-          onPointerOver={() => setHovered(-1)}
-          onPointerOut={() => setHovered(null)}
-        >
+        <mesh>
           <sphereGeometry args={[0.5, 16, 16]} />
           <meshBasicMaterial color="#FDB813" />
           <pointLight color="#FDB813" intensity={1} distance={20} />
@@ -164,16 +160,11 @@ function PlanetInstance({ solarSystem, systemPosition, animationConfig }: Planet
       <group ref={planetsRef}>
         {planetData.map((data, index) => (
           <group key={`planet-${index}`}>
-            <mesh
-              onPointerOver={() => setHovered(index)}
-              onPointerOut={() => setHovered(null)}
-            >
+            <mesh>
               <sphereGeometry args={[data.size, 8, 8]} />
               <meshStandardMaterial
                 color={data.planet.theme === 'blue-green' ? '#2E86AB' : 
                        data.planet.theme === 'red' ? '#E63946' : '#CCCCCC'}
-                emissive={hovered === index ? '#4A90E2' : '#000000'}
-                emissiveIntensity={hovered === index ? 0.3 : 0}
               />
             </mesh>
           </group>
