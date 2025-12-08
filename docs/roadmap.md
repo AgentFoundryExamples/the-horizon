@@ -2,9 +2,9 @@
 
 This document outlines the current state of The Horizon, what has been shipped, known limitations, and planned future enhancements.
 
-## Current Release: v0.1.3 (December 2025)
+## Current Release: v0.1.3 (December 8, 2025)
 
-This release enhances the visual experience with improved galaxy scaling for better screen presence and refined camera positioning for optimal viewing across different scenarios.
+This release enhances the visual experience with improved galaxy scaling for better screen presence and refined camera positioning for optimal viewing across different scenarios. Builds upon v0.1.2's admin workflow restoration, hover label standardization, and planet layout alignment.
 
 **Galaxy Scale Enhancements (PR #58):**
 - **Increased Galaxy Sizes**: Minimum radius 4→6 units (+50%), maximum radius 15→22 units (+47%)
@@ -302,36 +302,17 @@ Before deploying a new version, complete these verification steps:
 
 ## Version History
 
-### v0.1.3 - Galaxy Scale and Visual Improvements (December 2025)
+### v0.1.3 - Galaxy Scale and Visual Improvements (December 8, 2025)
 
-**Galaxy Scale Enhancements:**
-- Increased minimum galaxy radius from 4 to 6 units (+50%)
-- Increased maximum galaxy radius from 15 to 22 units (+47%)
-- Adjusted base radius from 8 to 12 units (+50%) for balance
-- Updated grid spacing from 30 to 50 units to prevent overlap
-- Enhanced camera positions: universe (0, 60, 130), galaxy (0, 25, 50)
-- OrbitControls ranges updated: minDistance 20→30, maxDistance 200→250
-- Added runtime validation for grid spacing sufficiency
+- Increased galaxy sizes for better visual presence (MIN: 6, MAX: 22, BASE: 12 units)
+- Updated grid spacing to 50 units to prevent overlap
+- Enhanced camera positioning for optimal framing
+- Performance: ~5-10% GPU increase, 60 FPS desktop maintained
+- Documentation: Comprehensive scale configuration guide
+- Testing: 450 tests (441 passing)
+- Builds upon v0.1.2's admin, hover, and planet improvements
 
-**Technical Improvements:**
-- ~5-10% GPU time increase from larger screen coverage (acceptable)
-- Frame rate targets maintained: 60 FPS desktop, 30+ FPS mobile
-- Particle count unchanged (2000 per galaxy)
-- Performance monitoring and adaptive quality thresholds in place
-
-**Documentation:**
-- Comprehensive galaxy scale configuration guide in visuals.md
-- Edge case documentation: lower-end GPUs, extreme zoom, collision logic
-- Enhanced testing guidelines for scale behavior
-- Camera positioning and framing logic clarified
-- Performance considerations and optimization strategies documented
-
-**Rationale:**
-Previous scale lacked visual impact for sparse universes. New scale provides:
-- Dramatic presence for 1-2 galaxy scenarios
-- Better clickability in crowded universes (50+)
-- Reduced GPU strain at distance
-- Enhanced showcase of particle effects and animations
+See "Current Release" section above for complete details.
 
 ### v0.1.2 - Critical UX Fixes and Documentation (December 2025)
 
@@ -591,6 +572,6 @@ Have ideas for future features? Here's how to contribute:
 
 ---
 
-*Last Updated: December 2025*  
+*Last Updated: December 8, 2025*  
 *Version: 0.1.3*  
 *Maintained by: Agent Foundry and John Brosnihan*
