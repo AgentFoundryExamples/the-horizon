@@ -158,31 +158,53 @@ describe('GitHub', () => {
       expect(result.message).toContain('not found');
     });
 
-    it('should detect conflict when currentHash does not match GitHub HEAD', async () => {
+    it('should accept currentHash parameter but not verify it against GitHub (API route handles verification)', async () => {
       const githubContent = '{"galaxies":["original"]}';
+      const newContent = '{"galaxies":["modified"]}';
       
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          sha: 'abc123',
-          content: Buffer.from(githubContent).toString('base64'),
-        }),
-      });
+      // Mock getFileSha (initial check) - returns original content
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            sha: 'github-sha-abc123',
+            content: Buffer.from(githubContent).toString('base64'),
+          }),
+        })
+        // Mock getFileSha (final check before commit) - still returns original
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            sha: 'github-sha-abc123',
+            content: Buffer.from(githubContent).toString('base64'),
+          }),
+        })
+        // Mock commitFile - returns new commit SHA
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            commit: { sha: 'new-commit-sha-def456' },
+          }),
+        });
 
+      // Call with currentHash - function should log it but not verify against GitHub
+      // (API route already verified the on-disk hash matches currentHash)
       const result = await pushUniverseChanges(
-        '{"galaxies":["modified"]}',
+        newContent,
         'Test commit',
         false,
-        'different-hash' // This won't match the computed hash
+        'some-on-disk-hash-123' // This was already verified by API route
       );
 
-      expect(result.success).toBe(false);
-      expect(result.message).toContain('modified by another user');
-      expect(result.error).toContain('changed since you started editing');
+      // Should succeed - content differs from GitHub, so commit proceeds
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('committed successfully');
+      expect(result.sha).toBe('new-commit-sha-def456');
     });
 
     it('should successfully commit directly to main branch', async () => {
-      const content = '{"galaxies":["test"]}';
+      const githubContent = '{"galaxies":["original"]}';
+      const newContent = '{"galaxies":["test"]}';
       
       // Mock getFileSha (initial check)
       (global.fetch as jest.Mock)
@@ -190,7 +212,7 @@ describe('GitHub', () => {
           ok: true,
           json: async () => ({
             sha: 'abc123',
-            content: Buffer.from(content).toString('base64'),
+            content: Buffer.from(githubContent).toString('base64'),
           }),
         })
         // Mock getFileSha (final check before commit)
@@ -198,7 +220,7 @@ describe('GitHub', () => {
           ok: true,
           json: async () => ({
             sha: 'abc123',
-            content: Buffer.from(content).toString('base64'),
+            content: Buffer.from(githubContent).toString('base64'),
           }),
         })
         // Mock commitFile
@@ -210,7 +232,7 @@ describe('GitHub', () => {
         });
 
       const result = await pushUniverseChanges(
-        content,
+        newContent,
         'Test commit',
         false
       );
@@ -221,7 +243,8 @@ describe('GitHub', () => {
     });
 
     it('should successfully create pull request', async () => {
-      const content = '{"galaxies":["test"]}';
+      const githubContent = '{"galaxies":["original"]}';
+      const newContent = '{"galaxies":["test"]}';
       
       // Mock getFileSha (initial)
       (global.fetch as jest.Mock)
@@ -229,7 +252,7 @@ describe('GitHub', () => {
           ok: true,
           json: async () => ({
             sha: 'abc123',
-            content: Buffer.from(content).toString('base64'),
+            content: Buffer.from(githubContent).toString('base64'),
           }),
         })
         // Mock getBaseBranch for createBranch
@@ -249,7 +272,7 @@ describe('GitHub', () => {
           ok: true,
           json: async () => ({
             sha: 'abc123',
-            content: Buffer.from(content).toString('base64'),
+            content: Buffer.from(githubContent).toString('base64'),
           }),
         })
         // Mock commitFile
@@ -268,7 +291,7 @@ describe('GitHub', () => {
         });
 
       const result = await pushUniverseChanges(
-        content,
+        newContent,
         'Test commit',
         true
       );
@@ -276,6 +299,29 @@ describe('GitHub', () => {
       expect(result.success).toBe(true);
       expect(result.message).toContain('Pull request created');
       expect(result.prUrl).toBe('https://github.com/test/repo/pull/1');
+    });
+
+    it('should prevent empty commits when content matches GitHub HEAD', async () => {
+      const content = '{"galaxies":["test"]}';
+      
+      // Mock getFileSha returning same content
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          sha: 'abc123',
+          content: Buffer.from(content).toString('base64'),
+        }),
+      });
+
+      const result = await pushUniverseChanges(
+        content,
+        'Test commit',
+        false
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('No changes to commit');
+      expect(result.sha).toBe('abc123'); // Returns existing SHA
     });
 
     it('should handle rate limit errors', async () => {
