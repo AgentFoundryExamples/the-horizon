@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 36,
+  "total_files": 37,
   "files": [
     {
       "schema_version": "2.0",
@@ -25,8 +25,8 @@
       "summary": "JavaScript module for jest.setup",
       "summary_text": "JavaScript module for jest.setup",
       "metrics": {
-        "size_bytes": 1074,
-        "loc": 14,
+        "size_bytes": 1444,
+        "loc": 29,
         "todo_count": 0
       }
     },
@@ -279,6 +279,20 @@
       "metrics": {
         "size_bytes": 2413,
         "loc": 53,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/universe/__tests__/admin-modal-save-workflow.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 11664,
+        "loc": 260,
         "todo_count": 0
       }
     },

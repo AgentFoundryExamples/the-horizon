@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 36
+Total files: 37
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -20,8 +20,8 @@ Total files: 36
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** JavaScript module for jest.setup  
-**Size:** 1.05 KB  
-**LOC:** 14  
+**Size:** 1.41 KB  
+**LOC:** 29  
 **TODOs/FIXMEs:** 0  
 
 ## next.config.js
@@ -184,6 +184,15 @@ Total files: 36
 **Summary:** TypeScript core implementation  
 **Size:** 2.36 KB  
 **LOC:** 53  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/universe/__tests__/admin-modal-save-workflow.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 11.39 KB  
+**LOC:** 260  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/__tests__/admin-workflow.test.ts
