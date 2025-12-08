@@ -60,10 +60,11 @@ describe('UniverseEditor - Dual Hash System', () => {
       fireEvent.click(saveButton);
 
       await waitFor(() => {
+        // Check that onUpdate was called with universe and newLocalHash
+        // Third parameter (gitBaseHash) is not passed, so it should remain unchanged in parent
         expect(mockOnUpdate).toHaveBeenCalledWith(
           mockUniverse,
           newLocalHash, // localDiskHash updated
-          undefined // gitBaseHash not provided, should remain unchanged
         );
       });
 
@@ -109,7 +110,6 @@ describe('UniverseEditor - Dual Hash System', () => {
           1,
           mockUniverse,
           firstNewHash,
-          undefined // gitBaseHash unchanged
         );
       });
 
@@ -120,7 +120,6 @@ describe('UniverseEditor - Dual Hash System', () => {
           2,
           mockUniverse,
           secondNewHash,
-          undefined // gitBaseHash still unchanged
         );
       });
 
@@ -204,11 +203,11 @@ describe('UniverseEditor - Dual Hash System', () => {
       fireEvent.click(commitButton);
 
       await waitFor(() => {
-        expect(mockOnUpdate).toHaveBeenCalledWith(
-          mockUniverse,
-          undefined, // localDiskHash not updated (already matches)
-          newGitBaseHash // gitBaseHash updated to new GitHub SHA
-        );
+        // Check that onUpdate was called with undefined localDiskHash and newGitBaseHash
+        const lastCall = mockOnUpdate.mock.calls[mockOnUpdate.mock.calls.length - 1];
+        expect(lastCall[0]).toEqual(mockUniverse); // universe
+        expect(lastCall[1]).toBeUndefined(); // localDiskHash not updated
+        expect(lastCall[2]).toBe(newGitBaseHash); // gitBaseHash updated
       });
     });
 
@@ -240,11 +239,11 @@ describe('UniverseEditor - Dual Hash System', () => {
       fireEvent.click(commitButton);
 
       await waitFor(() => {
-        expect(mockOnUpdate).toHaveBeenCalledWith(
-          mockUniverse,
-          undefined,
-          localDiskHash // Falls back to using localDiskHash as new gitBaseHash
-        );
+        // When no hash is returned, it falls back to localDiskHash
+        const lastCall = mockOnUpdate.mock.calls[mockOnUpdate.mock.calls.length - 1];
+        expect(lastCall[0]).toEqual(mockUniverse);
+        expect(lastCall[1]).toBeUndefined(); // localDiskHash parameter
+        expect(lastCall[2]).toBe(localDiskHash); // gitBaseHash set to localDiskHash
       });
     });
   });
@@ -273,7 +272,8 @@ describe('UniverseEditor - Dual Hash System', () => {
       fireEvent.click(saveButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/Conflict detected/i)).toBeInTheDocument();
+        // In conflict case, no update is called since save fails
+        expect(screen.getByText(/The file has been modified/i)).toBeInTheDocument();
       });
 
       // Verify gitBaseHash was not passed to save operation
@@ -315,14 +315,13 @@ describe('UniverseEditor - Dual Hash System', () => {
             i + 1,
             mockUniverse,
             saveHashes[i],
-            undefined // gitBaseHash never updated through saves
           );
         });
       }
 
-      // Verify gitBaseHash parameter was never updated in any call
+      // Verify gitBaseHash parameter was never updated in any call (only 2 params passed)
       mockOnUpdate.mock.calls.forEach(call => {
-        expect(call[2]).toBeUndefined(); // Third parameter (gitBaseHash) should be undefined
+        expect(call.length).toBe(2); // Only universe and localDiskHash passed
       });
     });
   });
