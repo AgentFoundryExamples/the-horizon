@@ -16,7 +16,7 @@
  */
 
 import { loadUniverse, clearCache } from '../data-service';
-import type { Universe } from '../types';
+import type { Universe, Galaxy } from '../types';
 
 describe('Universe Edge Cases', () => {
   beforeEach(() => {
@@ -60,5 +60,17 @@ describe('Universe Edge Cases', () => {
     
     expect(universe).toBeDefined();
     expect(Array.isArray(universe.galaxies)).toBe(true);
+  });
+
+  it('should auto-backfill missing galaxy IDs during load', async () => {
+    // This test ensures sanitizeGalaxy handles missing IDs
+    const universe = await loadUniverse();
+    
+    // All galaxies should have IDs after sanitization
+    universe.galaxies.forEach((galaxy) => {
+      expect(galaxy.id).toBeDefined();
+      expect(galaxy.id).not.toBe('');
+      expect(typeof galaxy.id).toBe('string');
+    });
   });
 });

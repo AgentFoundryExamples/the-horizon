@@ -178,7 +178,7 @@ describe('Universe Mutations', () => {
         solarSystems: [],
       };
       
-      expect(() => ensureGalaxyId(galaxy)).toThrow('Galaxy name is required to generate ID');
+      expect(() => ensureGalaxyId(galaxy)).toThrow('Galaxy name is required');
     });
 
     it('should throw error when name is whitespace only', () => {
@@ -192,7 +192,7 @@ describe('Universe Mutations', () => {
         solarSystems: [],
       };
       
-      expect(() => ensureGalaxyId(galaxy)).toThrow('Galaxy name is required to generate ID');
+      expect(() => ensureGalaxyId(galaxy)).toThrow('Galaxy name is required');
     });
   });
 

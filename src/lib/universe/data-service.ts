@@ -18,6 +18,7 @@
 
 import type { Universe, Galaxy, SolarSystem, Planet, Moon, Star } from './types';
 import { validateUniverse } from './types';
+import { generateId } from './mutate';
 
 // Import the universe data statically
 // JSON imports are handled differently in Jest vs runtime, so we need defensive code
@@ -82,22 +83,67 @@ function sanitizeSolarSystem(solarSystem: SolarSystem): SolarSystem {
 }
 
 /**
- * Sanitizes galaxy data
+ * Sanitizes galaxy data and ensures ID exists
+ * Note: This function generates IDs but does not check for duplicates.
+ * Duplicate checking is performed in sanitizeUniverse.
  */
 function sanitizeGalaxy(galaxy: Galaxy): Galaxy {
-  return {
+  // Ensure galaxy has an ID - auto-generate if missing
+  let sanitizedGalaxy = {
     ...galaxy,
     stars: galaxy.stars || [],
     solarSystems: galaxy.solarSystems ? galaxy.solarSystems.map(sanitizeSolarSystem) : [],
   };
+  
+  // Auto-backfill missing ID for legacy data
+  if (!sanitizedGalaxy.id || !sanitizedGalaxy.id.trim()) {
+    console.warn(`Galaxy "${sanitizedGalaxy.name}" has missing ID - auto-generating...`);
+    const timestamp = Date.now();
+    // Use existing generateId utility, with timestamp fallback
+    // Add timestamp suffix to reduce collision probability during backfill
+    const baseId = generateId(sanitizedGalaxy.name);
+    sanitizedGalaxy.id = baseId ? `${baseId}-${timestamp}` : `galaxy-${timestamp}`;
+  }
+  
+  return sanitizedGalaxy;
 }
 
 /**
  * Sanitizes universe data to handle missing content gracefully
+ * Also ensures all galaxy IDs are unique by checking for collisions
  */
 function sanitizeUniverse(universe: Universe): Universe {
+  if (!universe.galaxies) {
+    return { galaxies: [] };
+  }
+  
+  // First pass: sanitize all galaxies
+  const sanitizedGalaxies = universe.galaxies.map(sanitizeGalaxy);
+  
+  // Second pass: ensure all IDs are unique
+  const seenIds = new Set<string>();
+  const finalGalaxies = sanitizedGalaxies.map((galaxy) => {
+    let finalId = galaxy.id;
+    let counter = 2;
+    
+    // If ID already exists, append a suffix
+    while (seenIds.has(finalId)) {
+      finalId = `${galaxy.id}-${counter}`;
+      counter++;
+    }
+    
+    seenIds.add(finalId);
+    
+    // Log if ID was changed to avoid collision
+    if (finalId !== galaxy.id) {
+      console.warn(`Galaxy "${galaxy.name}" ID changed from "${galaxy.id}" to "${finalId}" to avoid collision`);
+    }
+    
+    return finalId === galaxy.id ? galaxy : { ...galaxy, id: finalId };
+  });
+  
   return {
-    galaxies: universe.galaxies ? universe.galaxies.map(sanitizeGalaxy) : [],
+    galaxies: finalGalaxies,
   };
 }
 

@@ -33,6 +33,11 @@ import {
 } from './types';
 
 /**
+ * Entity type for ID operations
+ */
+export type EntityType = 'galaxy' | 'solarSystem' | 'planet' | 'moon' | 'star';
+
+/**
  * Generates a unique ID based on name (kebab-case)
  * Handles unicode characters by normalizing them
  * 
@@ -63,9 +68,25 @@ export function generateId(name: string): string {
 }
 
 /**
+ * Generates a unique ID that doesn't collide with existing IDs in the universe
+ * If the base ID exists, appends a numeric suffix (-2, -3, etc.)
+ */
+export function generateUniqueId(baseName: string, universe: Universe, type: EntityType): string {
+  let id = generateId(baseName);
+  
+  // If base ID is empty, use a timestamp-based fallback
+  if (!id) {
+    id = `${type}-${Date.now()}`;
+  }
+  
+  // Use helper to ensure uniqueness
+  return ensureUniqueIdWithSuffix(id, universe, type);
+}
+
+/**
  * Checks if an ID exists in the universe
  */
-export function isIdUnique(universe: Universe, id: string, type: 'galaxy' | 'solarSystem' | 'planet' | 'moon' | 'star'): boolean {
+export function isIdUnique(universe: Universe, id: string, type: EntityType): boolean {
   const allIds = getAllIds(universe, type);
   return !allIds.includes(id);
 }
@@ -73,7 +94,7 @@ export function isIdUnique(universe: Universe, id: string, type: 'galaxy' | 'sol
 /**
  * Gets all IDs of a specific type in the universe
  */
-export function getAllIds(universe: Universe, type: 'galaxy' | 'solarSystem' | 'planet' | 'moon' | 'star'): string[] {
+export function getAllIds(universe: Universe, type: EntityType): string[] {
   const ids: string[] = [];
 
   universe.galaxies.forEach((galaxy) => {
@@ -103,21 +124,51 @@ export function getAllIds(universe: Universe, type: 'galaxy' | 'solarSystem' | '
 // Galaxy mutations
 
 /**
+ * Helper function to ensure unique ID by appending suffix if needed
+ */
+function ensureUniqueIdWithSuffix(baseId: string, universe: Universe, type: EntityType): string {
+  if (isIdUnique(universe, baseId, type)) {
+    return baseId;
+  }
+  
+  // Add numeric suffix to make it unique
+  let counter = 2;
+  let uniqueId = `${baseId}-${counter}`;
+  while (!isIdUnique(universe, uniqueId, type)) {
+    counter++;
+    uniqueId = `${baseId}-${counter}`;
+  }
+  return uniqueId;
+}
+
+/**
  * Ensures a galaxy has a valid ID, auto-generating from name if needed
  * Also provides default values for optional fields
+ * Can optionally check for ID uniqueness in a universe context
  * @throws Error if galaxy.name is missing or empty
  */
-export function ensureGalaxyId(galaxy: Galaxy): Galaxy {
+export function ensureGalaxyId(galaxy: Galaxy, universe?: Universe): Galaxy {
   if (!galaxy.name || !galaxy.name.trim()) {
     throw new Error('Galaxy name is required');
   }
   
   const id = galaxy.id?.trim();
-  const generatedId = id || generateId(galaxy.name);
+  let generatedId: string;
   
-  // Validate generated ID is not empty
-  if (!generatedId) {
-    throw new Error(`Failed to generate valid ID from galaxy name: "${galaxy.name}"`);
+  // Generate ID from name if not provided or empty
+  if (!id) {
+    generatedId = generateId(galaxy.name);
+    // If generation fails (returns empty string), use timestamp-based fallback
+    if (!generatedId) {
+      generatedId = `galaxy-${Date.now()}`;
+    }
+  } else {
+    generatedId = id;
+  }
+  
+  // If universe is provided, ensure ID is unique
+  if (universe) {
+    generatedId = ensureUniqueIdWithSuffix(generatedId, universe, 'galaxy');
   }
   
   return {

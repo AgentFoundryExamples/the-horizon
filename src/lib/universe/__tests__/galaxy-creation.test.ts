@@ -18,6 +18,7 @@
 
 import {
   generateId,
+  generateUniqueId,
   ensureGalaxyId,
   createGalaxy,
   isIdUnique,
@@ -164,7 +165,67 @@ describe('Galaxy Creation Edge Cases', () => {
         solarSystems: [],
       };
 
-      expect(() => ensureGalaxyId(galaxy)).toThrow('Failed to generate valid ID');
+      // Should not throw but use fallback timestamp-based ID
+      const result = ensureGalaxyId(galaxy);
+      expect(result.id).toMatch(/^galaxy-\d+$/);
+    });
+
+    it('should handle missing ID with valid name', () => {
+      const galaxy: Galaxy = {
+        id: '',
+        name: 'Test Galaxy',
+        description: 'Test',
+        theme: 'blue',
+        particleColor: '#000000',
+        stars: [],
+        solarSystems: [],
+      };
+
+      const result = ensureGalaxyId(galaxy);
+      expect(result.id).toBe('test-galaxy');
+    });
+
+    it('should handle undefined ID with valid name', () => {
+      const galaxy: Partial<Galaxy> = {
+        name: 'Test Galaxy',
+        description: 'Test',
+        theme: 'blue',
+        particleColor: '#000000',
+        stars: [],
+        solarSystems: [],
+      };
+
+      const result = ensureGalaxyId(galaxy as Galaxy);
+      expect(result.id).toBe('test-galaxy');
+    });
+
+    it('should avoid ID collisions when universe is provided', () => {
+      const testUniverse: Universe = {
+        galaxies: [
+          {
+            id: 'test-galaxy',
+            name: 'Existing Galaxy',
+            description: 'Test',
+            theme: 'blue',
+            particleColor: '#000000',
+            stars: [],
+            solarSystems: [],
+          },
+        ],
+      };
+
+      const galaxy: Galaxy = {
+        id: '',
+        name: 'Test Galaxy',
+        description: 'Test',
+        theme: 'blue',
+        particleColor: '#000000',
+        stars: [],
+        solarSystems: [],
+      };
+
+      const result = ensureGalaxyId(galaxy, testUniverse);
+      expect(result.id).toBe('test-galaxy-2');
     });
   });
 
@@ -373,6 +434,65 @@ describe('Galaxy Creation Edge Cases', () => {
 
     it('should handle numbers correctly', () => {
       expect(generateId('NGC 1234')).toBe('ngc-1234');
+    });
+  });
+
+  describe('generateUniqueId', () => {
+    it('should generate unique ID when base ID is available', () => {
+      const result = generateUniqueId('Test Galaxy', testUniverse, 'galaxy');
+      expect(result).toBe('test-galaxy');
+    });
+
+    it('should append suffix when base ID exists', () => {
+      const universeWithDuplicate: Universe = {
+        galaxies: [
+          {
+            id: 'test-galaxy',
+            name: 'Test',
+            description: 'Test',
+            theme: 'blue',
+            particleColor: '#000000',
+            stars: [],
+            solarSystems: [],
+          },
+        ],
+      };
+
+      const result = generateUniqueId('Test Galaxy', universeWithDuplicate, 'galaxy');
+      expect(result).toBe('test-galaxy-2');
+    });
+
+    it('should handle multiple collisions', () => {
+      const universeWithMultiple: Universe = {
+        galaxies: [
+          {
+            id: 'test-galaxy',
+            name: 'Test 1',
+            description: 'Test',
+            theme: 'blue',
+            particleColor: '#000000',
+            stars: [],
+            solarSystems: [],
+          },
+          {
+            id: 'test-galaxy-2',
+            name: 'Test 2',
+            description: 'Test',
+            theme: 'blue',
+            particleColor: '#000000',
+            stars: [],
+            solarSystems: [],
+          },
+        ],
+      };
+
+      const result = generateUniqueId('Test Galaxy', universeWithMultiple, 'galaxy');
+      expect(result).toBe('test-galaxy-3');
+    });
+
+    it('should use timestamp-based fallback for invalid names', () => {
+      const result = generateUniqueId('!@#$', testUniverse, 'galaxy');
+      expect(result).toMatch(/^galaxy-\d+$/);
     });
   });
 });

@@ -169,8 +169,10 @@ export default function UniverseEditor({
   };
 
   const handleAddGalaxy = () => {
+    // Generate a guaranteed unique ID using timestamp to avoid collisions
+    const timestamp = Date.now();
     const newGalaxy: Galaxy = {
-      id: generateId(`New Galaxy ${Date.now()}`),
+      id: `new-galaxy-${timestamp}`,
       name: 'New Galaxy',
       description: 'A newly discovered galaxy',
       theme: 'blue-white',
@@ -215,6 +217,11 @@ export default function UniverseEditor({
       setEditingGalaxy(null);
     }
   };
+
+  // Memoize galaxy lookup to avoid redundant array searches on every render
+  const editingGalaxyData = editingGalaxy 
+    ? universe.galaxies.find((g) => g.id === editingGalaxy)
+    : undefined;
 
   return (
     <div>
@@ -288,15 +295,24 @@ export default function UniverseEditor({
       <Modal
         isOpen={!!editingGalaxy}
         onClose={() => setEditingGalaxy(null)}
-        title={editingGalaxy ? `Edit: ${universe.galaxies.find((g) => g.id === editingGalaxy)?.name}` : 'Edit Galaxy'}
+        title={editingGalaxyData ? `Edit: ${editingGalaxyData.name}` : 'Edit Galaxy'}
         size="large"
       >
         {editingGalaxy && (
-          <GalaxyEditor
-            galaxy={universe.galaxies.find((g) => g.id === editingGalaxy)!}
-            onUpdate={handleUpdateGalaxy}
-            onClose={() => setEditingGalaxy(null)}
-          />
+          editingGalaxyData ? (
+            <GalaxyEditor
+              galaxy={editingGalaxyData}
+              onUpdate={handleUpdateGalaxy}
+              onClose={() => setEditingGalaxy(null)}
+            />
+          ) : (
+            <div style={{ padding: '2rem', textAlign: 'center' }}>
+              <p>Galaxy not found. This may be a temporary issue.</p>
+              <button onClick={() => setEditingGalaxy(null)} className="btn" style={{ marginTop: '1rem' }}>
+                Close
+              </button>
+            </div>
+          )
         )}
       </Modal>
 
