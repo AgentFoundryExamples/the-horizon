@@ -423,8 +423,8 @@ export async function POST(request: NextRequest) {
       console.error('[POST /api/admin/universe] Error:', result.error);
       logVerbose('[POST /api/admin/universe] ========================================');
       
-      // Return 409 for conflict errors (optimistic locking failures)
-      const isConflict = result.message?.includes('Conflict detected') || result.error?.includes('modified in GitHub');
+      // Return 409 for conflict errors using reliable errorCode instead of string matching
+      const isConflict = result.errorCode === 'CONFLICT';
       
       return NextResponse.json(
         {

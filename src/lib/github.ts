@@ -50,6 +50,7 @@ export interface CommitResult {
   hash?: string; // Content hash of committed content for UI baseline update
   prUrl?: string;
   error?: string;
+  errorCode?: 'CONFLICT' | 'RATE_LIMIT' | 'AUTH_FAILED' | 'PERMISSION_DENIED' | 'UNKNOWN'; // Error type for reliable detection
 }
 
 /**
@@ -335,6 +336,7 @@ export async function pushUniverseChanges(
           success: false,
           message: 'Conflict detected: file changed in GitHub',
           error: 'The file was modified in GitHub after you loaded the editor. Please refresh, re-apply your changes, save, and try committing again.',
+          errorCode: 'CONFLICT',
         };
       }
       
@@ -353,6 +355,7 @@ export async function pushUniverseChanges(
       return {
         success: true,
         message: 'No changes to commit. The content is already up-to-date.',
+        sha: fileData.sha, // Return file SHA for consistency
         hash: githubHash, // Return current hash so UI stays in sync
       };
     }
@@ -466,6 +469,7 @@ export async function pushUniverseChanges(
         success: false,
         message: 'Conflict detected: file changed remotely',
         error: 'The file was modified in GitHub between your save and commit. Please refresh, re-apply your changes, save, and try committing again.',
+        errorCode: 'CONFLICT',
       };
     }
     
@@ -475,6 +479,7 @@ export async function pushUniverseChanges(
         success: false,
         message: 'GitHub API rate limit exceeded',
         error: 'Please try again later or upgrade your GitHub token to a higher rate limit.',
+        errorCode: 'RATE_LIMIT',
       };
     }
 
@@ -484,6 +489,7 @@ export async function pushUniverseChanges(
         success: false,
         message: 'Authentication failed',
         error: 'GitHub token is invalid or expired. Please check your GITHUB_TOKEN environment variable.',
+        errorCode: 'AUTH_FAILED',
       };
     }
 
@@ -493,6 +499,7 @@ export async function pushUniverseChanges(
         success: false,
         message: 'Permission denied',
         error: 'GitHub token does not have required permissions. Ensure it has "repo" scope.',
+        errorCode: 'PERMISSION_DENIED',
       };
     }
 
@@ -501,6 +508,7 @@ export async function pushUniverseChanges(
       success: false,
       message: 'Failed to push changes to GitHub',
       error: 'An error occurred while communicating with GitHub. Please check your configuration and try again.',
+      errorCode: 'UNKNOWN',
     };
   }
 }
