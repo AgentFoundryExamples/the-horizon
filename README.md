@@ -27,6 +27,7 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 1. **Admin Workflow Clarification**
    - Detailed explanation of the two-step save workflow (Save to Disk → Commit to GitHub)
+   - **Inline Messaging**: Status messages now appear directly below action buttons for immediate feedback
    - Clear prerequisites and required environment variables for admin operations
    - Comprehensive troubleshooting guidance for common admin workflow issues
    - **Why Two Steps**: Safety, testing, review workflow, and recovery capabilities documented
@@ -474,6 +475,8 @@ cp .env.example .env.local
 - `ADMIN_PASSWORD` - Password for admin access (min 16 characters recommended)
 - `SESSION_SECRET` - Secret for signing session tokens (generate with `openssl rand -base64 32`)
 - `GITHUB_TOKEN` - Personal access token with `repo` scope (and optionally `workflow` if using actions)
+  - See [docs/deployment.md](docs/deployment.md#github-personal-access-token) for detailed token generation instructions
+  - For staging vs production: See [environment-specific configuration](docs/deployment.md#staging-vs-production-environments)
 - `GITHUB_OWNER` - Repository owner (e.g., 'AgentFoundryExamples')
 - `GITHUB_REPO` - Repository name (e.g., 'the-horizon')
 - `GITHUB_BRANCH` - Target branch (default: 'main')
