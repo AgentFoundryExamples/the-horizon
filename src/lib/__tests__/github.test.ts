@@ -160,7 +160,7 @@ describe('GitHub', () => {
 
     it('should verify gitBaseHash matches GitHub HEAD before committing', async () => {
       const githubContent = '{"galaxies":["original"]}';
-      const newContent = '{"galaxies":["modified"]}';
+      const newContent = '{"galaxies":["MODIFIED_CONTENT_HERE"]}'; // Different length and prefix
       
       // Mock getFileSha (initial check) - returns original content
       (global.fetch as jest.Mock)
@@ -206,7 +206,7 @@ describe('GitHub', () => {
 
     it('should successfully commit directly to main branch', async () => {
       const githubContent = '{"galaxies":["original"]}';
-      const newContent = '{"galaxies":["test"]}';
+      const newContent = '{"galaxies":["DIFFERENT_NEW_CONTENT"]}'; // Different to ensure hashes don't match
       
       // Mock getFileSha (initial check)
       (global.fetch as jest.Mock)
@@ -246,7 +246,7 @@ describe('GitHub', () => {
 
     it('should successfully create pull request', async () => {
       const githubContent = '{"galaxies":["original"]}';
-      const newContent = '{"galaxies":["test"]}';
+      const newContent = '{"galaxies":["COMPLETELY_DIFFERENT_PR_CONTENT"]}'; // Different to ensure hashes don't match
       
       // Mock getFileSha (initial)
       (global.fetch as jest.Mock)
