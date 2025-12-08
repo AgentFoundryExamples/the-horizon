@@ -25,7 +25,7 @@
       "summary": "JavaScript module for jest.setup",
       "summary_text": "JavaScript module for jest.setup",
       "metrics": {
-        "size_bytes": 1444,
+        "size_bytes": 1561,
         "loc": 29,
         "todo_count": 0
       }
