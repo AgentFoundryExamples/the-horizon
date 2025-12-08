@@ -256,6 +256,38 @@ This workflow provides several benefits:
 - **Recovery**: Disk-saved changes persist even if your browser session ends
 - **Rollback**: Easy to discard local changes before committing
 - **No Data Loss**: GET endpoint reads from local file by default, preventing GitHub fetches from overwriting unsaved work
+- **Inline Feedback**: Status messages appear adjacent to action buttons for immediate visibility without scrolling
+
+### Inline Status Notifications (v0.1.4+)
+
+The admin interface displays operation status directly next to the Save and Commit buttons for better visibility and accessibility:
+
+**Key Features:**
+- **No Scrolling**: Messages appear right where you took action
+- **Clear States**: Visual indicators for pending, success, and error states
+- **Accessible**: ARIA live regions announce status changes to screen readers
+- **Mobile Friendly**: Messages wrap gracefully on narrow screens
+- **Long Errors**: Detailed error messages wrap without hiding buttons
+- **Keyboard Accessible**: Status updates are announced to assistive technologies
+
+**Status Types:**
+- 🔄 **Pending**: Loading spinner with "Saving..." or "Committing..." message
+- ✅ **Success**: Green notification with checkmark and confirmation message
+- ❌ **Error**: Red notification with X icon and detailed error guidance
+
+**Accessibility Features:**
+- `role="status"` for semantic meaning
+- `aria-live="polite"` for screen reader announcements
+- `aria-atomic="true"` to announce entire message
+- Auto-dismiss for success messages (5-7 seconds)
+- Manual dismiss option with close button (× icon)
+- Pending states remain visible until operation completes
+
+**Mobile Responsiveness:**
+- Text size adjusts for smaller screens (0.9rem on mobile)
+- Messages wrap using `word-break: break-word`
+- Proper spacing maintained between button and notification
+- Touch-friendly close buttons with adequate tap targets
 
 ### Troubleshooting: How the Save Workflow Works
 
