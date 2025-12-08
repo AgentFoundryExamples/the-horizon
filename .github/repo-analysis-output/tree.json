@@ -262,6 +262,10 @@
                   "children": [
                     {
                       "type": "file",
+                      "name": "dual-hash.test.tsx"
+                    },
+                    {
+                      "type": "file",
                       "name": "GalaxyEditor.test.tsx"
                     },
                     {

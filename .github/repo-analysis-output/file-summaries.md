@@ -65,8 +65,8 @@ Total files: 36
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 15.75 KB  
-**LOC:** 338  
+**Size:** 18.11 KB  
+**LOC:** 374  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/__tests__/animation.test.ts
@@ -317,8 +317,8 @@ Total files: 36
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 7.76 KB  
-**LOC:** 215  
+**Size:** 9.02 KB  
+**LOC:** 245  
 **TODOs/FIXMEs:** 0  
 
 ## src/middleware.ts

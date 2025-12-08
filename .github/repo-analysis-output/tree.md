@@ -55,6 +55,7 @@
       └── WelcomeMessage.test.tsx
     ├── admin
       ├── __tests__
+        ├── dual-hash.test.tsx
         ├── GalaxyEditor.test.tsx
         ├── InlineNotification.test.tsx
         ├── Modal.test.tsx
