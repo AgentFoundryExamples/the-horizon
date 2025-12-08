@@ -129,36 +129,74 @@ cat public/universe/universe.json | grep -A 5 "Test System Beta"
 
 ### Scenario 4: Committing Changes to GitHub (with GitHub credentials)
 
-**Purpose**: Validate the GitHub integration workflow
+**Purpose**: Validate the GitHub integration workflow and SHA refresh mechanism
 
 **Prerequisites**: 
 - GitHub credentials configured in `.env.local`
 - Valid `GITHUB_TOKEN` with `repo` scope (and optionally `workflow` scope for PR-based workflows)
 
+**Context**: This tests the stabilized admin GitHub persistence flow that prevents "file has changed" errors by fetching fresh SHA from GitHub before committing.
+
 **Steps**:
 1. Make some edits (follow Scenario 1 or 2)
 2. Click "💾 Save to Disk" and verify success
-3. Scroll to "🔀 Commit to GitHub" section
-4. Enter commit message: "Test: Admin workflow validation"
-5. Check "Create Pull Request" checkbox
+3. **Verify disk file was updated**:
+   ```bash
+   # Check file modification time
+   ls -lh public/universe/universe.json
+   # Should show recent timestamp (within last minute)
+   
+   # Check file content
+   cat public/universe/universe.json | grep "your-change-text"
+   # Should show your changes
+   ```
+4. Scroll to "🔀 Commit to GitHub" section
+5. Enter commit message: "Test: Admin workflow validation"
+6. Check "Create Pull Request" checkbox
    - ✅ Expected: Checkbox is checked
-6. Click "🔀 Create Pull Request"
+7. Click "🔀 Create Pull Request"
    - ✅ Expected: Button shows "Committing..." with spinner
    - ✅ Expected: Green notification with PR URL
    - ✅ Expected: Message: "Pull request created successfully! PR: [URL]"
-7. Click the PR URL in the notification
+8. Click the PR URL in the notification
    - ✅ Expected: Opens GitHub PR page in new tab
    - ✅ Expected: PR shows the universe.json file changes
    - ✅ Expected: Commit message matches what you entered
 
 **Server Log Verification**:
+Look for these log messages in the terminal:
 ```
+[POST /api/admin/universe] ========================================
 [POST /api/admin/universe] Request received - committing to GitHub
-[POST /api/admin/universe] Reading from file: public/universe/universe.json
+[POST /api/admin/universe] Workflow: Step 2 of 2 (Step 1 was PATCH to save to disk)
+[POST /api/admin/universe] Step 1: Reading from persisted file: public/universe/universe.json
+[POST /api/admin/universe] File read successfully, size: XXXX bytes
+[POST /api/admin/universe] Step 2: Validating persisted data...
 [POST /api/admin/universe] Validation passed
-[POST /api/admin/universe] Pushing to GitHub...
-[POST /api/admin/universe] GitHub push successful: sha: ..., prUrl: https://...
+[POST /api/admin/universe] Step 3: Checking for race conditions...
+[POST /api/admin/universe] No race conditions detected
+[POST /api/admin/universe] Step 4: Pushing to GitHub...
+[pushUniverseChanges] Starting commit workflow
+[pushUniverseChanges] Fetching current SHA from GitHub...
+[pushUniverseChanges] Current GitHub SHA: abc12345...
+[pushUniverseChanges] Creating branch and PR workflow...
+[pushUniverseChanges] Branch created successfully
+[pushUniverseChanges] Re-fetching SHA after branch creation...
+[pushUniverseChanges] Fresh SHA after branch creation: abc12345...
+[pushUniverseChanges] Committing to new branch...
+[pushUniverseChanges] Commit successful, SHA: def67890...
+[pushUniverseChanges] Creating pull request...
+[pushUniverseChanges] Pull request created: https://...
+[POST /api/admin/universe] SUCCESS: GitHub push successful
+[POST /api/admin/universe] ========================================
 ```
+
+**Key Points Being Tested**:
+- ✅ Fresh SHA is fetched from GitHub before commit (prevents stale SHA errors)
+- ✅ SHA is re-fetched after branch creation (for PR workflow)
+- ✅ File content from disk is used as authoritative source
+- ✅ Workflow logs are clear and grouped with separators
+- ✅ Each step is logged with detailed context
 
 ### Scenario 5: Direct Commit to Main Branch (with GitHub credentials)
 
@@ -216,14 +254,17 @@ cat public/universe/universe.json | grep -A 5 "Test System Beta"
 
 ### Scenario 8: Concurrent Edit Conflict
 
-**Purpose**: Verify optimistic locking prevents data corruption
+**Purpose**: Verify optimistic locking prevents data corruption and that the SHA refresh mechanism works correctly
 
 **Prerequisites**: Two browser windows or tabs
+
+**Context**: This tests that the system correctly detects conflicts and that fresh SHA fetching prevents false positives.
 
 **Steps**:
 1. Open admin in two browser tabs (Tab A and Tab B)
 2. In Tab A: Edit a galaxy and save to disk
    - ✅ Expected: Save succeeds
+   - ✅ Expected: Server logs show new hash generated
 3. In Tab B: Edit the SAME galaxy (don't refresh first)
 4. In Tab B: Try to save to disk
    - ✅ Expected: Error notification: "Conflict detected: The file has been modified..."
@@ -231,11 +272,37 @@ cat public/universe/universe.json | grep -A 5 "Test System Beta"
 5. In Tab B: Refresh the page
 6. In Tab B: Re-apply your changes and save
    - ✅ Expected: Save succeeds now
+7. **Test GitHub commit with fresh SHA fetch**:
+   - In Tab A: Click "Commit to GitHub"
+   - ✅ Expected: Commit succeeds (fresh SHA is fetched before commit)
+   - ✅ Expected: Server logs show SHA fetch: `[pushUniverseChanges] Fetching current SHA from GitHub...`
+   - ✅ Expected: Server logs show: `[pushUniverseChanges] Current GitHub SHA: abc12345...`
 
 **Server Logs**:
+For Tab B conflict:
 ```
 [PATCH /api/admin/universe] Conflict detected - hash mismatch
 ```
+
+For Tab A successful commit with fresh SHA:
+```
+[POST /api/admin/universe] Step 4: Pushing to GitHub...
+[pushUniverseChanges] Starting commit workflow
+[pushUniverseChanges] Fetching current SHA from GitHub...
+[pushUniverseChanges] Current GitHub SHA: abc12345...
+[pushUniverseChanges] Optimistic lock verified - hash matches: def67890...
+[pushUniverseChanges] Direct commit to main branch...
+[pushUniverseChanges] Re-fetching SHA immediately before commit...
+[pushUniverseChanges] Final SHA before commit: abc12345...
+[pushUniverseChanges] Commit successful, SHA: ghi01234...
+```
+
+**What This Tests**:
+- ✅ Optimistic locking prevents concurrent edits to disk
+- ✅ Fresh SHA is fetched from GitHub before commit (not cached)
+- ✅ SHA is re-fetched immediately before the commit operation
+- ✅ This prevents "file has changed" errors from stale SHAs
+- ✅ Detailed logging helps debug any issues
 
 ### Scenario 9: Authentication Timeout
 
@@ -283,6 +350,73 @@ In browser DevTools → Application → Cookies:
 6. Try to commit to GitHub:
    - ✅ Expected: Error notification: "GitHub credentials not configured"
    - ✅ Expected: Clear message about missing environment variables
+
+---
+
+### Scenario 11: SHA Refresh Mechanism Verification
+
+**Purpose**: Verify that the system fetches fresh SHA from GitHub before committing, preventing "file has changed" errors
+
+**Prerequisites**: 
+- GitHub credentials configured
+- Access to server logs
+
+**Context**: This scenario specifically tests the fix for the "file has changed" error that occurred when admins saved to disk then committed.
+
+**Steps**:
+1. Make changes in the admin interface
+2. Click "💾 Save to Disk"
+   - ✅ Expected: Disk save succeeds
+   - ✅ Expected: Local file `public/universe/universe.json` is updated
+3. **Wait 5 seconds** (simulate time passing between save and commit)
+4. Click "🔀 Commit to GitHub" (or "Create Pull Request")
+5. **Monitor server logs carefully**:
+   ```
+   [POST /api/admin/universe] Step 1: Reading from persisted file
+   [POST /api/admin/universe] File is authoritative source for commit
+   [POST /api/admin/universe] Step 4: Pushing to GitHub...
+   [POST /api/admin/universe] Note: GitHub layer will fetch fresh SHA
+   [pushUniverseChanges] Starting commit workflow
+   [pushUniverseChanges] Fetching current SHA from GitHub...
+   [pushUniverseChanges] Current GitHub SHA: abc12345...
+   ```
+6. Verify commit succeeds:
+   - ✅ Expected: Commit or PR created successfully
+   - ✅ Expected: NO "file has changed" error
+   - ✅ Expected: Server logs show fresh SHA was fetched
+   - ✅ Expected: GitHub repository shows the new commit/PR
+
+**For PR Workflow**:
+Additional log verification:
+```
+[pushUniverseChanges] Creating branch and PR workflow...
+[pushUniverseChanges] Branch created successfully
+[pushUniverseChanges] Re-fetching SHA after branch creation...
+[pushUniverseChanges] Fresh SHA after branch creation: abc12345...
+```
+
+**For Direct Commit Workflow**:
+Additional log verification:
+```
+[pushUniverseChanges] Direct commit to main branch...
+[pushUniverseChanges] Re-fetching SHA immediately before commit...
+[pushUniverseChanges] Final SHA before commit: abc12345...
+```
+
+**What This Tests**:
+- ✅ Fresh SHA is fetched at START of commit operation
+- ✅ For PR: SHA is re-fetched AFTER branch creation
+- ✅ For direct commit: SHA is re-fetched RIGHT BEFORE commit
+- ✅ File content from disk is used (not stale in-memory content)
+- ✅ Multiple SHA refresh points prevent stale SHA errors
+- ✅ Workflow completes successfully without "file has changed" errors
+
+**Failure Scenario (if SHA refresh didn't work)**:
+If the system used a stale SHA, you would see:
+```
+Error: SHA does not match (GitHub API error)
+```
+This should NOT happen with the stabilized flow.
 
 ---
 

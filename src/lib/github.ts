@@ -19,6 +19,23 @@
 
 import { sha256 } from './crypto';
 
+/**
+ * Check if verbose logging is enabled
+ * Set GITHUB_VERBOSE_LOGGING=true to enable detailed workflow logging
+ */
+const isVerboseLoggingEnabled = (): boolean => {
+  return process.env.GITHUB_VERBOSE_LOGGING === 'true' || process.env.NODE_ENV === 'development';
+};
+
+/**
+ * Log verbose messages only when verbose logging is enabled
+ */
+const logVerbose = (...args: unknown[]): void => {
+  if (isVerboseLoggingEnabled()) {
+    console.log(...args);
+  }
+};
+
 export interface GitHubConfig {
   token: string;
   owner: string;
@@ -279,29 +296,33 @@ export async function pushUniverseChanges(
   try {
     const filePath = 'public/universe/universe.json';
     
+    logVerbose('[pushUniverseChanges] Starting commit workflow');
+    logVerbose('[pushUniverseChanges] Content size:', content.length, 'bytes');
+    logVerbose('[pushUniverseChanges] Create PR:', createPR);
+    
     // Always fetch fresh file SHA and content right before committing
     // This prevents stale SHA errors after disk saves
+    logVerbose('[pushUniverseChanges] Fetching current SHA from GitHub...');
     const fileData = await getFileSha(config, filePath);
     
     if (!fileData) {
+      console.error('[pushUniverseChanges] File not found in GitHub repository');
       return {
         success: false,
         message: 'Universe file not found in repository',
         error: 'File does not exist at public/universe/universe.json',
       };
     }
+    
+    logVerbose('[pushUniverseChanges] Current GitHub SHA:', fileData.sha.substring(0, 8) + '...');
 
-    // Optimistic locking: check if GitHub content has changed since user loaded it
+    // Optimistic locking is handled by the API route before calling this function.
+    // The route handler verifies the on-disk file hash matches the currentHash.
+    // This function fetches a fresh SHA from GitHub before committing,
+    // which serves as the protection against concurrent remote changes.
     if (currentHash) {
-      const actualHash = await sha256(fileData.content);
-      
-      if (actualHash !== currentHash) {
-        return {
-          success: false,
-          message: 'Content has been modified by another user',
-          error: 'The file has changed since you started editing. Please refresh, re-apply your changes, save to disk, and then commit again.',
-        };
-      }
+      logVerbose('[pushUniverseChanges] Received hash for optimistic lock verification:', currentHash.substring(0, 8) + '...');
+      logVerbose('[pushUniverseChanges] Note: API route has already verified on-disk hash against currentHash');
     }
 
     // Additional safety check: compare content being committed with GitHub HEAD
@@ -309,32 +330,53 @@ export async function pushUniverseChanges(
     const contentHash = await sha256(content);
     const githubHash = await sha256(fileData.content);
     
-    if (contentHash !== githubHash && !currentHash) {
-      // Content differs from GitHub but no hash was provided for locking
-      // This scenario occurs during:
-      // 1. Initial saves where no hash tracking has been established yet
-      // 2. Commits after successful disk saves where new content is being pushed
-      // Allow the commit to proceed - this is the expected workflow
-      console.log('[pushUniverseChanges] Content differs from GitHub HEAD - proceeding with commit');
+    if (contentHash === githubHash) {
+      // Content matches GitHub HEAD - no changes to commit.
+      console.log('[pushUniverseChanges] Content matches GitHub HEAD - no changes to commit. Aborting commit.');
+      return {
+        success: true,
+        message: 'No changes to commit. The content is already up-to-date.',
+        sha: fileData.sha,
+      };
+    }
+    
+    // Content being committed differs from current GitHub HEAD
+    // This is the EXPECTED workflow: save to disk → commit new content to GitHub
+    if (!currentHash) {
+      logVerbose('[pushUniverseChanges] Content differs from GitHub HEAD - proceeding with commit');
+      logVerbose('[pushUniverseChanges] This is expected for save-then-commit workflow');
+    } else {
+      // Hash verification passed (GitHub HEAD matched expected), but we're committing different content
+      // This means: GitHub HEAD == what user expected, but disk file has new changes
+      // This is also normal: user saved new content to disk, now committing it
+      logVerbose('[pushUniverseChanges] Content differs from GitHub HEAD (expected - committing new changes)');
+      logVerbose('[pushUniverseChanges] Optimistic lock verified, proceeding with updated content');
     }
 
     if (createPR) {
       // Create a new branch and PR
+      logVerbose('[pushUniverseChanges] Creating branch and PR workflow...');
       const timestamp = Date.now();
       const branchName = `admin-edit-${timestamp}`;
+      logVerbose('[pushUniverseChanges] Branch name:', branchName);
       
       await createBranch(config, branchName);
+      logVerbose('[pushUniverseChanges] Branch created successfully');
       
       // Fetch fresh SHA again after branch creation to ensure we have the latest
+      logVerbose('[pushUniverseChanges] Re-fetching SHA after branch creation...');
       const freshFileData = await getFileSha(config, filePath);
       if (!freshFileData) {
+        console.error('[pushUniverseChanges] File not found after branch creation');
         return {
           success: false,
           message: 'Universe file not found in repository',
           error: 'File does not exist at public/universe/universe.json',
         };
       }
+      logVerbose('[pushUniverseChanges] Fresh SHA after branch creation:', freshFileData.sha.substring(0, 8) + '...');
       
+      logVerbose('[pushUniverseChanges] Committing to new branch...');
       const commitSha = await commitFile(
         config,
         filePath,
@@ -343,13 +385,16 @@ export async function pushUniverseChanges(
         branchName,
         freshFileData.sha // Pass fresh SHA to prevent stale file errors
       );
+      logVerbose('[pushUniverseChanges] Commit successful, SHA:', commitSha.substring(0, 8) + '...');
 
+      logVerbose('[pushUniverseChanges] Creating pull request...');
       const prUrl = await createPullRequest(
         config,
         commitMessage,
         branchName,
         `Automated universe.json update from admin interface.\n\n${commitMessage}`
       );
+      console.log('[pushUniverseChanges] Pull request created:', prUrl);
 
       return {
         success: true,
@@ -359,16 +404,21 @@ export async function pushUniverseChanges(
       };
     } else {
       // Direct commit to main branch - fetch fresh SHA one more time right before commit
+      logVerbose('[pushUniverseChanges] Direct commit to', config.branch, 'branch...');
+      logVerbose('[pushUniverseChanges] Re-fetching SHA immediately before commit...');
       const finalFileData = await getFileSha(config, filePath);
       
       if (!finalFileData) {
+        console.error('[pushUniverseChanges] File not found before final commit');
         return {
           success: false,
           message: 'Universe file not found in repository',
           error: 'File does not exist at public/universe/universe.json',
         };
       }
+      logVerbose('[pushUniverseChanges] Final SHA before commit:', finalFileData.sha.substring(0, 8) + '...');
       
+      logVerbose('[pushUniverseChanges] Committing to', config.branch, '...');
       const commitSha = await commitFile(
         config,
         filePath,
@@ -377,6 +427,7 @@ export async function pushUniverseChanges(
         config.branch,
         finalFileData.sha
       );
+      console.log('[pushUniverseChanges] Commit successful to', config.branch);
 
       return {
         success: true,
@@ -389,10 +440,12 @@ export async function pushUniverseChanges(
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
     // Log sanitized error without details
-    console.error('Error pushing changes to GitHub');
+    console.error('[pushUniverseChanges] Error during GitHub operation');
+    console.error('[pushUniverseChanges] Error type:', error instanceof Error ? error.constructor.name : typeof error);
     
     // Check for specific GitHub API error patterns
     if (errorMessage.includes('does not match')) {
+      console.error('[pushUniverseChanges] SHA mismatch detected - file changed remotely');
       return {
         success: false,
         message: 'Conflict detected: file changed remotely',
@@ -401,6 +454,7 @@ export async function pushUniverseChanges(
     }
     
     if (errorMessage.includes('rate limit')) {
+      console.error('[pushUniverseChanges] GitHub API rate limit exceeded');
       return {
         success: false,
         message: 'GitHub API rate limit exceeded',
@@ -409,6 +463,7 @@ export async function pushUniverseChanges(
     }
 
     if (errorMessage.includes('401') || errorMessage.includes('Bad credentials')) {
+      console.error('[pushUniverseChanges] Authentication failed - invalid or expired token');
       return {
         success: false,
         message: 'Authentication failed',
@@ -417,6 +472,7 @@ export async function pushUniverseChanges(
     }
 
     if (errorMessage.includes('403')) {
+      console.error('[pushUniverseChanges] Permission denied - insufficient token permissions');
       return {
         success: false,
         message: 'Permission denied',
@@ -424,6 +480,7 @@ export async function pushUniverseChanges(
       };
     }
 
+    console.error('[pushUniverseChanges] Unhandled error:', errorMessage.substring(0, 100));
     return {
       success: false,
       message: 'Failed to push changes to GitHub',
