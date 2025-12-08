@@ -49,14 +49,12 @@ function PlanetMesh({
   systemPosition,
   onClick,
   totalPlanets,
-  onHover,
 }: {
   planet: Planet;
   index: number;
   systemPosition: THREE.Vector3;
   onClick: () => void;
   totalPlanets: number;
-  onHover: (planetId: string | null, position: THREE.Vector3 | null, size: number) => void;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
 
@@ -112,12 +110,6 @@ function PlanetMesh({
     <mesh
       ref={meshRef}
       onClick={onClick}
-      onPointerOver={() => {
-        if (meshRef.current) {
-          onHover(planet.id, meshRef.current.position.clone(), orbitalData.size);
-        }
-      }}
-      onPointerOut={() => onHover(null, null, 0)}
     >
       <sphereGeometry args={[orbitalData.size, 16, 16]} />
       <meshStandardMaterial
@@ -141,50 +133,11 @@ function PlanetMesh({
 export default function SolarSystemView({ solarSystem, position }: SolarSystemViewProps) {
   const { navigateToPlanet } = useNavigationStore();
   const totalPlanets = (solarSystem.planets || []).length;
-  const [hoveredObject, setHoveredObject] = useState<{
-    type: 'star' | 'planet';
-    id: string | null;
-    position: THREE.Vector3 | null;
-    offset: number;
-  } | null>(null);
-
-  const handleStarHover = (isHovered: boolean) => {
-    if (isHovered) {
-      setHoveredObject({
-        type: 'star',
-        id: solarSystem.id,
-        position: new THREE.Vector3(position.x, position.y, position.z),
-        offset: STAR_SCALE.RADIUS + 1.5,
-      });
-    } else {
-      setHoveredObject(null);
-    }
-  };
-
-  const handlePlanetHover = (planetId: string | null, planetPosition: THREE.Vector3 | null, size: number) => {
-    if (planetId && planetPosition) {
-      setHoveredObject({
-        type: 'planet',
-        id: planetId,
-        position: planetPosition,
-        offset: size + 1,
-      });
-    } else {
-      setHoveredObject(null);
-    }
-  };
-
-  const hoveredPlanet = hoveredObject?.type === 'planet' 
-    ? (solarSystem.planets || []).find(p => p.id === hoveredObject.id)
-    : null;
 
   return (
     <group position={position}>
       {/* Central star */}
-      <mesh
-        onPointerOver={() => handleStarHover(true)}
-        onPointerOut={() => handleStarHover(false)}
-      >
+      <mesh>
         <sphereGeometry args={[STAR_SCALE.RADIUS, 16, 16]} />
         <meshBasicMaterial color="#FDB813" />
         <pointLight
@@ -203,7 +156,6 @@ export default function SolarSystemView({ solarSystem, position }: SolarSystemVi
           systemPosition={position}
           onClick={() => navigateToPlanet(planet.id)}
           totalPlanets={totalPlanets}
-          onHover={handlePlanetHover}
         />
       ))}
     </group>

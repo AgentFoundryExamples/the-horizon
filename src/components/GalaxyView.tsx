@@ -66,7 +66,6 @@ const KEPLER_ITERATION_COUNT = 5;
 function PlanetInstance({ solarSystem, systemPosition, animationConfig }: PlanetInstanceProps) {
   const planetsRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState<number | null>(null);
-  const [hoveredPlanetPosition, setHoveredPlanetPosition] = useState<THREE.Vector3 | null>(null);
 
   const planetData = useMemo(() => {
     // Seeded pseudo-random number generator for deterministic orbits
@@ -135,23 +134,12 @@ function PlanetInstance({ solarSystem, systemPosition, animationConfig }: Planet
       child.position.x = Math.cos(angle) * radius;
       child.position.y = Math.sin(angle) * radius * Math.sin(data.inclination);
       child.position.z = Math.sin(angle) * radius * Math.cos(data.inclination);
-      
-      // Update hovered planet position for tooltip
-      if (hovered === index) {
-        setHoveredPlanetPosition(
-          new THREE.Vector3(
-            systemPosition.x + child.position.x,
-            systemPosition.y + child.position.y,
-            systemPosition.z + child.position.z
-          )
-        );
-      }
     });
   });
 
   return (
     <group position={systemPosition}>
-      {/* Central star with tooltip */}
+      {/* Central star */}
       <group>
         <mesh
           onPointerOver={() => setHovered(-1)}
