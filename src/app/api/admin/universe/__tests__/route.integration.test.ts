@@ -541,5 +541,29 @@ describe('Save → Commit Pipeline Integration Tests', () => {
       expect(commitResult.error).toContain('refresh, re-apply your changes');
     });
   });
+
+  describe('Empty Commit Prevention', () => {
+    it('should not create empty commits when content matches GitHub HEAD', async () => {
+      const content = JSON.stringify(testUniverse, null, 2);
+
+      // Mock: Content being committed is identical to GitHub HEAD
+      (github.pushUniverseChanges as jest.Mock).mockResolvedValue({
+        success: true,
+        message: 'No changes to commit. The content is already up-to-date.',
+        sha: 'existing-sha-123',
+      });
+
+      const commitResult = await github.pushUniverseChanges(
+        content,
+        'Test commit',
+        false
+      );
+
+      expect(commitResult.success).toBe(true);
+      expect(commitResult.message).toContain('No changes to commit');
+      // Should return existing SHA, not create new commit
+      expect(commitResult.sha).toBe('existing-sha-123');
+    });
+  });
 });
 

@@ -23,6 +23,23 @@ import fs from 'fs/promises';
 import path from 'path';
 
 /**
+ * Check if verbose logging is enabled
+ * Set ADMIN_VERBOSE_LOGGING=true to enable detailed workflow logging
+ */
+const isVerboseLoggingEnabled = (): boolean => {
+  return process.env.ADMIN_VERBOSE_LOGGING === 'true' || process.env.NODE_ENV === 'development';
+};
+
+/**
+ * Log verbose messages only when verbose logging is enabled
+ */
+const logVerbose = (...args: unknown[]): void => {
+  if (isVerboseLoggingEnabled()) {
+    console.log(...args);
+  }
+};
+
+/**
  * GET /api/admin/universe
  * Returns the current universe data with hash for optimistic locking
  * Query params:
@@ -266,14 +283,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  console.log('[POST /api/admin/universe] ========================================');
+  logVerbose('[POST /api/admin/universe] ========================================');
   console.log('[POST /api/admin/universe] Request received - committing to GitHub');
-  console.log('[POST /api/admin/universe] Workflow: Step 2 of 2 (Step 1 was PATCH to save to disk)');
+  logVerbose('[POST /api/admin/universe] Workflow: Step 2 of 2 (Step 1 was PATCH to save to disk)');
 
   try {
     const { commitMessage, createPR, currentHash } = await request.json();
     const messagePreview = commitMessage?.substring(0, 50) || '';
-    console.log('[POST /api/admin/universe] Payload:', { commitMessage: messagePreview, createPR, hasHash: !!currentHash });
+    logVerbose('[POST /api/admin/universe] Payload:', { commitMessage: messagePreview, createPR, hasHash: !!currentHash });
 
     if (!commitMessage) {
       console.error('[POST /api/admin/universe] No commit message provided');
@@ -288,12 +305,12 @@ export async function POST(request: NextRequest) {
     const targetPath = process.env.UNIVERSE_DATA_PATH || 'public/universe/universe.json';
     const absolutePath = path.resolve(process.cwd(), targetPath);
     
-    console.log('[POST /api/admin/universe] Step 1: Reading from persisted file:', targetPath);
+    logVerbose('[POST /api/admin/universe] Step 1: Reading from persisted file:', targetPath);
     let content: string;
     try {
       content = await fs.readFile(absolutePath, 'utf-8');
-      console.log('[POST /api/admin/universe] File read successfully, size:', content.length, 'bytes');
-      console.log('[POST /api/admin/universe] File is authoritative source for commit');
+      logVerbose('[POST /api/admin/universe] File read successfully, size:', content.length, 'bytes');
+      logVerbose('[POST /api/admin/universe] File is authoritative source for commit');
     } catch (error) {
       console.error('[POST /api/admin/universe] Failed to read persisted file:', error);
       return NextResponse.json(
@@ -307,7 +324,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate the persisted data
-    console.log('[POST /api/admin/universe] Step 2: Validating persisted data...');
+    logVerbose('[POST /api/admin/universe] Step 2: Validating persisted data...');
     const { errors } = parseAndValidateUniverse(content);
     if (errors.length > 0) {
       console.error('[POST /api/admin/universe] Validation failed:', errors.join(', '));
@@ -316,15 +333,15 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.log('[POST /api/admin/universe] Validation passed');
+    logVerbose('[POST /api/admin/universe] Validation passed');
 
     // Verify hash before committing to prevent race conditions
-    console.log('[POST /api/admin/universe] Step 3: Checking for race conditions...');
+    logVerbose('[POST /api/admin/universe] Step 3: Checking for race conditions...');
     const onDiskHash = await sha256(content);
     if (currentHash && onDiskHash !== currentHash) {
       console.warn('[POST /api/admin/universe] Conflict detected - hash mismatch before commit');
-      console.warn('[POST /api/admin/universe] Expected hash:', currentHash.substring(0, 8) + '...');
-      console.warn('[POST /api/admin/universe] Actual hash:', onDiskHash.substring(0, 8) + '...');
+      logVerbose('[POST /api/admin/universe] Expected hash:', currentHash.substring(0, 8) + '...');
+      logVerbose('[POST /api/admin/universe] Actual hash:', onDiskHash.substring(0, 8) + '...');
       return NextResponse.json(
         {
           error: 'Conflict detected',
@@ -333,11 +350,11 @@ export async function POST(request: NextRequest) {
         { status: 409 }
       );
     }
-    console.log('[POST /api/admin/universe] No race conditions detected');
+    logVerbose('[POST /api/admin/universe] No race conditions detected');
 
     // Push to GitHub
-    console.log('[POST /api/admin/universe] Step 4: Pushing to GitHub...');
-    console.log('[POST /api/admin/universe] Note: GitHub layer will fetch fresh SHA to prevent conflicts');
+    logVerbose('[POST /api/admin/universe] Step 4: Pushing to GitHub...');
+    logVerbose('[POST /api/admin/universe] Note: GitHub layer will fetch fresh SHA to prevent conflicts');
     const result = await pushUniverseChanges(
       content,
       commitMessage,
@@ -346,14 +363,12 @@ export async function POST(request: NextRequest) {
     );
 
     if (result.success) {
-      const shaPreview = result.sha?.substring(0, 8) || 'unknown';
-      console.log('[POST /api/admin/universe] ========================================');
+      logVerbose('[POST /api/admin/universe] ========================================');
       console.log('[POST /api/admin/universe] SUCCESS: GitHub push successful');
-      console.log('[POST /api/admin/universe] Commit SHA:', shaPreview + '...');
       if (result.prUrl) {
         console.log('[POST /api/admin/universe] PR URL:', result.prUrl);
       }
-      console.log('[POST /api/admin/universe] ========================================');
+      logVerbose('[POST /api/admin/universe] ========================================');
       return NextResponse.json({
         success: true,
         message: result.message,
@@ -361,10 +376,10 @@ export async function POST(request: NextRequest) {
         prUrl: result.prUrl,
       });
     } else {
-      console.error('[POST /api/admin/universe] ========================================');
+      logVerbose('[POST /api/admin/universe] ========================================');
       console.error('[POST /api/admin/universe] FAILED: GitHub push failed');
       console.error('[POST /api/admin/universe] Error:', result.error);
-      console.error('[POST /api/admin/universe] ========================================');
+      logVerbose('[POST /api/admin/universe] ========================================');
       return NextResponse.json(
         {
           success: false,
@@ -375,9 +390,9 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('[POST /api/admin/universe] ========================================');
+    logVerbose('[POST /api/admin/universe] ========================================');
     console.error('[POST /api/admin/universe] EXCEPTION: Unexpected error:', error);
-    console.error('[POST /api/admin/universe] ========================================');
+    logVerbose('[POST /api/admin/universe] ========================================');
     return NextResponse.json(
       { error: 'Failed to commit universe data', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

@@ -154,21 +154,27 @@ The system now fetches fresh SHA from GitHub at multiple strategic points:
 - ✅ File content from disk is always the authoritative source
 
 **Telemetry and Debugging**:
-The system now includes detailed logging for every step of the workflow:
-- Each operation is logged with context (e.g., `[pushUniverseChanges]`, `[POST /api/admin/universe]`)
-- SHA values are logged (first 8 characters for security)
-- Workflow steps are numbered and separated with clear boundaries
-- Error messages include actionable guidance for resolution
+The system includes comprehensive logging for debugging the save→commit workflow:
+- **Verbose logging** can be enabled for detailed step-by-step logs
+- Set `ADMIN_VERBOSE_LOGGING=true` or `GITHUB_VERBOSE_LOGGING=true` in environment
+- Verbose logging is automatically enabled in `NODE_ENV=development`
+- In production, only critical operations are logged to reduce noise
+- Monitor server logs to verify workflow:
+  ```bash
+  npm run dev
+  # Watch for log messages starting with:
+  # [PATCH /api/admin/universe] - Disk save operations
+  # [POST /api/admin/universe] - GitHub commit operations
+  # [pushUniverseChanges] - GitHub API interactions (if verbose enabled)
+  # [persistUniverseToFile] - File system operations
+  ```
 
-You can monitor server logs to verify the workflow:
-```bash
-npm run dev
-# Watch for log messages starting with:
-# [PATCH /api/admin/universe] - Disk save operations
-# [POST /api/admin/universe] - GitHub commit operations
-# [pushUniverseChanges] - GitHub API interactions
-# [persistUniverseToFile] - File system operations
-```
+**Empty Commit Prevention (v0.1.4+)**:
+The system now detects when content is identical to GitHub HEAD and prevents empty commits:
+- Before committing, content hashes are compared
+- If content matches GitHub, commit is skipped with success message
+- Returns existing SHA instead of creating unnecessary commit
+- Reduces GitHub API usage and commit clutter
 
 ### Admin Editor Layout
 
