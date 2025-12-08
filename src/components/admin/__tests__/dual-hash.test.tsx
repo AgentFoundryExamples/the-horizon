@@ -174,15 +174,15 @@ describe('UniverseEditor - Dual Hash System', () => {
       expect(fetchCall[1].body).not.toContain(localDiskHash);
     });
 
-    it('should update gitBaseHash after successful commit', async () => {
+    it('should update both hashes after successful commit', async () => {
       const localDiskHash = 'local-disk-changed-123';
-      const newGitBaseHash = 'github-commit-xyz789';
+      const newHash = 'github-commit-xyz789';
       
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ 
           success: true, 
-          hash: newGitBaseHash,
+          hash: newHash,
           message: 'Changes committed successfully',
         }),
       });
@@ -203,15 +203,15 @@ describe('UniverseEditor - Dual Hash System', () => {
       fireEvent.click(commitButton);
 
       await waitFor(() => {
-        // Check that onUpdate was called with undefined localDiskHash and newGitBaseHash
+        // Both hashes should be updated to the new GitHub hash
         const lastCall = mockOnUpdate.mock.calls[mockOnUpdate.mock.calls.length - 1];
         expect(lastCall[0]).toEqual(mockUniverse); // universe
-        expect(lastCall[1]).toBeUndefined(); // localDiskHash not updated
-        expect(lastCall[2]).toBe(newGitBaseHash); // gitBaseHash updated
+        expect(lastCall[1]).toBe(newHash); // localDiskHash updated
+        expect(lastCall[2]).toBe(newHash); // gitBaseHash updated
       });
     });
 
-    it('should sync both hashes when commit hash not returned', async () => {
+    it('should warn and not update hashes when commit hash not returned', async () => {
       const localDiskHash = 'local-disk-changed-123';
       
       (global.fetch as jest.Mock).mockResolvedValue({
@@ -239,11 +239,11 @@ describe('UniverseEditor - Dual Hash System', () => {
       fireEvent.click(commitButton);
 
       await waitFor(() => {
-        // When no hash is returned, it falls back to localDiskHash
+        // When no hash is returned, onUpdate is called with just universe (no hash updates)
+        // This logs a warning and requires user to refresh
         const lastCall = mockOnUpdate.mock.calls[mockOnUpdate.mock.calls.length - 1];
         expect(lastCall[0]).toEqual(mockUniverse);
-        expect(lastCall[1]).toBeUndefined(); // localDiskHash parameter
-        expect(lastCall[2]).toBe(localDiskHash); // gitBaseHash set to localDiskHash
+        expect(lastCall.length).toBe(1); // Only universe parameter passed
       });
     });
   });

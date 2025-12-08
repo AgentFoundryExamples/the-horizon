@@ -154,13 +154,15 @@ export default function UniverseEditor({
             : 'Changes committed to GitHub successfully. Your updates are now live.',
         });
         setCommitMessage('');
-        // After successful commit, update the gitBaseHash to match GitHub
-        // The localDiskHash should already match what we just committed
+        // After successful commit, update both hashes to match GitHub
+        // Both should now reflect the committed state
         if (data.hash) {
-          onUpdate(universe, undefined, data.hash);
+          onUpdate(universe, data.hash, data.hash);
         } else {
-          // If no hash returned, both hashes should be in sync now
-          onUpdate(universe, undefined, localDiskHash);
+          // If no hash is returned, we can't be sure of the new baseline.
+          // Log a warning and don't update hashes - user should refresh if needed.
+          console.warn('Commit successful, but no new hash returned from server. Hashes may be out of sync.');
+          onUpdate(universe);
         }
       } else if (response.status === 409) {
         setCommitNotification({

@@ -106,12 +106,14 @@ export async function GET(request: NextRequest) {
       console.log('[GET /api/admin/universe] Loaded local file, hash:', hashPreview + '...', 'galaxies:', universe.galaxies.length);
       
       // Try to get GitHub hash for baseline comparison, but don't fail if unavailable
-      let gitHash = localHash; // Default to local hash if GitHub unavailable
+      let gitHash: string | null = null;
       try {
         const githubData = await fetchCurrentUniverse();
         if (githubData && githubData.hash) {
           gitHash = githubData.hash;
           console.log('[GET /api/admin/universe] GitHub baseline hash:', gitHash.substring(0, 8) + '...');
+        } else {
+          console.warn('[GET /api/admin/universe] GitHub baseline hash could not be retrieved.');
         }
       } catch (err) {
         console.warn('[GET /api/admin/universe] Could not fetch GitHub baseline:', err instanceof Error ? err.message : String(err));
@@ -120,7 +122,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         universe,
         hash: localHash, // Legacy field for backwards compatibility
-        gitBaseHash: gitHash, // Immutable GitHub baseline
+        gitBaseHash: gitHash, // Can be null if GitHub is unreachable
         localDiskHash: localHash, // Current local file hash
         validationErrors: errors,
         source: 'local',
@@ -357,9 +359,9 @@ export async function POST(request: NextRequest) {
     logVerbose('[POST /api/admin/universe] Validation passed');
 
     /**
-     * Validate local disk state before committing
+     * Log local disk state before committing (diagnostic only)
      * 
-     * This function checks if the local disk file has diverged from the gitBaseHash.
+     * This function logs if the local disk file has diverged from the gitBaseHash.
      * In the normal save→commit workflow, the hashes WILL differ because:
      * 1. User loaded editor with gitBaseHash from GitHub
      * 2. User made edits and saved to disk (updates local file, gitBaseHash unchanged)
@@ -370,11 +372,11 @@ export async function POST(request: NextRequest) {
      * - The GitHub layer will fetch fresh SHA and detect actual remote conflicts
      * - This check is primarily for diagnostics and debugging
      */
-    const validateLocalStateBeforeCommit = async (
+    const logLocalStateBeforeCommit = async (
       localContent: string,
       expectedGitBaseHash: string | undefined
     ): Promise<void> => {
-      logVerbose('[POST /api/admin/universe] Step 3: Validating local state before commit...');
+      logVerbose('[POST /api/admin/universe] Step 3: Logging local state before commit...');
       const onDiskHash = await sha256(localContent);
       
       if (expectedGitBaseHash && onDiskHash !== expectedGitBaseHash) {
@@ -387,7 +389,7 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    await validateLocalStateBeforeCommit(content, gitBaseHash);
+    await logLocalStateBeforeCommit(content, gitBaseHash);
 
     // Push to GitHub
     logVerbose('[POST /api/admin/universe] Step 4: Pushing to GitHub...');

@@ -47,9 +47,14 @@ export default function AdminPage() {
       const data = await response.json();
       setUniverse(data.universe);
       // Initialize both hashes from the response
-      // If gitBaseHash is provided separately, use it; otherwise use hash for both
-      setGitBaseHash(data.gitBaseHash || data.hash);
-      setLocalDiskHash(data.localDiskHash || data.hash);
+      // gitBaseHash can be null if GitHub is unreachable
+      // Use localDiskHash as fallback for initial state, but log warning
+      const baseHash = data.gitBaseHash || data.hash || '';
+      if (!data.gitBaseHash && data.localDiskHash) {
+        console.warn('[Admin Page] GitHub baseline unavailable, using local hash as fallback. Dual-hash benefits may be limited.');
+      }
+      setGitBaseHash(baseHash);
+      setLocalDiskHash(data.localDiskHash || data.hash || '');
       
       if (data.validationErrors && data.validationErrors.length > 0) {
         console.warn('Validation warnings:', data.validationErrors);
