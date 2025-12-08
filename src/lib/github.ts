@@ -325,21 +325,20 @@ export async function pushUniverseChanges(
     const githubHash = await sha256(fileData.content);
     
     if (contentHash !== githubHash) {
+      // Content being committed differs from current GitHub HEAD
+      // This is the EXPECTED workflow: save to disk → commit new content to GitHub
       if (!currentHash) {
-        // Content differs from GitHub but no hash was provided for locking
-        // This scenario occurs during:
-        // 1. Initial saves where no hash tracking has been established yet
-        // 2. Commits after successful disk saves where new content is being pushed
-        // Allow the commit to proceed - this is the expected workflow
         console.log('[pushUniverseChanges] Content differs from GitHub HEAD - proceeding with commit');
         console.log('[pushUniverseChanges] This is expected for save-then-commit workflow');
       } else {
-        // Hash was provided and matched, but content differs
-        // This means the content on disk has the same hash as GitHub
-        // This shouldn't happen unless content is identical
-        console.log('[pushUniverseChanges] Content differs but hashes match - unusual but proceeding');
+        // Hash verification passed (GitHub HEAD matched expected), but we're committing different content
+        // This means: GitHub HEAD == what user expected, but disk file has new changes
+        // This is also normal: user saved new content to disk, now committing it
+        console.log('[pushUniverseChanges] Content differs from GitHub HEAD (expected - committing new changes)');
+        console.log('[pushUniverseChanges] Optimistic lock verified, proceeding with updated content');
       }
     } else {
+      // Content matches GitHub HEAD - committing identical content (no-op but allowed)
       console.log('[pushUniverseChanges] Content matches GitHub HEAD - no changes to commit');
     }
 
