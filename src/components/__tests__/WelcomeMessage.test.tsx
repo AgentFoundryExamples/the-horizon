@@ -191,7 +191,6 @@ describe('WelcomeMessage', () => {
     });
 
     it('should handle empty string description', () => {
-      render(<WelcomeMessage description="" />);
       const { container } = render(<WelcomeMessage description="" />);
       const paragraphs = container.querySelectorAll('p');
       
