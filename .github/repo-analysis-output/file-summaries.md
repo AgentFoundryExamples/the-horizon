@@ -56,8 +56,8 @@ Total files: 38
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 9.47 KB  
-**LOC:** 227  
+**Size:** 18.40 KB  
+**LOC:** 409  
 **TODOs/FIXMEs:** 0  
 
 ## src/app/api/admin/universe/route.ts
@@ -65,8 +65,8 @@ Total files: 38
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 13.49 KB  
-**LOC:** 296  
+**Size:** 15.75 KB  
+**LOC:** 338  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/__tests__/animation.test.ts
@@ -110,8 +110,8 @@ Total files: 38
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 11.48 KB  
-**LOC:** 304  
+**Size:** 13.18 KB  
+**LOC:** 339  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/__tests__/store.test.ts
@@ -173,8 +173,8 @@ Total files: 38
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 13.01 KB  
-**LOC:** 375  
+**Size:** 16.63 KB  
+**LOC:** 424  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/store.ts
