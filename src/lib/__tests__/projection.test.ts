@@ -309,5 +309,50 @@ describe('Projection Utilities', () => {
       expect(typeof result.y).toBe('number');
       expect(typeof result.isBehindCamera).toBe('boolean');
     });
+
+    it('should handle zero width gracefully', () => {
+      const camera = new THREE.PerspectiveCamera(75, 1920 / 1080, 0.1, 1000);
+      camera.position.set(0, 0, 10);
+      camera.lookAt(0, 0, 0);
+      camera.updateProjectionMatrix();
+
+      const position = new THREE.Vector3(0, 0, 0);
+      const result = projectToScreen(position, camera, 0, 1080);
+
+      expect(result.x).toBe(0);
+      expect(result.y).toBe(0);
+      expect(result.isOffScreen).toBe(true);
+      expect(result.isBehindCamera).toBe(false);
+    });
+
+    it('should handle zero height gracefully', () => {
+      const camera = new THREE.PerspectiveCamera(75, 1920 / 1080, 0.1, 1000);
+      camera.position.set(0, 0, 10);
+      camera.lookAt(0, 0, 0);
+      camera.updateProjectionMatrix();
+
+      const position = new THREE.Vector3(0, 0, 0);
+      const result = projectToScreen(position, camera, 1920, 0);
+
+      expect(result.x).toBe(0);
+      expect(result.y).toBe(0);
+      expect(result.isOffScreen).toBe(true);
+      expect(result.isBehindCamera).toBe(false);
+    });
+
+    it('should handle negative dimensions gracefully', () => {
+      const camera = new THREE.PerspectiveCamera(75, 1920 / 1080, 0.1, 1000);
+      camera.position.set(0, 0, 10);
+      camera.lookAt(0, 0, 0);
+      camera.updateProjectionMatrix();
+
+      const position = new THREE.Vector3(0, 0, 0);
+      const result = projectToScreen(position, camera, -1920, -1080);
+
+      expect(result.x).toBe(0);
+      expect(result.y).toBe(0);
+      expect(result.isOffScreen).toBe(true);
+      expect(result.isBehindCamera).toBe(false);
+    });
   });
 });

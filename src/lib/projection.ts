@@ -26,6 +26,16 @@ export function projectToScreen(
   width: number,
   height: number
 ): ScreenPosition {
+  // Validate dimensions to prevent division by zero or invalid calculations
+  if (width <= 0 || height <= 0) {
+    return {
+      x: 0,
+      y: 0,
+      isOffScreen: true,
+      isBehindCamera: false,
+    };
+  }
+  
   // Create a copy to avoid modifying the original
   const pos = position.clone();
   

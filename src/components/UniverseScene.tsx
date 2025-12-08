@@ -151,11 +151,16 @@ function GalaxyParticles({ galaxy, position, onClick, isActive, animationConfig,
       onPointerOver={(e) => {
         e.stopPropagation();
         setHovered(true);
+        // Get world position from the event object for accurate tracking
+        const object = e.object as THREE.Object3D;
+        const worldPosition = new THREE.Vector3();
+        object.getWorldPosition(worldPosition);
+        
         const hoveredObj: HoveredObject = {
           id: galaxy.id,
           name: galaxy.name,
           type: 'galaxy',
-          position: position.clone(),
+          position: worldPosition,
           metadata: {
             description: galaxy.description,
             planetCount: galaxy.solarSystems?.reduce((acc, sys) => acc + (sys.planets?.length || 0), 0),

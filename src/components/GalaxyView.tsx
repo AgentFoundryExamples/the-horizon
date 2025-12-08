@@ -144,11 +144,16 @@ function PlanetInstance({ solarSystem, systemPosition, animationConfig }: Planet
       <group
         onPointerOver={(e) => {
           e.stopPropagation();
+          // Get world position of the mesh for accurate hover tracking
+          const mesh = e.object as THREE.Mesh;
+          const worldPosition = new THREE.Vector3();
+          mesh.getWorldPosition(worldPosition);
+          
           const hoveredObj: HoveredObject = {
             id: solarSystem.id,
             name: solarSystem.name,
             type: 'solar-system',
-            position: systemPosition.clone(),
+            position: worldPosition,
             metadata: {
               planetCount: solarSystem.planets?.length || 0,
             },
@@ -223,11 +228,16 @@ function StarInstance({ star, position, animationConfig }: StarInstanceProps) {
         onPointerOver={(e) => {
           e.stopPropagation();
           setHovered(true);
+          // Get world position of the mesh for accurate hover tracking
+          const mesh = e.object as THREE.Mesh;
+          const worldPosition = new THREE.Vector3();
+          mesh.getWorldPosition(worldPosition);
+          
           const hoveredObj: HoveredObject = {
             id: star.id,
             name: star.name,
             type: 'star',
-            position: position.clone(),
+            position: worldPosition,
           };
           setHoveredObject(hoveredObj);
         }}

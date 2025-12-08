@@ -5,7 +5,7 @@
  * Renders 2D labels that float above the 3D canvas using HTML and CSS
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { createPortal } from 'react-dom';
 import { useHoverStore } from '@/lib/hover-store';
@@ -25,8 +25,9 @@ function OverlayLabelsInner() {
   const { camera, size } = useThree();
   const hoveredObject = useHoverStore((state) => state.hoveredObject);
   const labelsVisible = useHoverStore((state) => state.labelsVisible);
-  const [position, setPosition] = useState<LabelPosition | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const labelRef = useRef<HTMLDivElement | null>(null);
+  const lastPositionRef = useRef<{ x: number; y: number; visible: boolean } | null>(null);
 
   // Create container on mount
   useEffect(() => {
@@ -43,10 +44,15 @@ function OverlayLabelsInner() {
     };
   }, []);
 
-  // Update position every frame
+  // Update position every frame using direct DOM manipulation to avoid re-renders
   useFrame(() => {
+    if (!labelRef.current) return;
+    
     if (!hoveredObject || !labelsVisible) {
-      setPosition(null);
+      if (lastPositionRef.current?.visible !== false) {
+        labelRef.current.style.display = 'none';
+        lastPositionRef.current = { x: 0, y: 0, visible: false };
+      }
       return;
     }
 
@@ -57,21 +63,29 @@ function OverlayLabelsInner() {
       size.height
     );
 
-    if (screenPos.isBehindCamera) {
-      setPosition({ x: 0, y: 0, visible: false });
+    if (screenPos.isBehindCamera || screenPos.isOffScreen) {
+      if (lastPositionRef.current?.visible !== false) {
+        labelRef.current.style.display = 'none';
+        lastPositionRef.current = { x: 0, y: 0, visible: false };
+      }
     } else {
       const clamped = clampToScreen(screenPos.x, screenPos.y, size.width, size.height);
       const offset = calculateLabelOffset(clamped.x, clamped.y);
 
-      setPosition({
-        x: offset.x,
-        y: offset.y,
-        visible: !screenPos.isOffScreen,
-      });
+      // Only update if position changed significantly (> 1px)
+      if (!lastPositionRef.current || 
+          Math.abs(lastPositionRef.current.x - offset.x) > 1 || 
+          Math.abs(lastPositionRef.current.y - offset.y) > 1 ||
+          !lastPositionRef.current.visible) {
+        labelRef.current.style.display = 'block';
+        labelRef.current.style.left = `${offset.x}px`;
+        labelRef.current.style.top = `${offset.y}px`;
+        lastPositionRef.current = { x: offset.x, y: offset.y, visible: true };
+      }
     }
   });
 
-  if (!hoveredObject || !labelsVisible || !position || !position.visible || !containerRef.current) {
+  if (!hoveredObject || !labelsVisible || !containerRef.current) {
     return null;
   }
 
@@ -80,11 +94,8 @@ function OverlayLabelsInner() {
   // Render label via portal to container outside Canvas
   return createPortal(
     <div
+      ref={labelRef}
       className="overlay-label"
-      style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-      }}
       role="tooltip"
       aria-live="polite"
     >

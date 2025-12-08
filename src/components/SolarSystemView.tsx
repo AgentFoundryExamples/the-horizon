@@ -115,11 +115,15 @@ function PlanetMesh({
       onPointerOver={(e) => {
         e.stopPropagation();
         if (meshRef.current) {
+          // Get world position of the mesh for accurate hover tracking
+          const worldPosition = new THREE.Vector3();
+          meshRef.current.getWorldPosition(worldPosition);
+          
           const hoveredObj: HoveredObject = {
             id: planet.id,
             name: planet.name,
             type: 'planet',
-            position: meshRef.current.position.clone(),
+            position: worldPosition,
             metadata: {
               description: planet.summary,
               moonCount: planet.moons?.length || 0,
