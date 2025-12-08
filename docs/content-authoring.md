@@ -100,7 +100,7 @@ graph TB
 
 The admin interface uses a two-step workflow to ensure content changes are safe and reviewable. This separation provides better control and reliability for managing universe content.
 
-> **Note**: This workflow was restored and stabilized in v0.1.2 (ISS-4). Previous versions had issues with the disk save operation that prevented proper persistence of universe data. See [docs/roadmap.md](./roadmap.md) for complete fix details and troubleshooting steps.
+> **Note**: The admin modal save workflow was stabilized in v0.1.3+ to fix an issue where modal edits were lost due to premature data refetching. The system now properly maintains local edits until they are explicitly saved to disk. See the troubleshooting section below for details on how the fix works.
 
 ### Admin Editor Layout
 
@@ -248,6 +248,46 @@ This workflow provides several benefits:
 - **Recovery**: Disk-saved changes persist even if your browser session ends
 - **Rollback**: Easy to discard local changes before committing
 - **No Data Loss**: GET endpoint reads from local file by default, preventing GitHub fetches from overwriting unsaved work
+
+### Troubleshooting: How the Save Workflow Works
+
+**The Problem (Fixed in v0.1.3+)**:
+Prior versions had an issue where making nested edits (e.g., editing a planet within a solar system within a galaxy) and then clicking "Save Changes" would appear to work, but the changes would be lost before reaching disk. This happened because:
+
+1. User edits galaxy → modal saves changes → updates parent component
+2. Parent component callback **immediately refetched** universe from API
+3. Since changes hadn't been saved to disk yet, the refetch loaded the OLD version
+4. User's local edits were overwritten by the fetched data
+5. When user clicked "Save to Disk", only the old data was sent to the API
+
+**The Fix**:
+The system now properly maintains local state until explicitly saved:
+
+1. **No premature refetching**: The parent component no longer refetches after modal saves
+2. **Hash-based updates**: The hash is only updated after successful disk saves
+3. **Local state preservation**: All edits remain in memory until "Save to Disk" is clicked
+4. **Immutable updates**: State changes use immutable patterns to prevent data loss
+
+**How to Verify It's Working**:
+1. Open Galaxy Editor and make changes
+2. Click "Save Changes" - modal closes with success message
+3. Make more edits to other galaxies/systems
+4. Click "💾 Save to Disk" - should show success
+5. Refresh the page - your changes should still be there
+
+**If You Still Experience Issues**:
+1. Check browser console for errors
+2. Verify the "Save to Disk" button shows success notification
+3. Check server logs for validation errors
+4. Ensure no network errors occurred during save
+5. Try clearing browser cache and reloading
+
+**Technical Details**:
+- Local edits are stored in React component state (not persisted across page reloads until saved to disk)
+- The "Save Changes" button in modals updates parent state only (no API call)
+- The "Save to Disk" button calls `PATCH /api/admin/universe` to persist to file
+- Hash values use SHA-256 for optimistic locking and are updated after each disk save
+- State updates propagate through: PlanetEditor → SolarSystemEditor → GalaxyEditor → UniverseEditor → AdminPage
 
 ### GitHub Sync Behavior
 
