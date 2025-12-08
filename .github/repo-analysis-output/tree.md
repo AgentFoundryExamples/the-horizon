@@ -70,6 +70,7 @@
       └── UniverseEditor.tsx
     ├── GalaxyView.tsx
     ├── MarkdownContent.tsx
+    ├── OverlayLabels.tsx
     ├── PlanetSurface.tsx
     ├── SceneHUD.tsx
     ├── SolarSystemView.tsx
@@ -83,6 +84,9 @@
       ├── crypto.test.ts
       ├── github-optimistic-locking.test.ts
       ├── github.test.ts
+      ├── hover-labels-integration.test.ts
+      ├── hover-store.test.ts
+      ├── projection.test.ts
       └── store.test.ts
     ├── universe
       ├── __tests__
@@ -107,8 +111,11 @@
     ├── camera.ts
     ├── crypto.ts
     ├── github.ts
+    ├── hover-store.ts
+    ├── projection.ts
     └── store.ts
   ├── styles
+    ├── overlay-labels.css
     └── planet.css
   └── middleware.ts
 ├── .env.example

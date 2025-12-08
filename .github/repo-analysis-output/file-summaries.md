@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 37
+Total files: 42
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -123,6 +123,33 @@ Total files: 37
 **LOC:** 420  
 **TODOs/FIXMEs:** 0  
 
+## src/lib/__tests__/hover-labels-integration.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 10.59 KB  
+**LOC:** 270  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/__tests__/hover-store.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 7.79 KB  
+**LOC:** 218  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/__tests__/projection.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 11.83 KB  
+**LOC:** 267  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/__tests__/store.test.ts
 **Language:** TypeScript  
 **Role:** implementation  
@@ -175,6 +202,24 @@ Total files: 37
 **Summary:** TypeScript core implementation  
 **Size:** 18.35 KB  
 **LOC:** 457  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/hover-store.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 1.82 KB  
+**LOC:** 41  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/projection.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 3.29 KB  
+**LOC:** 98  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/store.ts

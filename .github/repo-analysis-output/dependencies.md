@@ -8,10 +8,10 @@ Includes classification of external dependencies as stdlib vs third-party.
 
 ## Statistics
 
-- **Total files**: 37
-- **Intra-repo dependencies**: 33
+- **Total files**: 42
+- **Intra-repo dependencies**: 35
 - **External stdlib dependencies**: 5
-- **External third-party dependencies**: 15
+- **External third-party dependencies**: 16
 
 ## External Dependencies
 
@@ -27,12 +27,13 @@ Total: 5 unique modules
 
 ### Third-Party Packages
 
-Total: 15 unique packages
+Total: 16 unique packages
 
 - `@/../public/universe/universe.json`
 - `@/lib/auth`
 - `@/lib/crypto`
 - `@/lib/github`
+- `@/lib/hover-store`
 - `@/lib/universe/mutate`
 - `@/lib/universe/persist`
 - `@/lib/universe/types`
@@ -56,7 +57,7 @@ Total: 15 unique packages
 - `src/lib/animation.ts` (1 dependents)
 - `src/lib/auth.ts` (1 dependents)
 - `src/lib/camera.ts` (1 dependents)
-- `src/lib/store.ts` (1 dependents)
+- `src/lib/hover-store.ts` (1 dependents)
 
 ## Files with Most Dependencies (Intra-Repo)
 

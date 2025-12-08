@@ -153,6 +153,42 @@
       }
     },
     {
+      "id": "src/lib/__tests__/hover-labels-integration.test.ts",
+      "path": "src/lib/__tests__/hover-labels-integration.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "@/lib/hover-store",
+          "@testing-library/react",
+          "three"
+        ]
+      }
+    },
+    {
+      "id": "src/lib/__tests__/hover-store.test.ts",
+      "path": "src/lib/__tests__/hover-store.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "@testing-library/react",
+          "three"
+        ]
+      }
+    },
+    {
+      "id": "src/lib/__tests__/projection.test.ts",
+      "path": "src/lib/__tests__/projection.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "three"
+        ]
+      }
+    },
+    {
       "id": "src/lib/__tests__/store.test.ts",
       "path": "src/lib/__tests__/store.test.ts",
       "type": "file",
@@ -212,6 +248,29 @@
       "external_dependencies": {
         "stdlib": [],
         "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/hover-store.ts",
+      "path": "src/lib/hover-store.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "three",
+          "zustand"
+        ]
+      }
+    },
+    {
+      "id": "src/lib/projection.ts",
+      "path": "src/lib/projection.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "three"
+        ]
       }
     },
     {
@@ -429,6 +488,14 @@
       "target": "src/lib/github.ts"
     },
     {
+      "source": "src/lib/__tests__/hover-store.test.ts",
+      "target": "src/lib/hover-store.ts"
+    },
+    {
+      "source": "src/lib/__tests__/projection.test.ts",
+      "target": "src/lib/projection.ts"
+    },
+    {
       "source": "src/lib/__tests__/store.test.ts",
       "target": "src/lib/store.ts"
     },
@@ -550,6 +617,7 @@
       "@/lib/auth",
       "@/lib/crypto",
       "@/lib/github",
+      "@/lib/hover-store",
       "@/lib/universe/mutate",
       "@/lib/universe/persist",
       "@/lib/universe/types",
@@ -563,6 +631,6 @@
       "zustand"
     ],
     "stdlib_count": 5,
-    "third-party_count": 15
+    "third-party_count": 16
   }
 }

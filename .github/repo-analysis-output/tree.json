@@ -326,6 +326,10 @@
             },
             {
               "type": "file",
+              "name": "OverlayLabels.tsx"
+            },
+            {
+              "type": "file",
               "name": "PlanetSurface.tsx"
             },
             {
@@ -377,6 +381,18 @@
                 {
                   "type": "file",
                   "name": "github.test.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "hover-labels-integration.test.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "hover-store.test.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "projection.test.ts"
                 },
                 {
                   "type": "file",
@@ -482,6 +498,14 @@
             },
             {
               "type": "file",
+              "name": "hover-store.ts"
+            },
+            {
+              "type": "file",
+              "name": "projection.ts"
+            },
+            {
+              "type": "file",
               "name": "store.ts"
             }
           ]
@@ -490,6 +514,10 @@
           "type": "directory",
           "name": "styles",
           "children": [
+            {
+              "type": "file",
+              "name": "overlay-labels.css"
+            },
             {
               "type": "file",
               "name": "planet.css"
