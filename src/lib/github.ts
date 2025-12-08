@@ -311,7 +311,10 @@ export async function pushUniverseChanges(
     
     if (contentHash !== githubHash && !currentHash) {
       // Content differs from GitHub but no hash was provided for locking
-      // This is expected when saving local edits - allow it to proceed
+      // This scenario occurs during:
+      // 1. Initial saves where no hash tracking has been established yet
+      // 2. Commits after successful disk saves where new content is being pushed
+      // Allow the commit to proceed - this is the expected workflow
       console.log('[pushUniverseChanges] Content differs from GitHub HEAD - proceeding with commit');
     }
 
@@ -337,7 +340,8 @@ export async function pushUniverseChanges(
         filePath,
         content,
         commitMessage,
-        branchName
+        branchName,
+        freshFileData.sha // Pass fresh SHA to prevent stale file errors
       );
 
       const prUrl = await createPullRequest(
