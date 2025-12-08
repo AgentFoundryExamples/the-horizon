@@ -33,6 +33,11 @@ import {
 } from './types';
 
 /**
+ * Entity type for ID operations
+ */
+export type EntityType = 'galaxy' | 'solarSystem' | 'planet' | 'moon' | 'star';
+
+/**
  * Generates a unique ID based on name (kebab-case)
  * Handles unicode characters by normalizing them
  * 
@@ -66,7 +71,7 @@ export function generateId(name: string): string {
  * Generates a unique ID that doesn't collide with existing IDs in the universe
  * If the base ID exists, appends a numeric suffix (-2, -3, etc.)
  */
-export function generateUniqueId(baseName: string, universe: Universe, type: 'galaxy' | 'solarSystem' | 'planet' | 'moon' | 'star'): string {
+export function generateUniqueId(baseName: string, universe: Universe, type: EntityType): string {
   let id = generateId(baseName);
   
   // If base ID is empty, use a timestamp-based fallback
@@ -81,7 +86,7 @@ export function generateUniqueId(baseName: string, universe: Universe, type: 'ga
 /**
  * Checks if an ID exists in the universe
  */
-export function isIdUnique(universe: Universe, id: string, type: 'galaxy' | 'solarSystem' | 'planet' | 'moon' | 'star'): boolean {
+export function isIdUnique(universe: Universe, id: string, type: EntityType): boolean {
   const allIds = getAllIds(universe, type);
   return !allIds.includes(id);
 }
@@ -89,7 +94,7 @@ export function isIdUnique(universe: Universe, id: string, type: 'galaxy' | 'sol
 /**
  * Gets all IDs of a specific type in the universe
  */
-export function getAllIds(universe: Universe, type: 'galaxy' | 'solarSystem' | 'planet' | 'moon' | 'star'): string[] {
+export function getAllIds(universe: Universe, type: EntityType): string[] {
   const ids: string[] = [];
 
   universe.galaxies.forEach((galaxy) => {
@@ -121,7 +126,7 @@ export function getAllIds(universe: Universe, type: 'galaxy' | 'solarSystem' | '
 /**
  * Helper function to ensure unique ID by appending suffix if needed
  */
-function ensureUniqueIdWithSuffix(baseId: string, universe: Universe, type: 'galaxy' | 'solarSystem' | 'planet' | 'moon' | 'star'): string {
+function ensureUniqueIdWithSuffix(baseId: string, universe: Universe, type: EntityType): string {
   if (isIdUnique(universe, baseId, type)) {
     return baseId;
   }

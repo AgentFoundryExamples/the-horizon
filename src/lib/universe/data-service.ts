@@ -18,6 +18,7 @@
 
 import type { Universe, Galaxy, SolarSystem, Planet, Moon, Star } from './types';
 import { validateUniverse } from './types';
+import { generateId } from './mutate';
 
 // Import the universe data statically
 // JSON imports are handled differently in Jest vs runtime, so we need defensive code
@@ -97,7 +98,6 @@ function sanitizeGalaxy(galaxy: Galaxy): Galaxy {
     console.warn(`Galaxy "${sanitizedGalaxy.name}" has missing ID - auto-generating...`);
     const timestamp = Date.now();
     // Use existing generateId utility, with timestamp fallback
-    const { generateId } = require('./mutate');
     sanitizedGalaxy.id = generateId(sanitizedGalaxy.name) || `galaxy-${timestamp}`;
   }
   

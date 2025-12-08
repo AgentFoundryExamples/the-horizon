@@ -287,6 +287,8 @@ export default function UniverseEditor({
       </div>
 
       {/* Galaxy Editor Modal */}
+      {/* Note: Galaxy lookup is performed twice (title and children) but is acceptable 
+          given small galaxy arrays (typically < 10 items). Caching would add complexity. */}
       <Modal
         isOpen={!!editingGalaxy}
         onClose={() => setEditingGalaxy(null)}
