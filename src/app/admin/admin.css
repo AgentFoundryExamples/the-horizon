@@ -625,6 +625,96 @@ body {
   margin-bottom: 0;
 }
 
+/* Inline Notification Styles */
+.inline-notification {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-top: 0.75rem;
+  border-left: 3px solid;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  animation: notificationSlideIn 0.3s ease-out;
+  word-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.inline-notification-icon {
+  flex-shrink: 0;
+  font-size: 1rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inline-notification-message {
+  flex: 1;
+  min-width: 0;
+}
+
+.inline-notification-close {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.inline-notification-close:hover {
+  opacity: 1;
+}
+
+.inline-notification-success {
+  background: rgba(76, 175, 80, 0.1);
+  border-color: var(--admin-success);
+  color: var(--admin-success);
+}
+
+.inline-notification-error {
+  background: rgba(244, 67, 54, 0.1);
+  border-color: var(--admin-error);
+  color: var(--admin-error);
+}
+
+.inline-notification-warning {
+  background: rgba(255, 152, 0, 0.1);
+  border-color: var(--admin-warning);
+  color: var(--admin-warning);
+}
+
+.inline-notification-info {
+  background: rgba(74, 144, 226, 0.1);
+  border-color: var(--admin-primary);
+  color: var(--admin-primary);
+}
+
+.inline-notification-pending {
+  background: rgba(74, 144, 226, 0.05);
+  border-color: var(--admin-primary);
+  color: var(--admin-primary);
+}
+
+/* Action section with inline notification */
+.action-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 /* Content List Styles */
 .content-list {
   display: flex;
@@ -779,5 +869,17 @@ body {
     left: 1rem;
     right: 1rem;
     max-width: calc(100vw - 2rem);
+  }
+
+  /* Inline notification mobile adjustments */
+  .inline-notification {
+    font-size: 0.9rem;
+    padding: 0.625rem 0.875rem;
+    flex-wrap: wrap;
+  }
+
+  .inline-notification-message {
+    word-break: break-word;
+    hyphens: auto;
   }
 }
