@@ -151,9 +151,12 @@ export default function AdminPage() {
       <UniverseEditor
         universe={universe}
         currentHash={hash}
-        onUpdate={(updatedUniverse) => {
+        onUpdate={(updatedUniverse, newHash) => {
           setUniverse(updatedUniverse);
-          fetchUniverse(); // Refresh to get new hash
+          // Only update hash if provided and is a non-empty string
+          if (newHash && typeof newHash === 'string' && newHash.trim()) {
+            setHash(newHash);
+          }
         }}
       />
     </>

@@ -25,7 +25,7 @@ import NotificationBanner, { NotificationType } from './NotificationBanner';
 interface UniverseEditorProps {
   universe: Universe;
   currentHash: string;
-  onUpdate: (universe: Universe) => void;
+  onUpdate: (universe: Universe, hash?: string) => void;
 }
 
 export default function UniverseEditor({
@@ -71,7 +71,8 @@ export default function UniverseEditor({
         if (data.hash) {
           setLocalHash(data.hash);
         }
-        onUpdate(universe);
+        // Pass both universe and new hash to parent
+        onUpdate(universe, data.hash);
       } else if (response.status === 409) {
         setNotification({
           type: 'error',
