@@ -186,16 +186,16 @@ describe('Galaxy Creation Edge Cases', () => {
     });
 
     it('should handle undefined ID with valid name', () => {
-      const galaxy = {
+      const galaxy: Partial<Galaxy> = {
         name: 'Test Galaxy',
         description: 'Test',
         theme: 'blue',
         particleColor: '#000000',
         stars: [],
         solarSystems: [],
-      } as Galaxy;
+      };
 
-      const result = ensureGalaxyId(galaxy);
+      const result = ensureGalaxyId(galaxy as Galaxy);
       expect(result.id).toBe('test-galaxy');
     });
 
