@@ -153,8 +153,8 @@ export default function AdminPage() {
         currentHash={hash}
         onUpdate={(updatedUniverse, newHash) => {
           setUniverse(updatedUniverse);
-          // Only update hash if provided (e.g., after successful save to disk)
-          if (newHash) {
+          // Only update hash if provided and is a non-empty string
+          if (newHash && typeof newHash === 'string' && newHash.trim()) {
             setHash(newHash);
           }
         }}

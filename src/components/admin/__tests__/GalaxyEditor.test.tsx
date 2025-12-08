@@ -192,7 +192,7 @@ describe('GalaxyEditor', () => {
     fireEvent.change(nameInput, { target: { value: 'My New Galaxy' } });
 
     // The ID should auto-update
-    const idInput = screen.getByLabelText(/^ID/i);
+    const idInput = screen.getByLabelText('ID');
     expect(idInput).toHaveValue('my-new-galaxy');
   });
 
@@ -206,7 +206,7 @@ describe('GalaxyEditor', () => {
     );
 
     // Manually edit the ID
-    const idInput = screen.getByLabelText(/^ID/i);
+    const idInput = screen.getByLabelText('ID');
     fireEvent.change(idInput, { target: { value: 'custom-id' } });
 
     // Now change the name

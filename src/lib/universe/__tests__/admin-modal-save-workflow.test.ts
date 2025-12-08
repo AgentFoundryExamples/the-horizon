@@ -184,9 +184,14 @@ describe('Admin Modal Save Workflow', () => {
     });
 
     it('should not mutate original galaxy when updating solar system', () => {
-      const originalGalaxy = JSON.parse(
-        JSON.stringify(testUniverse.galaxies[0])
-      );
+      // Deep clone for comparison
+      const originalGalaxy = {
+        ...testUniverse.galaxies[0],
+        solarSystems: testUniverse.galaxies[0].solarSystems!.map(s => ({
+          ...s,
+          planets: s.planets ? [...s.planets] : [],
+        })),
+      };
 
       const updatedSystem: SolarSystem = {
         ...testUniverse.galaxies[0].solarSystems![0],
