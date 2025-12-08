@@ -63,6 +63,29 @@ export function generateId(name: string): string {
 }
 
 /**
+ * Generates a unique ID that doesn't collide with existing IDs in the universe
+ * If the base ID exists, appends a numeric suffix (-2, -3, etc.)
+ */
+export function generateUniqueId(baseName: string, universe: Universe, type: 'galaxy' | 'solarSystem' | 'planet' | 'moon' | 'star'): string {
+  let id = generateId(baseName);
+  
+  // If base ID is empty, use a timestamp-based fallback
+  if (!id) {
+    id = `${type}-${Date.now()}`;
+  }
+  
+  // Check for collisions and add suffix if needed
+  let finalId = id;
+  let counter = 2;
+  while (!isIdUnique(universe, finalId, type)) {
+    finalId = `${id}-${counter}`;
+    counter++;
+  }
+  
+  return finalId;
+}
+
+/**
  * Checks if an ID exists in the universe
  */
 export function isIdUnique(universe: Universe, id: string, type: 'galaxy' | 'solarSystem' | 'planet' | 'moon' | 'star'): boolean {
@@ -105,19 +128,32 @@ export function getAllIds(universe: Universe, type: 'galaxy' | 'solarSystem' | '
 /**
  * Ensures a galaxy has a valid ID, auto-generating from name if needed
  * Also provides default values for optional fields
+ * Can optionally check for ID uniqueness in a universe context
  * @throws Error if galaxy.name is missing or empty
  */
-export function ensureGalaxyId(galaxy: Galaxy): Galaxy {
+export function ensureGalaxyId(galaxy: Galaxy, universe?: Universe): Galaxy {
   if (!galaxy.name || !galaxy.name.trim()) {
     throw new Error('Galaxy name is required');
   }
   
   const id = galaxy.id?.trim();
-  const generatedId = id || generateId(galaxy.name);
+  let generatedId = id || generateId(galaxy.name);
   
-  // Validate generated ID is not empty
+  // If ID is empty or invalid, use timestamp-based fallback
   if (!generatedId) {
-    throw new Error(`Failed to generate valid ID from galaxy name: "${galaxy.name}"`);
+    generatedId = `galaxy-${Date.now()}`;
+  }
+  
+  // If universe is provided, ensure ID is unique
+  if (universe && !isIdUnique(universe, generatedId, 'galaxy')) {
+    // Try to make it unique by adding a suffix
+    let counter = 2;
+    let uniqueId = `${generatedId}-${counter}`;
+    while (!isIdUnique(universe, uniqueId, 'galaxy')) {
+      counter++;
+      uniqueId = `${generatedId}-${counter}`;
+    }
+    generatedId = uniqueId;
   }
   
   return {

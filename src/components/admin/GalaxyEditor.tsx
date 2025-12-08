@@ -27,12 +27,15 @@ interface GalaxyEditorProps {
 }
 
 export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditorProps) {
-  const [localGalaxy, setLocalGalaxy] = useState(galaxy);
+  // Ensure galaxy has a valid ID before initializing state
+  const initialGalaxy = galaxy.id ? galaxy : { ...galaxy, id: '' };
+  
+  const [localGalaxy, setLocalGalaxy] = useState(initialGalaxy);
   const [editingSystem, setEditingSystem] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'info' | 'systems' | 'stars'>('info');
   const [showAnimationPreview, setShowAnimationPreview] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [idManuallyEdited, setIdManuallyEdited] = useState(Boolean(galaxy.id?.trim()));
+  const [idManuallyEdited, setIdManuallyEdited] = useState(Boolean(initialGalaxy.id?.trim()));
 
   const handleChange = (field: keyof Galaxy, value: unknown) => {
     const updated = { ...localGalaxy, [field]: value };

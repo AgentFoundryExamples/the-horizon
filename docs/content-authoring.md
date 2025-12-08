@@ -482,6 +482,40 @@ Set up a regular save cadence:
 
 The redesigned admin interface makes galaxy creation intuitive with clear visual feedback:
 
+### ID Lifecycle for Galaxies
+
+Understanding how galaxy identifiers are generated and managed is crucial for content authoring:
+
+**Automatic ID Generation:**
+- When you create a new galaxy, the system automatically generates a unique ID
+- IDs are generated using a timestamp-based approach: `new-galaxy-[timestamp]`
+- This ensures no collisions even with simultaneous galaxy creations
+- You can manually change the ID in the editor before saving
+
+**ID Format Rules:**
+- IDs use kebab-case format (lowercase with hyphens)
+- Generated from the galaxy name when you type it
+- Unicode characters are normalized: "Café Galaxy" → "cafe-galaxy"
+- Special characters are removed: "Galaxy #42!" → "galaxy-42"
+- Empty or invalid names get timestamp fallback: `galaxy-1234567890`
+
+**ID Collision Prevention:**
+- System checks for duplicate IDs before saving
+- If a collision is detected, a numeric suffix is added: `andromeda-2`, `andromeda-3`
+- You'll be notified if the ID was changed to avoid collisions
+- Manual IDs are validated server-side for uniqueness
+
+**Legacy Data Auto-Backfill:**
+- Galaxies without IDs are automatically assigned one during load
+- The system logs a warning when auto-backfilling IDs
+- This ensures existing data remains functional without manual intervention
+
+**Best Practices:**
+- Let the system generate IDs automatically for consistency
+- Only set custom IDs when you need specific URL patterns
+- Avoid changing IDs after publishing (breaks existing links)
+- Use descriptive names to get readable auto-generated IDs
+
 ### Creating a New Galaxy
 
 1. **Access Dashboard**: Navigate to `/admin` and log in
@@ -489,7 +523,7 @@ The redesigned admin interface makes galaxy creation intuitive with clear visual
 3. **Modal Opens**: Galaxy editor appears with three tabs
 4. **Fill Basic Info Tab**:
    - **Name*** (required): Display name (e.g., "Andromeda Galaxy")
-     - Auto-generates ID in kebab-case if not manually set
+     - Auto-generates ID in kebab-case as you type
      - Red border and error if left empty
    - **Description*** (required): Brief description of the galaxy
      - Cannot be empty or whitespace-only
@@ -501,10 +535,11 @@ The redesigned admin interface makes galaxy creation intuitive with clear visual
      - Color picker provided for easy selection
      - Text input for manual entry (e.g., "#4A90E2")
      - Must be valid hex color format
-   - **ID** (optional): Unique kebab-case identifier
-     - Auto-generated from name if not provided
-     - Unicode names are normalized: "Café Galaxy" → "cafe-galaxy"
+   - **ID**: Unique kebab-case identifier
+     - **Pre-generated** when modal opens (e.g., `new-galaxy-1234567890`)
+     - Auto-updates as you type the name (unless manually edited)
      - Can be manually edited if auto-generation is not desired
+     - System ensures uniqueness automatically
 
 5. **Add Solar Systems** (Solar Systems tab):
    - Click "+ Add Solar System" to create systems within the galaxy
@@ -561,6 +596,23 @@ While not enforced, keep in mind:
 - Galaxy names: 10-50 characters recommended
 - Descriptions: 50-200 characters recommended
 - Longer descriptions may be truncated in card view
+
+### Troubleshooting Galaxy Creation
+
+**"Galaxy not found" Error:**
+- This is a rare race condition that has been fixed
+- If you see this, close the modal and try again
+- The galaxy will still be created in the universe
+
+**Empty or Invalid IDs:**
+- System automatically generates fallback IDs
+- You'll see `galaxy-[timestamp]` format
+- This is normal for names with only special characters
+
+**Duplicate ID Error:**
+- System adds numeric suffix automatically: `galaxy-2`, `galaxy-3`
+- Choose a more unique name or manually set a custom ID
+- Server-side validation prevents saving duplicates
 
 
 ## Overview

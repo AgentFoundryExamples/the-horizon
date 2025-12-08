@@ -82,14 +82,26 @@ function sanitizeSolarSystem(solarSystem: SolarSystem): SolarSystem {
 }
 
 /**
- * Sanitizes galaxy data
+ * Sanitizes galaxy data and ensures ID exists
  */
 function sanitizeGalaxy(galaxy: Galaxy): Galaxy {
-  return {
+  // Ensure galaxy has an ID - auto-generate if missing
+  let sanitizedGalaxy = {
     ...galaxy,
     stars: galaxy.stars || [],
     solarSystems: galaxy.solarSystems ? galaxy.solarSystems.map(sanitizeSolarSystem) : [],
   };
+  
+  // Auto-backfill missing ID for legacy data
+  if (!sanitizedGalaxy.id || !sanitizedGalaxy.id.trim()) {
+    console.warn(`Galaxy "${sanitizedGalaxy.name}" has missing ID - auto-generating...`);
+    const timestamp = Date.now();
+    sanitizedGalaxy.id = sanitizedGalaxy.name 
+      ? sanitizedGalaxy.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-') || `galaxy-${timestamp}`
+      : `galaxy-${timestamp}`;
+  }
+  
+  return sanitizedGalaxy;
 }
 
 /**
