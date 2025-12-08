@@ -372,6 +372,10 @@
                 },
                 {
                   "type": "file",
+                  "name": "github-optimistic-locking.test.ts"
+                },
+                {
+                  "type": "file",
                   "name": "github.test.ts"
                 },
                 {

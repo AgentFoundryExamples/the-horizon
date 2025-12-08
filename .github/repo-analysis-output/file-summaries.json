@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 36,
+  "total_files": 37,
   "files": [
     {
       "schema_version": "2.0",
@@ -95,8 +95,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 18544,
-        "loc": 374,
+        "size_bytes": 18701,
+        "loc": 375,
         "todo_count": 0
       }
     },
@@ -158,6 +158,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/__tests__/github-optimistic-locking.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 11913,
+        "loc": 314,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/__tests__/github.test.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -165,8 +179,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 13501,
-        "loc": 339,
+        "size_bytes": 16673,
+        "loc": 420,
         "todo_count": 0
       }
     },
@@ -249,8 +263,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 17033,
-        "loc": 424,
+        "size_bytes": 18794,
+        "loc": 457,
         "todo_count": 0
       }
     },

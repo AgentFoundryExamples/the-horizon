@@ -133,6 +133,17 @@
       }
     },
     {
+      "id": "src/lib/__tests__/github-optimistic-locking.test.ts",
+      "path": "src/lib/__tests__/github-optimistic-locking.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [
+          "crypto"
+        ],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/__tests__/github.test.ts",
       "path": "src/lib/__tests__/github.test.ts",
       "type": "file",
@@ -408,6 +419,10 @@
     {
       "source": "src/lib/__tests__/crypto.test.ts",
       "target": "src/lib/crypto.ts"
+    },
+    {
+      "source": "src/lib/__tests__/github-optimistic-locking.test.ts",
+      "target": "src/lib/github.ts"
     },
     {
       "source": "src/lib/__tests__/github.test.ts",
