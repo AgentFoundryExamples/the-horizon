@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export type NotificationType = 'success' | 'error' | 'warning' | 'info' | 'pending';
 
@@ -21,15 +21,19 @@ export default function InlineNotification({
   autoCloseDelay = 5000,
   className = '',
 }: InlineNotificationProps) {
+  // Use ref to avoid timer resets when onClose function reference changes
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
-    if (autoClose && onClose && type !== 'pending') {
+    if (autoClose && onCloseRef.current && type !== 'pending') {
       const timer = setTimeout(() => {
-        onClose();
+        onCloseRef.current?.();
       }, autoCloseDelay);
 
       return () => clearTimeout(timer);
     }
-  }, [autoClose, autoCloseDelay, onClose, message, type]);
+  }, [autoClose, autoCloseDelay, message, type]);
 
   const getIcon = () => {
     switch (type) {

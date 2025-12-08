@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Universe, Galaxy } from '@/lib/universe/types';
 import { generateId } from '@/lib/universe/mutate';
@@ -45,6 +45,15 @@ export default function UniverseEditor({
   const [createPR, setCreatePR] = useState(false);
   const [localHash, setLocalHash] = useState(currentHash);
   const [retrying, setRetrying] = useState(false);
+
+  // Stable callbacks for notification close handlers to prevent timer resets
+  const handleCloseSaveNotification = useCallback(() => {
+    setSaveNotification(null);
+  }, []);
+
+  const handleCloseCommitNotification = useCallback(() => {
+    setCommitNotification(null);
+  }, []);
 
   const handleSaveToFile = async () => {
     setSaving(true);
@@ -360,7 +369,7 @@ export default function UniverseEditor({
             <InlineNotification
               type={saveNotification.type}
               message={saveNotification.message}
-              onClose={() => setSaveNotification(null)}
+              onClose={handleCloseSaveNotification}
               autoClose={saveNotification.type === 'success'}
               autoCloseDelay={5000}
             />
@@ -441,7 +450,7 @@ export default function UniverseEditor({
             <InlineNotification
               type={commitNotification.type}
               message={commitNotification.message}
-              onClose={() => setCommitNotification(null)}
+              onClose={handleCloseCommitNotification}
               autoClose={commitNotification.type === 'success'}
               autoCloseDelay={7000}
             />
