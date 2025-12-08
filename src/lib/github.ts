@@ -324,11 +324,12 @@ export async function pushUniverseChanges(
 
     // Optimistic locking: verify GitHub hasn't changed since user loaded the editor
     // currentHash should be the gitBaseHash from when the user loaded the editor
+    // Compute githubHash only when needed for verification
     let githubHash: string;
     if (currentHash) {
       logVerbose('[pushUniverseChanges] Verifying optimistic lock with gitBaseHash:', currentHash.substring(0, 8) + '...');
       
-      // Compute hash of current GitHub content only when optimistic locking is needed
+      // Compute hash of current GitHub content for optimistic locking
       githubHash = await sha256(fileData.content);
       logVerbose('[pushUniverseChanges] Current GitHub content hash:', githubHash.substring(0, 8) + '...');
       
@@ -346,22 +347,33 @@ export async function pushUniverseChanges(
       }
       
       logVerbose('[pushUniverseChanges] Optimistic lock verified - GitHub matches baseline');
+      
+      // Early exit if no changes to commit
+      if (contentHash === githubHash) {
+        console.log('[pushUniverseChanges] Content matches GitHub HEAD - no changes to commit. Aborting commit.');
+        return {
+          success: true,
+          message: 'No changes to commit. The content is already up-to-date.',
+          sha: fileData.sha,
+          hash: githubHash,
+        };
+      }
     } else {
       logVerbose('[pushUniverseChanges] No gitBaseHash provided - skipping optimistic lock check');
-      // Compute GitHub hash for no-changes check even without optimistic locking
+      
+      // Compute GitHub hash for no-changes check (only when optimistic locking was skipped)
       githubHash = await sha256(fileData.content);
       logVerbose('[pushUniverseChanges] Current GitHub content hash:', githubHash.substring(0, 8) + '...');
-    }
-    
-    if (contentHash === githubHash) {
-      // Content matches GitHub HEAD - no changes to commit.
-      console.log('[pushUniverseChanges] Content matches GitHub HEAD - no changes to commit. Aborting commit.');
-      return {
-        success: true,
-        message: 'No changes to commit. The content is already up-to-date.',
-        sha: fileData.sha, // Git commit SHA representing the current state in GitHub
-        hash: githubHash, // Content hash for UI baseline tracking
-      };
+      
+      if (contentHash === githubHash) {
+        console.log('[pushUniverseChanges] Content matches GitHub HEAD - no changes to commit. Aborting commit.');
+        return {
+          success: true,
+          message: 'No changes to commit. The content is already up-to-date.',
+          sha: fileData.sha,
+          hash: githubHash,
+        };
+      }
     }
     
     logVerbose('[pushUniverseChanges] Content differs from GitHub HEAD - proceeding with commit');
