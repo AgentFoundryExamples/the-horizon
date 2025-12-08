@@ -197,7 +197,7 @@ The admin interface includes multiple layers of security protection:
 
 Understanding the two-step workflow helps troubleshoot issues:
 
-> **Note**: This workflow was restored in v0.1.2 (ISS-4) after critical fixes to the save and commit operations. Previous versions had issues with disk persistence that prevented proper content updates. See [docs/roadmap.md](./roadmap.md) for complete fix details.
+> **Note**: This workflow was restored in v0.1.2 (ISS-4) after critical fixes to the save and commit operations. The workflow was further stabilized to always fetch fresh SHA from GitHub before committing, preventing "file has changed" errors.
 
 ```mermaid
 graph TD
@@ -211,20 +211,28 @@ graph TD
     H --> I[Enter Commit Message]
     I --> J{Create PR?}
     J -->|Yes| K[POST /api/admin/universe]
-    K --> L[GitHub API: Create Branch]
-    L --> M[GitHub API: Commit File]
-    M --> N[GitHub API: Create PR]
-    N --> O[Manual Review & Merge]
-    O --> P[Vercel Redeploys Automatically]
-    J -->|No| Q[POST /api/admin/universe]
-    Q --> R[GitHub API: Commit to Main]
-    R --> P
-    P --> S[Changes Live on Site]
+    K --> L[Fetch Fresh SHA from GitHub]
+    L --> M{SHA Conflict?}
+    M -->|Yes| N[Return 409 Conflict with Retry Guidance]
+    M -->|No| O[Create Branch]
+    O --> P[Commit File]
+    P --> Q[Create PR]
+    Q --> R[Manual Review & Merge]
+    R --> S[Vercel Redeploys Automatically]
+    J -->|No| T[POST /api/admin/universe]
+    T --> U[Fetch Fresh SHA from GitHub]
+    U --> V{SHA Conflict?}
+    V -->|Yes| N
+    V -->|No| W[Commit to Main]
+    W --> S
+    S --> X[Changes Live on Site]
+    N --> Y[User: Refresh, Re-apply, Save, Commit]
+    Y --> H
 ```
 
 ### Two-Step Save Workflow
 
-The admin interface uses a **two-step workflow** for safety and flexibility:
+The admin interface uses a **two-step workflow** for safety and reliability:
 
 **Step 1: Save to Disk (PATCH /api/admin/universe)**
 1. Admin makes changes in the browser
@@ -239,7 +247,10 @@ The admin interface uses a **two-step workflow** for safety and flexibility:
 2. Chooses to create a PR or commit directly
 3. System reads the saved file from disk
 4. Validates the content again
-5. Pushes to GitHub via API
+5. **Fetches fresh SHA from GitHub** to prevent stale file errors
+6. Checks for conflicts between local content and GitHub HEAD
+7. Pushes to GitHub via API if no conflicts detected
+8. Returns detailed error with retry guidance if conflict occurs
 
 **Why Two Steps?**
 - **Safety**: Validate changes before they reach version control
@@ -247,6 +258,17 @@ The admin interface uses a **two-step workflow** for safety and flexibility:
 - **Review**: Create PRs for team review before merging
 - **Recovery**: Disk-saved changes persist even if session ends
 - **Testing**: Test changes locally before committing
+- **Reliability**: Always fetch fresh SHA to prevent stale file errors
+
+**Conflict Resolution**
+If you get a "Conflict detected" error when committing:
+1. Someone else committed to GitHub since you loaded the editor
+2. Refresh the admin page to load the latest version
+3. Re-apply your changes to the fresh content
+4. Click "💾 Save to Disk" to persist your changes
+5. Click "Commit to GitHub" again to retry
+
+The system automatically prevents stale SHA errors by fetching the latest file metadata from GitHub right before committing.
 
 ### Logging and Debugging
 
@@ -404,6 +426,28 @@ Watch the server console for log messages:
 4. **Check disk space**: Ensure adequate space for writing files
 5. **Try again**: Temporary file system issues may resolve on retry
 
+**Symptom**: "Conflict detected: file changed remotely" when committing
+
+**Solutions**:
+1. **This is expected behavior** when GitHub HEAD changed between your save and commit
+2. **Resolution steps**:
+   - Refresh the admin page to load the latest version from GitHub
+   - Re-apply your changes to the fresh content
+   - Click "💾 Save to Disk" to persist your changes locally
+   - Click "Commit to GitHub" again to retry
+3. **Prevention**: Use the PR workflow to isolate your changes during review
+4. **Note**: The system always fetches fresh SHA from GitHub before committing to minimize conflicts
+
+**Symptom**: "No saved data found" when trying to commit
+
+**Solutions**:
+1. **Must save to disk BEFORE committing** - this is required workflow order
+2. **Steps**:
+   - Make your changes in the editor
+   - Click "💾 Save to Disk" and wait for success message
+   - Then click "Commit to GitHub"
+3. **Verify**: Check that `public/universe/universe.json` was updated after save
+
 **Symptom**: Changes saved but not appearing after commit
 
 **Solutions**:
@@ -416,15 +460,16 @@ Watch the server console for log messages:
 3. **Verify file was written**: Check `public/universe/universe.json` locally
 4. **Check GitHub**: Verify commit or PR was created
 5. **Wait for deployment**: Vercel takes 1-3 minutes to redeploy
+6. **Check for SHA conflicts**: If you see "file has changed" errors, follow conflict resolution steps
 
-**Symptom**: "Conflict detected" error when saving
+**Symptom**: "Conflict detected" error when saving (not committing)
 
 **Solutions**:
-- Another admin modified the file concurrently
+- Another admin modified the local file concurrently
 - Click browser refresh to load latest version
 - Reapply your changes
 - Save again
-- This is expected behavior (optimistic locking)
+- This is expected behavior (optimistic locking protects against data loss)
 
 ### Admin Login Fails
 

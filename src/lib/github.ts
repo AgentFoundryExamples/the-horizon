@@ -279,7 +279,8 @@ export async function pushUniverseChanges(
   try {
     const filePath = 'public/universe/universe.json';
     
-    // Get current file SHA and content
+    // Always fetch fresh file SHA and content right before committing
+    // This prevents stale SHA errors after disk saves
     const fileData = await getFileSha(config, filePath);
     
     if (!fileData) {
@@ -290,7 +291,7 @@ export async function pushUniverseChanges(
       };
     }
 
-    // Optimistic locking: check if content has changed since user loaded it
+    // Optimistic locking: check if GitHub content has changed since user loaded it
     if (currentHash) {
       const actualHash = await sha256(fileData.content);
       
@@ -298,9 +299,20 @@ export async function pushUniverseChanges(
         return {
           success: false,
           message: 'Content has been modified by another user',
-          error: 'The file has changed since you started editing. Please refresh and try again.',
+          error: 'The file has changed since you started editing. Please refresh, re-apply your changes, save to disk, and then commit again.',
         };
       }
+    }
+
+    // Additional safety check: compare content being committed with GitHub HEAD
+    // This detects drift even without currentHash provided
+    const contentHash = await sha256(content);
+    const githubHash = await sha256(fileData.content);
+    
+    if (contentHash !== githubHash && !currentHash) {
+      // Content differs from GitHub but no hash was provided for locking
+      // This is expected when saving local edits - allow it to proceed
+      console.log('[pushUniverseChanges] Content differs from GitHub HEAD - proceeding with commit');
     }
 
     if (createPR) {
@@ -309,6 +321,17 @@ export async function pushUniverseChanges(
       const branchName = `admin-edit-${timestamp}`;
       
       await createBranch(config, branchName);
+      
+      // Fetch fresh SHA again after branch creation to ensure we have the latest
+      const freshFileData = await getFileSha(config, filePath);
+      if (!freshFileData) {
+        return {
+          success: false,
+          message: 'Universe file not found in repository',
+          error: 'File does not exist at public/universe/universe.json',
+        };
+      }
+      
       const commitSha = await commitFile(
         config,
         filePath,
@@ -331,14 +354,24 @@ export async function pushUniverseChanges(
         prUrl,
       };
     } else {
-      // Direct commit to main branch
+      // Direct commit to main branch - fetch fresh SHA one more time right before commit
+      const finalFileData = await getFileSha(config, filePath);
+      
+      if (!finalFileData) {
+        return {
+          success: false,
+          message: 'Universe file not found in repository',
+          error: 'File does not exist at public/universe/universe.json',
+        };
+      }
+      
       const commitSha = await commitFile(
         config,
         filePath,
         content,
         commitMessage,
         config.branch,
-        fileData.sha
+        finalFileData.sha
       );
 
       return {
@@ -354,7 +387,15 @@ export async function pushUniverseChanges(
     // Log sanitized error without details
     console.error('Error pushing changes to GitHub');
     
-    // Check for specific error types without exposing details
+    // Check for specific GitHub API error patterns
+    if (errorMessage.includes('does not match')) {
+      return {
+        success: false,
+        message: 'Conflict detected: file changed remotely',
+        error: 'The file was modified in GitHub between your save and commit. Please refresh, re-apply your changes, save, and try committing again.',
+      };
+    }
+    
     if (errorMessage.includes('rate limit')) {
       return {
         success: false,

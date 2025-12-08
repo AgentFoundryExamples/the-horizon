@@ -76,8 +76,9 @@ export default function UniverseEditor({
       } else if (response.status === 409) {
         setNotification({
           type: 'error',
-          message: data.message || 'Conflict detected: The file has been modified by another user. Please refresh and try again.',
+          message: data.message || 'Conflict detected: The file has been modified. Please refresh, re-apply your changes, save, and then commit again.',
         });
+        setRetrying(true);
       } else if (response.status === 401) {
         setNotification({
           type: 'error',
@@ -142,6 +143,12 @@ export default function UniverseEditor({
         });
         setCommitMessage('');
         onUpdate(universe);
+      } else if (response.status === 409) {
+        setNotification({
+          type: 'error',
+          message: data.error || data.message || 'Conflict detected: The file was modified in GitHub. Please refresh, re-apply your changes, save, and try committing again.',
+        });
+        setRetrying(true);
       } else if (response.status === 401) {
         setNotification({
           type: 'error',
