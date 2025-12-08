@@ -74,15 +74,8 @@ export function generateUniqueId(baseName: string, universe: Universe, type: 'ga
     id = `${type}-${Date.now()}`;
   }
   
-  // Check for collisions and add suffix if needed
-  let finalId = id;
-  let counter = 2;
-  while (!isIdUnique(universe, finalId, type)) {
-    finalId = `${id}-${counter}`;
-    counter++;
-  }
-  
-  return finalId;
+  // Use helper to ensure uniqueness
+  return ensureUniqueIdWithSuffix(id, universe, type);
 }
 
 /**
@@ -126,6 +119,24 @@ export function getAllIds(universe: Universe, type: 'galaxy' | 'solarSystem' | '
 // Galaxy mutations
 
 /**
+ * Helper function to ensure unique ID by appending suffix if needed
+ */
+function ensureUniqueIdWithSuffix(baseId: string, universe: Universe, type: 'galaxy' | 'solarSystem' | 'planet' | 'moon' | 'star'): string {
+  if (isIdUnique(universe, baseId, type)) {
+    return baseId;
+  }
+  
+  // Add numeric suffix to make it unique
+  let counter = 2;
+  let uniqueId = `${baseId}-${counter}`;
+  while (!isIdUnique(universe, uniqueId, type)) {
+    counter++;
+    uniqueId = `${baseId}-${counter}`;
+  }
+  return uniqueId;
+}
+
+/**
  * Ensures a galaxy has a valid ID, auto-generating from name if needed
  * Also provides default values for optional fields
  * Can optionally check for ID uniqueness in a universe context
@@ -145,15 +156,8 @@ export function ensureGalaxyId(galaxy: Galaxy, universe?: Universe): Galaxy {
   }
   
   // If universe is provided, ensure ID is unique
-  if (universe && !isIdUnique(universe, generatedId, 'galaxy')) {
-    // Try to make it unique by adding a suffix
-    let counter = 2;
-    let uniqueId = `${generatedId}-${counter}`;
-    while (!isIdUnique(universe, uniqueId, 'galaxy')) {
-      counter++;
-      uniqueId = `${generatedId}-${counter}`;
-    }
-    generatedId = uniqueId;
+  if (universe) {
+    generatedId = ensureUniqueIdWithSuffix(generatedId, universe, 'galaxy');
   }
   
   return {

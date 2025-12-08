@@ -290,24 +290,33 @@ export default function UniverseEditor({
       <Modal
         isOpen={!!editingGalaxy}
         onClose={() => setEditingGalaxy(null)}
-        title={editingGalaxy ? `Edit: ${universe.galaxies.find((g) => g.id === editingGalaxy)?.name || 'Galaxy'}` : 'Edit Galaxy'}
+        title={(() => {
+          if (!editingGalaxy) return 'Edit Galaxy';
+          const galaxy = universe.galaxies.find((g) => g.id === editingGalaxy);
+          return galaxy ? `Edit: ${galaxy.name}` : 'Edit Galaxy';
+        })()}
         size="large"
       >
-        {editingGalaxy && universe.galaxies.find((g) => g.id === editingGalaxy) && (
-          <GalaxyEditor
-            galaxy={universe.galaxies.find((g) => g.id === editingGalaxy)!}
-            onUpdate={handleUpdateGalaxy}
-            onClose={() => setEditingGalaxy(null)}
-          />
-        )}
-        {editingGalaxy && !universe.galaxies.find((g) => g.id === editingGalaxy) && (
-          <div style={{ padding: '2rem', textAlign: 'center' }}>
-            <p>Galaxy not found. This may be a temporary issue.</p>
-            <button onClick={() => setEditingGalaxy(null)} className="btn" style={{ marginTop: '1rem' }}>
-              Close
-            </button>
-          </div>
-        )}
+        {editingGalaxy && (() => {
+          const galaxy = universe.galaxies.find((g) => g.id === editingGalaxy);
+          if (galaxy) {
+            return (
+              <GalaxyEditor
+                galaxy={galaxy}
+                onUpdate={handleUpdateGalaxy}
+                onClose={() => setEditingGalaxy(null)}
+              />
+            );
+          }
+          return (
+            <div style={{ padding: '2rem', textAlign: 'center' }}>
+              <p>Galaxy not found. This may be a temporary issue.</p>
+              <button onClick={() => setEditingGalaxy(null)} className="btn" style={{ marginTop: '1rem' }}>
+                Close
+              </button>
+            </div>
+          );
+        })()}
       </Modal>
 
       <div className="admin-card">

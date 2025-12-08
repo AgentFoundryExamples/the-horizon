@@ -96,9 +96,9 @@ function sanitizeGalaxy(galaxy: Galaxy): Galaxy {
   if (!sanitizedGalaxy.id || !sanitizedGalaxy.id.trim()) {
     console.warn(`Galaxy "${sanitizedGalaxy.name}" has missing ID - auto-generating...`);
     const timestamp = Date.now();
-    sanitizedGalaxy.id = sanitizedGalaxy.name 
-      ? sanitizedGalaxy.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-') || `galaxy-${timestamp}`
-      : `galaxy-${timestamp}`;
+    // Use existing generateId utility, with timestamp fallback
+    const { generateId } = require('./mutate');
+    sanitizedGalaxy.id = generateId(sanitizedGalaxy.name) || `galaxy-${timestamp}`;
   }
   
   return sanitizedGalaxy;
