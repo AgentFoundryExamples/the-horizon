@@ -1,11 +1,25 @@
 'use client';
 
 /**
- * WelcomeMessage - Welcome callout displayed on universe landing page
- * Shows a tasteful branding message with instructions
+ * WelcomeMessage - Contextual hero message displayed across universe views
+ * Shows contextual titles and descriptions for galaxies, solar systems, and universe
  */
 
-export default function WelcomeMessage() {
+export interface WelcomeMessageProps {
+  title?: string;
+  description?: string;
+  visible?: boolean;
+}
+
+export default function WelcomeMessage({ 
+  title = 'Welcome to the Horizon', 
+  description = 'Click a galaxy to explore',
+  visible = true 
+}: WelcomeMessageProps) {
+  if (!visible) {
+    return null;
+  }
+
   return (
     <div
       className="welcome-message"
@@ -13,10 +27,10 @@ export default function WelcomeMessage() {
       aria-label="Welcome message"
     >
       <h2 className="welcome-message-title">
-        Welcome to the Horizon
+        {title}
       </h2>
       <p className="welcome-message-text">
-        Click a galaxy to explore
+        {description}
       </p>
     </div>
   );
