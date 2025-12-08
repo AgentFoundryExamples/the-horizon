@@ -392,6 +392,27 @@ describe('useHoverStore', () => {
       );
     });
 
+    it('should reject object with position but missing coordinates', () => {
+      const { result } = renderHook(() => useHoverStore());
+      
+      const invalidObj = {
+        id: 'test-1',
+        name: 'Test',
+        type: 'galaxy' as const,
+        position: { x: 10 }, // Missing y and z
+      } as any;
+
+      act(() => {
+        result.current.setHoveredObject(invalidObj);
+      });
+
+      expect(result.current.hoveredObject).toBeNull();
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Position missing x/y/z coordinates'),
+        expect.any(Object)
+      );
+    });
+
     it('should accept valid object', () => {
       const { result } = renderHook(() => useHoverStore());
       
@@ -434,27 +455,34 @@ describe('useHoverStore', () => {
       expect(result.current.hoveredObject).toBeNull();
     });
 
-    it('should handle setLabelsVisibility with non-boolean gracefully', () => {
+    describe('setLabelsVisibility with non-boolean', () => {
       const originalWarn = console.warn;
-      console.warn = jest.fn();
-
-      const { result } = renderHook(() => useHoverStore());
       
-      const initialVisibility = result.current.labelsVisible;
-
-      act(() => {
-        // @ts-expect-error Testing invalid input
-        result.current.setLabelsVisibility('true');
+      beforeEach(() => {
+        console.warn = jest.fn();
+      });
+      
+      afterEach(() => {
+        console.warn = originalWarn;
       });
 
-      // Should not change visibility with invalid input
-      expect(result.current.labelsVisible).toBe(initialVisibility);
-      expect(console.warn).toHaveBeenCalledWith(
-        expect.stringContaining('setLabelsVisibility requires boolean'),
-        'true'
-      );
+      it('should handle it gracefully', () => {
+        const { result } = renderHook(() => useHoverStore());
+        
+        const initialVisibility = result.current.labelsVisible;
 
-      console.warn = originalWarn;
+        act(() => {
+          // @ts-expect-error Testing invalid input
+          result.current.setLabelsVisibility('true');
+        });
+
+        // Should not change visibility with invalid input
+        expect(result.current.labelsVisible).toBe(initialVisibility);
+        expect(console.warn).toHaveBeenCalledWith(
+          expect.stringContaining('setLabelsVisibility requires boolean'),
+          'true'
+        );
+      });
     });
   });
 });

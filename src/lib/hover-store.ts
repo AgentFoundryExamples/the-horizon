@@ -64,12 +64,17 @@ function validateHoveredObject(object: HoveredObject | null): boolean {
     return false;
   }
   
-  // Check if position exists and has x, y, z properties
-  if (!object.position || 
-      typeof object.position.x !== 'number' ||
+  // Check if position exists and is an object with required structure
+  if (!object.position || typeof object.position !== 'object') {
+    console.warn('HoverStore: Invalid object position', object);
+    return false;
+  }
+  
+  // Verify position has x, y, z properties that are numbers
+  if (typeof object.position.x !== 'number' ||
       typeof object.position.y !== 'number' ||
       typeof object.position.z !== 'number') {
-    console.warn('HoverStore: Invalid object position', object);
+    console.warn('HoverStore: Position missing x/y/z coordinates', object.position);
     return false;
   }
   

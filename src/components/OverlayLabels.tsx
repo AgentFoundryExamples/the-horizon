@@ -18,12 +18,24 @@ export default function OverlayLabels() {
   const labelsVisible = useHoverStore((state) => state.labelsVisible);
 
   // Don't render if no object is hovered or labels are hidden
-  // Validation is handled by hover-store, so we can trust hoveredObject is valid
   if (!hoveredObject || !labelsVisible) {
     return null;
   }
 
   const { name, type, metadata, position } = hoveredObject;
+
+  // Defensive check: ensure position has valid coordinates before rendering
+  // This protects against edge cases where store validation might be bypassed
+  if (!position || 
+      typeof position.x !== 'number' || 
+      typeof position.y !== 'number' || 
+      typeof position.z !== 'number' ||
+      !isFinite(position.x) || 
+      !isFinite(position.y) || 
+      !isFinite(position.z)) {
+    console.warn('OverlayLabels: Invalid position coordinates, skipping render', position);
+    return null;
+  }
 
   return (
     <Html
