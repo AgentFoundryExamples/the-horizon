@@ -89,9 +89,8 @@ export const useHoverStore = create<HoverStore>((set) => ({
   labelsVisible: true,
 
   setHoveredObject: (object: HoveredObject | null) => {
-    // Validate the object
+    // Validate and reject invalid objects
     if (!validateHoveredObject(object)) {
-      console.warn('HoverStore: Rejected invalid object', object);
       return;
     }
     
