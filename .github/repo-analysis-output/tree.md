@@ -51,8 +51,6 @@
   ├── components
     ├── __tests__
       ├── SceneHUD.test.tsx
-      ├── SceneTooltip.test.tsx
-      ├── Tooltip.test.tsx
       ├── UniverseScene.test.tsx
       └── WelcomeMessage.test.tsx
     ├── admin
@@ -73,9 +71,7 @@
     ├── MarkdownContent.tsx
     ├── PlanetSurface.tsx
     ├── SceneHUD.tsx
-    ├── SceneTooltip.tsx
     ├── SolarSystemView.tsx
-    ├── Tooltip.tsx
     ├── UniverseScene.tsx
     └── WelcomeMessage.tsx
   ├── lib
@@ -85,8 +81,7 @@
       ├── camera.test.ts
       ├── crypto.test.ts
       ├── github.test.ts
-      ├── store.test.ts
-      └── tooltip-constants.test.ts
+      └── store.test.ts
     ├── universe
       ├── __tests__
         ├── admin-modal-save-workflow.test.ts
@@ -110,8 +105,7 @@
     ├── camera.ts
     ├── crypto.ts
     ├── github.ts
-    ├── store.ts
-    └── tooltip-constants.ts
+    └── store.ts
   ├── styles
     └── planet.css
   └── middleware.ts

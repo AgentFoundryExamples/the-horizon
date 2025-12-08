@@ -244,14 +244,6 @@
                 },
                 {
                   "type": "file",
-                  "name": "SceneTooltip.test.tsx"
-                },
-                {
-                  "type": "file",
-                  "name": "Tooltip.test.tsx"
-                },
-                {
-                  "type": "file",
                   "name": "UniverseScene.test.tsx"
                 },
                 {
@@ -338,15 +330,7 @@
             },
             {
               "type": "file",
-              "name": "SceneTooltip.tsx"
-            },
-            {
-              "type": "file",
               "name": "SolarSystemView.tsx"
-            },
-            {
-              "type": "file",
-              "name": "Tooltip.tsx"
             },
             {
               "type": "file",
@@ -389,10 +373,6 @@
                 {
                   "type": "file",
                   "name": "store.test.ts"
-                },
-                {
-                  "type": "file",
-                  "name": "tooltip-constants.test.ts"
                 }
               ]
             },
@@ -495,10 +475,6 @@
             {
               "type": "file",
               "name": "store.ts"
-            },
-            {
-              "type": "file",
-              "name": "tooltip-constants.ts"
             }
           ]
         },
