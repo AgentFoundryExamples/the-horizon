@@ -50,6 +50,7 @@
     └── page.tsx
   ├── components
     ├── __tests__
+      ├── ContextualWelcomeMessage.test.tsx
       ├── SceneHUD.test.tsx
       ├── UniverseScene.test.tsx
       └── WelcomeMessage.test.tsx
@@ -68,6 +69,7 @@
       ├── PlanetEditor.tsx
       ├── SolarSystemEditor.tsx
       └── UniverseEditor.tsx
+    ├── ContextualWelcomeMessage.tsx
     ├── GalaxyView.tsx
     ├── MarkdownContent.tsx
     ├── OverlayLabels.tsx

@@ -240,6 +240,10 @@
               "children": [
                 {
                   "type": "file",
+                  "name": "ContextualWelcomeMessage.test.tsx"
+                },
+                {
+                  "type": "file",
                   "name": "SceneHUD.test.tsx"
                 },
                 {
@@ -315,6 +319,10 @@
                   "name": "UniverseEditor.tsx"
                 }
               ]
+            },
+            {
+              "type": "file",
+              "name": "ContextualWelcomeMessage.tsx"
             },
             {
               "type": "file",
