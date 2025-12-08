@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
           console.log('[GET /api/admin/universe] GitHub baseline hash:', gitHash.substring(0, 8) + '...');
         }
       } catch (err) {
-        console.warn('[GET /api/admin/universe] Could not fetch GitHub baseline, using local hash');
+        console.warn('[GET /api/admin/universe] Could not fetch GitHub baseline:', err instanceof Error ? err.message : String(err));
       }
       
       return NextResponse.json({
@@ -356,23 +356,38 @@ export async function POST(request: NextRequest) {
     }
     logVerbose('[POST /api/admin/universe] Validation passed');
 
-    // Verify hash before committing to prevent race conditions
-    logVerbose('[POST /api/admin/universe] Step 3: Checking for race conditions...');
-    const onDiskHash = await sha256(content);
-    if (gitBaseHash && onDiskHash !== gitBaseHash) {
-      // The local disk has been modified since the gitBaseHash was established
-      // This could mean:
-      // 1. User saved changes locally (expected - we want to commit these)
-      // 2. Concurrent local edit by another admin (conflict)
-      // Since we can't distinguish easily, we log this but DON'T fail
-      // The GitHub layer will detect actual conflicts with remote
-      logVerbose('[POST /api/admin/universe] Note: Local disk hash differs from gitBaseHash');
-      logVerbose('[POST /api/admin/universe] GitBaseHash:', gitBaseHash.substring(0, 8) + '...');
-      logVerbose('[POST /api/admin/universe] OnDiskHash:', onDiskHash.substring(0, 8) + '...');
-      logVerbose('[POST /api/admin/universe] This is expected in save→commit workflow');
-    } else {
-      logVerbose('[POST /api/admin/universe] Local disk hash matches gitBaseHash or no hash provided');
-    }
+    /**
+     * Validate local disk state before committing
+     * 
+     * This function checks if the local disk file has diverged from the gitBaseHash.
+     * In the normal save→commit workflow, the hashes WILL differ because:
+     * 1. User loaded editor with gitBaseHash from GitHub
+     * 2. User made edits and saved to disk (updates local file, gitBaseHash unchanged)
+     * 3. User commits (we're here - local file has changes, gitBaseHash is still original)
+     * 
+     * We log the difference but DON'T fail because:
+     * - The divergence is expected and intentional in the save→commit workflow
+     * - The GitHub layer will fetch fresh SHA and detect actual remote conflicts
+     * - This check is primarily for diagnostics and debugging
+     */
+    const validateLocalStateBeforeCommit = async (
+      localContent: string,
+      expectedGitBaseHash: string | undefined
+    ): Promise<void> => {
+      logVerbose('[POST /api/admin/universe] Step 3: Validating local state before commit...');
+      const onDiskHash = await sha256(localContent);
+      
+      if (expectedGitBaseHash && onDiskHash !== expectedGitBaseHash) {
+        logVerbose('[POST /api/admin/universe] Note: Local disk hash differs from gitBaseHash');
+        logVerbose('[POST /api/admin/universe] GitBaseHash:', expectedGitBaseHash.substring(0, 8) + '...');
+        logVerbose('[POST /api/admin/universe] OnDiskHash:', onDiskHash.substring(0, 8) + '...');
+        logVerbose('[POST /api/admin/universe] This is EXPECTED in save→commit workflow (user saved changes locally)');
+      } else {
+        logVerbose('[POST /api/admin/universe] Local disk hash matches gitBaseHash or no hash provided');
+      }
+    };
+
+    await validateLocalStateBeforeCommit(content, gitBaseHash);
 
     // Push to GitHub
     logVerbose('[POST /api/admin/universe] Step 4: Pushing to GitHub...');

@@ -137,7 +137,7 @@ export default function UniverseEditor({
         body: JSON.stringify({
           commitMessage,
           createPR,
-          gitBaseHash, // Use the immutable git base hash for GitHub operations
+          gitBaseHash, // Immutable GitHub baseline for optimistic locking against remote changes
         }),
       });
 
