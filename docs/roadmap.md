@@ -633,5 +633,5 @@ Have ideas for future features? Here's how to contribute:
 ---
 
 *Last Updated: December 8, 2025*  
-*Version: 0.1.3*  
+*Version: 0.1.4*  
 *Maintained by: Agent Foundry and John Brosnihan*
