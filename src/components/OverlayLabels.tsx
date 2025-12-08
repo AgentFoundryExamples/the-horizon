@@ -29,11 +29,16 @@ export default function OverlayLabels() {
   if (!position || 
       typeof position.x !== 'number' || 
       typeof position.y !== 'number' || 
-      typeof position.z !== 'number' ||
-      !isFinite(position.x) || 
+      typeof position.z !== 'number') {
+    console.warn('OverlayLabels: Invalid position structure, skipping render', position);
+    return null;
+  }
+
+  // Check for NaN or Infinity (safe now that we know they're numbers)
+  if (!isFinite(position.x) || 
       !isFinite(position.y) || 
       !isFinite(position.z)) {
-    console.warn('OverlayLabels: Invalid position coordinates, skipping render', position);
+    console.warn('OverlayLabels: Position contains invalid numbers, skipping render', position);
     return null;
   }
 

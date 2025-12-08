@@ -65,7 +65,8 @@ function validateHoveredObject(object: HoveredObject | null): boolean {
   }
   
   // Check if position exists and is an object with required structure
-  if (!object.position || typeof object.position !== 'object') {
+  // Note: typeof null === 'object', so we need to explicitly check for null
+  if (!object.position || object.position === null || typeof object.position !== 'object' || Array.isArray(object.position)) {
     console.warn('HoverStore: Invalid object position', object);
     return false;
   }
@@ -78,7 +79,7 @@ function validateHoveredObject(object: HoveredObject | null): boolean {
     return false;
   }
   
-  // Check for NaN or Infinity in position
+  // Check for NaN or Infinity in position (safe now that we know they're numbers)
   if (!isFinite(object.position.x) || 
       !isFinite(object.position.y) || 
       !isFinite(object.position.z)) {
