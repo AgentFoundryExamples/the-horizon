@@ -12,12 +12,6 @@ import { useHoverStore } from '@/lib/hover-store';
 import { projectToScreen, clampToScreen, calculateLabelOffset } from '@/lib/projection';
 import '../styles/overlay-labels.css';
 
-interface LabelPosition {
-  x: number;
-  y: number;
-  visible: boolean;
-}
-
 /**
  * Inner component that uses useThree and renders via portal
  */
