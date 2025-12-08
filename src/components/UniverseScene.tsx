@@ -11,6 +11,7 @@ import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Galaxy } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
+import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 import {
   CameraAnimator,
   calculateFocusPosition,
@@ -22,6 +23,7 @@ import { calculateGalaxyScaleWithOverride, calculateGalaxyScale } from '@/lib/un
 import GalaxyView from './GalaxyView';
 import SolarSystemView from './SolarSystemView';
 import { PlanetSurface3D, PlanetSurfaceOverlay } from './PlanetSurface';
+import OverlayLabels from './OverlayLabels';
 import '../styles/planet.css';
 
 // Planet surface view constants
@@ -77,6 +79,8 @@ const MAX_PARTICLE_COUNT = 5000; // Cap for performance on lower-end devices
 function GalaxyParticles({ galaxy, position, onClick, isActive, animationConfig, galaxyCount }: GalaxyParticlesProps) {
   const meshRef = useRef<THREE.Points>(null);
   const [hovered, setHovered] = useState(false);
+  const setHoveredObject = useHoverStore((state) => state.setHoveredObject);
+  
   const particleCount = Math.min(
     BASE_PARTICLE_COUNT + (galaxy.solarSystems?.length || 0) * PARTICLES_PER_SOLAR_SYSTEM,
     MAX_PARTICLE_COUNT
@@ -144,8 +148,31 @@ function GalaxyParticles({ galaxy, position, onClick, isActive, animationConfig,
   return (
     <group
       position={position}
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+        // Get world position from the event object for accurate tracking
+        const object = e.object as THREE.Object3D;
+        const worldPosition = new THREE.Vector3();
+        object.getWorldPosition(worldPosition);
+        
+        const hoveredObj: HoveredObject = {
+          id: galaxy.id,
+          name: galaxy.name,
+          type: 'galaxy',
+          position: worldPosition,
+          metadata: {
+            description: galaxy.description,
+            planetCount: galaxy.solarSystems?.reduce((acc, sys) => acc + (sys.planets?.length || 0), 0),
+          },
+        };
+        setHoveredObject(hoveredObj);
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation();
+        setHovered(false);
+        setHoveredObject(null);
+      }}
     >
       <points
         ref={meshRef}
@@ -424,6 +451,9 @@ function SceneContent({ galaxies }: SceneContentProps) {
         maxDistance={250}
         maxPolarAngle={Math.PI / 2}
       />
+      
+      {/* Overlay labels - portals to DOM outside Canvas */}
+      <OverlayLabels />
     </>
   );
 }
