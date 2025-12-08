@@ -19,6 +19,69 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 ## Changelog
 
+### v0.1.6 - Documentation Completeness and Version Tracking (December 8, 2025)
+
+*This release captures recent improvements in documentation, ensuring all hash-handling fixes, UI changes, and operational updates are thoroughly documented for maintainability and clarity.*
+
+**Documentation Updates:**
+
+1. **Admin Workflow Documentation**
+   - Dual-hash system fully documented (gitBaseHash vs localDiskHash)
+   - SHA refresh mechanism explained with detailed workflow diagrams
+   - Multiple SHA fetch points documented for both PR and direct commit workflows
+   - Optimistic locking behavior clarified at both save and commit stages
+   - Clear guidance on when conflicts occur and how to resolve them
+
+2. **Environment Variable Documentation**
+   - All admin-related environment variables documented in .env.example
+   - `ADMIN_VERBOSE_LOGGING` usage and benefits explained
+   - `GITHUB_VERBOSE_LOGGING` option documented for debugging
+   - Security best practices for `SESSION_SECRET` highlighted
+   - Optional vs required variables clearly distinguished
+
+3. **Visual Changes Documentation**
+   - Hover label/tooltip removal rationale documented
+   - Alternative context cues explained (breadcrumbs, transition messages, ARIA labels)
+   - Performance improvements from component removal quantified
+   - Future reconsideration criteria established
+
+4. **Testing Documentation**
+   - SHA refresh verification scenarios added to MANUAL_TESTING.md
+   - Dual-hash model verification test scenarios documented
+   - Hover/tooltip removal verification steps added
+   - Expected server log outputs documented for troubleshooting
+
+5. **Roadmap Synchronization**
+   - Version history updated to reflect v0.1.6 release
+   - Completed features clearly marked
+   - Known limitations updated
+   - Future enhancement priorities refined
+
+**Why This Release:**
+
+Documentation is critical for:
+- **Maintainability**: Future developers understand design decisions
+- **Troubleshooting**: Clear logs and error messages reduce debugging time
+- **Onboarding**: New team members can quickly understand workflows
+- **Compliance**: Security and operational best practices are documented
+
+**Technical Details:**
+- No code changes; pure documentation updates
+- Version bump from 0.1.5 to 0.1.6
+- All tests continue to pass
+- No migration steps needed
+- Compatible with all v0.1.x releases
+
+**Deployment Notes:**
+- No environment variable changes
+- No redeployment required (documentation-only release)
+- Existing workflows remain unchanged
+- Documentation cross-references validated
+
+See [docs/content-authoring.md](docs/content-authoring.md) for dual-hash system details.
+See [MANUAL_TESTING.md](MANUAL_TESTING.md#scenario-11-sha-refresh-mechanism-verification) for SHA refresh testing.
+See [docs/roadmap.md](docs/roadmap.md) for complete version history.
+
 ### v0.1.5 - GitHub Persistence Stabilization and UI Cleanup (December 8, 2025)
 
 *This release stabilizes the admin GitHub persistence workflow and removes deprecated hover/tooltip UI elements for a cleaner user experience.*
