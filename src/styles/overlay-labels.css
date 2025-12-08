@@ -1,0 +1,189 @@
+/**
+ * Overlay Labels - Hologram-style hover labels
+ * Positioned above WebGL canvas in DOM overlay
+ */
+
+.overlay-label {
+  position: fixed;
+  pointer-events: none;
+  z-index: 200;
+  transform: translate(-50%, -100%);
+  animation: labelFadeIn 0.2s ease-out;
+  user-select: none;
+}
+
+@keyframes labelFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -100%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%) scale(1);
+  }
+}
+
+.overlay-label-content {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(74, 144, 226, 0.15),
+    rgba(74, 144, 226, 0.08)
+  );
+  border: 1px solid rgba(74, 144, 226, 0.6);
+  border-radius: 8px;
+  padding: 0.5rem 0.875rem;
+  backdrop-filter: blur(12px);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(74, 144, 226, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  min-width: 120px;
+  max-width: 300px;
+}
+
+/* Hologram glow effect */
+.overlay-label-content::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 8px;
+  background: linear-gradient(
+    135deg,
+    rgba(74, 144, 226, 0.4),
+    transparent,
+    rgba(74, 144, 226, 0.2)
+  );
+  filter: blur(4px);
+  z-index: -1;
+  opacity: 0.6;
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.overlay-label-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin-bottom: 0.25rem;
+  text-shadow: 0 0 8px rgba(74, 144, 226, 0.8);
+  letter-spacing: 0.02em;
+}
+
+.overlay-label-type {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #4A90E2;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.overlay-label-description {
+  font-size: 0.8rem;
+  color: #AAAAAA;
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+.overlay-label-meta {
+  font-size: 0.75rem;
+  color: #888888;
+  margin-top: 0.125rem;
+}
+
+/* Pointer/arrow pointing to target */
+.overlay-label-pointer {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid rgba(74, 144, 226, 0.6);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .overlay-label {
+    animation: none;
+  }
+  
+  .overlay-label-content::before {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .overlay-label-content {
+    padding: 0.375rem 0.625rem;
+    min-width: 100px;
+    max-width: 250px;
+  }
+  
+  .overlay-label-name {
+    font-size: 0.875rem;
+  }
+  
+  .overlay-label-type {
+    font-size: 0.7rem;
+  }
+  
+  .overlay-label-description {
+    font-size: 0.75rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .overlay-label-content {
+    background: rgba(0, 0, 0, 0.95);
+    border: 2px solid #4A90E2;
+  }
+  
+  .overlay-label-content::before {
+    display: none;
+  }
+}
+
+/* Light mode support */
+@media (prefers-color-scheme: light) {
+  .overlay-label-content {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.95),
+      rgba(255, 255, 255, 0.9)
+    );
+    border-color: rgba(74, 144, 226, 0.8);
+  }
+  
+  .overlay-label-name {
+    color: #000000;
+    text-shadow: 0 0 8px rgba(74, 144, 226, 0.4);
+  }
+  
+  .overlay-label-type {
+    color: #2C5AA0;
+  }
+  
+  .overlay-label-description {
+    color: #444444;
+  }
+  
+  .overlay-label-meta {
+    color: #666666;
+  }
+}

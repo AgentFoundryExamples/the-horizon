@@ -24,6 +24,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { SolarSystem, Planet } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
+import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 import {
   calculatePlanetSize,
   calculateOrbitalRadius,
@@ -57,6 +58,7 @@ function PlanetMesh({
   totalPlanets: number;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const setHoveredObject = useHoverStore((state) => state.setHoveredObject);
 
   // Calculate orbital parameters
   const orbitalData = useMemo(() => {
@@ -110,6 +112,27 @@ function PlanetMesh({
     <mesh
       ref={meshRef}
       onClick={onClick}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        if (meshRef.current) {
+          const hoveredObj: HoveredObject = {
+            id: planet.id,
+            name: planet.name,
+            type: 'planet',
+            position: meshRef.current.position.clone(),
+            metadata: {
+              description: planet.summary,
+              moonCount: planet.moons?.length || 0,
+              theme: planet.theme,
+            },
+          };
+          setHoveredObject(hoveredObj);
+        }
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation();
+        setHoveredObject(null);
+      }}
     >
       <sphereGeometry args={[orbitalData.size, 16, 16]} />
       <meshStandardMaterial

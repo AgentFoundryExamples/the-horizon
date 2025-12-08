@@ -2,10 +2,11 @@
 
 /**
  * SceneHUD - Heads-up display for scene navigation
- * Shows breadcrumb trail and back button
+ * Shows breadcrumb trail, back button, and overlay hover labels
  */
 
 import { useNavigationStore } from '@/lib/store';
+import { useHoverStore } from '@/lib/hover-store';
 import type { Galaxy } from '@/lib/universe/types';
 import type { FocusLevel } from '@/lib/store';
 
@@ -33,6 +34,8 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
     isTransitioning,
     navigateBack,
   } = useNavigationStore();
+  
+  const { labelsVisible, toggleLabelsVisibility } = useHoverStore();
 
   const focusedGalaxy = galaxies.find((g) => g.id === focusedGalaxyId);
   const focusedSolarSystem = focusedGalaxy?.solarSystems?.find(
@@ -91,38 +94,65 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
         )}
       </div>
 
-      {/* Back button */}
-      {focusLevel !== 'universe' && (
+      {/* Back button and label visibility toggle */}
+      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+        {focusLevel !== 'universe' && (
+          <button
+            onClick={navigateBack}
+            disabled={isTransitioning}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: isTransitioning ? '#444444' : '#4A90E2',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: isTransitioning ? 'not-allowed' : 'pointer',
+              fontSize: '0.9rem',
+              pointerEvents: 'auto',
+              opacity: isTransitioning ? 0.5 : 1,
+              transition: 'all 0.3s',
+            }}
+            onMouseEnter={(e) => {
+              if (!isTransitioning) {
+                e.currentTarget.style.backgroundColor = '#357ABD';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isTransitioning) {
+                e.currentTarget.style.backgroundColor = '#4A90E2';
+              }
+            }}
+          >
+            ← Back
+          </button>
+        )}
+        
+        {/* Label visibility toggle */}
         <button
-          onClick={navigateBack}
-          disabled={isTransitioning}
+          onClick={toggleLabelsVisibility}
           style={{
-            marginTop: '1rem',
             padding: '0.5rem 1rem',
-            backgroundColor: isTransitioning ? '#444444' : '#4A90E2',
+            backgroundColor: labelsVisible ? '#4A90E2' : '#666666',
             color: '#FFFFFF',
             border: 'none',
             borderRadius: '4px',
-            cursor: isTransitioning ? 'not-allowed' : 'pointer',
+            cursor: 'pointer',
             fontSize: '0.9rem',
             pointerEvents: 'auto',
-            opacity: isTransitioning ? 0.5 : 1,
             transition: 'all 0.3s',
           }}
           onMouseEnter={(e) => {
-            if (!isTransitioning) {
-              e.currentTarget.style.backgroundColor = '#357ABD';
-            }
+            e.currentTarget.style.backgroundColor = labelsVisible ? '#357ABD' : '#555555';
           }}
           onMouseLeave={(e) => {
-            if (!isTransitioning) {
-              e.currentTarget.style.backgroundColor = '#4A90E2';
-            }
+            e.currentTarget.style.backgroundColor = labelsVisible ? '#4A90E2' : '#666666';
           }}
+          title={labelsVisible ? 'Hide hover labels' : 'Show hover labels'}
+          aria-label={labelsVisible ? 'Hide hover labels' : 'Show hover labels'}
         >
-          ← Back
+          {labelsVisible ? '👁️ Labels' : '👁️‍🗨️ Labels'}
         </button>
-      )}
+      </div>
 
     </div>
 

@@ -10,6 +10,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { Galaxy, SolarSystem, Star } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
+import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG } from '@/lib/animation';
 
 interface OrbitRingProps {
@@ -65,6 +66,7 @@ const KEPLER_ITERATION_COUNT = 5;
  */
 function PlanetInstance({ solarSystem, systemPosition, animationConfig }: PlanetInstanceProps) {
   const planetsRef = useRef<THREE.Group>(null);
+  const setHoveredObject = useHoverStore((state) => state.setHoveredObject);
 
   const planetData = useMemo(() => {
     // Seeded pseudo-random number generator for deterministic orbits
@@ -139,7 +141,25 @@ function PlanetInstance({ solarSystem, systemPosition, animationConfig }: Planet
   return (
     <group position={systemPosition}>
       {/* Central star */}
-      <group>
+      <group
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          const hoveredObj: HoveredObject = {
+            id: solarSystem.id,
+            name: solarSystem.name,
+            type: 'solar-system',
+            position: systemPosition.clone(),
+            metadata: {
+              planetCount: solarSystem.planets?.length || 0,
+            },
+          };
+          setHoveredObject(hoveredObj);
+        }}
+        onPointerOut={(e) => {
+          e.stopPropagation();
+          setHoveredObject(null);
+        }}
+      >
         <mesh>
           <sphereGeometry args={[0.5, 16, 16]} />
           <meshBasicMaterial color="#FDB813" />
@@ -186,6 +206,7 @@ interface StarInstanceProps {
 function StarInstance({ star, position, animationConfig }: StarInstanceProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
+  const setHoveredObject = useHoverStore((state) => state.setHoveredObject);
 
   useFrame((state) => {
     if (meshRef.current && animationConfig.rotation) {
@@ -199,8 +220,22 @@ function StarInstance({ star, position, animationConfig }: StarInstanceProps) {
     <group position={position}>
       <mesh
         ref={meshRef}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          setHovered(true);
+          const hoveredObj: HoveredObject = {
+            id: star.id,
+            name: star.name,
+            type: 'star',
+            position: position.clone(),
+          };
+          setHoveredObject(hoveredObj);
+        }}
+        onPointerOut={(e) => {
+          e.stopPropagation();
+          setHovered(false);
+          setHoveredObject(null);
+        }}
       >
         <sphereGeometry args={[0.4, 16, 16]} />
         <meshBasicMaterial
