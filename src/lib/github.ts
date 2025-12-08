@@ -355,8 +355,8 @@ export async function pushUniverseChanges(
       return {
         success: true,
         message: 'No changes to commit. The content is already up-to-date.',
-        sha: fileData.sha, // Return file SHA for consistency
-        hash: githubHash, // Return current hash so UI stays in sync
+        sha: fileData.sha, // Git commit SHA representing the current state in GitHub
+        hash: githubHash, // Content hash for UI baseline tracking
       };
     }
     
@@ -396,9 +396,8 @@ export async function pushUniverseChanges(
       );
       logVerbose('[pushUniverseChanges] Commit successful, SHA:', commitSha.substring(0, 8) + '...');
 
-      // Compute hash of committed content for UI baseline update
-      const committedHash = await sha256(content);
-      logVerbose('[pushUniverseChanges] New content hash after commit:', committedHash.substring(0, 8) + '...');
+      // Reuse contentHash computed earlier (no need to recompute)
+      logVerbose('[pushUniverseChanges] New content hash after commit:', contentHash.substring(0, 8) + '...');
 
       logVerbose('[pushUniverseChanges] Creating pull request...');
       const prUrl = await createPullRequest(
@@ -413,7 +412,7 @@ export async function pushUniverseChanges(
         success: true,
         message: 'Pull request created successfully',
         sha: commitSha,
-        hash: committedHash, // New content hash for UI baseline update
+        hash: contentHash, // Reuse contentHash computed earlier
         prUrl,
       };
     } else {
@@ -443,15 +442,14 @@ export async function pushUniverseChanges(
       );
       console.log('[pushUniverseChanges] Commit successful to', config.branch);
 
-      // Compute hash of committed content for UI baseline update
-      const committedHash = await sha256(content);
-      logVerbose('[pushUniverseChanges] New content hash after commit:', committedHash.substring(0, 8) + '...');
+      // Reuse contentHash computed earlier (no need to recompute)
+      logVerbose('[pushUniverseChanges] New content hash after commit:', contentHash.substring(0, 8) + '...');
 
       return {
         success: true,
         message: 'Changes committed successfully',
         sha: commitSha,
-        hash: committedHash, // New content hash for UI baseline update
+        hash: contentHash, // Reuse contentHash computed earlier
       };
     }
   } catch (error) {
