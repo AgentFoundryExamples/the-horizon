@@ -473,7 +473,7 @@ cp .env.example .env.local
 **For Admin Interface**:
 - `ADMIN_PASSWORD` - Password for admin access (min 16 characters recommended)
 - `SESSION_SECRET` - Secret for signing session tokens (generate with `openssl rand -base64 32`)
-- `GITHUB_TOKEN` - Personal access token with `repo` scope
+- `GITHUB_TOKEN` - Personal access token with `repo` scope (and optionally `workflow` if using actions)
 - `GITHUB_OWNER` - Repository owner (e.g., 'AgentFoundryExamples')
 - `GITHUB_REPO` - Repository name (e.g., 'the-horizon')
 - `GITHUB_BRANCH` - Target branch (default: 'main')
@@ -496,7 +496,7 @@ cp .env.example .env.local
 3. Configure environment variables:
    - `ADMIN_PASSWORD` - Strong password for admin access
    - `SESSION_SECRET` - Secret for signing session tokens
-   - `GITHUB_TOKEN` - GitHub personal access token
+   - `GITHUB_TOKEN` - GitHub personal access token with `repo` scope (and optionally `workflow`)
    - `GITHUB_OWNER` - Your GitHub username or organization
    - `GITHUB_REPO` - Repository name
    - `GITHUB_BRANCH` - Target branch (usually 'main')

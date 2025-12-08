@@ -133,7 +133,7 @@ cat public/universe/universe.json | grep -A 5 "Test System Beta"
 
 **Prerequisites**: 
 - GitHub credentials configured in `.env.local`
-- Valid `GITHUB_TOKEN` with `repo` scope
+- Valid `GITHUB_TOKEN` with `repo` scope (and optionally `workflow` scope for PR-based workflows)
 
 **Steps**:
 1. Make some edits (follow Scenario 1 or 2)
