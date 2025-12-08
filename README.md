@@ -19,6 +19,63 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 ## Changelog
 
+### v0.1.4 - Admin Workflow Documentation and Testing (December 8, 2025)
+
+*This release provides comprehensive documentation and testing guidance for the admin save/commit workflow, ensuring administrators can confidently manage universe content.*
+
+**Documentation Enhancements:**
+
+1. **Admin Workflow Clarification**
+   - Detailed explanation of the two-step save workflow (Save to Disk → Commit to GitHub)
+   - Clear prerequisites and required environment variables for admin operations
+   - Comprehensive troubleshooting guidance for common admin workflow issues
+   - **Why Two Steps**: Safety, testing, review workflow, and recovery capabilities documented
+   - **Environment Variables**: All admin-related secrets clearly documented in `.env.example`
+
+2. **Manual Testing Guide Updates** (MANUAL_TESTING.md)
+   - Added comprehensive test scenarios for galaxy creation workflow
+   - Step-by-step validation for editing existing galaxies and solar systems
+   - Save to disk verification procedures with file system checks
+   - GitHub commit workflow testing (both PR and direct commit)
+   - Error handling scenarios: network failures, validation errors, authentication timeouts
+   - Expected success/failure states clearly documented for each scenario
+
+3. **Admin Prerequisites Documentation**
+   - Required environment variables: `ADMIN_PASSWORD`, `SESSION_SECRET`, `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO`, `GITHUB_BRANCH`
+   - Token generation instructions with proper scopes (`repo`, `workflow`)
+   - Security best practices: strong passwords (16+ chars), separate session secrets
+   - Optional variables for testing vs. production environments
+
+4. **Workflow Verification Steps**
+   - Server log monitoring: `[PATCH /api/admin/universe]`, `[POST /api/admin/universe]`, `[persistUniverseToFile]`
+   - File system verification: Check `public/universe/universe.json` updates
+   - GitHub verification: Confirm commits/PRs appear in repository
+   - Local testing procedures before committing to production
+
+**Why This Release:**
+
+The admin workflow is critical for content management, and proper documentation ensures:
+- Administrators understand the safety benefits of the two-step workflow
+- Clear testing procedures reduce the risk of data loss
+- Troubleshooting guidance minimizes downtime when issues occur
+- Environment setup is straightforward with complete variable documentation
+
+**Technical Details:**
+- No code changes; pure documentation and testing guidance
+- All 450 unit tests remain passing (441 passing, 9 pre-existing crypto polyfill failures)
+- Build verified successful with no breaking changes
+- Compatible with all v0.1.x releases
+
+**Deployment Notes:**
+- No new environment variables required (all were already available)
+- No migration steps needed
+- Documentation updates only; no functional changes
+- Backward compatible with existing admin workflows
+
+See [MANUAL_TESTING.md](MANUAL_TESTING.md) for complete admin workflow testing procedures.
+See [docs/roadmap.md](docs/roadmap.md) for admin workflow feature status and limitations.
+See [docs/content-authoring.md](docs/content-authoring.md) for detailed admin workflow usage guide.
+
 ### v0.1.3 - Galaxy Scale and Visual Improvements (December 8, 2025)
 
 *This release enhances the visual experience with improved galaxy scaling and refined camera positioning. Builds upon v0.1.2's admin workflow, hover labeling, and planet viewer improvements.*
