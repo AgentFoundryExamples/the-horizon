@@ -1346,112 +1346,311 @@ Before committing changes:
 - [React Markdown Documentation](https://github.com/remarkjs/react-markdown)
 - [Universe Schema Documentation](./universe-schema.md)
 
-## Welcome Message Customization
+## Contextual Hero Messaging
 
-The Horizon welcome message appears on the universe landing page when users first visit. This provides branding and navigation guidance.
+The Horizon displays contextual hero messages that adapt to the current view, providing relevant context and navigation guidance as users explore the universe.
 
-### Location
+### Overview
 
-The welcome message is rendered by the `WelcomeMessage` component in `src/components/WelcomeMessage.tsx` and is displayed on the main universe landing page (`src/app/page.tsx`). It appears at the top center of the screen when users first load the application.
+The hero message system automatically updates based on navigation state:
+- **Universe View**: Displays welcome message with general instructions
+- **Galaxy View**: Shows galaxy name and description
+- **Solar System View**: Shows system name and planet count
+- **Planet View**: Hero is hidden (planet content provides its own context)
+
+### Components
+
+The contextual messaging system consists of two components:
+
+1. **WelcomeMessage** (`src/components/WelcomeMessage.tsx`)
+   - Base presentation component
+   - Accepts `title`, `description`, and `visible` props
+   - Handles rendering and accessibility
+
+2. **ContextualWelcomeMessage** (`src/components/ContextualWelcomeMessage.tsx`)
+   - Wrapper component that provides contextual logic
+   - Reads navigation state from the store
+   - Determines appropriate title and description
+   - Controls visibility based on current view
+
+### Hero Message Formats
+
+#### Universe Level
+```
+Title: "Welcome to the Horizon"
+Description: "Click a galaxy to explore"
+```
+
+#### Galaxy Level
+```
+Title: "Exploring {GalaxyName}"
+Description: {Galaxy.description from universe.json}
+Fallback: "A vast collection of stars and worlds"
+```
+
+Example:
+```
+Title: "Exploring Milky Way"
+Description: "Our home galaxy, a barred spiral galaxy containing hundreds of billions of stars."
+```
+
+#### Solar System Level
+```
+Title: "Navigating {SystemName}"
+Description: "A star system with {N} planet(s)"
+```
+
+Example:
+```
+Title: "Navigating Sol System"
+Description: "A star system with 2 planets"
+```
+
+#### Planet Level
+```
+No hero message displayed (planet surface content provides context)
+```
+
+### Supplying Galaxy Descriptions
+
+Galaxy descriptions come from the `description` field in `universe.json`:
+
+```json
+{
+  "galaxies": [
+    {
+      "id": "milky-way",
+      "name": "Milky Way",
+      "description": "Our home galaxy, a barred spiral galaxy containing hundreds of billions of stars.",
+      "theme": "blue-white",
+      "particleColor": "#4A90E2",
+      ...
+    }
+  ]
+}
+```
+
+**Guidelines for descriptions:**
+- Keep descriptions between 50-200 characters
+- Be concise but descriptive
+- Avoid markdown formatting (plain text only)
+- Focus on key characteristics or interesting facts
+- Consider the description appears prominently at top of screen
+
+**Examples of good descriptions:**
+- "Our home galaxy, a barred spiral galaxy containing hundreds of billions of stars."
+- "The nearest major galaxy to the Milky Way, destined to collide with our galaxy in about 4.5 billion years."
+- "A massive elliptical galaxy located at the center of the Virgo Cluster."
+
+**Avoid:**
+- Overly technical jargon: "A SABbc-type spiral galaxy with active galactic nucleus"
+- Too brief: "A galaxy"
+- Too long: Multiple paragraph descriptions (save these for planet content)
+- Markdown: "**Bold** galaxy with _emphasis_" (will render as plain text)
+
+### Graceful Fallbacks
+
+The system handles missing data gracefully:
+
+**Missing Galaxy Description:**
+- Fallback: "A vast collection of stars and worlds"
+- Hero still displays with galaxy name
+
+**Missing Galaxy/System:**
+- Falls back to universe-level welcome message
+- Prevents errors from broken navigation state
+
+**Empty Galaxies Array:**
+- Displays default welcome message
+- System remains functional
 
 ### Customizing Content
 
-To change the welcome message text, edit `src/components/WelcomeMessage.tsx`:
+To customize the hero messages, edit the ContextualWelcomeMessage component:
 
 ```typescript
-<h2>Welcome to the Horizon</h2>
-<p>Click a galaxy to explore</p>
+// In src/components/ContextualWelcomeMessage.tsx
+
+if (focusLevel === 'galaxy' && currentGalaxy) {
+  title = `Exploring ${currentGalaxy.name}`;
+  description = currentGalaxy.description || 'A vast collection of stars and worlds';
+}
 ```
+
+You can:
+- Change the format strings (e.g., "Exploring" → "Viewing")
+- Modify fallback messages
+- Add additional contextual information
+- Localize text for internationalization
 
 ### Styling
 
-The welcome message uses responsive typography with `clamp()` for fluid scaling:
-- Heading: `clamp(1.5rem, 4vw, 2.5rem)` - scales from 1.5rem to 2.5rem
-- Body: `clamp(0.8rem, 1.8vw, 1rem)` - scales from 0.8rem to 1rem
+Hero message styling is defined in `src/app/globals.css`:
 
-The message is positioned at the top center of the screen:
-- Position: `absolute` with `top: 2rem` and `left: 50%`
-- Transform: `translateX(-50%)` for centering
-- Padding: `1rem 2rem` for compact appearance
+```css
+.welcome-message {
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  z-index: 10;
+}
 
-To adjust styling:
-```typescript
-// Change colors
-color: '#4A90E2',  // Heading color
-color: '#CCCCCC',  // Body text
+.welcome-message-title {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  color: #4A90E2;
+}
 
-// Adjust sizing
-maxWidth: '90%',   // Maximum width (responsive)
-width: 'auto',     // Auto width for compact display
-padding: '1rem 2rem', // Compact spacing
+.welcome-message-text {
+  font-size: clamp(0.8rem, 1.8vw, 1rem);
+  color: #CCCCCC;
+}
 ```
 
-Responsive adjustments are defined in `src/app/globals.css`:
-```css
-@media (max-width: 768px) {
-  .welcome-message {
-    padding: 0.75rem 1.5rem !important;
-    top: 1rem !important;
-  }
-}
+The styling:
+- Uses responsive typography with `clamp()` for fluid scaling
+- Positions at top center without obscuring content
+- Semi-transparent background for contrast
+- Compact padding for minimal visual footprint
 
-@media (max-width: 480px) {
-  .welcome-message {
-    padding: 0.5rem 1rem !important;
-    top: 0.5rem !important;
-    max-width: 95% !important;
-  }
-}
+**Responsive breakpoints:**
+- Desktop: Full size with 2rem top spacing
+- Tablet (≤768px): Reduced padding and spacing
+- Mobile (≤480px): Minimal padding and top positioning
+
+### Accessibility
+
+The hero message system includes:
+- `role="complementary"` - semantic role for assistive technologies
+- `aria-label="Welcome message"` - screen reader context
+- Semantic HTML with proper heading hierarchy
+- High contrast text (21:1 ratio) for readability
+- Responsive text sizing for all devices
+- No pointer events to avoid blocking scene interaction
+
+### Edge Cases
+
+**Long galaxy names:**
+- Layout wraps text naturally
+- `clamp()` typography prevents overflow
+- Tested with names up to 100+ characters
+
+**Long descriptions:**
+- Text wraps within container
+- Max width prevents excessive line length
+- Consider breaking very long descriptions (200+ chars) into shorter ones
+
+**Special characters:**
+- Names with `&`, `'`, `"` render correctly
+- No sanitization needed (React handles escaping)
+- Markdown formatting displays as plain text
+
+**Markdown in descriptions:**
+- Markdown syntax will display literally (e.g., "**Bold**" shows as "**Bold**")
+- Use plain text only in galaxy descriptions
+- Save rich formatting for planet content
+
+**Route changes:**
+- Hero updates immediately on navigation
+- No flash of incorrect content
+- Smooth transition between states
+
+**Direct URL access:**
+- System fetches metadata before rendering
+- No race conditions or missing data
+- Graceful fallback if data unavailable
+
+### Testing
+
+The hero messaging system includes comprehensive tests:
+
+**WelcomeMessage.test.tsx:**
+- Tests base component with various props
+- Validates accessibility attributes
+- Checks visibility toggle behavior
+- Tests edge cases (long text, special chars, empty strings)
+
+**ContextualWelcomeMessage.test.tsx:**
+- Tests all navigation states (universe, galaxy, solar system, planet)
+- Validates correct title/description for each level
+- Tests fallback behavior for missing data
+- Checks state transition updates
+
+Run tests with:
+```bash
+npm test -- WelcomeMessage
 ```
 
 ### Localization
 
-To support multiple languages, you can:
+To support multiple languages:
 
-1. **Add language prop**:
+1. Create a translations file:
 ```typescript
-interface WelcomeMessageProps {
-  locale?: string;
-}
-```
-
-2. **Create translation map**:
-```typescript
-const translations = {
+// src/lib/translations.ts
+export const translations = {
   en: {
-    title: 'Welcome to the Horizon',
-    instruction: 'Click a galaxy to explore'
+    universe: {
+      title: 'Welcome to the Horizon',
+      description: 'Click a galaxy to explore',
+    },
+    galaxy: {
+      titlePrefix: 'Exploring',
+      fallback: 'A vast collection of stars and worlds',
+    },
+    solarSystem: {
+      titlePrefix: 'Navigating',
+      description: (count: number) => `A star system with ${count} planet${count === 1 ? '' : 's'}`,
+    },
   },
   es: {
-    title: 'Bienvenido al Horizonte',
-    instruction: 'Haz clic en una galaxia para explorar'
-  }
+    universe: {
+      title: 'Bienvenido al Horizonte',
+      description: 'Haz clic en una galaxia para explorar',
+    },
+    galaxy: {
+      titlePrefix: 'Explorando',
+      fallback: 'Una vasta colección de estrellas y mundos',
+    },
+    solarSystem: {
+      titlePrefix: 'Navegando',
+      description: (count: number) => `Un sistema estelar con ${count} planeta${count === 1 ? '' : 's'}`,
+    },
+  },
 };
 ```
 
-3. **Use translations**:
-```typescript
-const t = translations[locale || 'en'];
-<h2>{t.title}</h2>
-```
+2. Update ContextualWelcomeMessage to use translations
+3. Pass locale prop from app configuration
 
-### Accessibility
+### Best Practices
 
-The welcome message includes:
-- `role="complementary"` - identifies as supporting content
-- `aria-label="Welcome message"` - screen reader label
-- `pointerEvents: 'none'` - doesn't block interaction with the scene
-- Responsive text sizing for readability on all devices
+**For Content Authors:**
+- Write concise, engaging galaxy descriptions (50-200 chars)
+- Use plain text only (no markdown)
+- Focus on unique or interesting characteristics
+- Test descriptions at different screen sizes
+- Ensure descriptions make sense out of context
 
-### Display Behavior
+**For Developers:**
+- Always provide fallback text for missing data
+- Test state transitions between all levels
+- Validate accessibility with screen readers
+- Check responsive behavior on mobile devices
+- Update tests when modifying hero logic
 
-The message appears:
-- On the universe landing page when the app first loads
-- At the top center, providing context without obscuring the 3D scene
-- With compact styling to minimize visual footprint
-- Only on the main landing page, not on galaxy detail views
+### Migration Notes
 
-This ensures the welcome message provides context for first-time visitors without being intrusive during exploration.
+Prior to this feature, the welcome message was static and always displayed "Welcome to the Horizon". The new system:
+- Maintains backward compatibility (default text unchanged)
+- Hides on planet views (where content provides context)
+- Enhances UX with contextual information
+- Gracefully handles missing metadata
+
+No breaking changes to existing universe.json files - descriptions are optional.
 
 ## Contributing
 

@@ -1,7 +1,7 @@
 import { getGalaxies } from '@/lib/universe';
 import UniverseScene from '@/components/UniverseScene';
 import SceneHUD from '@/components/SceneHUD';
-import WelcomeMessage from '@/components/WelcomeMessage';
+import ContextualWelcomeMessage from '@/components/ContextualWelcomeMessage';
 
 export default async function HomePage() {
   const galaxies = await getGalaxies();
@@ -20,7 +20,7 @@ export default async function HomePage() {
 
   return (
     <main style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
-      <WelcomeMessage />
+      <ContextualWelcomeMessage galaxies={galaxies} />
       <UniverseScene galaxies={galaxies} />
       <SceneHUD galaxies={galaxies} />
     </main>
