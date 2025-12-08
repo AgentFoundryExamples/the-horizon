@@ -137,8 +137,8 @@ Total files: 42
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 7.79 KB  
-**LOC:** 218  
+**Size:** 13.37 KB  
+**LOC:** 376  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/__tests__/projection.test.ts
@@ -209,8 +209,8 @@ Total files: 42
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 1.82 KB  
-**LOC:** 41  
+**Size:** 3.52 KB  
+**LOC:** 81  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/projection.ts

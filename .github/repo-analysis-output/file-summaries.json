@@ -207,8 +207,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 7978,
-        "loc": 218,
+        "size_bytes": 13693,
+        "loc": 376,
         "todo_count": 0
       }
     },
@@ -319,8 +319,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 1859,
-        "loc": 41,
+        "size_bytes": 3609,
+        "loc": 81,
         "todo_count": 0
       }
     },
