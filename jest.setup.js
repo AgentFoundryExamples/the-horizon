@@ -20,8 +20,10 @@ const { TextEncoder, TextDecoder } = require('util');
 
 // Set up Web Crypto API polyfill for test environment
 if (typeof global !== 'undefined') {
-  // Always set crypto to ensure it's available in all tests
-  global.crypto = webcrypto;
+  // Polyfill crypto only if it's not already available or not the native implementation
+  if (!global.crypto || !global.crypto.subtle) {
+    global.crypto = webcrypto;
+  }
   
   if (!global.TextEncoder) {
     global.TextEncoder = TextEncoder;
