@@ -1,6 +1,6 @@
 # Manual Testing Guide
 
-This guide helps reviewers manually test The Horizon application, with a focus on the admin interface and content management workflows.
+This guide helps reviewers manually test The Horizon application, with a primary focus on the admin interface and content management workflows.
 
 ## Prerequisites
 
@@ -289,8 +289,6 @@ In browser DevTools → Application → Cookies:
 ## UI Component Test Scenarios
 
 The following scenarios test the visual and interactive aspects of the admin interface.
-
-### 1. Dashboard and Navigation
 
 ### 1. Dashboard and Navigation
 
