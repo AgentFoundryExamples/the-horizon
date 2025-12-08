@@ -181,6 +181,16 @@
                       "name": "universe",
                       "children": [
                         {
+                          "type": "directory",
+                          "name": "__tests__",
+                          "children": [
+                            {
+                              "type": "file",
+                              "name": "route.integration.test.ts"
+                            }
+                          ]
+                        },
+                        {
                           "type": "file",
                           "name": "route.ts"
                         }

@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 37
+Total files: 38
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -49,6 +49,15 @@ Total files: 37
 **Summary:** TypeScript core implementation  
 **Size:** 0.96 KB  
 **LOC:** 14  
+**TODOs/FIXMEs:** 0  
+
+## src/app/api/admin/universe/__tests__/route.integration.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 9.47 KB  
+**LOC:** 227  
 **TODOs/FIXMEs:** 0  
 
 ## src/app/api/admin/universe/route.ts
@@ -101,8 +110,8 @@ Total files: 37
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 3.11 KB  
-**LOC:** 69  
+**Size:** 11.48 KB  
+**LOC:** 304  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/__tests__/store.test.ts
@@ -164,8 +173,8 @@ Total files: 37
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 11.04 KB  
-**LOC:** 346  
+**Size:** 13.01 KB  
+**LOC:** 375  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/store.ts
@@ -254,8 +263,8 @@ Total files: 37
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 7.64 KB  
-**LOC:** 180  
+**Size:** 10.87 KB  
+**LOC:** 239  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/__tests__/scale-constants.test.ts

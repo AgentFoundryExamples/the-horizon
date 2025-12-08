@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 37,
+  "total_files": 38,
   "files": [
     {
       "schema_version": "2.0",
@@ -69,6 +69,20 @@
       "metrics": {
         "size_bytes": 984,
         "loc": 14,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/app/api/admin/universe/__tests__/route.integration.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 9698,
+        "loc": 227,
         "todo_count": 0
       }
     },
@@ -151,8 +165,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 3184,
-        "loc": 69,
+        "size_bytes": 11753,
+        "loc": 304,
         "todo_count": 0
       }
     },
@@ -249,8 +263,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 11310,
-        "loc": 346,
+        "size_bytes": 13323,
+        "loc": 375,
         "todo_count": 0
       }
     },
@@ -389,8 +403,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 7820,
-        "loc": 180,
+        "size_bytes": 11127,
+        "loc": 239,
         "todo_count": 0
       }
     },

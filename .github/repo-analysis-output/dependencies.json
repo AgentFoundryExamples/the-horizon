@@ -60,6 +60,19 @@
       }
     },
     {
+      "id": "src/app/api/admin/universe/__tests__/route.integration.test.ts",
+      "path": "src/app/api/admin/universe/__tests__/route.integration.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "@/lib/github",
+          "@/lib/universe/persist",
+          "@/lib/universe/types"
+        ]
+      }
+    },
+    {
       "id": "src/app/api/admin/universe/route.ts",
       "path": "src/app/api/admin/universe/route.ts",
       "type": "file",
@@ -546,6 +559,7 @@
       "@/lib/github",
       "@/lib/universe/mutate",
       "@/lib/universe/persist",
+      "@/lib/universe/types",
       "@testing-library/jest-dom",
       "@testing-library/react",
       "next/headers",
@@ -556,6 +570,6 @@
       "zustand"
     ],
     "stdlib_count": 5,
-    "third-party_count": 14
+    "third-party_count": 15
   }
 }

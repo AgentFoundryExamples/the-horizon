@@ -39,6 +39,8 @@
         ├── logout
           └── route.ts
         └── universe
+          ├── __tests__
+            └── route.integration.test.ts
           └── route.ts
     ├── galaxy
       └── [id]

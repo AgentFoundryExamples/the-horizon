@@ -8,10 +8,10 @@ Includes classification of external dependencies as stdlib vs third-party.
 
 ## Statistics
 
-- **Total files**: 37
+- **Total files**: 38
 - **Intra-repo dependencies**: 33
 - **External stdlib dependencies**: 5
-- **External third-party dependencies**: 14
+- **External third-party dependencies**: 15
 
 ## External Dependencies
 
@@ -27,7 +27,7 @@ Total: 5 unique modules
 
 ### Third-Party Packages
 
-Total: 14 unique packages
+Total: 15 unique packages
 
 - `@/../public/universe/universe.json`
 - `@/lib/auth`
@@ -35,6 +35,7 @@ Total: 14 unique packages
 - `@/lib/github`
 - `@/lib/universe/mutate`
 - `@/lib/universe/persist`
+- `@/lib/universe/types`
 - `@testing-library/jest-dom`
 - `@testing-library/react`
 - `next/headers`
