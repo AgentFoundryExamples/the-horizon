@@ -54,8 +54,11 @@ Configure the following environment variables in Vercel:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `NODE_ENV` | Environment mode | `production` |
+| `ADMIN_VERBOSE_LOGGING` | Enable detailed workflow logging for admin operations (useful for debugging GitHub persistence issues). Set to `true` to enable. | `false` (enabled in development) |
 
 **Note on SESSION_SECRET**: If not provided, the system will fall back to using `ADMIN_PASSWORD` as the session secret (not recommended for production). For better security, always set a separate `SESSION_SECRET`.
+
+**Note on ADMIN_VERBOSE_LOGGING**: When enabled, provides detailed step-by-step logging of the save/commit workflow including SHA fetch operations, file reads, and validation steps. Recommended for troubleshooting GitHub integration issues. Automatically enabled in development mode.
 
 #### Staging vs Production Environments
 
@@ -244,7 +247,7 @@ The admin interface includes multiple layers of security protection:
 
 Understanding the two-step workflow helps troubleshoot issues:
 
-> **Note**: This workflow was restored in v0.1.2 (ISS-4) after critical fixes to the save and commit operations. The workflow was further stabilized to always fetch fresh SHA from GitHub before committing, preventing "file has changed" errors.
+> **Note**: This workflow was restored in v0.1.2 (ISS-4) after critical fixes to the save and commit operations. The workflow was further stabilized in v0.1.5 to always fetch fresh SHA from GitHub immediately before committing, preventing "file has changed" errors. Enhanced verbose logging is available via `ADMIN_VERBOSE_LOGGING=true` environment variable.
 
 ```mermaid
 graph TD
@@ -321,7 +324,18 @@ The system automatically prevents stale SHA errors by fetching the latest file m
 
 The admin save workflow includes comprehensive logging for troubleshooting:
 
-**Server Logs** (visible in server console or deployment logs):
+**Verbose Logging Mode (v0.1.5+)**
+
+Enable detailed workflow logging by setting `ADMIN_VERBOSE_LOGGING=true` environment variable. This provides:
+- Step-by-step workflow execution logs with clear separators
+- SHA fetch operations with hash previews for debugging
+- File read operations with byte counts and content validation
+- Detailed GitHub API interaction logs
+- Optimistic lock verification details
+
+Verbose logging is automatically enabled in development mode (`NODE_ENV=development`).
+
+**Standard Server Logs** (visible in server console or deployment logs):
 ```
 [GET /api/admin/universe] Request received - fetching universe data
 [GET /api/admin/universe] Loaded local file, galaxies: 2
@@ -339,6 +353,35 @@ The admin save workflow includes comprehensive logging for troubleshooting:
 [POST /api/admin/universe] GitHub push successful
 ```
 
+**Verbose Logs with ADMIN_VERBOSE_LOGGING=true**:
+```
+[POST /api/admin/universe] ========================================
+[POST /api/admin/universe] Request received - committing to GitHub
+[POST /api/admin/universe] Workflow: Step 2 of 2 (Step 1 was PATCH to save to disk)
+[POST /api/admin/universe] Step 1: Reading from persisted file: public/universe/universe.json
+[POST /api/admin/universe] File read successfully, size: 5578 bytes
+[POST /api/admin/universe] File is authoritative source for commit
+[POST /api/admin/universe] Step 2: Validating persisted data...
+[POST /api/admin/universe] Validation passed
+[POST /api/admin/universe] Step 3: Checking for race conditions...
+[POST /api/admin/universe] No race conditions detected
+[POST /api/admin/universe] Step 4: Pushing to GitHub...
+[POST /api/admin/universe] Note: GitHub layer will fetch fresh SHA to prevent conflicts
+[pushUniverseChanges] Starting commit workflow
+[pushUniverseChanges] Fetching current SHA from GitHub...
+[pushUniverseChanges] Current GitHub SHA: abc12345...
+[pushUniverseChanges] Creating branch and PR workflow...
+[pushUniverseChanges] Branch created successfully
+[pushUniverseChanges] Re-fetching SHA after branch creation...
+[pushUniverseChanges] Fresh SHA after branch creation: abc12345...
+[pushUniverseChanges] Committing to new branch...
+[pushUniverseChanges] Commit successful, SHA: def67890...
+[pushUniverseChanges] Creating pull request...
+[pushUniverseChanges] Pull request created: https://...
+[POST /api/admin/universe] SUCCESS: GitHub push successful
+[POST /api/admin/universe] ========================================
+```
+
 **Log Filtering**: Use grep to filter logs by operation:
 ```bash
 # View all admin save operations
@@ -349,6 +392,12 @@ grep "\[POST /api/admin/universe\]" logs.txt
 
 # View file persistence operations
 grep "\[persistUniverseToFile\]" logs.txt
+
+# View GitHub SHA fetch operations (v0.1.5+)
+grep "\[pushUniverseChanges\]" logs.txt
+
+# View all verbose workflow logs
+grep "========================================" logs.txt
 ```
 
 ### Commit Workflow Options

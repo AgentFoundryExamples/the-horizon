@@ -19,6 +19,81 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 ## Changelog
 
+### v0.1.5 - GitHub Persistence Stabilization and UI Cleanup (December 8, 2025)
+
+*This release stabilizes the admin GitHub persistence workflow and removes deprecated hover/tooltip UI elements for a cleaner user experience.*
+
+**GitHub Persistence Flow Improvements:**
+
+1. **Fresh SHA Fetching Before Commit**
+   - GitHub SHA is now fetched immediately before every commit operation
+   - Prevents "file has changed" errors from stale SHA values
+   - For PR workflow: SHA is re-fetched after branch creation
+   - For direct commit: SHA is re-fetched right before the commit
+   - Detailed logging tracks SHA refresh operations for troubleshooting
+
+2. **Two-Step Workflow Stability**
+   - PATCH endpoint saves changes to `public/universe/universe.json` (Step 1)
+   - POST endpoint reads from disk and commits to GitHub (Step 2)
+   - File content on disk is the authoritative source for commits
+   - Optimistic locking prevents concurrent edit conflicts at both steps
+   - Comprehensive validation before GitHub operations
+
+3. **Enhanced Logging and Debugging**
+   - Verbose logging mode with `ADMIN_VERBOSE_LOGGING=true` environment variable
+   - Workflow steps clearly logged with separators and context
+   - SHA fetch operations logged with hash previews
+   - File read operations show byte counts and validation results
+   - Each GitHub operation logged with success/failure status
+
+**UI Improvements:**
+
+1. **Hover Label and Tooltip Removal**
+   - Removed all hover labels from celestial objects (galaxies, stars, planets, moons)
+   - Eliminated tooltip components that were causing visual clutter
+   - Cleaned up unused hover state variables and emissive highlighting
+   - Streamlined scene components for better performance
+   - Users now interact directly with objects without intermediate hover states
+
+**Why These Changes:**
+
+The GitHub persistence workflow needed stabilization to prevent commit failures:
+- Admins were encountering "file has changed" errors when committing after saving
+- Stale SHA values caused GitHub API rejections
+- Fresh SHA fetching before every commit ensures accurate file state
+- Clear logging helps troubleshoot any remaining edge cases
+
+The tooltip removal improves the user experience:
+- Hover labels added visual noise without clear benefit
+- Direct object interaction is more intuitive
+- Cleaner scene rendering improves performance
+- Reduced component complexity makes maintenance easier
+
+**Technical Details:**
+- No new environment variables required
+- No migration steps needed
+- All existing tests passing
+- Compatible with all v0.1.x releases
+- Backward compatible with existing admin workflows
+
+**Deployment Notes:**
+- Optional: Set `ADMIN_VERBOSE_LOGGING=true` for detailed workflow debugging
+- Review server logs for `[pushUniverseChanges]` messages to track SHA operations
+- GitHub tokens with `repo` scope (and optionally `workflow`) remain required
+- No changes to existing environment variable configuration
+
+**Verification Steps:**
+1. Make edits in admin interface
+2. Click "💾 Save to Disk" - verify success message
+3. Wait a few seconds (simulate time passing)
+4. Click "Commit to GitHub" - should succeed without "file has changed" error
+5. Check server logs for "Fetching current SHA from GitHub..." messages
+6. Verify commit or PR appears in GitHub repository
+7. Confirm no hover tooltips appear when hovering over celestial objects
+
+See [MANUAL_TESTING.md](MANUAL_TESTING.md#scenario-11-sha-refresh-mechanism-verification) for detailed SHA refresh testing procedures.
+See [docs/deployment.md](docs/deployment.md#two-step-save-workflow) for complete workflow documentation.
+
 ### v0.1.4 - Admin Workflow Documentation and Testing (December 8, 2025)
 
 *This release provides comprehensive documentation and testing guidance for the admin save/commit workflow, ensuring administrators can confidently manage universe content.*

@@ -418,6 +418,70 @@ Error: SHA does not match (GitHub API error)
 ```
 This should NOT happen with the stabilized flow.
 
+### Scenario 12: Hover/Tooltip Removal Verification (v0.1.5)
+
+**Purpose**: Verify that hover labels and tooltips have been removed from all celestial objects
+
+**Prerequisites**: None (visual inspection only)
+
+**Context**: v0.1.5 removed all hover labels and tooltip components to reduce visual clutter and improve performance.
+
+**Steps**:
+1. Navigate to the main universe view at `http://localhost:3000`
+2. Hover over various galaxies
+   - ✅ Expected: NO tooltip or label appears above/near the galaxy
+   - ✅ Expected: Galaxy may have subtle visual feedback (shader effects) but no text overlay
+3. Click on a galaxy to enter galaxy view
+4. Hover over solar systems within the galaxy
+   - ✅ Expected: NO tooltip or label appears
+   - ✅ Expected: Solar systems remain interactive (clickable)
+5. Click on a solar system to enter system view
+6. Hover over planets orbiting the star
+   - ✅ Expected: NO tooltip or label appears
+   - ✅ Expected: Planets remain clickable
+7. Click on a planet to land on its surface
+8. Hover over moons in the skybox
+   - ✅ Expected: NO tooltip or label appears
+   - ✅ Expected: Moons remain clickable for navigation
+
+**Visual Inspection**:
+- Scene should feel cleaner without text overlays
+- Object interactions should be direct and intuitive
+- Cursor may change to indicate interactivity, but no text labels
+- Focus should be on the 3D objects themselves, not UI overlays
+
+**Performance Check**:
+1. Open browser DevTools → Performance tab
+2. Start recording
+3. Move mouse rapidly over multiple objects
+4. Stop recording
+   - ✅ Expected: No tooltip-related rendering overhead
+   - ✅ Expected: Smooth 60 FPS during mouse movement
+   - ✅ Expected: No React component updates for hover states
+
+**Code Verification** (optional):
+```bash
+# Verify tooltip components have been removed
+cd src/components
+ls -la | grep -i tooltip
+# Should return no results
+
+# Check for hover state cleanup in scene components
+grep -r "setHovered" src/components/
+# Should return minimal or no results
+
+# Check for emissive highlighting cleanup
+grep -r "emissive" src/components/ | grep -v "test"
+# Should show only intentional emissive usage, not hover-based
+```
+
+**What This Tests**:
+- ✅ Tooltip components completely removed from codebase
+- ✅ Hover states cleaned up from scene components
+- ✅ Objects remain interactive without visual label clutter
+- ✅ Performance improved without tooltip rendering overhead
+- ✅ User experience is more direct and less cluttered
+
 ---
 
 ## UI Component Test Scenarios
