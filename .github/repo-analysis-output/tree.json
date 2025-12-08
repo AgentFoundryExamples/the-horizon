@@ -274,17 +274,29 @@
                     },
                     {
                       "type": "file",
+                      "name": "InlineNotification.test.tsx"
+                    },
+                    {
+                      "type": "file",
                       "name": "Modal.test.tsx"
                     },
                     {
                       "type": "file",
                       "name": "NotificationBanner.test.tsx"
+                    },
+                    {
+                      "type": "file",
+                      "name": "UniverseEditor.inline.test.tsx"
                     }
                   ]
                 },
                 {
                   "type": "file",
                   "name": "GalaxyEditor.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "InlineNotification.tsx"
                 },
                 {
                   "type": "file",

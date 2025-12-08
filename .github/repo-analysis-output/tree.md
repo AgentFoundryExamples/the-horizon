@@ -58,9 +58,12 @@
     ├── admin
       ├── __tests__
         ├── GalaxyEditor.test.tsx
+        ├── InlineNotification.test.tsx
         ├── Modal.test.tsx
-        └── NotificationBanner.test.tsx
+        ├── NotificationBanner.test.tsx
+        └── UniverseEditor.inline.test.tsx
       ├── GalaxyEditor.tsx
+      ├── InlineNotification.tsx
       ├── Modal.tsx
       ├── NotificationBanner.tsx
       ├── PlanetEditor.tsx
