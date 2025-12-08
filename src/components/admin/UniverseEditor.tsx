@@ -25,13 +25,15 @@ import InlineNotification from './InlineNotification';
 
 interface UniverseEditorProps {
   universe: Universe;
-  currentHash: string;
-  onUpdate: (universe: Universe, hash?: string) => void;
+  gitBaseHash: string;
+  localDiskHash: string;
+  onUpdate: (universe: Universe, newLocalHash?: string, newGitBaseHash?: string) => void;
 }
 
 export default function UniverseEditor({
   universe,
-  currentHash,
+  gitBaseHash,
+  localDiskHash,
   onUpdate,
 }: UniverseEditorProps) {
   const router = useRouter();
@@ -43,7 +45,6 @@ export default function UniverseEditor({
   const [commitNotification, setCommitNotification] = useState<{ type: NotificationType; message: string } | null>(null);
   const [commitMessage, setCommitMessage] = useState('');
   const [createPR, setCreatePR] = useState(false);
-  const [localHash, setLocalHash] = useState(currentHash);
   const [retrying, setRetrying] = useState(false);
 
   // Stable callbacks for notification close handlers to prevent timer resets
@@ -68,7 +69,7 @@ export default function UniverseEditor({
         },
         body: JSON.stringify({
           universe,
-          currentHash: localHash,
+          currentHash: localDiskHash,
         }),
       });
 
@@ -79,12 +80,11 @@ export default function UniverseEditor({
           type: 'success',
           message: 'Changes saved successfully! Your edits are now persisted locally.',
         });
-        // Update local hash to the new hash from the server
+        // Update local disk hash to the new hash from the server
+        // gitBaseHash remains unchanged - it only updates after commit or refresh
         if (data.hash) {
-          setLocalHash(data.hash);
+          onUpdate(universe, data.hash);
         }
-        // Pass both universe and new hash to parent
-        onUpdate(universe, data.hash);
       } else if (response.status === 409) {
         setSaveNotification({
           type: 'error',
@@ -137,7 +137,7 @@ export default function UniverseEditor({
         body: JSON.stringify({
           commitMessage,
           createPR,
-          currentHash: localHash,
+          gitBaseHash, // Immutable GitHub baseline for optimistic locking against remote changes
         }),
       });
 
@@ -154,7 +154,16 @@ export default function UniverseEditor({
             : 'Changes committed to GitHub successfully. Your updates are now live.',
         });
         setCommitMessage('');
-        onUpdate(universe);
+        // After successful commit, update both hashes to match GitHub
+        // Both should now reflect the committed state
+        if (data.hash) {
+          onUpdate(universe, data.hash, data.hash);
+        } else {
+          // If no hash is returned, we can't be sure of the new baseline.
+          // Log a warning and don't update hashes - user should refresh if needed.
+          console.warn('Commit successful, but no new hash returned from server. Hashes may be out of sync.');
+          onUpdate(universe);
+        }
       } else if (response.status === 409) {
         setCommitNotification({
           type: 'error',

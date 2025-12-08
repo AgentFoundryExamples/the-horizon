@@ -30,7 +30,8 @@ describe('UniverseEditor - Inline Notifications', () => {
   };
 
   const mockOnUpdate = jest.fn();
-  const currentHash = 'test-hash-123';
+  const gitBaseHash = 'git-base-hash-123';
+  const localDiskHash = 'local-disk-hash-456';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -53,7 +54,8 @@ describe('UniverseEditor - Inline Notifications', () => {
       render(
         <UniverseEditor
           universe={mockUniverse}
-          currentHash={currentHash}
+          gitBaseHash={gitBaseHash}
+          localDiskHash={localDiskHash}
           onUpdate={mockOnUpdate}
         />
       );
@@ -80,7 +82,8 @@ describe('UniverseEditor - Inline Notifications', () => {
       render(
         <UniverseEditor
           universe={mockUniverse}
-          currentHash={currentHash}
+          gitBaseHash={gitBaseHash}
+          localDiskHash={localDiskHash}
           onUpdate={mockOnUpdate}
         />
       );
@@ -112,7 +115,8 @@ describe('UniverseEditor - Inline Notifications', () => {
       render(
         <UniverseEditor
           universe={mockUniverse}
-          currentHash={currentHash}
+          gitBaseHash={gitBaseHash}
+          localDiskHash={localDiskHash}
           onUpdate={mockOnUpdate}
         />
       );
@@ -142,7 +146,8 @@ describe('UniverseEditor - Inline Notifications', () => {
       render(
         <UniverseEditor
           universe={mockUniverse}
-          currentHash={currentHash}
+          gitBaseHash={gitBaseHash}
+          localDiskHash={localDiskHash}
           onUpdate={mockOnUpdate}
         />
       );
@@ -168,7 +173,8 @@ describe('UniverseEditor - Inline Notifications', () => {
       render(
         <UniverseEditor
           universe={mockUniverse}
-          currentHash={currentHash}
+          gitBaseHash={gitBaseHash}
+          localDiskHash={localDiskHash}
           onUpdate={mockOnUpdate}
         />
       );
@@ -193,7 +199,8 @@ describe('UniverseEditor - Inline Notifications', () => {
       render(
         <UniverseEditor
           universe={mockUniverse}
-          currentHash={currentHash}
+          gitBaseHash={gitBaseHash}
+          localDiskHash={localDiskHash}
           onUpdate={mockOnUpdate}
         />
       );
@@ -235,7 +242,8 @@ describe('UniverseEditor - Inline Notifications', () => {
       render(
         <UniverseEditor
           universe={mockUniverse}
-          currentHash={currentHash}
+          gitBaseHash={gitBaseHash}
+          localDiskHash={localDiskHash}
           onUpdate={mockOnUpdate}
         />
       );
@@ -264,7 +272,8 @@ describe('UniverseEditor - Inline Notifications', () => {
       render(
         <UniverseEditor
           universe={mockUniverse}
-          currentHash={currentHash}
+          gitBaseHash={gitBaseHash}
+          localDiskHash={localDiskHash}
           onUpdate={mockOnUpdate}
         />
       );
@@ -298,7 +307,8 @@ describe('UniverseEditor - Inline Notifications', () => {
       render(
         <UniverseEditor
           universe={mockUniverse}
-          currentHash={currentHash}
+          gitBaseHash={gitBaseHash}
+          localDiskHash={localDiskHash}
           onUpdate={mockOnUpdate}
         />
       );
@@ -322,7 +332,8 @@ describe('UniverseEditor - Inline Notifications', () => {
       render(
         <UniverseEditor
           universe={mockUniverse}
-          currentHash={currentHash}
+          gitBaseHash={gitBaseHash}
+          localDiskHash={localDiskHash}
           onUpdate={mockOnUpdate}
         />
       );
@@ -347,7 +358,8 @@ describe('UniverseEditor - Inline Notifications', () => {
       render(
         <UniverseEditor
           universe={mockUniverse}
-          currentHash={currentHash}
+          gitBaseHash={gitBaseHash}
+          localDiskHash={localDiskHash}
           onUpdate={mockOnUpdate}
         />
       );
@@ -380,7 +392,8 @@ describe('UniverseEditor - Inline Notifications', () => {
       render(
         <UniverseEditor
           universe={mockUniverse}
-          currentHash={currentHash}
+          gitBaseHash={gitBaseHash}
+          localDiskHash={localDiskHash}
           onUpdate={mockOnUpdate}
         />
       );
@@ -430,7 +443,8 @@ describe('UniverseEditor - Inline Notifications', () => {
       render(
         <UniverseEditor
           universe={mockUniverse}
-          currentHash={currentHash}
+          gitBaseHash={gitBaseHash}
+          localDiskHash={localDiskHash}
           onUpdate={mockOnUpdate}
         />
       );

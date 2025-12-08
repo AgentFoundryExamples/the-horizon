@@ -74,6 +74,8 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           universe,
           hash: githubData.hash,
+          gitBaseHash: githubData.hash, // Both hashes are the same when fetching from GitHub
+          localDiskHash: githubData.hash,
           validationErrors: errors,
           source: 'github',
         });
@@ -98,13 +100,30 @@ export async function GET(request: NextRequest) {
     try {
       const content = await fs.readFile(absolutePath, 'utf-8');
       console.log('[GET /api/admin/universe] Local file read successfully');
-      const hash = await sha256(content);
+      const localHash = await sha256(content);
       const { universe, errors } = parseAndValidateUniverse(content);
-      const hashPreview = hash?.substring(0, 8) || 'unknown';
+      const hashPreview = localHash?.substring(0, 8) || 'unknown';
       console.log('[GET /api/admin/universe] Loaded local file, hash:', hashPreview + '...', 'galaxies:', universe.galaxies.length);
+      
+      // Try to get GitHub hash for baseline comparison, but don't fail if unavailable
+      let gitHash: string | null = null;
+      try {
+        const githubData = await fetchCurrentUniverse();
+        if (githubData && githubData.hash) {
+          gitHash = githubData.hash;
+          console.log('[GET /api/admin/universe] GitHub baseline hash:', gitHash.substring(0, 8) + '...');
+        } else {
+          console.warn('[GET /api/admin/universe] GitHub baseline hash could not be retrieved.');
+        }
+      } catch (err) {
+        console.warn('[GET /api/admin/universe] Could not fetch GitHub baseline:', err instanceof Error ? err.message : String(err));
+      }
+      
       return NextResponse.json({
         universe,
-        hash,
+        hash: localHash, // Legacy field for backwards compatibility
+        gitBaseHash: gitHash, // Can be null if GitHub is unreachable
+        localDiskHash: localHash, // Current local file hash
         validationErrors: errors,
         source: 'local',
       });
@@ -121,6 +140,8 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           universe,
           hash: githubData.hash,
+          gitBaseHash: githubData.hash,
+          localDiskHash: githubData.hash,
           validationErrors: errors,
           source: 'github',
           warning: 'Local file not found, loaded from GitHub',
@@ -137,6 +158,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         universe,
         hash,
+        gitBaseHash: hash,
+        localDiskHash: hash,
         validationErrors: errors,
         source: 'default',
         warning: 'Local file and GitHub unavailable, loaded default data',
@@ -233,11 +256,11 @@ export async function PATCH(request: NextRequest) {
       const hash = await sha256(persistedContent);
 
       const hashPreview = hash?.substring(0, 8) || 'unknown';
-      console.log('[PATCH /api/admin/universe] Success - new hash:', hashPreview + '...');
+      console.log('[PATCH /api/admin/universe] Success - new local disk hash:', hashPreview + '...');
       return NextResponse.json({
         success: true,
         message: 'Universe data saved successfully',
-        hash,
+        hash, // This is the new localDiskHash - gitBaseHash should remain unchanged in client
       });
     } else {
       console.error('[PATCH /api/admin/universe] Persist failed:', result.error);
@@ -288,9 +311,9 @@ export async function POST(request: NextRequest) {
   logVerbose('[POST /api/admin/universe] Workflow: Step 2 of 2 (Step 1 was PATCH to save to disk)');
 
   try {
-    const { commitMessage, createPR, currentHash } = await request.json();
+    const { commitMessage, createPR, gitBaseHash } = await request.json();
     const messagePreview = commitMessage?.substring(0, 50) || '';
-    logVerbose('[POST /api/admin/universe] Payload:', { commitMessage: messagePreview, createPR, hasHash: !!currentHash });
+    logVerbose('[POST /api/admin/universe] Payload:', { commitMessage: messagePreview, createPR, hasGitBaseHash: !!gitBaseHash });
 
     if (!commitMessage) {
       console.error('[POST /api/admin/universe] No commit message provided');
@@ -335,22 +358,38 @@ export async function POST(request: NextRequest) {
     }
     logVerbose('[POST /api/admin/universe] Validation passed');
 
-    // Verify hash before committing to prevent race conditions
-    logVerbose('[POST /api/admin/universe] Step 3: Checking for race conditions...');
-    const onDiskHash = await sha256(content);
-    if (currentHash && onDiskHash !== currentHash) {
-      console.warn('[POST /api/admin/universe] Conflict detected - hash mismatch before commit');
-      logVerbose('[POST /api/admin/universe] Expected hash:', currentHash.substring(0, 8) + '...');
-      logVerbose('[POST /api/admin/universe] Actual hash:', onDiskHash.substring(0, 8) + '...');
-      return NextResponse.json(
-        {
-          error: 'Conflict detected',
-          message: 'The file has been modified since you last saved. Please refresh, re-apply your changes, save, and then commit again.',
-        },
-        { status: 409 }
-      );
-    }
-    logVerbose('[POST /api/admin/universe] No race conditions detected');
+    /**
+     * Log local disk state before committing (diagnostic only)
+     * 
+     * This function logs if the local disk file has diverged from the gitBaseHash.
+     * In the normal save→commit workflow, the hashes WILL differ because:
+     * 1. User loaded editor with gitBaseHash from GitHub
+     * 2. User made edits and saved to disk (updates local file, gitBaseHash unchanged)
+     * 3. User commits (we're here - local file has changes, gitBaseHash is still original)
+     * 
+     * We log the difference but DON'T fail because:
+     * - The divergence is expected and intentional in the save→commit workflow
+     * - The GitHub layer will fetch fresh SHA and detect actual remote conflicts
+     * - This check is primarily for diagnostics and debugging
+     */
+    const logLocalStateBeforeCommit = async (
+      localContent: string,
+      expectedGitBaseHash: string | undefined
+    ): Promise<void> => {
+      logVerbose('[POST /api/admin/universe] Step 3: Logging local state before commit...');
+      const onDiskHash = await sha256(localContent);
+      
+      if (expectedGitBaseHash && onDiskHash !== expectedGitBaseHash) {
+        logVerbose('[POST /api/admin/universe] Note: Local disk hash differs from gitBaseHash');
+        logVerbose('[POST /api/admin/universe] GitBaseHash:', expectedGitBaseHash.substring(0, 8) + '...');
+        logVerbose('[POST /api/admin/universe] OnDiskHash:', onDiskHash.substring(0, 8) + '...');
+        logVerbose('[POST /api/admin/universe] This is EXPECTED in save→commit workflow (user saved changes locally)');
+      } else {
+        logVerbose('[POST /api/admin/universe] Local disk hash matches gitBaseHash or no hash provided');
+      }
+    };
+
+    await logLocalStateBeforeCommit(content, gitBaseHash);
 
     // Push to GitHub
     logVerbose('[POST /api/admin/universe] Step 4: Pushing to GitHub...');
@@ -359,7 +398,7 @@ export async function POST(request: NextRequest) {
       content,
       commitMessage,
       createPR || false,
-      currentHash
+      gitBaseHash // Pass gitBaseHash for logging/context, but actual GitHub SHA fetching happens in pushUniverseChanges
     );
 
     if (result.success) {
@@ -369,10 +408,13 @@ export async function POST(request: NextRequest) {
         console.log('[POST /api/admin/universe] PR URL:', result.prUrl);
       }
       logVerbose('[POST /api/admin/universe] ========================================');
+      
+      // Return the new hash which should now be the gitBaseHash for future operations
       return NextResponse.json({
         success: true,
         message: result.message,
         sha: result.sha,
+        hash: result.sha, // This becomes the new gitBaseHash after successful commit
         prUrl: result.prUrl,
       });
     } else {

@@ -112,6 +112,84 @@ The admin interface uses a two-step workflow to ensure content changes are safe 
 
 > **Important**: As of v0.1.4+, the GitHub persistence flow has been stabilized to prevent "file has changed" errors. The system now fetches fresh SHA from GitHub multiple times during the commit process to ensure the most recent file state is used. See the SHA Refresh section below for details.
 
+### Dual-Hash System (v0.1.5+)
+
+The admin interface uses a **dual-hash system** to preserve the GitHub baseline and prevent false conflicts during the save→commit workflow. This ensures that local saves don't interfere with GitHub baseline tracking.
+
+**Why Two Hashes?**
+
+Previously, when you saved changes to disk, the system would update the single `currentHash` with the new local file hash. When you later tried to commit to GitHub, the system would use this updated hash as the baseline, which could cause false conflicts if the file had changed locally but not in GitHub.
+
+**The Solution: Separate Tracking**
+
+The system now maintains two distinct hashes:
+
+1. **`gitBaseHash`** - The immutable GitHub baseline hash
+   - Represents the last known state of the file in GitHub
+   - Only updates after a successful commit to GitHub or explicit refresh
+   - Used for GitHub API operations and optimistic locking against remote changes
+   - Never modified by local save operations
+
+2. **`localDiskHash`** - The current local file hash
+   - Represents the current state of the file on disk
+   - Updates after each save-to-disk operation
+   - Used for detecting concurrent local modifications
+   - Changes frequently as you save edits
+
+**Workflow with Dual Hashes:**
+
+```mermaid
+graph TB
+    A[Load Editor] --> B[Get gitBaseHash from GitHub]
+    B --> C[Get localDiskHash from local file]
+    C --> D[Admin makes edits]
+    D --> E[Save to Disk - PATCH]
+    E --> F[localDiskHash updates]
+    F --> G[gitBaseHash unchanged]
+    G --> H{More edits?}
+    H -->|Yes| D
+    H -->|No| I[Commit to GitHub - POST]
+    I --> J[Uses gitBaseHash for baseline]
+    J --> K[Success: Both hashes sync]
+    K --> L[gitBaseHash = localDiskHash = new GitHub SHA]
+```
+
+**Benefits:**
+- ✅ Prevents false conflicts during save→commit workflow
+- ✅ Local saves never interfere with GitHub baseline tracking
+- ✅ Commits use the correct baseline for optimistic locking
+- ✅ Concurrent edits by multiple admins can still be detected
+- ✅ Clear separation between local and remote state
+
+**Hash Lifecycle:**
+
+| Operation | gitBaseHash | localDiskHash |
+|-----------|-------------|---------------|
+| Initial load | From GitHub | From local file or GitHub |
+| Save to disk | Unchanged | Updates to new local hash |
+| Commit to GitHub | Updates to new GitHub SHA | Already matches committed content |
+| Explicit refresh | Updates to current GitHub SHA | Updates to current GitHub SHA |
+| Logout | Cleared | Cleared |
+
+**Example Scenario:**
+
+1. Admin loads editor:
+   - `gitBaseHash`: `abc123...` (from GitHub)
+   - `localDiskHash`: `abc123...` (file matches GitHub)
+
+2. Admin makes edits and saves to disk:
+   - `gitBaseHash`: `abc123...` (unchanged - still the GitHub baseline)
+   - `localDiskHash`: `def456...` (new local file hash)
+
+3. Admin makes more edits and saves again:
+   - `gitBaseHash`: `abc123...` (still unchanged)
+   - `localDiskHash`: `ghi789...` (updated again)
+
+4. Admin commits to GitHub:
+   - System uses `gitBaseHash` (`abc123...`) to verify GitHub baseline
+   - Commits new content successfully
+   - Both hashes update: `gitBaseHash` = `localDiskHash` = `jkl012...`
+
 ### SHA Refresh and Conflict Prevention (v0.1.4+)
 
 The admin GitHub persistence flow has been enhanced to prevent "file has changed" errors that previously occurred when saving to disk followed by committing to GitHub. Here's how the stabilized flow works:

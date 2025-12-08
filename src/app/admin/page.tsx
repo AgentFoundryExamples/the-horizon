@@ -22,7 +22,8 @@ import UniverseEditor from '@/components/admin/UniverseEditor';
 
 export default function AdminPage() {
   const [universe, setUniverse] = useState<Universe | null>(null);
-  const [hash, setHash] = useState<string>('');
+  const [gitBaseHash, setGitBaseHash] = useState<string>('');
+  const [localDiskHash, setLocalDiskHash] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -45,7 +46,15 @@ export default function AdminPage() {
 
       const data = await response.json();
       setUniverse(data.universe);
-      setHash(data.hash);
+      // Initialize both hashes from the response
+      // gitBaseHash can be null if GitHub is unreachable
+      // Use localDiskHash as fallback for initial state, but log warning
+      const baseHash = data.gitBaseHash || data.hash || '';
+      if (!data.gitBaseHash && data.localDiskHash) {
+        console.warn('[Admin Page] GitHub baseline unavailable, using local hash as fallback. Dual-hash benefits may be limited.');
+      }
+      setGitBaseHash(baseHash);
+      setLocalDiskHash(data.localDiskHash || data.hash || '');
       
       if (data.validationErrors && data.validationErrors.length > 0) {
         console.warn('Validation warnings:', data.validationErrors);
@@ -150,12 +159,17 @@ export default function AdminPage() {
 
       <UniverseEditor
         universe={universe}
-        currentHash={hash}
-        onUpdate={(updatedUniverse, newHash) => {
+        gitBaseHash={gitBaseHash}
+        localDiskHash={localDiskHash}
+        onUpdate={(updatedUniverse, newLocalHash, newGitBaseHash) => {
           setUniverse(updatedUniverse);
-          // Only update hash if provided and is a non-empty string
-          if (newHash && typeof newHash === 'string' && newHash.trim()) {
-            setHash(newHash);
+          // Update local disk hash if provided
+          if (newLocalHash && typeof newLocalHash === 'string' && newLocalHash.trim()) {
+            setLocalDiskHash(newLocalHash);
+          }
+          // Update git base hash if provided (after successful commit)
+          if (newGitBaseHash && typeof newGitBaseHash === 'string' && newGitBaseHash.trim()) {
+            setGitBaseHash(newGitBaseHash);
           }
         }}
       />
