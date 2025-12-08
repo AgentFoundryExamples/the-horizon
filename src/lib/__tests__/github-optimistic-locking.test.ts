@@ -121,7 +121,7 @@ describe('GitHub Optimistic Locking with gitBaseHash', () => {
   describe('Conflict Detection', () => {
     it('should detect conflict when gitBaseHash does not match GitHub HEAD', async () => {
       const oldHash = crypto.createHash('sha256').update(originalContent).digest('hex');
-      const someoneElsesContent = JSON.stringify({ galaxies: [{ id: 'test', name: 'Someone Elses Galaxy' }] }, null, 2);
+      const someoneElsesContent = JSON.stringify({ galaxies: [{ id: 'test', name: "Someone Else's Galaxy" }] }, null, 2);
 
       // Mock GitHub returning different content than gitBaseHash expects
       (global.fetch as jest.Mock).mockResolvedValueOnce({

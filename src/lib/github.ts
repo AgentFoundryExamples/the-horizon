@@ -47,10 +47,10 @@ export interface CommitResult {
   success: boolean;
   message: string;
   sha?: string;
-  hash?: string; // Content hash of committed content for UI baseline update
+  hash?: string; // Content hash that becomes the new gitBaseHash for subsequent operations
   prUrl?: string;
   error?: string;
-  errorCode?: 'CONFLICT' | 'RATE_LIMIT' | 'AUTH_FAILED' | 'PERMISSION_DENIED' | 'UNKNOWN'; // Error type for reliable detection
+  errorCode?: 'CONFLICT' | 'RATE_LIMIT' | 'AUTH_FAILED' | 'PERMISSION_DENIED' | 'UNKNOWN'; // Typed error codes for reliable programmatic error handling
 }
 
 /**
