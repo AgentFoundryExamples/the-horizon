@@ -11,8 +11,6 @@ import * as THREE from 'three';
 import type { Galaxy, SolarSystem, Star } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
 import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG } from '@/lib/animation';
-import { TOOLTIP_POSITIONING, TOOLTIP_COLORS } from '@/lib/tooltip-constants';
-import SceneTooltip from './SceneTooltip';
 
 interface OrbitRingProps {
   radius: number;
@@ -67,8 +65,6 @@ const KEPLER_ITERATION_COUNT = 5;
  */
 function PlanetInstance({ solarSystem, systemPosition, animationConfig }: PlanetInstanceProps) {
   const planetsRef = useRef<THREE.Group>(null);
-  const [hovered, setHovered] = useState<number | null>(null);
-  const [hoveredPlanetPosition, setHoveredPlanetPosition] = useState<THREE.Vector3 | null>(null);
 
   const planetData = useMemo(() => {
     // Seeded pseudo-random number generator for deterministic orbits
@@ -137,40 +133,18 @@ function PlanetInstance({ solarSystem, systemPosition, animationConfig }: Planet
       child.position.x = Math.cos(angle) * radius;
       child.position.y = Math.sin(angle) * radius * Math.sin(data.inclination);
       child.position.z = Math.sin(angle) * radius * Math.cos(data.inclination);
-      
-      // Update hovered planet position for tooltip
-      if (hovered === index) {
-        setHoveredPlanetPosition(
-          new THREE.Vector3(
-            systemPosition.x + child.position.x,
-            systemPosition.y + child.position.y,
-            systemPosition.z + child.position.z
-          )
-        );
-      }
     });
   });
 
   return (
     <group position={systemPosition}>
-      {/* Central star with tooltip */}
+      {/* Central star */}
       <group>
-        <mesh
-          onPointerOver={() => setHovered(-1)}
-          onPointerOut={() => setHovered(null)}
-        >
+        <mesh>
           <sphereGeometry args={[0.5, 16, 16]} />
           <meshBasicMaterial color="#FDB813" />
           <pointLight color="#FDB813" intensity={1} distance={20} />
         </mesh>
-        <SceneTooltip
-          visible={hovered === -1}
-          worldPosition={systemPosition}
-          distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_MEDIUM}
-          borderColor={TOOLTIP_COLORS.STAR_BORDER_COLOR}
-          isStar={true}
-          content={solarSystem.name}
-        />
       </group>
 
       {/* Orbit rings */}
@@ -186,31 +160,16 @@ function PlanetInstance({ solarSystem, systemPosition, animationConfig }: Planet
       <group ref={planetsRef}>
         {planetData.map((data, index) => (
           <group key={`planet-${index}`}>
-            <mesh
-              onPointerOver={() => setHovered(index)}
-              onPointerOut={() => setHovered(null)}
-            >
+            <mesh>
               <sphereGeometry args={[data.size, 8, 8]} />
               <meshStandardMaterial
                 color={data.planet.theme === 'blue-green' ? '#2E86AB' : 
                        data.planet.theme === 'red' ? '#E63946' : '#CCCCCC'}
-                emissive={hovered === index ? '#4A90E2' : '#000000'}
-                emissiveIntensity={hovered === index ? 0.3 : 0}
               />
             </mesh>
           </group>
         ))}
       </group>
-      
-      {/* Render tooltip for hovered planet at correct position */}
-      {hovered !== null && hovered >= 0 && hoveredPlanetPosition && (
-        <SceneTooltip
-          visible={true}
-          worldPosition={hoveredPlanetPosition}
-          distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_MEDIUM}
-          content={planetData[hovered].planet.name}
-        />
-      )}
     </group>
   );
 }
@@ -257,13 +216,6 @@ function StarInstance({ star, position, animationConfig }: StarInstanceProps) {
           distance={10}
         />
       </mesh>
-      <SceneTooltip
-        visible={hovered}
-        worldPosition={position}
-        distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_MEDIUM}
-        borderColor={TOOLTIP_COLORS.STAR_BORDER_COLOR}
-        content={star.name}
-      />
     </group>
   );
 }
