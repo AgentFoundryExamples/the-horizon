@@ -20,6 +20,14 @@ The admin interface has been redesigned to provide a blog-style authoring experi
 - Network failures display retry options
 - Auth failures redirect to login automatically
 
+**Inline Action Status (v0.1.4+)**
+- Save and commit status messages appear directly below action buttons
+- No scrolling needed to see operation results
+- Pending states show loading indicators adjacent to controls
+- Success and error messages remain visible near their triggering buttons
+- Accessible to keyboard users via aria-live regions
+- Long error messages wrap gracefully without hiding buttons
+
 **Breadcrumb Navigation**
 - Clear navigation hierarchy: Galaxies → Systems → Planets → Moons
 - Click breadcrumbs to navigate back through levels
@@ -148,15 +156,19 @@ The redesigned admin interface makes it easy to edit content with a clear, modal
 After making all your edits, scroll to the "💾 Save Changes" section:
 
 1. **Click "💾 Save to Disk"** button
-2. **Wait for confirmation**: A green notification banner appears
-3. **Success message**: "Changes saved successfully! Your edits are now persisted locally."
-4. **Error handling**: If save fails, the editor stays open with a detailed error message
+2. **Inline status appears**: A status message displays directly below the button
+   - 🔄 **Pending**: "Saving changes to disk..." (with loading spinner)
+   - ✅ **Success**: "Changes saved successfully! Your edits are now persisted locally."
+   - ❌ **Error**: Detailed error message with guidance (e.g., conflict, network, auth)
+3. **Status stays visible**: Message remains adjacent to the button for easy reference
+4. **No scrolling needed**: Feedback appears right where you took action
 
 **What happens during save**:
 - All edited content is validated to prevent corrupted data
 - Data is written to `public/universe/universe.json` on the server
 - A new hash is generated for optimistic locking (prevents concurrent edit conflicts)
 - Changes are now persisted locally but **not yet committed to version control**
+- Inline status updates keep you informed without losing context
 
 **Important**: The GET endpoint now reads from the local file by default, preventing GitHub fetches from overwriting your unsaved edits. This ensures your work is not lost if another admin commits changes while you're editing.
 
@@ -197,10 +209,11 @@ After saving your changes locally and verifying they work correctly:
 4. **Click the button**:
    - "🔀 Create Pull Request" if checkbox is selected
    - "✓ Commit to Main Branch" if checkbox is unchecked
-5. **Wait for confirmation**: Button shows "Committing..." with loading spinner
-6. **Success notification**: Green banner with confirmation message
-   - For PR: Includes link to the created pull request
-   - For direct commit: Confirms commit was successful
+5. **Inline status appears**: A status message displays directly below the button
+   - 🔄 **Pending**: "Committing changes to GitHub..." (with loading spinner)
+   - ✅ **Success**: "Pull request created successfully!" or "Changes committed to GitHub successfully."
+   - ❌ **Error**: Detailed error message with conflict guidance and recovery steps
+6. **Status stays visible**: Message remains adjacent to the button, including PR links if applicable
 
 **What happens during commit**:
 - System reads the saved file from `public/universe/universe.json`
@@ -209,12 +222,7 @@ After saving your changes locally and verifying they work correctly:
 - **If PR selected**: Creates new branch, commits file, opens pull request
 - **If direct commit**: Commits directly to main branch
 - Vercel automatically redeploys when PR is merged or commit is pushed
-
-**Success Indicators**:
-- ✅ Green notification banner at top of page
-- 📝 Success message with next steps
-- 🔗 PR link (if PR was created)
-- ✓ Commit confirmed message
+- Inline status updates provide immediate feedback without scrolling
 
 **API Endpoint**: `POST /api/admin/universe`
 
@@ -248,6 +256,38 @@ This workflow provides several benefits:
 - **Recovery**: Disk-saved changes persist even if your browser session ends
 - **Rollback**: Easy to discard local changes before committing
 - **No Data Loss**: GET endpoint reads from local file by default, preventing GitHub fetches from overwriting unsaved work
+- **Inline Feedback**: Status messages appear adjacent to action buttons for immediate visibility without scrolling
+
+### Inline Status Notifications (v0.1.4+)
+
+The admin interface displays operation status directly next to the Save and Commit buttons for better visibility and accessibility:
+
+**Key Features:**
+- **No Scrolling**: Messages appear right where you took action
+- **Clear States**: Visual indicators for pending, success, and error states
+- **Accessible**: ARIA live regions announce status changes to screen readers
+- **Mobile Friendly**: Messages wrap gracefully on narrow screens
+- **Long Errors**: Detailed error messages wrap without hiding buttons
+- **Keyboard Accessible**: Status updates are announced to assistive technologies
+
+**Status Types:**
+- 🔄 **Pending**: Loading spinner with "Saving..." or "Committing..." message
+- ✅ **Success**: Green notification with checkmark and confirmation message
+- ❌ **Error**: Red notification with X icon and detailed error guidance
+
+**Accessibility Features:**
+- `role="status"` for semantic meaning
+- `aria-live="polite"` for screen reader announcements
+- `aria-atomic="true"` to announce entire message
+- Auto-dismiss for success messages (5-7 seconds)
+- Manual dismiss option with close button (× icon)
+- Pending states remain visible until operation completes
+
+**Mobile Responsiveness:**
+- Text size adjusts for smaller screens (0.9rem on mobile)
+- Messages wrap using `word-break: break-word`
+- Proper spacing maintained between button and notification
+- Touch-friendly close buttons with adequate tap targets
 
 ### Troubleshooting: How the Save Workflow Works
 
