@@ -48,18 +48,66 @@ interface HoverStore extends HoverState {
   clearHover: () => void;
 }
 
+/**
+ * Validates a HoveredObject to ensure it has valid data
+ */
+function validateHoveredObject(object: HoveredObject | null): boolean {
+  if (!object) return true; // null is valid (clearing hover)
+  
+  if (!object.id || typeof object.id !== 'string') {
+    console.warn('HoverStore: Invalid object id', object);
+    return false;
+  }
+  
+  if (!object.name || typeof object.name !== 'string') {
+    console.warn('HoverStore: Invalid object name', object);
+    return false;
+  }
+  
+  // Check if position exists and has x, y, z properties
+  if (!object.position || 
+      typeof object.position.x !== 'number' ||
+      typeof object.position.y !== 'number' ||
+      typeof object.position.z !== 'number') {
+    console.warn('HoverStore: Invalid object position', object);
+    return false;
+  }
+  
+  // Check for NaN or Infinity in position
+  if (!isFinite(object.position.x) || 
+      !isFinite(object.position.y) || 
+      !isFinite(object.position.z)) {
+    console.warn('HoverStore: Position contains invalid numbers', object.position);
+    return false;
+  }
+  
+  return true;
+}
+
 export const useHoverStore = create<HoverStore>((set) => ({
   hoveredObject: null,
   labelsVisible: true,
 
-  setHoveredObject: (object: HoveredObject | null) =>
-    set({ hoveredObject: object }),
+  setHoveredObject: (object: HoveredObject | null) => {
+    // Validate the object
+    if (!validateHoveredObject(object)) {
+      console.warn('HoverStore: Rejected invalid object', object);
+      return;
+    }
+    
+    set({ hoveredObject: object });
+  },
 
   toggleLabelsVisibility: () =>
     set((state) => ({ labelsVisible: !state.labelsVisible })),
 
-  setLabelsVisibility: (visible: boolean) =>
-    set({ labelsVisible: visible }),
+  setLabelsVisibility: (visible: boolean) => {
+    if (typeof visible !== 'boolean') {
+      console.warn('HoverStore: setLabelsVisibility requires boolean', visible);
+      return;
+    }
+    set({ labelsVisible: visible });
+  },
 
   clearHover: () => set({ hoveredObject: null }),
 }));

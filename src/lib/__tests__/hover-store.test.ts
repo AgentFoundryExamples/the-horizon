@@ -281,4 +281,180 @@ describe('useHoverStore', () => {
       expect(result.current.hoveredObject?.type).toBe('star');
     });
   });
+
+  describe('Validation', () => {
+    // Suppress console warnings during validation tests
+    const originalWarn = console.warn;
+    beforeEach(() => {
+      console.warn = jest.fn();
+    });
+    afterEach(() => {
+      console.warn = originalWarn;
+    });
+
+    it('should reject object with invalid position (NaN)', () => {
+      const { result } = renderHook(() => useHoverStore());
+      
+      const invalidObj = {
+        id: 'test-1',
+        name: 'Test',
+        type: 'galaxy' as const,
+        position: new THREE.Vector3(NaN, 0, 0),
+      };
+
+      act(() => {
+        result.current.setHoveredObject(invalidObj);
+      });
+
+      // Should not update hoveredObject when position is invalid
+      expect(result.current.hoveredObject).toBeNull();
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Position contains invalid numbers'),
+        expect.any(THREE.Vector3)
+      );
+    });
+
+    it('should reject object with invalid position (Infinity)', () => {
+      const { result } = renderHook(() => useHoverStore());
+      
+      const invalidObj = {
+        id: 'test-1',
+        name: 'Test',
+        type: 'planet' as const,
+        position: new THREE.Vector3(0, Infinity, 0),
+      };
+
+      act(() => {
+        result.current.setHoveredObject(invalidObj);
+      });
+
+      expect(result.current.hoveredObject).toBeNull();
+      expect(console.warn).toHaveBeenCalled();
+    });
+
+    it('should reject object without id', () => {
+      const { result } = renderHook(() => useHoverStore());
+      
+      const invalidObj = {
+        name: 'Test',
+        type: 'star' as const,
+        position: new THREE.Vector3(0, 0, 0),
+      } as any;
+
+      act(() => {
+        result.current.setHoveredObject(invalidObj);
+      });
+
+      expect(result.current.hoveredObject).toBeNull();
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid object id'),
+        expect.any(Object)
+      );
+    });
+
+    it('should reject object without name', () => {
+      const { result } = renderHook(() => useHoverStore());
+      
+      const invalidObj = {
+        id: 'test-1',
+        type: 'galaxy' as const,
+        position: new THREE.Vector3(0, 0, 0),
+      } as any;
+
+      act(() => {
+        result.current.setHoveredObject(invalidObj);
+      });
+
+      expect(result.current.hoveredObject).toBeNull();
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid object name'),
+        expect.any(Object)
+      );
+    });
+
+    it('should reject object without position', () => {
+      const { result } = renderHook(() => useHoverStore());
+      
+      const invalidObj = {
+        id: 'test-1',
+        name: 'Test',
+        type: 'planet' as const,
+      } as any;
+
+      act(() => {
+        result.current.setHoveredObject(invalidObj);
+      });
+
+      expect(result.current.hoveredObject).toBeNull();
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid object position'),
+        expect.any(Object)
+      );
+    });
+
+    it('should accept valid object', () => {
+      const { result } = renderHook(() => useHoverStore());
+      
+      const validObj: HoveredObject = {
+        id: 'test-1',
+        name: 'Valid Test',
+        type: 'galaxy',
+        position: new THREE.Vector3(10, 20, 30),
+      };
+
+      act(() => {
+        result.current.setHoveredObject(validObj);
+      });
+
+      expect(result.current.hoveredObject).toEqual(validObj);
+      expect(console.warn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle rapid enter/leave events', () => {
+      const { result } = renderHook(() => useHoverStore());
+      
+      const obj: HoveredObject = {
+        id: 'obj-1',
+        name: 'Test',
+        type: 'planet',
+        position: new THREE.Vector3(0, 0, 0),
+      };
+
+      // Rapidly set and clear
+      act(() => {
+        result.current.setHoveredObject(obj);
+        result.current.setHoveredObject(null);
+        result.current.setHoveredObject(obj);
+        result.current.setHoveredObject(null);
+      });
+
+      // Final state should be null
+      expect(result.current.hoveredObject).toBeNull();
+    });
+
+    it('should handle setLabelsVisibility with non-boolean gracefully', () => {
+      const originalWarn = console.warn;
+      console.warn = jest.fn();
+
+      const { result } = renderHook(() => useHoverStore());
+      
+      const initialVisibility = result.current.labelsVisible;
+
+      act(() => {
+        // @ts-expect-error Testing invalid input
+        result.current.setLabelsVisibility('true');
+      });
+
+      // Should not change visibility with invalid input
+      expect(result.current.labelsVisible).toBe(initialVisibility);
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining('setLabelsVisibility requires boolean'),
+        'true'
+      );
+
+      console.warn = originalWarn;
+    });
+  });
 });
