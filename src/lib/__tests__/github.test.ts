@@ -12,20 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getGitHubConfig, validateGitHubToken } from '../github';
+import { getGitHubConfig, validateGitHubToken, pushUniverseChanges, fetchCurrentUniverse } from '../github';
+
+// Mock fetch globally
+global.fetch = jest.fn();
+
+// Mock sha256 function
+jest.mock('../crypto', () => ({
+  sha256: jest.fn((content: string) => {
+    // Simple mock hash based on content
+    return Promise.resolve(`hash-${content.length}-${content.substring(0, 10)}`);
+  }),
+}));
 
 describe('GitHub', () => {
   const originalEnv = process.env;
   let consoleErrorSpy: jest.SpyInstance;
+  let consoleLogSpy: jest.SpyInstance;
 
   beforeEach(() => {
     process.env = { ...originalEnv };
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+    (global.fetch as jest.Mock).mockClear();
   });
 
   afterEach(() => {
     process.env = originalEnv;
     consoleErrorSpy.mockRestore();
+    consoleLogSpy.mockRestore();
   });
 
   describe('getGitHubConfig', () => {
@@ -92,6 +107,285 @@ describe('GitHub', () => {
       expect(validateGitHubToken('invalid_token')).toBe(false);
       expect(validateGitHubToken('abc123')).toBe(false);
       expect(validateGitHubToken('')).toBe(false);
+    });
+  });
+
+  describe('pushUniverseChanges', () => {
+    beforeEach(() => {
+      process.env.GITHUB_TOKEN = 'ghp_test123';
+      process.env.GITHUB_OWNER = 'testowner';
+      process.env.GITHUB_REPO = 'testrepo';
+      process.env.GITHUB_BRANCH = 'main';
+    });
+
+    it('should return error when GitHub config is incomplete', async () => {
+      delete process.env.GITHUB_TOKEN;
+
+      const result = await pushUniverseChanges(
+        '{"galaxies":[]}',
+        'Test commit'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('configuration is incomplete');
+    });
+
+    it('should return error when token format is invalid', async () => {
+      process.env.GITHUB_TOKEN = 'invalid_token';
+
+      const result = await pushUniverseChanges(
+        '{"galaxies":[]}',
+        'Test commit'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Invalid GitHub token format');
+    });
+
+    it('should return error when file not found in repository', async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+      });
+
+      const result = await pushUniverseChanges(
+        '{"galaxies":[]}',
+        'Test commit'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('not found');
+    });
+
+    it('should detect conflict when currentHash does not match GitHub HEAD', async () => {
+      const githubContent = '{"galaxies":["original"]}';
+      
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          sha: 'abc123',
+          content: Buffer.from(githubContent).toString('base64'),
+        }),
+      });
+
+      const result = await pushUniverseChanges(
+        '{"galaxies":["modified"]}',
+        'Test commit',
+        false,
+        'different-hash' // This won't match the computed hash
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('modified by another user');
+      expect(result.error).toContain('changed since you started editing');
+    });
+
+    it('should successfully commit directly to main branch', async () => {
+      const content = '{"galaxies":["test"]}';
+      
+      // Mock getFileSha (initial check)
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            sha: 'abc123',
+            content: Buffer.from(content).toString('base64'),
+          }),
+        })
+        // Mock getFileSha (final check before commit)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            sha: 'abc123',
+            content: Buffer.from(content).toString('base64'),
+          }),
+        })
+        // Mock commitFile
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            commit: { sha: 'def456' },
+          }),
+        });
+
+      const result = await pushUniverseChanges(
+        content,
+        'Test commit',
+        false
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('committed successfully');
+      expect(result.sha).toBe('def456');
+    });
+
+    it('should successfully create pull request', async () => {
+      const content = '{"galaxies":["test"]}';
+      
+      // Mock getFileSha (initial)
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            sha: 'abc123',
+            content: Buffer.from(content).toString('base64'),
+          }),
+        })
+        // Mock getBaseBranch for createBranch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            object: { sha: 'base123' },
+          }),
+        })
+        // Mock createBranch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({}),
+        })
+        // Mock getFileSha (after branch creation)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            sha: 'abc123',
+            content: Buffer.from(content).toString('base64'),
+          }),
+        })
+        // Mock commitFile
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            commit: { sha: 'commit123' },
+          }),
+        })
+        // Mock createPullRequest
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            html_url: 'https://github.com/test/repo/pull/1',
+          }),
+        });
+
+      const result = await pushUniverseChanges(
+        content,
+        'Test commit',
+        true
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Pull request created');
+      expect(result.prUrl).toBe('https://github.com/test/repo/pull/1');
+    });
+
+    it('should handle rate limit errors', async () => {
+      (global.fetch as jest.Mock).mockRejectedValueOnce(
+        new Error('rate limit exceeded')
+      );
+
+      const result = await pushUniverseChanges(
+        '{"galaxies":[]}',
+        'Test commit'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('rate limit');
+    });
+
+    it('should handle authentication errors', async () => {
+      (global.fetch as jest.Mock).mockRejectedValueOnce(
+        new Error('401 Bad credentials')
+      );
+
+      const result = await pushUniverseChanges(
+        '{"galaxies":[]}',
+        'Test commit'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Authentication failed');
+    });
+
+    it('should handle permission errors', async () => {
+      (global.fetch as jest.Mock).mockRejectedValueOnce(
+        new Error('403 Forbidden')
+      );
+
+      const result = await pushUniverseChanges(
+        '{"galaxies":[]}',
+        'Test commit'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Permission denied');
+    });
+
+    it('should detect SHA mismatch errors and provide retry guidance', async () => {
+      (global.fetch as jest.Mock).mockRejectedValueOnce(
+        new Error('does not match the expected SHA')
+      );
+
+      const result = await pushUniverseChanges(
+        '{"galaxies":[]}',
+        'Test commit'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Conflict detected');
+      expect(result.error).toContain('refresh, re-apply your changes');
+    });
+  });
+
+  describe('fetchCurrentUniverse', () => {
+    beforeEach(() => {
+      process.env.GITHUB_TOKEN = 'ghp_test123';
+      process.env.GITHUB_OWNER = 'testowner';
+      process.env.GITHUB_REPO = 'testrepo';
+      process.env.GITHUB_BRANCH = 'main';
+    });
+
+    it('should return null when GitHub config is incomplete', async () => {
+      delete process.env.GITHUB_TOKEN;
+
+      const result = await fetchCurrentUniverse();
+      expect(result).toBeNull();
+    });
+
+    it('should fetch and return universe content with hash', async () => {
+      const content = '{"galaxies":["test"]}';
+      
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          sha: 'abc123',
+          content: Buffer.from(content).toString('base64'),
+        }),
+      });
+
+      const result = await fetchCurrentUniverse();
+      
+      expect(result).not.toBeNull();
+      expect(result?.content).toBe(content);
+      expect(result?.hash).toBeDefined();
+    });
+
+    it('should return null when file not found', async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+      });
+
+      const result = await fetchCurrentUniverse();
+      expect(result).toBeNull();
+    });
+
+    it('should handle fetch errors gracefully', async () => {
+      (global.fetch as jest.Mock).mockRejectedValueOnce(
+        new Error('Network error')
+      );
+
+      const result = await fetchCurrentUniverse();
+      expect(result).toBeNull();
     });
   });
 });

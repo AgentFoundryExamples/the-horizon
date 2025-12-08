@@ -244,5 +244,94 @@ describe('Universe Persistence', () => {
       expect(parsed.galaxies[0].stars).toHaveLength(1);
       expect(parsed.galaxies[0].solarSystems[0].planets[0].moons).toHaveLength(1);
     });
+
+    it('should handle concurrent writes with unique temp files', async () => {
+      // Simulate concurrent writes by starting multiple persist operations
+      const universe1 = { ...testUniverse, galaxies: [{ ...testUniverse.galaxies[0], name: 'Universe 1' }] };
+      const universe2 = { ...testUniverse, galaxies: [{ ...testUniverse.galaxies[0], name: 'Universe 2' }] };
+      
+      const [result1, result2] = await Promise.all([
+        persistUniverseToFile(universe1, testFile),
+        persistUniverseToFile(universe2, testFile),
+      ]);
+
+      // Both should succeed (one will win the race)
+      expect(result1.success || result2.success).toBe(true);
+      
+      // Verify final file is valid JSON
+      const content = await fs.readFile(testFile, 'utf-8');
+      const parsed = JSON.parse(content);
+      expect(parsed.galaxies).toHaveLength(1);
+      expect(['Universe 1', 'Universe 2']).toContain(parsed.galaxies[0].name);
+    });
+
+    it('should handle filesystem errors during write', async () => {
+      // Mock writeFile to fail
+      const originalWriteFile = fs.writeFile;
+      const mockWriteFile = jest.fn().mockRejectedValue(new Error('Disk full'));
+      (fs as any).writeFile = mockWriteFile;
+
+      try {
+        const result = await persistUniverseToFile(testUniverse, testFile);
+        
+        expect(result.success).toBe(false);
+        expect(result.error).toContain('Disk full');
+      } finally {
+        (fs as any).writeFile = originalWriteFile;
+      }
+    });
+
+    it('should atomically replace existing file', async () => {
+      // First write
+      const universe1 = testUniverse;
+      await persistUniverseToFile(universe1, testFile);
+      
+      // Verify first write
+      let content = await fs.readFile(testFile, 'utf-8');
+      let parsed = JSON.parse(content);
+      expect(parsed.galaxies[0].name).toBe('Test Galaxy');
+
+      // Second write with different data
+      const universe2 = {
+        galaxies: [{
+          ...testUniverse.galaxies[0],
+          name: 'Updated Galaxy',
+          description: 'Updated description',
+        }],
+      };
+      
+      const result = await persistUniverseToFile(universe2, testFile);
+      expect(result.success).toBe(true);
+
+      // Verify atomic replacement - no corruption
+      content = await fs.readFile(testFile, 'utf-8');
+      parsed = JSON.parse(content);
+      expect(parsed.galaxies[0].name).toBe('Updated Galaxy');
+      expect(parsed.galaxies[0].description).toBe('Updated description');
+      
+      // Ensure no temp files remain
+      const files = await fs.readdir(testDir);
+      const tmpFiles = files.filter(f => f.includes('.tmp'));
+      expect(tmpFiles.length).toBe(0);
+    });
+
+    it('should preserve exact JSON formatting for consistency', async () => {
+      await persistUniverseToFile(testUniverse, testFile);
+      
+      const content = await fs.readFile(testFile, 'utf-8');
+      
+      // Verify proper indentation (2 spaces)
+      expect(content).toMatch(/\n  "/);
+      
+      // Verify newlines at appropriate places
+      expect(content).toMatch(/{\n/);
+      expect(content).toMatch(/\n}/);
+      
+      // Verify no trailing whitespace
+      const lines = content.split('\n');
+      lines.forEach(line => {
+        expect(line).not.toMatch(/\s+$/);
+      });
+    });
   });
 });
