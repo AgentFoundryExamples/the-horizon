@@ -11,6 +11,7 @@ This release provides comprehensive documentation and testing guidance for the a
   - Why two steps: Safety, local testing, review workflow, and recovery capabilities
   - Clear prerequisites: Required environment variables documented in `.env.example`
   - Troubleshooting guidance for common workflow issues
+  - **Inline Status Messaging**: Status messages now appear directly below action buttons for immediate feedback without scrolling
 - **Manual Testing Scenarios** (MANUAL_TESTING.md):
   - 10 comprehensive test scenarios covering:
     - Galaxy creation and editing workflows

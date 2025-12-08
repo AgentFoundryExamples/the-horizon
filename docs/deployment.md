@@ -57,6 +57,53 @@ Configure the following environment variables in Vercel:
 
 **Note on SESSION_SECRET**: If not provided, the system will fall back to using `ADMIN_PASSWORD` as the session secret (not recommended for production). For better security, always set a separate `SESSION_SECRET`.
 
+#### Staging vs Production Environments
+
+When using Vercel's environment-specific configuration, you can set different values for Production, Preview (staging), and Development:
+
+**GitHub Token Strategy:**
+- **Production**: Use a GitHub token with full `repo` access pointing to your production branch (usually `main`)
+- **Preview/Staging**: Optionally use a separate token or the same token with appropriate branch targeting
+- **Development**: Use a development-specific token or omit GitHub credentials to test local-only saves
+
+**Benefits of Separate Tokens:**
+- **Audit Trail**: Track which environment made which commits
+- **Security**: Revoke staging tokens without affecting production
+- **Testing**: Use a test repository for staging environments
+- **Permissions**: Limit staging tokens to PR-only workflow (no direct commits)
+
+**Configuration in Vercel:**
+1. Navigate to **Settings** → **Environment Variables**
+2. For each variable, check which environments should use it:
+   - ✓ Production - Live site with production credentials
+   - ✓ Preview - Staging/PR deployments (optional: use separate staging token)
+   - ✓ Development - Local development (optional: omit or use dev token)
+3. To use different tokens per environment:
+   - Add `GITHUB_TOKEN` with production token, check only "Production"
+   - Add `GITHUB_TOKEN` again with staging token, check only "Preview"
+   - Optionally add `GITHUB_TOKEN` with dev token, check only "Development"
+
+**Example Configuration:**
+```
+# Production environment
+GITHUB_TOKEN=ghp_prod_token_XXXX  (Production only)
+GITHUB_BRANCH=main
+
+# Preview/Staging environment  
+GITHUB_TOKEN=ghp_staging_token_XXXX  (Preview only)
+GITHUB_BRANCH=staging
+
+# Development environment
+GITHUB_TOKEN=ghp_dev_token_XXXX  (Development only, or omit entirely)
+GITHUB_BRANCH=dev
+```
+
+**Best Practices:**
+- Use descriptive token names in GitHub (e.g., "Horizon Production", "Horizon Staging")
+- Set expiration dates and rotate tokens regularly (90 days recommended)
+- Document which token is used in which environment
+- Test staging configuration before deploying to production
+
 ### 3. Configure Environment Variables in Vercel
 
 1. Go to your project in Vercel
