@@ -158,7 +158,7 @@ describe('GitHub', () => {
       expect(result.message).toContain('not found');
     });
 
-    it('should accept currentHash parameter but not verify it against GitHub (API route handles verification)', async () => {
+    it('should verify gitBaseHash matches GitHub HEAD before committing', async () => {
       const githubContent = '{"galaxies":["original"]}';
       const newContent = '{"galaxies":["modified"]}';
       
@@ -187,16 +187,18 @@ describe('GitHub', () => {
           }),
         });
 
-      // Call with currentHash - function should log it but not verify against GitHub
-      // (API route already verified the on-disk hash matches currentHash)
+      // Calculate the expected hash based on githubContent using the mocked sha256
+      // The mock returns `hash-${content.length}-${content.substring(0, 10)}`
+      const expectedHash = `hash-${githubContent.length}-${githubContent.substring(0, 10)}`;
+      
       const result = await pushUniverseChanges(
         newContent,
         'Test commit',
         false,
-        'some-on-disk-hash-123' // This was already verified by API route
+        expectedHash // gitBaseHash must match GitHub HEAD
       );
 
-      // Should succeed - content differs from GitHub, so commit proceeds
+      // Should succeed - gitBaseHash matches GitHub HEAD and content differs
       expect(result.success).toBe(true);
       expect(result.message).toContain('committed successfully');
       expect(result.sha).toBe('new-commit-sha-def456');
@@ -321,16 +323,35 @@ describe('GitHub', () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toContain('No changes to commit');
-      expect(result.sha).toBe('abc123'); // Returns existing SHA
+      expect(result.hash).toBeDefined(); // Returns content hash (no commit happened)
     });
 
     it('should handle rate limit errors', async () => {
-      (global.fetch as jest.Mock).mockRejectedValueOnce(
-        new Error('rate limit exceeded')
-      );
+      const content = '{"galaxies":["test"]}';
+      
+      // First fetch for getFileSha succeeds
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            sha: 'abc123',
+            content: Buffer.from('different content').toString('base64'),
+          }),
+        })
+        // Second fetch for final commit fails with rate limit
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            sha: 'abc123',
+            content: Buffer.from('different content').toString('base64'),
+          }),
+        })
+        .mockRejectedValueOnce(
+          new Error('rate limit exceeded')
+        );
 
       const result = await pushUniverseChanges(
-        '{"galaxies":[]}',
+        content,
         'Test commit'
       );
 
@@ -339,12 +360,29 @@ describe('GitHub', () => {
     });
 
     it('should handle authentication errors', async () => {
-      (global.fetch as jest.Mock).mockRejectedValueOnce(
-        new Error('401 Bad credentials')
-      );
+      const content = '{"galaxies":["test"]}';
+      
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            sha: 'abc123',
+            content: Buffer.from('different content').toString('base64'),
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            sha: 'abc123',
+            content: Buffer.from('different content').toString('base64'),
+          }),
+        })
+        .mockRejectedValueOnce(
+          new Error('401 Bad credentials')
+        );
 
       const result = await pushUniverseChanges(
-        '{"galaxies":[]}',
+        content,
         'Test commit'
       );
 
@@ -353,12 +391,29 @@ describe('GitHub', () => {
     });
 
     it('should handle permission errors', async () => {
-      (global.fetch as jest.Mock).mockRejectedValueOnce(
-        new Error('403 Forbidden')
-      );
+      const content = '{"galaxies":["test"]}';
+      
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            sha: 'abc123',
+            content: Buffer.from('different content').toString('base64'),
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            sha: 'abc123',
+            content: Buffer.from('different content').toString('base64'),
+          }),
+        })
+        .mockRejectedValueOnce(
+          new Error('403 Forbidden')
+        );
 
       const result = await pushUniverseChanges(
-        '{"galaxies":[]}',
+        content,
         'Test commit'
       );
 
@@ -367,12 +422,29 @@ describe('GitHub', () => {
     });
 
     it('should detect SHA mismatch errors and provide retry guidance', async () => {
-      (global.fetch as jest.Mock).mockRejectedValueOnce(
-        new Error('does not match the expected SHA')
-      );
+      const content = '{"galaxies":["test"]}';
+      
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            sha: 'abc123',
+            content: Buffer.from('different content').toString('base64'),
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            sha: 'abc123',
+            content: Buffer.from('different content').toString('base64'),
+          }),
+        })
+        .mockRejectedValueOnce(
+          new Error('does not match the expected SHA')
+        );
 
       const result = await pushUniverseChanges(
-        '{"galaxies":[]}',
+        content,
         'Test commit'
       );
 

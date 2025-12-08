@@ -393,12 +393,12 @@ export async function POST(request: NextRequest) {
 
     // Push to GitHub
     logVerbose('[POST /api/admin/universe] Step 4: Pushing to GitHub...');
-    logVerbose('[POST /api/admin/universe] Note: GitHub layer will fetch fresh SHA to prevent conflicts');
+    logVerbose('[POST /api/admin/universe] Note: GitHub layer will verify gitBaseHash matches current GitHub HEAD');
     const result = await pushUniverseChanges(
       content,
       commitMessage,
       createPR || false,
-      gitBaseHash // Pass gitBaseHash for logging/context, but actual GitHub SHA fetching happens in pushUniverseChanges
+      gitBaseHash // Pass gitBaseHash for optimistic locking against GitHub
     );
 
     if (result.success) {
@@ -414,7 +414,7 @@ export async function POST(request: NextRequest) {
         success: true,
         message: result.message,
         sha: result.sha,
-        hash: result.sha, // This becomes the new gitBaseHash after successful commit
+        hash: result.hash || result.sha, // New content hash becomes the gitBaseHash after successful commit
         prUrl: result.prUrl,
       });
     } else {
@@ -422,13 +422,17 @@ export async function POST(request: NextRequest) {
       console.error('[POST /api/admin/universe] FAILED: GitHub push failed');
       console.error('[POST /api/admin/universe] Error:', result.error);
       logVerbose('[POST /api/admin/universe] ========================================');
+      
+      // Return 409 for conflict errors (optimistic locking failures)
+      const isConflict = result.message?.includes('Conflict detected') || result.error?.includes('modified in GitHub');
+      
       return NextResponse.json(
         {
           success: false,
           error: result.error,
           message: result.message,
         },
-        { status: 400 }
+        { status: isConflict ? 409 : 400 }
       );
     }
   } catch (error) {

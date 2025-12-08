@@ -47,6 +47,7 @@ export interface CommitResult {
   success: boolean;
   message: string;
   sha?: string;
+  hash?: string; // Content hash of committed content for UI baseline update
   prUrl?: string;
   error?: string;
 }
@@ -316,19 +317,35 @@ export async function pushUniverseChanges(
     
     logVerbose('[pushUniverseChanges] Current GitHub SHA:', fileData.sha.substring(0, 8) + '...');
 
-    // Optimistic locking is handled by the API route before calling this function.
-    // The route handler verifies the on-disk file hash matches the currentHash.
-    // This function fetches a fresh SHA from GitHub before committing,
-    // which serves as the protection against concurrent remote changes.
+    // Compute hash of current GitHub content for optimistic locking
+    const githubHash = await sha256(fileData.content);
+    logVerbose('[pushUniverseChanges] Current GitHub content hash:', githubHash.substring(0, 8) + '...');
+
+    // Optimistic locking: verify GitHub hasn't changed since user loaded the editor
+    // currentHash should be the gitBaseHash from when the user loaded the editor
     if (currentHash) {
-      logVerbose('[pushUniverseChanges] Received hash for optimistic lock verification:', currentHash.substring(0, 8) + '...');
-      logVerbose('[pushUniverseChanges] Note: API route has already verified on-disk hash against currentHash');
+      logVerbose('[pushUniverseChanges] Verifying optimistic lock with gitBaseHash:', currentHash.substring(0, 8) + '...');
+      
+      if (githubHash !== currentHash) {
+        // GitHub has changed since the user loaded the editor - conflict!
+        console.error('[pushUniverseChanges] Conflict detected: GitHub content changed since baseline');
+        console.error('[pushUniverseChanges] Expected gitBaseHash:', currentHash.substring(0, 8) + '...');
+        console.error('[pushUniverseChanges] Current GitHub hash:', githubHash.substring(0, 8) + '...');
+        return {
+          success: false,
+          message: 'Conflict detected: file changed in GitHub',
+          error: 'The file was modified in GitHub after you loaded the editor. Please refresh, re-apply your changes, save, and try committing again.',
+        };
+      }
+      
+      logVerbose('[pushUniverseChanges] Optimistic lock verified - GitHub matches baseline');
+    } else {
+      logVerbose('[pushUniverseChanges] No gitBaseHash provided - skipping optimistic lock check');
     }
 
-    // Additional safety check: compare content being committed with GitHub HEAD
-    // This detects drift even without currentHash provided
+    // Check if content being committed differs from GitHub HEAD
     const contentHash = await sha256(content);
-    const githubHash = await sha256(fileData.content);
+    logVerbose('[pushUniverseChanges] Content to commit hash:', contentHash.substring(0, 8) + '...');
     
     if (contentHash === githubHash) {
       // Content matches GitHub HEAD - no changes to commit.
@@ -336,22 +353,11 @@ export async function pushUniverseChanges(
       return {
         success: true,
         message: 'No changes to commit. The content is already up-to-date.',
-        sha: fileData.sha,
+        hash: githubHash, // Return current hash so UI stays in sync
       };
     }
     
-    // Content being committed differs from current GitHub HEAD
-    // This is the EXPECTED workflow: save to disk → commit new content to GitHub
-    if (!currentHash) {
-      logVerbose('[pushUniverseChanges] Content differs from GitHub HEAD - proceeding with commit');
-      logVerbose('[pushUniverseChanges] This is expected for save-then-commit workflow');
-    } else {
-      // Hash verification passed (GitHub HEAD matched expected), but we're committing different content
-      // This means: GitHub HEAD == what user expected, but disk file has new changes
-      // This is also normal: user saved new content to disk, now committing it
-      logVerbose('[pushUniverseChanges] Content differs from GitHub HEAD (expected - committing new changes)');
-      logVerbose('[pushUniverseChanges] Optimistic lock verified, proceeding with updated content');
-    }
+    logVerbose('[pushUniverseChanges] Content differs from GitHub HEAD - proceeding with commit');
 
     if (createPR) {
       // Create a new branch and PR
@@ -387,6 +393,10 @@ export async function pushUniverseChanges(
       );
       logVerbose('[pushUniverseChanges] Commit successful, SHA:', commitSha.substring(0, 8) + '...');
 
+      // Compute hash of committed content for UI baseline update
+      const committedHash = await sha256(content);
+      logVerbose('[pushUniverseChanges] New content hash after commit:', committedHash.substring(0, 8) + '...');
+
       logVerbose('[pushUniverseChanges] Creating pull request...');
       const prUrl = await createPullRequest(
         config,
@@ -400,6 +410,7 @@ export async function pushUniverseChanges(
         success: true,
         message: 'Pull request created successfully',
         sha: commitSha,
+        hash: committedHash, // New content hash for UI baseline update
         prUrl,
       };
     } else {
@@ -429,10 +440,15 @@ export async function pushUniverseChanges(
       );
       console.log('[pushUniverseChanges] Commit successful to', config.branch);
 
+      // Compute hash of committed content for UI baseline update
+      const committedHash = await sha256(content);
+      logVerbose('[pushUniverseChanges] New content hash after commit:', committedHash.substring(0, 8) + '...');
+
       return {
         success: true,
         message: 'Changes committed successfully',
         sha: commitSha,
+        hash: committedHash, // New content hash for UI baseline update
       };
     }
   } catch (error) {
