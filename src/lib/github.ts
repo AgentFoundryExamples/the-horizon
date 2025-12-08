@@ -47,8 +47,10 @@ export interface CommitResult {
   success: boolean;
   message: string;
   sha?: string;
+  hash?: string; // Content hash that becomes the new gitBaseHash for subsequent operations
   prUrl?: string;
   error?: string;
+  errorCode?: 'CONFLICT' | 'RATE_LIMIT' | 'AUTH_FAILED' | 'PERMISSION_DENIED' | 'UNKNOWN'; // Typed error codes for reliable programmatic error handling
 }
 
 /**
@@ -316,42 +318,65 @@ export async function pushUniverseChanges(
     
     logVerbose('[pushUniverseChanges] Current GitHub SHA:', fileData.sha.substring(0, 8) + '...');
 
-    // Optimistic locking is handled by the API route before calling this function.
-    // The route handler verifies the on-disk file hash matches the currentHash.
-    // This function fetches a fresh SHA from GitHub before committing,
-    // which serves as the protection against concurrent remote changes.
-    if (currentHash) {
-      logVerbose('[pushUniverseChanges] Received hash for optimistic lock verification:', currentHash.substring(0, 8) + '...');
-      logVerbose('[pushUniverseChanges] Note: API route has already verified on-disk hash against currentHash');
-    }
-
-    // Additional safety check: compare content being committed with GitHub HEAD
-    // This detects drift even without currentHash provided
+    // Compute hash of content to be committed
     const contentHash = await sha256(content);
-    const githubHash = await sha256(fileData.content);
-    
-    if (contentHash === githubHash) {
-      // Content matches GitHub HEAD - no changes to commit.
-      console.log('[pushUniverseChanges] Content matches GitHub HEAD - no changes to commit. Aborting commit.');
-      return {
-        success: true,
-        message: 'No changes to commit. The content is already up-to-date.',
-        sha: fileData.sha,
-      };
-    }
-    
-    // Content being committed differs from current GitHub HEAD
-    // This is the EXPECTED workflow: save to disk → commit new content to GitHub
-    if (!currentHash) {
-      logVerbose('[pushUniverseChanges] Content differs from GitHub HEAD - proceeding with commit');
-      logVerbose('[pushUniverseChanges] This is expected for save-then-commit workflow');
+    logVerbose('[pushUniverseChanges] Content to commit hash:', contentHash.substring(0, 8) + '...');
+
+    // Optimistic locking: verify GitHub hasn't changed since user loaded the editor
+    // currentHash should be the gitBaseHash from when the user loaded the editor
+    // Compute githubHash only when needed for verification
+    let githubHash: string;
+    if (currentHash) {
+      logVerbose('[pushUniverseChanges] Verifying optimistic lock with gitBaseHash:', currentHash.substring(0, 8) + '...');
+      
+      // Compute hash of current GitHub content for optimistic locking
+      githubHash = await sha256(fileData.content);
+      logVerbose('[pushUniverseChanges] Current GitHub content hash:', githubHash.substring(0, 8) + '...');
+      
+      if (githubHash !== currentHash) {
+        // GitHub has changed since the user loaded the editor - conflict!
+        console.error('[pushUniverseChanges] Conflict detected: GitHub content changed since baseline');
+        console.error('[pushUniverseChanges] Expected gitBaseHash:', currentHash.substring(0, 8) + '...');
+        console.error('[pushUniverseChanges] Current GitHub hash:', githubHash.substring(0, 8) + '...');
+        return {
+          success: false,
+          message: 'Conflict detected: file changed in GitHub',
+          error: 'The file was modified in GitHub after you loaded the editor. Please refresh, re-apply your changes, save, and try committing again.',
+          errorCode: 'CONFLICT',
+        };
+      }
+      
+      logVerbose('[pushUniverseChanges] Optimistic lock verified - GitHub matches baseline');
+      
+      // Early exit if no changes to commit
+      if (contentHash === githubHash) {
+        console.log('[pushUniverseChanges] Content matches GitHub HEAD - no changes to commit. Aborting commit.');
+        return {
+          success: true,
+          message: 'No changes to commit. The content is already up-to-date.',
+          sha: fileData.sha,
+          hash: githubHash,
+        };
+      }
     } else {
-      // Hash verification passed (GitHub HEAD matched expected), but we're committing different content
-      // This means: GitHub HEAD == what user expected, but disk file has new changes
-      // This is also normal: user saved new content to disk, now committing it
-      logVerbose('[pushUniverseChanges] Content differs from GitHub HEAD (expected - committing new changes)');
-      logVerbose('[pushUniverseChanges] Optimistic lock verified, proceeding with updated content');
+      logVerbose('[pushUniverseChanges] No gitBaseHash provided - skipping optimistic lock check');
+      
+      // Compute GitHub hash for no-changes check (only when optimistic locking was skipped)
+      githubHash = await sha256(fileData.content);
+      logVerbose('[pushUniverseChanges] Current GitHub content hash:', githubHash.substring(0, 8) + '...');
+      
+      if (contentHash === githubHash) {
+        console.log('[pushUniverseChanges] Content matches GitHub HEAD - no changes to commit. Aborting commit.');
+        return {
+          success: true,
+          message: 'No changes to commit. The content is already up-to-date.',
+          sha: fileData.sha,
+          hash: githubHash,
+        };
+      }
     }
+    
+    logVerbose('[pushUniverseChanges] Content differs from GitHub HEAD - proceeding with commit');
 
     if (createPR) {
       // Create a new branch and PR
@@ -387,6 +412,9 @@ export async function pushUniverseChanges(
       );
       logVerbose('[pushUniverseChanges] Commit successful, SHA:', commitSha.substring(0, 8) + '...');
 
+      // Reuse contentHash computed earlier (no need to recompute)
+      logVerbose('[pushUniverseChanges] New content hash after commit:', contentHash.substring(0, 8) + '...');
+
       logVerbose('[pushUniverseChanges] Creating pull request...');
       const prUrl = await createPullRequest(
         config,
@@ -400,6 +428,7 @@ export async function pushUniverseChanges(
         success: true,
         message: 'Pull request created successfully',
         sha: commitSha,
+        hash: contentHash, // Reuse contentHash computed earlier
         prUrl,
       };
     } else {
@@ -429,10 +458,14 @@ export async function pushUniverseChanges(
       );
       console.log('[pushUniverseChanges] Commit successful to', config.branch);
 
+      // Reuse contentHash computed earlier (no need to recompute)
+      logVerbose('[pushUniverseChanges] New content hash after commit:', contentHash.substring(0, 8) + '...');
+
       return {
         success: true,
         message: 'Changes committed successfully',
         sha: commitSha,
+        hash: contentHash, // Reuse contentHash computed earlier
       };
     }
   } catch (error) {
@@ -450,6 +483,7 @@ export async function pushUniverseChanges(
         success: false,
         message: 'Conflict detected: file changed remotely',
         error: 'The file was modified in GitHub between your save and commit. Please refresh, re-apply your changes, save, and try committing again.',
+        errorCode: 'CONFLICT',
       };
     }
     
@@ -459,6 +493,7 @@ export async function pushUniverseChanges(
         success: false,
         message: 'GitHub API rate limit exceeded',
         error: 'Please try again later or upgrade your GitHub token to a higher rate limit.',
+        errorCode: 'RATE_LIMIT',
       };
     }
 
@@ -468,6 +503,7 @@ export async function pushUniverseChanges(
         success: false,
         message: 'Authentication failed',
         error: 'GitHub token is invalid or expired. Please check your GITHUB_TOKEN environment variable.',
+        errorCode: 'AUTH_FAILED',
       };
     }
 
@@ -477,6 +513,7 @@ export async function pushUniverseChanges(
         success: false,
         message: 'Permission denied',
         error: 'GitHub token does not have required permissions. Ensure it has "repo" scope.',
+        errorCode: 'PERMISSION_DENIED',
       };
     }
 
@@ -485,6 +522,7 @@ export async function pushUniverseChanges(
       success: false,
       message: 'Failed to push changes to GitHub',
       error: 'An error occurred while communicating with GitHub. Please check your configuration and try again.',
+      errorCode: 'UNKNOWN',
     };
   }
 }
