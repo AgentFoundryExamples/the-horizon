@@ -17,6 +17,38 @@
  * and independent Stars
  */
 
+/**
+ * Hash tracking for admin editor optimistic locking
+ * 
+ * The admin editor maintains two separate hashes to prevent false conflicts:
+ * 
+ * - gitBaseHash: The immutable GitHub baseline hash that serves as the comparison target
+ *   for commit operations. This hash only updates after a successful commit to GitHub
+ *   or when explicitly refreshing from GitHub. It is never modified by local save operations.
+ * 
+ * - localDiskHash: The current hash of the local file on disk. This updates after each
+ *   save-to-disk operation and is used to detect concurrent local modifications.
+ * 
+ * This dual-hash approach ensures that:
+ * 1. Local saves don't interfere with GitHub baseline tracking
+ * 2. Commits use the correct baseline for optimistic locking
+ * 3. Concurrent edits by multiple admins can be detected
+ * 4. The workflow remains: edit → save to disk → commit to GitHub
+ */
+export interface AdminHashTracking {
+  /**
+   * GitHub baseline hash - immutable until successful commit or explicit refresh
+   * Used for GitHub API operations and optimistic locking against remote changes
+   */
+  gitBaseHash: string;
+  
+  /**
+   * Local disk file hash - updates after each save to disk
+   * Used for detecting concurrent local modifications
+   */
+  localDiskHash: string;
+}
+
 export interface Moon {
   id: string;
   name: string;

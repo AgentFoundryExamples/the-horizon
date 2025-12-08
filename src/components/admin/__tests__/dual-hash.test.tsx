@@ -1,0 +1,329 @@
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import UniverseEditor from '../UniverseEditor';
+import { Universe } from '@/lib/universe/types';
+
+// Mock next/navigation
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+}));
+
+// Mock fetch
+global.fetch = jest.fn();
+
+describe('UniverseEditor - Dual Hash System', () => {
+  const mockUniverse: Universe = {
+    galaxies: [
+      {
+        id: 'test-galaxy',
+        name: 'Test Galaxy',
+        description: 'A test galaxy',
+        theme: 'blue-white',
+        particleColor: '#4A90E2',
+        stars: [],
+        solarSystems: [],
+      },
+    ],
+  };
+
+  const mockOnUpdate = jest.fn();
+  const initialGitBaseHash = 'git-base-abc123';
+  const initialLocalDiskHash = 'git-base-abc123'; // Initially in sync
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (global.fetch as jest.Mock).mockClear();
+  });
+
+  describe('Save to Disk - preserves gitBaseHash', () => {
+    it('should update only localDiskHash when saving to disk, preserving gitBaseHash', async () => {
+      const newLocalHash = 'local-disk-def456';
+      
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({ success: true, hash: newLocalHash }),
+      });
+
+      render(
+        <UniverseEditor
+          universe={mockUniverse}
+          gitBaseHash={initialGitBaseHash}
+          localDiskHash={initialLocalDiskHash}
+          onUpdate={mockOnUpdate}
+        />
+      );
+
+      const saveButton = screen.getByText('💾 Save to Disk');
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(mockOnUpdate).toHaveBeenCalledWith(
+          mockUniverse,
+          newLocalHash, // localDiskHash updated
+          undefined // gitBaseHash not provided, should remain unchanged
+        );
+      });
+
+      // Verify the PATCH call used localDiskHash
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/admin/universe',
+        expect.objectContaining({
+          method: 'PATCH',
+          body: expect.stringContaining(initialLocalDiskHash),
+        })
+      );
+    });
+
+    it('should handle multiple saves without affecting gitBaseHash', async () => {
+      const firstNewHash = 'local-disk-def456';
+      const secondNewHash = 'local-disk-ghi789';
+      
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ success: true, hash: firstNewHash }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ success: true, hash: secondNewHash }),
+        });
+
+      render(
+        <UniverseEditor
+          universe={mockUniverse}
+          gitBaseHash={initialGitBaseHash}
+          localDiskHash={initialLocalDiskHash}
+          onUpdate={mockOnUpdate}
+        />
+      );
+
+      const saveButton = screen.getByText('💾 Save to Disk');
+      
+      // First save
+      fireEvent.click(saveButton);
+      await waitFor(() => {
+        expect(mockOnUpdate).toHaveBeenNthCalledWith(
+          1,
+          mockUniverse,
+          firstNewHash,
+          undefined // gitBaseHash unchanged
+        );
+      });
+
+      // Second save
+      fireEvent.click(saveButton);
+      await waitFor(() => {
+        expect(mockOnUpdate).toHaveBeenNthCalledWith(
+          2,
+          mockUniverse,
+          secondNewHash,
+          undefined // gitBaseHash still unchanged
+        );
+      });
+
+      expect(mockOnUpdate).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('Commit to GitHub - uses gitBaseHash', () => {
+    it('should use gitBaseHash for commit operation, not localDiskHash', async () => {
+      const localDiskHash = 'local-disk-changed-123';
+      const commitResponseHash = 'github-commit-xyz789';
+      
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({ 
+          success: true, 
+          hash: commitResponseHash,
+          message: 'Changes committed successfully',
+        }),
+      });
+
+      render(
+        <UniverseEditor
+          universe={mockUniverse}
+          gitBaseHash={initialGitBaseHash}
+          localDiskHash={localDiskHash}
+          onUpdate={mockOnUpdate}
+        />
+      );
+
+      // Fill in commit message
+      const commitMessageInput = screen.getByLabelText(/Commit Message/i);
+      fireEvent.change(commitMessageInput, { target: { value: 'Test commit' } });
+
+      const commitButton = screen.getByText('✓ Commit to Main Branch');
+      fireEvent.click(commitButton);
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith(
+          '/api/admin/universe',
+          expect.objectContaining({
+            method: 'POST',
+            body: expect.stringContaining(initialGitBaseHash), // Uses gitBaseHash, not localDiskHash
+          })
+        );
+      });
+
+      // Verify body doesn't contain localDiskHash
+      const fetchCall = (global.fetch as jest.Mock).mock.calls.find(
+        call => call[1]?.method === 'POST'
+      );
+      expect(fetchCall[1].body).not.toContain(localDiskHash);
+    });
+
+    it('should update gitBaseHash after successful commit', async () => {
+      const localDiskHash = 'local-disk-changed-123';
+      const newGitBaseHash = 'github-commit-xyz789';
+      
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({ 
+          success: true, 
+          hash: newGitBaseHash,
+          message: 'Changes committed successfully',
+        }),
+      });
+
+      render(
+        <UniverseEditor
+          universe={mockUniverse}
+          gitBaseHash={initialGitBaseHash}
+          localDiskHash={localDiskHash}
+          onUpdate={mockOnUpdate}
+        />
+      );
+
+      const commitMessageInput = screen.getByLabelText(/Commit Message/i);
+      fireEvent.change(commitMessageInput, { target: { value: 'Test commit' } });
+
+      const commitButton = screen.getByText('✓ Commit to Main Branch');
+      fireEvent.click(commitButton);
+
+      await waitFor(() => {
+        expect(mockOnUpdate).toHaveBeenCalledWith(
+          mockUniverse,
+          undefined, // localDiskHash not updated (already matches)
+          newGitBaseHash // gitBaseHash updated to new GitHub SHA
+        );
+      });
+    });
+
+    it('should sync both hashes when commit hash not returned', async () => {
+      const localDiskHash = 'local-disk-changed-123';
+      
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({ 
+          success: true,
+          message: 'Changes committed successfully',
+          // No hash in response
+        }),
+      });
+
+      render(
+        <UniverseEditor
+          universe={mockUniverse}
+          gitBaseHash={initialGitBaseHash}
+          localDiskHash={localDiskHash}
+          onUpdate={mockOnUpdate}
+        />
+      );
+
+      const commitMessageInput = screen.getByLabelText(/Commit Message/i);
+      fireEvent.change(commitMessageInput, { target: { value: 'Test commit' } });
+
+      const commitButton = screen.getByText('✓ Commit to Main Branch');
+      fireEvent.click(commitButton);
+
+      await waitFor(() => {
+        expect(mockOnUpdate).toHaveBeenCalledWith(
+          mockUniverse,
+          undefined,
+          localDiskHash // Falls back to using localDiskHash as new gitBaseHash
+        );
+      });
+    });
+  });
+
+  describe('Conflict detection', () => {
+    it('should detect conflicts during save using localDiskHash', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: false,
+        status: 409,
+        json: async () => ({ 
+          error: 'Conflict detected',
+          message: 'The file has been modified. Please refresh and try again.',
+        }),
+      });
+
+      render(
+        <UniverseEditor
+          universe={mockUniverse}
+          gitBaseHash={initialGitBaseHash}
+          localDiskHash={initialLocalDiskHash}
+          onUpdate={mockOnUpdate}
+        />
+      );
+
+      const saveButton = screen.getByText('💾 Save to Disk');
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Conflict detected/i)).toBeInTheDocument();
+      });
+
+      // Verify gitBaseHash was not passed to save operation
+      const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
+      const body = JSON.parse(fetchCall[1].body);
+      expect(body.currentHash).toBe(initialLocalDiskHash);
+    });
+  });
+
+  describe('Hash lifecycle', () => {
+    it('should maintain gitBaseHash through multiple edit-save cycles', async () => {
+      const saveHashes = ['hash1', 'hash2', 'hash3'];
+      let callCount = 0;
+      
+      (global.fetch as jest.Mock).mockImplementation(() => {
+        const hash = saveHashes[callCount++];
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ success: true, hash }),
+        });
+      });
+
+      render(
+        <UniverseEditor
+          universe={mockUniverse}
+          gitBaseHash={initialGitBaseHash}
+          localDiskHash={initialLocalDiskHash}
+          onUpdate={mockOnUpdate}
+        />
+      );
+
+      const saveButton = screen.getByText('💾 Save to Disk');
+      
+      // Multiple saves
+      for (let i = 0; i < 3; i++) {
+        fireEvent.click(saveButton);
+        await waitFor(() => {
+          expect(mockOnUpdate).toHaveBeenNthCalledWith(
+            i + 1,
+            mockUniverse,
+            saveHashes[i],
+            undefined // gitBaseHash never updated through saves
+          );
+        });
+      }
+
+      // Verify gitBaseHash parameter was never updated in any call
+      mockOnUpdate.mock.calls.forEach(call => {
+        expect(call[2]).toBeUndefined(); // Third parameter (gitBaseHash) should be undefined
+      });
+    });
+  });
+});
