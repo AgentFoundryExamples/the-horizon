@@ -30,16 +30,27 @@
     rgba(74, 144, 226, 0.15),
     rgba(74, 144, 226, 0.08)
   );
+  /* Fallback for browsers without backdrop-filter support */
+  background-color: rgba(0, 0, 0, 0.85);
   border: 1px solid rgba(74, 144, 226, 0.6);
   border-radius: 8px;
   padding: 0.5rem 0.875rem;
   backdrop-filter: blur(12px);
+  /* Fallback for older browsers */
+  -webkit-backdrop-filter: blur(12px);
   box-shadow: 
     0 4px 16px rgba(0, 0, 0, 0.4),
     0 0 20px rgba(74, 144, 226, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   min-width: 120px;
   max-width: 300px;
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not (backdrop-filter: blur(12px)) {
+  .overlay-label-content {
+    background: rgba(0, 0, 0, 0.95);
+  }
 }
 
 /* Hologram glow effect */

@@ -241,9 +241,10 @@ describe('Projection Utilities', () => {
       const threshold = 100;
 
       // Distance = sqrt(60^2 + 80^2) = 100
+      // Distance equals threshold, so not too close (< threshold)
       const result = arePositionsTooClose(pos1, pos2, threshold);
 
-      expect(result).toBe(false); // Exactly at threshold
+      expect(result).toBe(false); // Distance = threshold, not less than
     });
 
     it('should handle identical positions', () => {
