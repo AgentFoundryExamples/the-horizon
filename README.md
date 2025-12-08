@@ -21,7 +21,7 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 ### v0.1.3 - Galaxy Scale and Visual Improvements (December 2025)
 
-*This release enhances the visual experience with improved galaxy scaling, refined hover interactions, and documentation updates.*
+*This release enhances the visual experience with improved galaxy scaling and refined camera positioning.*
 
 **Key Improvements:**
 
