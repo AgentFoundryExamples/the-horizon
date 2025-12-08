@@ -414,7 +414,7 @@ export async function POST(request: NextRequest) {
         success: true,
         message: result.message,
         sha: result.sha,
-        hash: result.hash || result.sha, // New content hash becomes the gitBaseHash after successful commit
+        hash: result.hash, // New content hash becomes the gitBaseHash after successful commit
         prUrl: result.prUrl,
       });
     } else {

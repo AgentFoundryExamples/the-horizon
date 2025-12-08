@@ -318,14 +318,19 @@ export async function pushUniverseChanges(
     
     logVerbose('[pushUniverseChanges] Current GitHub SHA:', fileData.sha.substring(0, 8) + '...');
 
-    // Compute hash of current GitHub content for optimistic locking
-    const githubHash = await sha256(fileData.content);
-    logVerbose('[pushUniverseChanges] Current GitHub content hash:', githubHash.substring(0, 8) + '...');
+    // Compute hash of content to be committed
+    const contentHash = await sha256(content);
+    logVerbose('[pushUniverseChanges] Content to commit hash:', contentHash.substring(0, 8) + '...');
 
     // Optimistic locking: verify GitHub hasn't changed since user loaded the editor
     // currentHash should be the gitBaseHash from when the user loaded the editor
+    let githubHash: string;
     if (currentHash) {
       logVerbose('[pushUniverseChanges] Verifying optimistic lock with gitBaseHash:', currentHash.substring(0, 8) + '...');
+      
+      // Compute hash of current GitHub content only when optimistic locking is needed
+      githubHash = await sha256(fileData.content);
+      logVerbose('[pushUniverseChanges] Current GitHub content hash:', githubHash.substring(0, 8) + '...');
       
       if (githubHash !== currentHash) {
         // GitHub has changed since the user loaded the editor - conflict!
@@ -343,11 +348,10 @@ export async function pushUniverseChanges(
       logVerbose('[pushUniverseChanges] Optimistic lock verified - GitHub matches baseline');
     } else {
       logVerbose('[pushUniverseChanges] No gitBaseHash provided - skipping optimistic lock check');
+      // Compute GitHub hash for no-changes check even without optimistic locking
+      githubHash = await sha256(fileData.content);
+      logVerbose('[pushUniverseChanges] Current GitHub content hash:', githubHash.substring(0, 8) + '...');
     }
-
-    // Check if content being committed differs from GitHub HEAD
-    const contentHash = await sha256(content);
-    logVerbose('[pushUniverseChanges] Content to commit hash:', contentHash.substring(0, 8) + '...');
     
     if (contentHash === githubHash) {
       // Content matches GitHub HEAD - no changes to commit.
