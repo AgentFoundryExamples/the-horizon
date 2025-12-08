@@ -6,14 +6,14 @@ This document describes the 3D scene controls, camera animations, hover labels, 
 
 ### Overview
 
-The application features DOM-based overlay hover labels that appear when hovering over celestial objects in the 3D scene. These labels are rendered as HTML/CSS overlays positioned above the WebGL canvas, ensuring they remain legible and properly sized at any zoom level or camera angle.
+The application features DOM-based overlay hover labels that appear when hovering over celestial objects in the 3D scene. These labels are rendered using Drei's `Html` component, which provides seamless integration with React Three Fiber's rendering pipeline.
 
 **Key Features:**
-- **2D DOM Overlay**: Labels render in a fixed-position DOM container outside the Canvas, never scaling with 3D scene depth
-- **Screen Projection**: 3D world positions are projected to 2D screen coordinates every frame using camera matrices
-- **Smart Clamping**: Labels reposition when near screen edges to remain visible
+- **R3F Native Rendering**: Labels use Drei's `Html` component for proper integration with the R3F Canvas
+- **3D Positioning**: Labels are positioned in 3D space and automatically project to screen coordinates
+- **Robust Validation**: Input validation prevents crashes from invalid position data
 - **Hologram Aesthetics**: Modern glassmorphism design with glowing borders, translucent backgrounds, and smooth animations
-- **Performance Optimized**: Updates run in `useFrame` hook for 60 FPS rendering
+- **Performance Optimized**: Efficient rendering using R3F's built-in optimization strategies
 - **Accessibility**: ARIA attributes for screen readers, keyboard-accessible toggle button
 - **Responsive**: Adapts to mobile viewports and respects `prefers-reduced-motion`
 
@@ -23,7 +23,7 @@ The hover label system consists of three main components:
 
 #### 1. Hover State Management (`src/lib/hover-store.ts`)
 
-Zustand store that tracks the currently hovered object:
+Zustand store that tracks the currently hovered object with built-in validation:
 
 ```typescript
 interface HoveredObject {
@@ -41,39 +41,27 @@ interface HoveredObject {
 ```
 
 **Store Actions:**
-- `setHoveredObject(object)`: Update the hovered object
+- `setHoveredObject(object)`: Update the hovered object (with validation)
 - `clearHover()`: Clear hover state
 - `toggleLabelsVisibility()`: Toggle label visibility on/off
 - `setLabelsVisibility(visible)`: Programmatically set visibility
 
-#### 2. Projection Utilities (`src/lib/projection.ts`)
+**Validation Features:**
+- Validates object structure (id, name, position)
+- Checks for NaN and Infinity in position coordinates
+- Logs warnings for invalid data without crashing
+- Gracefully handles null values (for clearing)
 
-Converts 3D world coordinates to 2D screen coordinates:
+#### 2. Overlay Component (`src/components/OverlayLabels.tsx`)
 
-```typescript
-// Project 3D position to screen coordinates
-projectToScreen(position, camera, width, height): ScreenPosition
+Renders labels using Drei's `Html` component inside the R3F Canvas:
 
-// Clamp position to screen bounds with margin
-clampToScreen(x, y, width, height, margin): { x, y, clamped }
-
-// Calculate offset for label positioning
-calculateLabelOffset(baseX, baseY, offsetX, offsetY): { x, y }
-```
-
-**Edge Case Handling:**
-- Objects behind camera are hidden (`isBehindCamera` flag)
-- Off-screen objects are detected and hidden
-- Screen-edge clamping prevents labels from being cut off
-
-#### 3. Overlay Component (`src/components/OverlayLabels.tsx`)
-
-Renders labels using React Portal to position them outside the Canvas:
-
-- **Inner Component**: Uses `useThree()` hook to access camera and size within Canvas context
-- **Portal Rendering**: `createPortal()` renders to a DOM container appended to `document.body`
-- **Frame Updates**: `useFrame()` hook recalculates position every frame (60 FPS)
-- **Cleanup**: Container is removed from DOM on unmount
+- **Drei Html Integration**: Uses `<Html>` component from `@react-three/drei` for proper R3F rendering
+- **3D Positioning**: Position is specified as `[x, y, z]` array in 3D space
+- **Automatic Projection**: Drei handles projection from 3D to 2D automatically
+- **Guard Rails**: Additional position validation prevents rendering invalid labels
+- **Sprite Mode**: Uses sprite rendering for consistent label sizing
+- **No Occlusion**: Labels are always visible, even when objects are behind others
 
 ### Integration Points
 
@@ -229,12 +217,13 @@ offsetY: -30  // Vertical offset (negative = above)
 
 ### Testing
 
-**Unit Tests** (`src/lib/__tests__/`):
-- Projection utilities tested with known camera matrices
-- Edge cases: behind camera, off-screen, screen edges
-- Clamping behavior verified
+**Unit Tests** (`src/lib/__tests__/hover-store.test.ts`):
+- Store actions and selectors
+- Validation logic for invalid objects
+- Edge cases: NaN, Infinity, null, missing fields
+- Rapid hover enter/leave events
 
-**Integration Tests** (`src/components/__tests__/`):
+**Integration Tests** (`src/components/__tests__/SceneHUD.test.tsx`):
 - Hover interactions trigger correct store updates
 - Labels appear/disappear on hover events
 - Toggle button controls visibility
@@ -243,13 +232,171 @@ offsetY: -30  // Vertical offset (negative = above)
 - [ ] Labels appear on hover over galaxies in universe view
 - [ ] Labels appear on solar systems and stars in galaxy view
 - [ ] Labels appear on planets in solar system view
-- [ ] Labels reposition when object is near screen edge
-- [ ] Labels hide when object is behind camera
+- [ ] Labels remain visible and follow object in 3D space
+- [ ] Labels hide when hovering off objects
 - [ ] Toggle button shows/hides labels
 - [ ] Labels respect reduced motion preference
 - [ ] Labels work on mobile (tap-to-show)
-- [ ] No performance issues at 60 FPS
+- [ ] No crashes or errors in console
 - [ ] Screen readers announce label content
+
+### Troubleshooting
+
+#### Application crashes when hovering over objects
+
+**Symptoms:**
+- Browser console shows errors like "Div is not part of the THREE namespace"
+- React component crashes on hover
+- Labels don't appear at all
+
+**Causes & Solutions:**
+
+1. **Using DOM elements directly in Canvas**
+   - ❌ **Wrong**: Rendering `<div>` directly inside `<Canvas>` without proper wrapper
+   - ✅ **Fix**: Always use Drei's `<Html>` component for DOM content inside R3F Canvas
+   ```tsx
+   // Inside Canvas
+   <Html position={[x, y, z]}>
+     <div className="label">Content</div>
+   </Html>
+   ```
+
+2. **Invalid position data**
+   - ❌ **Wrong**: Position contains `NaN`, `Infinity`, or is not a Vector3
+   - ✅ **Fix**: Validation is built into `hover-store.ts`. Check console warnings for rejected objects.
+   - ✅ **Additional**: Guard against undefined in OverlayLabels component
+
+3. **Missing Drei package**
+   - ❌ **Wrong**: `@react-three/drei` not installed or wrong version
+   - ✅ **Fix**: Ensure `@react-three/drei` is installed: `npm install @react-three/drei@^9.117.3`
+
+4. **Position not as array**
+   - ❌ **Wrong**: `position={hoveredObject.position}` (passing Vector3 object)
+   - ✅ **Fix**: Convert to array: `position={[pos.x, pos.y, pos.z]}`
+
+#### Labels don't appear or are invisible
+
+**Symptoms:**
+- No errors in console
+- Objects can be hovered (logging shows state updates)
+- But no visual label appears
+
+**Causes & Solutions:**
+
+1. **Labels disabled via toggle**
+   - Check: Click the "👁️ Labels" button in top-left HUD
+   - ✅ **Fix**: Toggle should be ON (filled eye icon)
+
+2. **CSS not loading**
+   - Check: Inspect element, verify classes are applied
+   - ✅ **Fix**: Ensure `overlay-labels.css` is imported in OverlayLabels.tsx
+
+3. **Position behind camera**
+   - Check: Try rotating camera to face the object
+   - ✅ **Fix**: Working as intended. Labels hide when object is behind view.
+
+4. **Z-index conflict**
+   - Check: Other elements with higher z-index covering labels
+   - ✅ **Fix**: Labels use `zIndexRange={[200, 0]}` in Html component
+
+#### Labels appear at wrong position
+
+**Symptoms:**
+- Label renders but not near the object
+- Label is offset incorrectly
+- Label doesn't follow object
+
+**Causes & Solutions:**
+
+1. **Wrong distanceFactor**
+   - Current setting: `distanceFactor={10}`
+   - ✅ **Fix**: Adjust in OverlayLabels.tsx to scale label distance from object
+
+2. **CSS transform conflicts**
+   - Check: CSS `transform` property in overlay-label class
+   - Current: `transform: translate(-50%, calc(-100% - 20px))`
+   - ✅ **Fix**: Adjust transform values to reposition label relative to anchor point
+
+3. **Position not updating**
+   - Check: Ensure `hoveredObject.position` is a new reference when updating
+   - ✅ **Fix**: Use `position.clone()` when creating HoveredObject
+
+#### Performance issues / jittery labels
+
+**Symptoms:**
+- Labels stutter or lag behind object
+- Frame rate drops when labels are visible
+- Browser feels sluggish
+
+**Causes & Solutions:**
+
+1. **Too many re-renders**
+   - Check: React DevTools profiler for excessive renders
+   - ✅ **Fix**: Component already optimized with conditional rendering
+
+2. **Heavy CSS animations**
+   - Check: Disable `prefers-reduced-motion` to test
+   - ✅ **Fix**: Use CSS `will-change` property sparingly
+
+3. **Multiple labels rendering**
+   - Check: Ensure only one HoveredObject at a time
+   - ✅ **Fix**: Store only tracks single hovered object
+
+#### Extending the Hover System
+
+**Adding new metadata fields:**
+
+1. Update `HoveredObject` interface in `src/lib/hover-store.ts`:
+   ```typescript
+   metadata?: {
+     description?: string;
+     planetCount?: number;
+     moonCount?: number;
+     theme?: string;
+     newField?: string; // Add here
+   }
+   ```
+
+2. Update label rendering in `src/components/OverlayLabels.tsx`:
+   ```tsx
+   {metadata?.newField && (
+     <div className="overlay-label-meta">{metadata.newField}</div>
+   )}
+   ```
+
+3. Update CSS in `src/styles/overlay-labels.css` if needed
+
+**Adding new hoverable object types:**
+
+1. Update type union in `src/lib/hover-store.ts`:
+   ```typescript
+   export type HoverableObjectType = 'galaxy' | 'solar-system' | 'planet' | 'star' | 'moon';
+   ```
+
+2. Add hover handlers in relevant 3D components:
+   ```tsx
+   onPointerOver={(e) => {
+     e.stopPropagation();
+     setHoveredObject({
+       id: moon.id,
+       name: moon.name,
+       type: 'moon',
+       position: position.clone(),
+       metadata: { /* ... */ }
+     });
+   }}
+   onPointerOut={() => setHoveredObject(null)}
+   ```
+
+**Safety checklist when modifying:**
+- ✅ Always validate position data before passing to store
+- ✅ Use `position.clone()` to avoid reference issues
+- ✅ Include `e.stopPropagation()` to prevent hover conflicts
+- ✅ Test validation with unit tests
+- ✅ Add console warnings for debugging without breaking app
+- ✅ Update documentation when adding features
+
+
 
 ## Planet Surface Layout
 

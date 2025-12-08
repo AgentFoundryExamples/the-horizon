@@ -1,25 +1,24 @@
 /**
  * Overlay Labels - Hologram-style hover labels
- * Positioned above WebGL canvas in DOM overlay
+ * Positioned above WebGL canvas using Drei's Html component
  */
 
 .overlay-label {
-  position: fixed;
   pointer-events: none;
-  z-index: 200;
-  transform: translate(-50%, -100%);
   animation: labelFadeIn 0.2s ease-out;
   user-select: none;
+  transform: translate(-50%, calc(-100% - 20px));
+  white-space: nowrap;
 }
 
 @keyframes labelFadeIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -100%) scale(0.9);
+    transform: translate(-50%, calc(-100% - 20px)) scale(0.9);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -100%) scale(1);
+    transform: translate(-50%, calc(-100% - 20px)) scale(1);
   }
 }
 

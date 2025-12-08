@@ -48,18 +48,71 @@ interface HoverStore extends HoverState {
   clearHover: () => void;
 }
 
+/**
+ * Validates a HoveredObject to ensure it has valid data
+ */
+function validateHoveredObject(object: HoveredObject | null): boolean {
+  if (!object) return true; // null is valid (clearing hover)
+  
+  if (!object.id || typeof object.id !== 'string') {
+    console.warn('HoverStore: Invalid object id', object);
+    return false;
+  }
+  
+  if (!object.name || typeof object.name !== 'string') {
+    console.warn('HoverStore: Invalid object name', object);
+    return false;
+  }
+  
+  // Check if position exists and is an object with required structure
+  // Note: typeof null === 'object', so we need to explicitly check for null
+  if (!object.position || object.position === null || typeof object.position !== 'object' || Array.isArray(object.position)) {
+    console.warn('HoverStore: Invalid object position', object);
+    return false;
+  }
+  
+  // Verify position has x, y, z properties that are numbers
+  if (typeof object.position.x !== 'number' ||
+      typeof object.position.y !== 'number' ||
+      typeof object.position.z !== 'number') {
+    console.warn('HoverStore: Position missing x/y/z coordinates', object.position);
+    return false;
+  }
+  
+  // Check for NaN or Infinity in position (safe now that we know they're numbers)
+  if (!isFinite(object.position.x) || 
+      !isFinite(object.position.y) || 
+      !isFinite(object.position.z)) {
+    console.warn('HoverStore: Position contains invalid numbers', object.position);
+    return false;
+  }
+  
+  return true;
+}
+
 export const useHoverStore = create<HoverStore>((set) => ({
   hoveredObject: null,
   labelsVisible: true,
 
-  setHoveredObject: (object: HoveredObject | null) =>
-    set({ hoveredObject: object }),
+  setHoveredObject: (object: HoveredObject | null) => {
+    // Validate and reject invalid objects
+    if (!validateHoveredObject(object)) {
+      return;
+    }
+    
+    set({ hoveredObject: object });
+  },
 
   toggleLabelsVisibility: () =>
     set((state) => ({ labelsVisible: !state.labelsVisible })),
 
-  setLabelsVisibility: (visible: boolean) =>
-    set({ labelsVisible: visible }),
+  setLabelsVisibility: (visible: boolean) => {
+    if (typeof visible !== 'boolean') {
+      console.warn('HoverStore: setLabelsVisibility requires boolean', visible);
+      return;
+    }
+    set({ labelsVisible: visible });
+  },
 
   clearHover: () => set({ hoveredObject: null }),
 }));
