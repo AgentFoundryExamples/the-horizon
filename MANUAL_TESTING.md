@@ -418,7 +418,143 @@ Error: SHA does not match (GitHub API error)
 ```
 This should NOT happen with the stabilized flow.
 
-### Scenario 12: Hover/Tooltip Removal Verification (v0.1.5)
+### Scenario 12: Dual-Hash Model Verification
+
+**Purpose**: Verify that the dual-hash model (gitBaseHash vs localDiskHash) works correctly to prevent conflicts and data loss
+
+**Prerequisites**: 
+- Admin access
+- Browser DevTools (Network tab)
+
+**Context**: The application uses two separate hashes:
+- **gitBaseHash**: Tracks the last known state in GitHub (baseline for conflict detection during commits)
+- **localDiskHash**: Tracks the current local file state (used for optimistic locking during saves)
+
+This dual-hash model allows multiple local saves without requiring GitHub pushes, while still preventing conflicts when committing.
+
+**Steps**:
+
+1. **Initial Load - Both Hashes in Sync**
+   - Navigate to `/admin`
+   - Open browser DevTools → Network tab
+   - Click any "Edit" button to open the editor
+   - Check the initial props passed to the component
+   - ✅ Expected: gitBaseHash === localDiskHash (both represent GitHub state)
+
+2. **Save to Disk - localDiskHash Updates, gitBaseHash Preserved**
+   - Make an edit to a galaxy/system/planet
+   - Click "💾 Save to Disk"
+   - Observe the PATCH request payload in DevTools Network tab:
+     ```json
+     {
+       "universe": {...},
+       "currentHash": "abc123..."  // This is localDiskHash
+     }
+     ```
+   - Observe the PATCH response:
+     ```json
+     {
+       "success": true,
+       "hash": "def456..."  // New localDiskHash
+     }
+     ```
+   - ✅ Expected: Response includes updated hash for local disk
+   - ✅ Expected: gitBaseHash remains unchanged in client state
+   - ✅ Expected: localDiskHash updates to new value
+
+3. **Multiple Saves Without Commit**
+   - Make another edit
+   - Click "💾 Save to Disk" again
+   - Repeat 2-3 times
+   - ✅ Expected: Each save uses the previous localDiskHash for optimistic locking
+   - ✅ Expected: gitBaseHash never changes (still points to GitHub baseline)
+   - ✅ Expected: No "conflict" errors since each save builds on previous disk state
+
+4. **Commit to GitHub - Uses gitBaseHash**
+   - After multiple local saves, enter a commit message
+   - Click "✓ Commit to Main Branch" (or "🔀 Create Pull Request")
+   - Observe the POST request payload in DevTools Network tab:
+     ```json
+     {
+       "commitMessage": "Your message",
+       "createPR": false,
+       "gitBaseHash": "abc123..."  // Original baseline, not latest localDiskHash
+     }
+     ```
+   - ✅ Expected: POST uses gitBaseHash (GitHub baseline) for conflict detection
+   - ✅ Expected: POST does NOT use localDiskHash
+   - ✅ Expected: Commit succeeds and returns new SHA
+
+5. **After Successful Commit - Both Hashes Sync Again**
+   - Observe the POST response:
+     ```json
+     {
+       "success": true,
+       "hash": "xyz789..."  // New GitHub SHA
+     }
+     ```
+   - Refresh the admin page
+   - Check state after reload
+   - ✅ Expected: Both gitBaseHash and localDiskHash update to new GitHub SHA
+   - ✅ Expected: Hashes are in sync again after commit
+   - ✅ Expected: Next save cycle starts from this new baseline
+
+6. **Conflict Detection During Save**
+   - Open admin in TWO browser tabs (Tab A and Tab B)
+   - In Tab A: Make an edit and save to disk
+   - In Tab B: Make a DIFFERENT edit (don't refresh)
+   - In Tab B: Try to save to disk
+   - ✅ Expected: Tab B gets 409 Conflict error
+   - ✅ Expected: Error message: "Conflict detected: The file has been modified..."
+   - ✅ Expected: Tab B's edits are preserved (not lost)
+   - In Tab B: Refresh the page, re-apply edits, and save
+   - ✅ Expected: Save succeeds after refresh
+
+7. **Conflict Detection During Commit**
+   - Open admin in TWO browser tabs
+   - In Tab A: Make edits and save to disk
+   - In Tab B: Make edits and save to disk (conflict at save time caught above)
+   - Assume Tab A's save succeeds first
+   - In Tab A: Commit to GitHub successfully
+   - In Tab B: Try to commit (after Tab A's commit)
+   - ✅ Expected: If GitHub HEAD changed, commit may succeed (uses fresh SHA)
+   - ✅ Expected: System fetches fresh SHA before commit (see logs)
+   - ✅ Expected: No false conflicts due to stale SHA caching
+
+**Server Log Verification**:
+
+For Save to Disk (PATCH):
+```
+[PATCH /api/admin/universe] Checking optimistic lock with hash: abc123...
+[PATCH /api/admin/universe] Hash verification passed
+[PATCH /api/admin/universe] Success - new local disk hash: def456...
+```
+
+For Commit to GitHub (POST):
+```
+[POST /api/admin/universe] Payload: {..., hasGitBaseHash: true}
+[POST /api/admin/universe] Step 4: Pushing to GitHub...
+[pushUniverseChanges] Fetching current SHA from GitHub...
+```
+
+**What This Tests**:
+- ✅ Dual-hash model separates local and remote states
+- ✅ Local saves update localDiskHash only
+- ✅ Commits use gitBaseHash for baseline comparison
+- ✅ Multiple saves without commits work correctly
+- ✅ Conflicts detected at appropriate times (save vs commit)
+- ✅ No false conflicts from stale hash caching
+- ✅ Both hashes sync after successful commit
+
+**Why This Matters**:
+- Allows admins to save frequently without committing
+- Prevents conflicts when multiple admins work simultaneously
+- Ensures GitHub commits always use correct baseline for conflict detection
+- Avoids "file has changed" errors from stale SHAs
+
+---
+
+### Scenario 13: Hover/Tooltip Removal Verification (v0.1.5)
 
 **Purpose**: Verify that hover labels and tooltips have been removed from all celestial objects
 
