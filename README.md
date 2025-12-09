@@ -19,7 +19,7 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 ## Changelog
 
-### v0.1.8 - Navigation & Layout Overhaul Summary (December 2025)
+### v0.1.8 - Navigation & Layout Overhaul Summary (December 9, 2025)
 
 *This release captures the scope of Part 1 improvements, documenting the navigation and layout work completed in v0.1.7 and v0.1.8, and outlining Part 2 graphical polish plans.*
 

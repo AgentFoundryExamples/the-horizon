@@ -296,6 +296,42 @@ Part 2 will focus on graphical refinements, advanced visual effects, and enhance
 - **User Satisfaction**: Positive feedback on polish and refinement
 - **Code Quality**: No regressions, comprehensive tests for new features
 
+### Part 2 Prioritization
+
+To prevent scope creep and ensure realistic delivery, proposals are categorized by priority:
+
+**P0 - Critical (Must Have)**
+- Typography & Font System (B): Foundation for all UI polish
+- Performance Optimizations (F.1, F.2): Ensure new features don't degrade experience
+- WCAG 2.1 compliance items (E.1, E.2, E.3): Accessibility is non-negotiable
+
+**P1 - High Priority (Should Have)**
+- Shader-Based Visual Effects (A.1): Core "wow factor" for Part 2
+- Camera Transition Polish (D.1): Enhances primary navigation experience
+- UI Micro-interactions (D.2): Improves perceived responsiveness
+
+**P2 - Medium Priority (Nice to Have)**
+- Material & Texture Improvements (A.2): Enhances realism but resource-intensive
+- Layout Composition Refinements (C): Builds on Part 1 foundation
+- Scene Ambient Animations (D.3): Adds life to static scenes
+
+**P3 - Low Priority (Future Consideration)**
+- Particle System Enhancements (A.3): Complex, marginal user benefit
+- Asset Loading Optimizations (F.3): Only if performance issues arise
+- Advanced layout options (C.1, C.2): Only if user demand demonstrated
+
+**Recommended Phasing:**
+1. **Week 1-2**: P0 typography system + critical accessibility fixes
+2. **Week 3-6**: P1 shader effects + camera transitions
+3. **Week 7-9**: P1 micro-interactions + P2 materials/textures
+4. **Week 10-11**: P2 layout refinements + remaining P0 performance work
+5. **Week 12+**: P3 items only if time permits and metrics justify
+
+**Decision Framework:**
+- Skip P3 items if timeline pressure increases
+- Defer P2 items if P1 reveals unforeseen complexity
+- Never compromise P0 items - these are table stakes
+
 ### Part 2 Timeline Estimate
 
 - **Phase 2A (Visual Effects)**: 3-4 weeks
