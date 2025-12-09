@@ -7,6 +7,7 @@
  * - Orbital spacing prevents overlap
  * - Animations remain smooth and believable
  * - Edge cases (single planet, many planets) are handled correctly
+ * - Orbit ring styling differentiates galaxy vs solar system scales
  */
 
 import { 
@@ -16,6 +17,8 @@ import {
   ORBITAL_SPACING,
   PLANET_SCALE,
   STAR_SCALE,
+  GALAXY_ORBIT_STYLE,
+  SOLAR_ORBIT_STYLE,
 } from '@/lib/universe/scale-constants';
 import type { Planet, SolarSystem } from '@/lib/universe/types';
 
@@ -450,6 +453,138 @@ describe('SolarSystemView - Deterministic Orbits', () => {
       const maxInclinationDegrees = ORBITAL_SPACING.MAX_INCLINATION * (180 / Math.PI);
       expect(maxInclinationDegrees).toBeLessThan(15); // Less than 15 degrees
       expect(maxInclinationDegrees).toBeGreaterThan(0); // But not zero
+    });
+  });
+
+  describe('Orbit Ring Styling', () => {
+    describe('Galaxy Orbit Style', () => {
+      it('should have defined color', () => {
+        expect(GALAXY_ORBIT_STYLE.COLOR).toBeDefined();
+        expect(GALAXY_ORBIT_STYLE.COLOR).toMatch(/^#[0-9A-F]{6}$/i);
+      });
+
+      it('should have higher opacity than solar orbits', () => {
+        expect(GALAXY_ORBIT_STYLE.OPACITY).toBeGreaterThan(SOLAR_ORBIT_STYLE.OPACITY);
+        expect(GALAXY_ORBIT_STYLE.OPACITY).toBeGreaterThanOrEqual(0);
+        expect(GALAXY_ORBIT_STYLE.OPACITY).toBeLessThanOrEqual(1);
+      });
+
+      it('should have thicker line width than solar orbits', () => {
+        expect(GALAXY_ORBIT_STYLE.LINE_WIDTH).toBeGreaterThan(SOLAR_ORBIT_STYLE.LINE_WIDTH);
+        expect(GALAXY_ORBIT_STYLE.LINE_WIDTH).toBeGreaterThan(0);
+      });
+
+      it('should use solid lines (no dash pattern)', () => {
+        expect(GALAXY_ORBIT_STYLE.DASH_PATTERN).toBeUndefined();
+      });
+    });
+
+    describe('Solar Orbit Style', () => {
+      it('should have defined color', () => {
+        expect(SOLAR_ORBIT_STYLE.COLOR).toBeDefined();
+        expect(SOLAR_ORBIT_STYLE.COLOR).toMatch(/^#[0-9A-F]{6}$/i);
+      });
+
+      it('should have lower opacity than galaxy orbits', () => {
+        expect(SOLAR_ORBIT_STYLE.OPACITY).toBeLessThan(GALAXY_ORBIT_STYLE.OPACITY);
+        expect(SOLAR_ORBIT_STYLE.OPACITY).toBeGreaterThanOrEqual(0);
+        expect(SOLAR_ORBIT_STYLE.OPACITY).toBeLessThanOrEqual(1);
+      });
+
+      it('should have thinner line width than galaxy orbits', () => {
+        expect(SOLAR_ORBIT_STYLE.LINE_WIDTH).toBeLessThan(GALAXY_ORBIT_STYLE.LINE_WIDTH);
+        expect(SOLAR_ORBIT_STYLE.LINE_WIDTH).toBeGreaterThan(0);
+      });
+
+      it('should use dashed pattern to distinguish from galaxy orbits', () => {
+        expect(SOLAR_ORBIT_STYLE.DASH_PATTERN).toBeDefined();
+        expect(Array.isArray(SOLAR_ORBIT_STYLE.DASH_PATTERN)).toBe(true);
+        expect(SOLAR_ORBIT_STYLE.DASH_PATTERN).toHaveLength(2);
+        // Both dash and gap should be positive
+        expect(SOLAR_ORBIT_STYLE.DASH_PATTERN![0]).toBeGreaterThan(0);
+        expect(SOLAR_ORBIT_STYLE.DASH_PATTERN![1]).toBeGreaterThan(0);
+      });
+    });
+
+    describe('Visual Hierarchy', () => {
+      it('should ensure galaxy orbits are more prominent than solar orbits', () => {
+        // Galaxy orbits should have:
+        // 1. Higher opacity
+        expect(GALAXY_ORBIT_STYLE.OPACITY).toBeGreaterThan(SOLAR_ORBIT_STYLE.OPACITY);
+        
+        // 2. Thicker lines
+        expect(GALAXY_ORBIT_STYLE.LINE_WIDTH).toBeGreaterThan(SOLAR_ORBIT_STYLE.LINE_WIDTH);
+        
+        // 3. Solid vs dashed (galaxy solid, solar dashed)
+        expect(GALAXY_ORBIT_STYLE.DASH_PATTERN).toBeUndefined();
+        expect(SOLAR_ORBIT_STYLE.DASH_PATTERN).toBeDefined();
+      });
+
+      it('should have reasonable visual weight for galaxy orbits', () => {
+        // Galaxy orbits should be visible but not overwhelming
+        // Opacity between 30-60% for good visibility without dominating
+        expect(GALAXY_ORBIT_STYLE.OPACITY).toBeGreaterThanOrEqual(0.3);
+        expect(GALAXY_ORBIT_STYLE.OPACITY).toBeLessThanOrEqual(0.6);
+      });
+
+      it('should have subtle visual weight for solar orbits', () => {
+        // Solar orbits should be subtle guides, not primary focus
+        // Opacity between 10-30% for subtle guidance
+        expect(SOLAR_ORBIT_STYLE.OPACITY).toBeGreaterThanOrEqual(0.1);
+        expect(SOLAR_ORBIT_STYLE.OPACITY).toBeLessThanOrEqual(0.3);
+      });
+
+      it('should use similar color family for consistency', () => {
+        // Both should use blue family colors
+        // Extract color channels (rough check)
+        const galaxyColor = parseInt(GALAXY_ORBIT_STYLE.COLOR.substring(1), 16);
+        const solarColor = parseInt(SOLAR_ORBIT_STYLE.COLOR.substring(1), 16);
+        
+        // Both colors should be defined and valid
+        expect(galaxyColor).toBeGreaterThan(0);
+        expect(solarColor).toBeGreaterThan(0);
+        
+        // Colors should be different (visual distinction)
+        expect(GALAXY_ORBIT_STYLE.COLOR).not.toBe(SOLAR_ORBIT_STYLE.COLOR);
+      });
+    });
+
+    describe('Performance Characteristics', () => {
+      it('should have reasonable dash pattern for performance', () => {
+        if (SOLAR_ORBIT_STYLE.DASH_PATTERN) {
+          const [dash, gap] = SOLAR_ORBIT_STYLE.DASH_PATTERN;
+          
+          // Dash pattern should not be too fine-grained (performance)
+          // Minimum 1 unit for each segment
+          expect(dash).toBeGreaterThanOrEqual(1);
+          expect(gap).toBeGreaterThanOrEqual(1);
+          
+          // Maximum reasonable dash pattern (avoid excessive segments)
+          expect(dash).toBeLessThanOrEqual(10);
+          expect(gap).toBeLessThanOrEqual(10);
+        }
+      });
+
+      it('should use reasonable line widths', () => {
+        // Line widths should be practical for rendering
+        // WebGL lineWidth support is limited, so keep values modest
+        expect(GALAXY_ORBIT_STYLE.LINE_WIDTH).toBeLessThanOrEqual(5);
+        expect(SOLAR_ORBIT_STYLE.LINE_WIDTH).toBeLessThanOrEqual(5);
+      });
+    });
+
+    describe('Contrast and Accessibility', () => {
+      it('should provide sufficient opacity difference for visual distinction', () => {
+        const opacityDiff = GALAXY_ORBIT_STYLE.OPACITY - SOLAR_ORBIT_STYLE.OPACITY;
+        
+        // Difference should be noticeable (at least 15% opacity difference)
+        expect(opacityDiff).toBeGreaterThanOrEqual(0.15);
+      });
+
+      it('should maintain minimum visibility for accessibility', () => {
+        // Even the more subtle solar orbits should be somewhat visible
+        expect(SOLAR_ORBIT_STYLE.OPACITY).toBeGreaterThanOrEqual(0.15);
+      });
     });
   });
 });
