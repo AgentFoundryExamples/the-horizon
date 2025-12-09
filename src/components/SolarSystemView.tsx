@@ -77,16 +77,13 @@ function PlanetMesh({
     // Spread planets evenly around the orbit at initialization
     const phase = (index * Math.PI * 2) / Math.max(totalPlanets, 1);
     
-    // No argument of periapsis rotation (apses aligned with x-axis)
-    const argumentOfPeriapsis = 0;
-    
     // Orbital speed follows Kepler's third law approximation
     // Inner planets orbit faster than outer planets
     const orbitSpeed = 0.5 / (semiMajorAxis * semiMajorAxis);
     
     const size = calculatePlanetSize(planet.moons?.length || 0);
 
-    return { semiMajorAxis, eccentricity, inclination, argumentOfPeriapsis, orbitSpeed, phase, size };
+    return { semiMajorAxis, eccentricity, inclination, orbitSpeed, phase, size };
   }, [planet, index, totalPlanets]);
 
   useFrame((state) => {
@@ -109,7 +106,8 @@ function PlanetMesh({
       (orbitalData.semiMajorAxis * (1 - orbitalData.eccentricity * orbitalData.eccentricity)) /
       (1 + orbitalData.eccentricity * Math.cos(trueAnomaly));
 
-    const angle = trueAnomaly + orbitalData.argumentOfPeriapsis;
+    // Since apses are aligned with x-axis (no rotation), angle = trueAnomaly
+    const angle = trueAnomaly;
 
     meshRef.current.position.x = systemPosition.x + Math.cos(angle) * radius;
     meshRef.current.position.y = systemPosition.y + Math.sin(angle) * radius * Math.sin(orbitalData.inclination);

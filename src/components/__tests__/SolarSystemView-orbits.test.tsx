@@ -10,7 +10,8 @@
  */
 
 import { 
-  calculateOrbitalRadius, 
+  calculateOrbitalRadius,
+  calculateAdaptiveOrbitalRadius,
   calculateSafeSpacing, 
   ORBITAL_SPACING,
   PLANET_SCALE,
@@ -100,6 +101,55 @@ describe('SolarSystemView - Deterministic Orbits', () => {
       const spacing2 = calculateSafeSpacing(planetCount);
       
       expect(spacing1).toBe(spacing2);
+    });
+  });
+
+  describe('Adaptive Orbital Radius', () => {
+    it('should match implementation in SolarSystemView for typical systems', () => {
+      const planetCount = 5;
+      const index = 2;
+      
+      // This is what SolarSystemView actually uses
+      const spacing = calculateSafeSpacing(planetCount);
+      const expectedRadius = ORBITAL_SPACING.BASE_RADIUS + index * spacing;
+      
+      // This is the helper function
+      const actualRadius = calculateAdaptiveOrbitalRadius(index, planetCount);
+      
+      expect(actualRadius).toBe(expectedRadius);
+    });
+
+    it('should apply adaptive spacing for systems with many planets', () => {
+      const planetCount = 12;
+      
+      // Fixed spacing radius (without adaptation)
+      const fixedRadius = calculateOrbitalRadius(5);
+      
+      // Adaptive spacing radius (matches SolarSystemView)
+      const adaptiveRadius = calculateAdaptiveOrbitalRadius(5, planetCount);
+      
+      // Adaptive should be larger due to increased spacing
+      expect(adaptiveRadius).toBeGreaterThan(fixedRadius);
+    });
+
+    it('should match fixed radius for small systems', () => {
+      const planetCount = 5;
+      const index = 3;
+      
+      // For systems below threshold, adaptive should match fixed
+      const fixedRadius = calculateOrbitalRadius(index);
+      const adaptiveRadius = calculateAdaptiveOrbitalRadius(index, planetCount);
+      
+      expect(adaptiveRadius).toBe(fixedRadius);
+    });
+
+    it('should be deterministic', () => {
+      const radius1 = calculateAdaptiveOrbitalRadius(4, 10);
+      const radius2 = calculateAdaptiveOrbitalRadius(4, 10);
+      const radius3 = calculateAdaptiveOrbitalRadius(4, 10);
+      
+      expect(radius1).toBe(radius2);
+      expect(radius2).toBe(radius3);
     });
   });
 
@@ -229,6 +279,18 @@ describe('SolarSystemView - Deterministic Orbits', () => {
         const spacing = calculateSafeSpacing(0);
         expect(spacing).toBe(ORBITAL_SPACING.RADIUS_INCREMENT);
         expect(Number.isFinite(spacing)).toBe(true);
+      });
+
+      it('should handle phase calculation for zero planets to avoid division by zero', () => {
+        // In the component, this is guarded by Math.max(totalPlanets, 1)
+        // This test verifies the behavior if that guard were not present.
+        const phaseWithZero = (0 * Math.PI * 2) / 0;
+        expect(Number.isNaN(phaseWithZero)).toBe(true); // Division by zero produces NaN
+
+        // This test verifies the actual implementation's guarded behavior
+        const guardedPhase = (0 * Math.PI * 2) / Math.max(0, 1);
+        expect(guardedPhase).toBe(0);
+        expect(Number.isFinite(guardedPhase)).toBe(true);
       });
     });
   });

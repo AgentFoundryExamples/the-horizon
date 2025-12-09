@@ -187,10 +187,31 @@ export function calculateMoonSize(): number {
 
 /**
  * Calculate orbital radius for a planet at given index
- * Ensures even spacing that accommodates planet sizes
+ * Uses fixed spacing without adaptive scaling
+ * 
+ * Note: For actual rendering, SolarSystemView uses calculateSafeSpacing()
+ * which applies adaptive spacing for systems with many planets.
+ * This function is provided for simple calculations and testing.
+ * 
+ * @param planetIndex - Zero-based index of the planet (0 = innermost)
+ * @returns Orbital radius in Three.js units
  */
 export function calculateOrbitalRadius(planetIndex: number): number {
   return ORBITAL_SPACING.BASE_RADIUS + (planetIndex * ORBITAL_SPACING.RADIUS_INCREMENT);
+}
+
+/**
+ * Calculate orbital radius for a planet with adaptive spacing
+ * Uses adaptive spacing that scales with total planet count
+ * This matches the actual implementation in SolarSystemView
+ * 
+ * @param planetIndex - Zero-based index of the planet (0 = innermost)
+ * @param totalPlanets - Total number of planets in the system
+ * @returns Orbital radius in Three.js units with adaptive spacing applied
+ */
+export function calculateAdaptiveOrbitalRadius(planetIndex: number, totalPlanets: number): number {
+  const spacing = calculateSafeSpacing(totalPlanets);
+  return ORBITAL_SPACING.BASE_RADIUS + (planetIndex * spacing);
 }
 
 /**
