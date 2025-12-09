@@ -500,7 +500,7 @@ describe('Planet Material Presets', () => {
       expect(custom?.roughness).toBe(0.8); // Inherited from rocky
     });
     
-    it('should return null for non-existent base preset', () => {
+    it('should return undefined for non-existent base preset', () => {
       const custom = createCustomPlanetMaterial(
         'nonexistent',
         {},
@@ -508,7 +508,7 @@ describe('Planet Material Presets', () => {
         'Custom'
       );
       
-      expect(custom).toBeNull();
+      expect(custom).toBeUndefined();
     });
     
     it('should override multiple properties', () => {

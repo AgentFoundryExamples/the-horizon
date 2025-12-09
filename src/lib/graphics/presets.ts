@@ -230,16 +230,17 @@ export function hasPlanetMaterialPreset(id: string): boolean {
 
 /**
  * Create a custom planet material by extending an existing preset
+ * Returns undefined if the base preset doesn't exist
  */
 export function createCustomPlanetMaterial(
   basePresetId: string,
   overrides: Partial<PlanetMaterial>,
   newId: string,
   newName: string
-): PlanetMaterial | null {
+): PlanetMaterial | undefined {
   const basePreset = getPlanetMaterialPreset(basePresetId);
   if (!basePreset) {
-    return null;
+    return undefined;
   }
   
   return {
