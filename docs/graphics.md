@@ -1160,3 +1160,648 @@ Clamps animation speed to safe range [0, 10].
 - `defaultValue: number` - Fallback value
 
 **Returns:** `number`
+
+## Background Starfield System
+
+### Overview
+
+The Background Starfield System provides AAA-quality star rendering with config-driven density, brightness distribution, parallax drift, and color variance. The system is optimized for performance with automatic density clamping and graceful fallback when shaders are unavailable.
+
+### Architecture
+
+```mermaid
+graph TD
+    A[GraphicsConfig] --> B[createStarfieldConfig]
+    B --> C[StarfieldConfig]
+    C --> D[generateStarfield]
+    D --> E[StarfieldData]
+    E --> F[updateStarfield]
+    E --> G[disposeStarfield]
+    
+    E --> H{Shader Support?}
+    H -->|Yes| I[ShaderMaterial]
+    H -->|No| J[PointsMaterial Fallback]
+```
+
+### Creating a Starfield
+
+```typescript
+import {
+  DEFAULT_GRAPHICS_CONFIG,
+  createStarfieldConfig,
+  generateStarfield,
+  updateStarfield,
+  disposeStarfield,
+} from '@/lib/graphics';
+
+// Create configuration from GraphicsConfig
+const config = createStarfieldConfig(
+  DEFAULT_GRAPHICS_CONFIG.universe,
+  DEFAULT_GRAPHICS_CONFIG.galaxyView
+);
+
+// Generate starfield
+const starfield = generateStarfield(config);
+
+// In animation loop
+function animate(deltaTime: number, isTransitioning: boolean) {
+  updateStarfield(starfield, deltaTime, isTransitioning);
+}
+
+// Cleanup when unmounting
+disposeStarfield(starfield);
+```
+
+### Configuration Parameters
+
+The starfield system reads from both `UniverseConfig` and `GalaxyViewConfig`:
+
+| Parameter | Source | Range | Default | Description |
+|-----------|--------|-------|---------|-------------|
+| `backgroundStarDensity` | UniverseConfig | 0-1 | 0.5 | Base density multiplier |
+| `starDensity` | GalaxyViewConfig | 0.1-2.0 | 1.0 | Additional density multiplier |
+| `starBrightness` | GalaxyViewConfig | 0.1-3.0 | 1.0 | Brightness multiplier |
+| `lowPowerMode` | UniverseConfig | boolean | false | Reduces quality for performance |
+
+**Computed Values:**
+- **Final Density**: `DEFAULT_STARS * backgroundStarDensity * starDensity`
+- **Final Brightness Range**: `[0.3 * starBrightness, 1.0 * starBrightness]`
+- **Parallax**: Disabled in low power mode
+
+### Tuning Starfield Appearance
+
+#### Increasing Star Count
+
+```typescript
+const universeConfig: UniverseConfig = {
+  backgroundStarDensity: 0.8, // More stars
+};
+const galaxyViewConfig: GalaxyViewConfig = {
+  starDensity: 1.5, // Even more stars
+};
+```
+
+**Result:** More dense starfield, but still clamped to `MAX_STARS` (10,000) for performance.
+
+#### Adjusting Brightness
+
+```typescript
+const galaxyViewConfig: GalaxyViewConfig = {
+  starBrightness: 1.5, // Brighter stars
+};
+```
+
+**Result:** Stars appear brighter, with brightness range [0.45, 1.5].
+
+#### Controlling Parallax
+
+Parallax drift is controlled internally:
+- **Speed**: `0.05` units per second (configurable via `parallaxSpeed`)
+- **Animation Speed**: Multiplied by `animationSpeed` (default 1.0)
+- **Automatic Pause**: Pauses during camera transitions to prevent motion sickness
+
+### Performance Considerations
+
+#### Density Clamping
+
+The system automatically clamps star density to maintain <16ms frame budget:
+
+```typescript
+import { validateStarfieldDensity } from '@/lib/graphics';
+
+const result = validateStarfieldDensity(20000);
+// result.density = 10000 (clamped)
+// result.clamped = true
+// result.reason = "Density clamped to 10000 stars to maintain <16ms frame budget"
+```
+
+**Performance Targets:**
+- **MIN_STARS**: 100 (minimum quality)
+- **DEFAULT_STARS**: 2000 (balanced)
+- **MAX_STARS**: 10000 (maximum before clamping)
+
+#### Low Power Mode
+
+When `lowPowerMode` is enabled:
+- Star count reduced by 50%
+- Parallax animation disabled
+- Size range reduced: [0.5, 1.5] instead of [0.5, 3.0]
+- Fallback material used instead of shader
+
+```typescript
+const config = createStarfieldConfig(
+  { ...DEFAULT_GRAPHICS_CONFIG.universe, lowPowerMode: true },
+  DEFAULT_GRAPHICS_CONFIG.galaxyView
+);
+```
+
+#### Shader Fallback
+
+If shader compilation fails, the system automatically falls back to simple `PointsMaterial`:
+
+```typescript
+const starfield = generateStarfield(config);
+
+if (starfield.fallbackMode) {
+  console.warn('Using fallback starfield renderer');
+}
+```
+
+### Advanced Features
+
+#### Color Temperature Distribution
+
+Stars are distributed across color temperatures:
+- **Cool** (10%): Blue-white stars
+- **Neutral** (70%): White stars
+- **Warm** (15%): Yellow-white stars
+- **Hot** (5%): Orange stars
+
+Color variance can be adjusted via `colorVariance` parameter (0 = no variance, 1 = full spectrum).
+
+#### Parallax Wrapping
+
+Stars that drift too far from their original position (>100 units) automatically wrap back:
+
+```typescript
+// In updateStarfield:
+const distSq = dx * dx + dy * dy + dz * dz;
+if (distSq > 10000) {
+  // Reset to original position
+  positions[i] = originalPositions[i];
+}
+```
+
+This maintains spherical distribution while allowing infinite drift.
+
+### Integration Example
+
+```typescript
+// In React Three Fiber component
+function BackgroundStarfield() {
+  const starfieldDataRef = useRef<StarfieldData | null>(null);
+  const { isTransitioning } = useNavigationStore();
+  
+  useEffect(() => {
+    const config = createStarfieldConfig(
+      DEFAULT_GRAPHICS_CONFIG.universe,
+      DEFAULT_GRAPHICS_CONFIG.galaxyView
+    );
+    starfieldDataRef.current = generateStarfield(config);
+    
+    return () => {
+      if (starfieldDataRef.current) {
+        disposeStarfield(starfieldDataRef.current);
+      }
+    };
+  }, []);
+  
+  useFrame((state, delta) => {
+    if (starfieldDataRef.current) {
+      // Pause during camera transitions
+      updateStarfield(starfieldDataRef.current, delta, isTransitioning);
+    }
+  });
+  
+  if (!starfieldDataRef.current) return null;
+  
+  return (
+    <points
+      geometry={starfieldDataRef.current.geometry}
+      material={starfieldDataRef.current.material}
+    />
+  );
+}
+```
+
+## Layered Galaxy Renderer
+
+### Overview
+
+The Layered Galaxy Renderer creates visually stunning galaxies with spiral arms, glowing cores, and optional nebula effects. The system supports multiple texture theme presets and gracefully degrades on low-power devices.
+
+### Architecture
+
+```mermaid
+graph TD
+    A[GalaxyViewConfig] --> B[createGalaxyRenderConfig]
+    B --> C[GalaxyRenderConfig]
+    C --> D[generateGalaxy]
+    D --> E[GalaxyData]
+    E --> F{Layers}
+    F --> G[Core Layer]
+    F --> H[Spiral Arm Layers]
+    F --> I[Glow Layers]
+    F --> J[Nebula Layer]
+    
+    E --> K[updateGalaxy]
+    E --> L[setGalaxyOpacity]
+    E --> M[disposeGalaxy]
+```
+
+### Creating a Galaxy
+
+```typescript
+import {
+  DEFAULT_GRAPHICS_CONFIG,
+  createGalaxyRenderConfig,
+  generateGalaxy,
+  updateGalaxy,
+  setGalaxyOpacity,
+  disposeGalaxy,
+  type GalaxyTheme,
+} from '@/lib/graphics';
+
+// Create configuration
+const config = createGalaxyRenderConfig(
+  DEFAULT_GRAPHICS_CONFIG.galaxyView,
+  'neon', // Theme
+  false   // Low power mode
+);
+
+// Generate galaxy
+const galaxy = generateGalaxy(config);
+
+// In animation loop
+function animate(time: number) {
+  updateGalaxy(galaxy, time);
+}
+
+// Change opacity
+setGalaxyOpacity(galaxy, 0.5);
+
+// Cleanup
+disposeGalaxy(galaxy);
+```
+
+### Galaxy Themes
+
+The system includes five predefined themes:
+
+#### 1. Classic
+Traditional blue-white galaxy with warm core.
+```typescript
+const config = createGalaxyRenderConfig(galaxyViewConfig, 'classic', false);
+```
+- **Core**: Warm white (#FFF9E5)
+- **Arms**: Blue-white (#99B3FF)
+- **Glow**: Cool white (#CCCCFF)
+- **Nebula**: Dust blue (#6680B3)
+
+#### 2. Neon
+Vibrant cyan and magenta galaxy.
+```typescript
+const config = createGalaxyRenderConfig(galaxyViewConfig, 'neon', false);
+```
+- **Core**: Cyan (#00FFFF)
+- **Arms**: Magenta (#FF00FF)
+- **Glow**: Purple (#8000FF)
+- **Nebula**: Blue (#0080FF)
+
+#### 3. Molten
+Fiery orange and red galaxy.
+```typescript
+const config = createGalaxyRenderConfig(galaxyViewConfig, 'molten', false);
+```
+- **Core**: White-yellow (#FFFFCC)
+- **Arms**: Orange (#FF6600)
+- **Glow**: Red-orange (#FF3300)
+- **Nebula**: Dark red (#991A00)
+
+#### 4. Ethereal
+Soft, dreamlike blue and lavender galaxy.
+```typescript
+const config = createGalaxyRenderConfig(galaxyViewConfig, 'ethereal', false);
+```
+- **Core**: White (#FFFFFF)
+- **Arms**: Light blue (#B3E6FF)
+- **Glow**: Lavender (#E6CCFF)
+- **Nebula**: Soft blue (#80B3E6)
+
+#### 5. Dark Matter
+Deep purple and violet galaxy.
+```typescript
+const config = createGalaxyRenderConfig(galaxyViewConfig, 'dark-matter', false);
+```
+- **Core**: Deep purple (#800080)
+- **Arms**: Dark purple (#330066)
+- **Glow**: Violet (#4D0080)
+- **Nebula**: Very dark purple (#1A0033)
+
+### Configuration Parameters
+
+| Parameter | Range | Default | Description |
+|-----------|-------|---------|-------------|
+| `particleCount` | 500-15000 | ~3000 | Total particles across all layers |
+| `radius` | >0 | 20 | Galaxy radius in world units |
+| `coreRadius` | >0 | 3 | Core size (bright center) |
+| `armCount` | 1-8 | 3 | Number of spiral arms |
+| `spiralTightness` | 0-2 | 0.5 | How tightly arms spiral |
+| `rotationSpeed` | 0-10 | 0.05 | Animation rotation speed |
+| `opacity` | 0-1 | 0.7 | Overall galaxy opacity |
+| `enableGlow` | boolean | true | Enable glow layers |
+| `enableNebula` | boolean | true | Enable nebula overlay |
+| `enableBloom` | boolean | true | Enable bloom effect |
+| `noiseIntensity` | 0-1 | 0.3 | Color variation amount |
+
+### Layer System
+
+Galaxies are composed of multiple layers:
+
+#### Core Layer (~15% of particles)
+- Bright central bulge
+- Spherical distribution
+- Highest brightness
+- Size range: [2.0, 4.0]
+
+#### Spiral Arm Layers (~60% of particles)
+- One layer per arm
+- Logarithmic spiral pattern
+- Medium brightness
+- Size range: [1.0, 3.0]
+
+#### Glow Layers (~15% of particles)
+- Optional (enabled by `enableGlow`)
+- Follows spiral arms
+- Larger, dimmer particles
+- Size range: [3.0, 6.0]
+
+#### Nebula Layer (~10% of particles)
+- Optional (enabled by `enableNebula`)
+- Diffuse cloud distribution
+- Largest, dimmest particles
+- Size range: [4.0, 8.0]
+
+### Tuning Galaxy Appearance
+
+#### Adjusting Particle Density
+
+```typescript
+const galaxyViewConfig: GalaxyViewConfig = {
+  starDensity: 1.5, // 50% more particles
+};
+```
+
+**Result:** More detailed galaxy with ~4500 particles (clamped to 15000 max).
+
+#### Controlling Rotation
+
+```typescript
+const galaxyViewConfig: GalaxyViewConfig = {
+  rotationSpeed: 2.0, // 2x faster rotation
+};
+```
+
+**Result:** Faster spinning galaxy (applied to `rotationSpeed` in config).
+
+#### Adjusting Opacity
+
+```typescript
+// Via config
+const config = createGalaxyRenderConfig(galaxyViewConfig, 'classic', false);
+config.opacity = 0.5;
+
+// Or at runtime
+setGalaxyOpacity(galaxy, 0.5);
+
+// Full hide
+setGalaxyOpacity(galaxy, 0.0); // Layers become invisible
+```
+
+#### Changing Themes
+
+```typescript
+import { getGalaxyThemes } from '@/lib/graphics';
+
+const themes = getGalaxyThemes();
+// ['neon', 'molten', 'ethereal', 'classic', 'dark-matter']
+
+const config = createGalaxyRenderConfig(
+  galaxyViewConfig,
+  themes[0], // Use any theme
+  false
+);
+```
+
+### Performance Considerations
+
+#### Particle Count Limits
+
+```typescript
+import { validateGalaxyConfig } from '@/lib/graphics';
+
+const config: GalaxyRenderConfig = {
+  particleCount: 20000, // Too many!
+  // ... other config
+};
+
+const result = validateGalaxyConfig(config);
+// result.valid = false
+// result.warnings includes "Particle count exceeds maximum"
+```
+
+**Performance Targets:**
+- **MIN_GALAXY_PARTICLES**: 500 (minimum quality)
+- **MAX_GALAXY_PARTICLES**: 15000 (maximum before rejection)
+
+#### Low Power Mode
+
+When low power mode is enabled:
+- Particle count reduced by 50%
+- Glow layers disabled (`enableGlow = false`)
+- Nebula layer disabled (`enableNebula = false`)
+- Bloom effect disabled (`enableBloom = false`)
+
+```typescript
+const config = createGalaxyRenderConfig(
+  galaxyViewConfig,
+  'classic',
+  true // Low power mode
+);
+```
+
+#### Shader Fallback
+
+If shader compilation fails:
+- Falls back to simple `PointsMaterial`
+- `fallbackMode` flag set to `true`
+- Visual quality reduced but still functional
+
+```typescript
+const galaxy = generateGalaxy(config);
+
+if (galaxy.fallbackMode) {
+  console.warn('Using fallback galaxy renderer');
+}
+```
+
+### Integration Example
+
+```typescript
+// In React Three Fiber component
+function LayeredGalaxy({ galaxyData, position }: Props) {
+  const galaxyDataRef = useRef<GalaxyData | null>(null);
+  const layerRefs = useRef<(THREE.Points | null)[]>([]);
+  
+  useEffect(() => {
+    const theme = mapGalaxyTheme(galaxyData.particleColor);
+    const config = createGalaxyRenderConfig(
+      DEFAULT_GRAPHICS_CONFIG.galaxyView,
+      theme,
+      DEFAULT_GRAPHICS_CONFIG.universe.lowPowerMode ?? false
+    );
+    galaxyDataRef.current = generateGalaxy(config);
+    
+    return () => {
+      if (galaxyDataRef.current) {
+        disposeGalaxy(galaxyDataRef.current);
+      }
+    };
+  }, [galaxyData.id, galaxyData.particleColor]);
+  
+  useFrame((state) => {
+    if (galaxyDataRef.current) {
+      updateGalaxy(galaxyDataRef.current, state.clock.getElapsedTime());
+    }
+  });
+  
+  if (!galaxyDataRef.current) return null;
+  
+  return (
+    <group position={position}>
+      {galaxyDataRef.current.layers.map((layer, index) => (
+        <points
+          key={`layer-${index}`}
+          ref={(el) => { layerRefs.current[index] = el; }}
+          geometry={layer.geometry}
+          material={layer.material}
+        />
+      ))}
+    </group>
+  );
+}
+```
+
+### Edge Cases
+
+#### Opacity = 0 (Full Hide)
+
+When opacity is set to 0, all layers are fully hidden:
+- `material.visible` set to `false`
+- Per-particle alphas set to 0
+- No residual glow
+
+```typescript
+setGalaxyOpacity(galaxy, 0.0);
+// All layers now invisible
+```
+
+#### Rotation Speed Limits
+
+Rotation speeds are validated but not clamped:
+
+```typescript
+const config: GalaxyRenderConfig = {
+  rotationSpeed: 15.0, // Very high!
+  // ... other config
+};
+
+const result = validateGalaxyConfig(config);
+// result.warnings includes "Rotation speed out of safe range"
+```
+
+**Recommendation:** Keep rotation speed ≤ 5.0 for best experience.
+
+### API Reference
+
+#### `createGalaxyRenderConfig(galaxyViewConfig, theme?, lowPowerMode?)`
+Creates galaxy configuration from GalaxyViewConfig.
+
+**Parameters:**
+- `galaxyViewConfig: GalaxyViewConfig` - Source configuration
+- `theme?: GalaxyTheme` - Theme preset (default: 'classic')
+- `lowPowerMode?: boolean` - Enable low power optimizations (default: false)
+
+**Returns:** `GalaxyRenderConfig`
+
+#### `generateGalaxy(config)`
+Generates complete galaxy with all layers.
+
+**Parameters:**
+- `config: GalaxyRenderConfig` - Galaxy configuration
+
+**Returns:** `GalaxyData`
+
+#### `updateGalaxy(galaxy, time)`
+Updates galaxy animation (shader uniforms).
+
+**Parameters:**
+- `galaxy: GalaxyData` - Galaxy to update
+- `time: number` - Current time in seconds
+
+**Returns:** `void`
+
+#### `setGalaxyOpacity(galaxy, opacity)`
+Sets galaxy opacity with full hide support at 0.
+
+**Parameters:**
+- `galaxy: GalaxyData` - Galaxy to update
+- `opacity: number` - New opacity [0, 1]
+
+**Returns:** `void`
+
+#### `disposeGalaxy(galaxy)`
+Disposes all galaxy resources (geometry and materials).
+
+**Parameters:**
+- `galaxy: GalaxyData` - Galaxy to dispose
+
+**Returns:** `void`
+
+#### `getGalaxyThemes()`
+Returns list of available galaxy themes.
+
+**Returns:** `GalaxyTheme[]`
+
+#### `validateGalaxyConfig(config)`
+Validates galaxy configuration for performance and correctness.
+
+**Parameters:**
+- `config: GalaxyRenderConfig` - Configuration to validate
+
+**Returns:** `{ valid: boolean; warnings: string[] }`
+
+## Performance Summary
+
+### Frame Budget Targets
+
+The graphics system is designed to maintain **<16ms** per frame (60 FPS):
+
+| System | Target Time | Particle Limit | Fallback |
+|--------|-------------|----------------|----------|
+| Starfield | 2-3ms | 10,000 stars | PointsMaterial |
+| Galaxy (per instance) | 3-5ms | 15,000 particles | PointsMaterial |
+| Combined | <8ms | Depends on scene | Auto-degrades |
+
+### Optimization Strategies
+
+1. **Enable Low Power Mode** for mobile devices
+2. **Reduce Star/Galaxy Density** to 0.5-0.7 on low-end hardware
+3. **Disable Glow and Nebula** layers on constrained devices
+4. **Use Shader Fallback** detection to automatically degrade quality
+5. **Limit Visible Galaxies** to 2-3 on screen simultaneously
+
+### Monitoring Performance
+
+```typescript
+// Check if fallback mode is active
+if (starfield.fallbackMode || galaxy.fallbackMode) {
+  console.warn('Using fallback renderers - performance mode active');
+}
+
+// Validate density before generating
+const validation = validateStarfieldDensity(requestedDensity);
+if (validation.clamped) {
+  console.warn(validation.reason);
+}
+```
