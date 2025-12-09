@@ -17,6 +17,7 @@
  */
 
 import { create } from 'zustand';
+import { useHoverStore } from './hover-store';
 
 export type FocusLevel = 'universe' | 'galaxy' | 'solar-system' | 'planet';
 
@@ -34,6 +35,7 @@ interface NavigationStore extends NavigationState {
   setFocus: (level: FocusLevel, id?: string | null) => void;
   setTransitioning: (isTransitioning: boolean) => void;
   finishTransition: () => void;
+  navigateToUniverse: () => void;
   navigateToGalaxy: (galaxyId: string) => void;
   navigateToSolarSystem: (solarSystemId: string) => void;
   navigateToPlanet: (planetId: string) => void;
@@ -51,6 +53,14 @@ const initialState: NavigationState = {
   isTransitioning: false,
   transitionQueue: [],
 };
+
+/**
+ * Helper function to clear hover state when navigating
+ */
+function clearHoverState() {
+  const { clearHover } = useHoverStore.getState();
+  clearHover();
+}
 
 export const useNavigationStore = create<NavigationStore>((set, get) => ({
   ...initialState,
@@ -94,7 +104,7 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
         get().navigateToPlanet(nextAction.id);
       } else if (nextAction.level === 'universe') {
         // Universe navigation doesn't require an ID
-        get().navigateBack(); // Navigate back handles universe level
+        get().navigateToUniverse();
       } else {
         console.warn('Unknown navigation level in queue:', nextAction.level);
       }
@@ -104,8 +114,42 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
     }
   },
 
+  navigateToUniverse: () => {
+    const state = get();
+    
+    // No-op if already at universe level
+    if (state.focusLevel === 'universe') {
+      return;
+    }
+
+    // If already transitioning, queue the navigation
+    if (state.isTransitioning) {
+      set({
+        transitionQueue: [...state.transitionQueue, { level: 'universe', id: null }],
+      });
+      return;
+    }
+
+    // Clear hover state when navigating
+    clearHoverState();
+
+    set({
+      isTransitioning: true,
+      focusLevel: 'universe',
+      focusedGalaxyId: null,
+      focusedSolarSystemId: null,
+      focusedPlanetId: null,
+      focusedMoonId: null,
+    });
+  },
+
   navigateToGalaxy: (galaxyId: string) => {
     const state = get();
+    
+    // No-op if already at this galaxy
+    if (state.focusLevel === 'galaxy' && state.focusedGalaxyId === galaxyId) {
+      return;
+    }
     
     // If already transitioning, queue the navigation
     if (state.isTransitioning) {
@@ -114,6 +158,9 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
       });
       return;
     }
+
+    // Clear hover state when navigating
+    clearHoverState();
 
     set({
       isTransitioning: true,
@@ -128,6 +175,11 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
   navigateToSolarSystem: (solarSystemId: string) => {
     const state = get();
 
+    // No-op if already at this solar system
+    if (state.focusLevel === 'solar-system' && state.focusedSolarSystemId === solarSystemId) {
+      return;
+    }
+
     // If already transitioning, queue the navigation
     if (state.isTransitioning) {
       set({
@@ -135,6 +187,9 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
       });
       return;
     }
+
+    // Clear hover state when navigating
+    clearHoverState();
 
     set({
       isTransitioning: true,
@@ -148,6 +203,11 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
   navigateToPlanet: (planetId: string) => {
     const state = get();
 
+    // No-op if already at this planet
+    if (state.focusLevel === 'planet' && state.focusedPlanetId === planetId) {
+      return;
+    }
+
     // If already transitioning, queue the navigation
     if (state.isTransitioning) {
       set({
@@ -155,6 +215,9 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
       });
       return;
     }
+
+    // Clear hover state when navigating
+    clearHoverState();
 
     set({
       isTransitioning: true,
@@ -185,6 +248,9 @@ export const useNavigationStore = create<NavigationStore>((set, get) => ({
     if (state.isTransitioning || state.focusLevel === 'universe') {
       return;
     }
+
+    // Clear hover state when navigating
+    clearHoverState();
 
     if (state.focusLevel === 'planet') {
       // Go back to solar system view

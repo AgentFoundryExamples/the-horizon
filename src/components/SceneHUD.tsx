@@ -33,6 +33,9 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
     focusedMoonId,
     isTransitioning,
     navigateBack,
+    navigateToUniverse,
+    navigateToGalaxy,
+    navigateToSolarSystem,
   } = useNavigationStore();
   
   const { labelsVisible, toggleLabelsVisibility } = useHoverStore();
@@ -43,6 +46,14 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
   );
   const focusedPlanet = focusedSolarSystem?.planets?.find((p) => p.id === focusedPlanetId);
   const focusedMoon = focusedPlanet?.moons?.find((m) => m.id === focusedMoonId);
+
+  // Handler for keyboard navigation
+  const handleBreadcrumbKeyPress = (event: React.KeyboardEvent, handler: () => void) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handler();
+    }
+  };
 
   return (
     <>
@@ -67,27 +78,165 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
           color: '#CCCCCC',
         }}
       >
-        <span>Universe</span>
+        {/* Universe breadcrumb - always clickable unless at universe level */}
+        <button
+          onClick={() => navigateToUniverse()}
+          onKeyDown={(e) => handleBreadcrumbKeyPress(e, navigateToUniverse)}
+          disabled={isTransitioning || focusLevel === 'universe'}
+          aria-label="Navigate to Universe view"
+          aria-current={focusLevel === 'universe' ? 'page' : undefined}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '0.25rem 0.5rem',
+            margin: '-0.25rem -0.5rem',
+            color: focusLevel === 'universe' ? '#FFFFFF' : '#CCCCCC',
+            fontWeight: focusLevel === 'universe' ? 'bold' : 'normal',
+            fontSize: '0.9rem',
+            cursor: isTransitioning || focusLevel === 'universe' ? 'default' : 'pointer',
+            pointerEvents: 'auto',
+            textDecoration: 'none',
+            borderRadius: '4px',
+            transition: 'all 0.2s',
+            opacity: isTransitioning ? 0.5 : 1,
+          }}
+          onMouseEnter={(e) => {
+            if (!isTransitioning && focusLevel !== 'universe') {
+              e.currentTarget.style.color = '#FFFFFF';
+              e.currentTarget.style.textDecoration = 'underline';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!isTransitioning && focusLevel !== 'universe') {
+              e.currentTarget.style.color = '#CCCCCC';
+              e.currentTarget.style.textDecoration = 'none';
+            }
+          }}
+          onFocus={(e) => {
+            if (!isTransitioning && focusLevel !== 'universe') {
+              e.currentTarget.style.outline = '2px solid #4A90E2';
+              e.currentTarget.style.outlineOffset = '2px';
+            }
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.outline = 'none';
+          }}
+        >
+          Universe
+        </button>
+        
         {focusLevel !== 'universe' && (
           <>
             <span>→</span>
-            <span style={{ color: '#FFFFFF', fontWeight: 'bold' }}>
+            {/* Galaxy breadcrumb - clickable when not at galaxy level */}
+            <button
+              onClick={() => focusedGalaxyId && navigateToGalaxy(focusedGalaxyId)}
+              onKeyDown={(e) => handleBreadcrumbKeyPress(e, () => focusedGalaxyId && navigateToGalaxy(focusedGalaxyId))}
+              disabled={isTransitioning || focusLevel === 'galaxy' || !focusedGalaxyId}
+              aria-label={`Navigate to ${focusedGalaxy?.name || 'Galaxy'} view`}
+              aria-current={focusLevel === 'galaxy' ? 'page' : undefined}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '0.25rem 0.5rem',
+                margin: '-0.25rem -0.5rem',
+                color: '#FFFFFF',
+                fontWeight: 'bold',
+                fontSize: '0.9rem',
+                cursor: isTransitioning || focusLevel === 'galaxy' ? 'default' : 'pointer',
+                pointerEvents: 'auto',
+                textDecoration: 'none',
+                borderRadius: '4px',
+                transition: 'all 0.2s',
+                opacity: isTransitioning ? 0.5 : 1,
+              }}
+              onMouseEnter={(e) => {
+                if (!isTransitioning && focusLevel !== 'galaxy') {
+                  e.currentTarget.style.textDecoration = 'underline';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isTransitioning && focusLevel !== 'galaxy') {
+                  e.currentTarget.style.textDecoration = 'none';
+                }
+              }}
+              onFocus={(e) => {
+                if (!isTransitioning && focusLevel !== 'galaxy') {
+                  e.currentTarget.style.outline = '2px solid #4A90E2';
+                  e.currentTarget.style.outlineOffset = '2px';
+                }
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.outline = 'none';
+              }}
+            >
               {focusedGalaxy?.name || 'Galaxy'}
-            </span>
+            </button>
           </>
         )}
+        
         {(focusLevel === 'solar-system' || focusLevel === 'planet') && (
           <>
             <span>→</span>
-            <span style={{ color: '#FFFFFF', fontWeight: 'bold' }}>
+            {/* Solar System breadcrumb - clickable when at planet level */}
+            <button
+              onClick={() => focusedSolarSystemId && navigateToSolarSystem(focusedSolarSystemId)}
+              onKeyDown={(e) => handleBreadcrumbKeyPress(e, () => focusedSolarSystemId && navigateToSolarSystem(focusedSolarSystemId))}
+              disabled={isTransitioning || focusLevel === 'solar-system' || !focusedSolarSystemId}
+              aria-label={`Navigate to ${focusedSolarSystem?.name || 'Solar System'} view`}
+              aria-current={focusLevel === 'solar-system' ? 'page' : undefined}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '0.25rem 0.5rem',
+                margin: '-0.25rem -0.5rem',
+                color: '#FFFFFF',
+                fontWeight: 'bold',
+                fontSize: '0.9rem',
+                cursor: isTransitioning || focusLevel === 'solar-system' ? 'default' : 'pointer',
+                pointerEvents: 'auto',
+                textDecoration: 'none',
+                borderRadius: '4px',
+                transition: 'all 0.2s',
+                opacity: isTransitioning ? 0.5 : 1,
+              }}
+              onMouseEnter={(e) => {
+                if (!isTransitioning && focusLevel !== 'solar-system') {
+                  e.currentTarget.style.textDecoration = 'underline';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isTransitioning && focusLevel !== 'solar-system') {
+                  e.currentTarget.style.textDecoration = 'none';
+                }
+              }}
+              onFocus={(e) => {
+                if (!isTransitioning && focusLevel !== 'solar-system') {
+                  e.currentTarget.style.outline = '2px solid #4A90E2';
+                  e.currentTarget.style.outlineOffset = '2px';
+                }
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.outline = 'none';
+              }}
+            >
               {focusedSolarSystem?.name || 'Solar System'}
-            </span>
+            </button>
           </>
         )}
+        
         {focusLevel === 'planet' && (
           <>
             <span>→</span>
-            <span style={{ color: '#FFFFFF', fontWeight: 'bold' }}>
+            {/* Planet breadcrumb - currently active, not clickable */}
+            <span 
+              style={{ 
+                color: '#FFFFFF', 
+                fontWeight: 'bold',
+                padding: '0.25rem 0.5rem',
+              }}
+              aria-current="page"
+            >
               {focusedMoon ? focusedMoon.name : focusedPlanet?.name || 'Planet'}
             </span>
           </>
