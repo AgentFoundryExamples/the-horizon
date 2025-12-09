@@ -3,19 +3,24 @@
 /**
  * OverlayLabels - DOM-based overlay for hover labels
  * Renders 2D labels that float above the 3D canvas using Drei's Html component
+ * Now supports per-scene configuration for optimal readability at different zoom levels
  */
 
 import { Html } from '@react-three/drei';
 import { useHoverStore } from '@/lib/hover-store';
+import { useNavigationStore } from '@/lib/store';
+import { getLabelConfig } from '@/lib/label-config';
 import '../styles/overlay-labels.css';
 
 /**
  * OverlayLabels component - must be inside Canvas
  * Uses Drei's Html component to render DOM content in 3D space
+ * Applies per-scene styling based on current focus level
  */
 export default function OverlayLabels() {
   const hoveredObject = useHoverStore((state) => state.hoveredObject);
   const labelsVisible = useHoverStore((state) => state.labelsVisible);
+  const focusLevel = useNavigationStore((state) => state.focusLevel);
 
   // Don't render if no object is hovered or labels are hidden
   if (!hoveredObject || !labelsVisible) {
@@ -23,6 +28,9 @@ export default function OverlayLabels() {
   }
 
   const { name, type, metadata, position } = hoveredObject;
+
+  // Get per-scene label configuration
+  const labelConfig = getLabelConfig(focusLevel);
 
   // Defensive check: ensure position has valid coordinates before rendering
   // This protects against edge cases where store validation might be bypassed
@@ -46,7 +54,7 @@ export default function OverlayLabels() {
     <Html
       position={[position.x, position.y, position.z]}
       center
-      distanceFactor={100}
+      distanceFactor={labelConfig.distanceFactor}
       zIndexRange={[200, 0]}
       sprite
       occlude={false}
@@ -58,10 +66,41 @@ export default function OverlayLabels() {
       transform
       wrapperClass="overlay-label-wrapper"
     >
-      <div className="overlay-label" role="tooltip" aria-live="polite">
-        <div className="overlay-label-content">
-          <div className="overlay-label-name">{name}</div>
-          <div className="overlay-label-type">{type}</div>
+      <div 
+        className="overlay-label" 
+        role="tooltip" 
+        aria-live="polite"
+        style={{
+          // Apply per-scene offset
+          transform: `translate(-50%, calc(-100% - ${labelConfig.offsetY}px))`,
+        }}
+      >
+        <div 
+          className={`overlay-label-content ${labelConfig.enableGlow ? 'with-glow' : 'no-glow'}`}
+          style={{
+            minWidth: labelConfig.minWidth,
+            maxWidth: labelConfig.maxWidth,
+            backgroundColor: labelConfig.backgroundOpacity !== undefined 
+              ? `rgba(0, 0, 0, ${labelConfig.backgroundOpacity})` 
+              : undefined,
+            borderColor: labelConfig.borderColor,
+          }}
+        >
+          <div 
+            className="overlay-label-name"
+            style={{
+              fontSize: labelConfig.fontSize,
+              // Map 'wrap' to 'normal' for valid CSS whiteSpace value
+              // Default to 'nowrap' if textWrap is undefined
+              whiteSpace: labelConfig.textWrap === 'wrap' ? 'normal' : 'nowrap',
+            }}
+          >{name}</div>
+          <div 
+            className="overlay-label-type"
+            style={{
+              fontSize: labelConfig.typeFontSize,
+            }}
+          >{type}</div>
           {metadata?.description && (
             <div className="overlay-label-description">{metadata.description}</div>
           )}
