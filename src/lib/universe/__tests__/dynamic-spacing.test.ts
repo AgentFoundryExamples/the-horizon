@@ -24,6 +24,9 @@ import {
   type PlanetSizeInfo,
 } from '../scale-constants';
 
+// Floating point comparison tolerance for geometric calculations
+const FLOATING_POINT_TOLERANCE = 0.001;
+
 describe('Dynamic Orbit Spacing', () => {
   describe('calculateDynamicSpacing', () => {
     it('should return base spacing for single planet', () => {
@@ -88,7 +91,7 @@ describe('Dynamic Orbit Spacing', () => {
         const gap = nextRadius - currentRadius;
         const minGap = planets[i].radius + planets[i + 1].radius + ORBITAL_SPACING.MIN_SEPARATION;
         
-        expect(gap).toBeGreaterThanOrEqual(minGap - 0.001); // Allow small floating point error
+        expect(gap).toBeGreaterThanOrEqual(minGap - FLOATING_POINT_TOLERANCE); // Allow small floating point error
       }
     });
 
@@ -116,7 +119,7 @@ describe('Dynamic Orbit Spacing', () => {
         const gap = nextRadius - currentRadius;
         const minGap = planets[i].radius + planets[i + 1].radius + ORBITAL_SPACING.MIN_SEPARATION;
         
-        expect(gap).toBeGreaterThanOrEqual(minGap - 0.001);
+        expect(gap).toBeGreaterThanOrEqual(minGap - FLOATING_POINT_TOLERANCE);
       }
     });
 
@@ -133,7 +136,7 @@ describe('Dynamic Orbit Spacing', () => {
       
       // Should still prevent overlap even if exceeding viewport
       const minSpacing = calculateMinimumSpacingForPlanets(planets);
-      expect(spacing).toBeGreaterThanOrEqual(minSpacing - 0.001);
+      expect(spacing).toBeGreaterThanOrEqual(minSpacing - FLOATING_POINT_TOLERANCE);
     });
 
     it('should apply density factor for many planets', () => {
@@ -171,7 +174,7 @@ describe('Dynamic Orbit Spacing', () => {
       const gap = orbit2 - orbit1;
       const minGap = planets[1].radius + planets[2].radius + ORBITAL_SPACING.MIN_SEPARATION;
       
-      expect(gap).toBeGreaterThanOrEqual(minGap - 0.001);
+      expect(gap).toBeGreaterThanOrEqual(minGap - FLOATING_POINT_TOLERANCE);
     });
 
     it('should handle non-sequential indices gracefully', () => {
@@ -207,7 +210,7 @@ describe('Dynamic Orbit Spacing', () => {
       
       // Minimum gap = 1.0 + 1.0 + MIN_SEPARATION = 2.0 + 2.0 = 4.0
       // For index difference of 1, spacing should be >= 4.0
-      expect(minSpacing).toBeGreaterThanOrEqual(4.0 - 0.001);
+      expect(minSpacing).toBeGreaterThanOrEqual(4.0 - FLOATING_POINT_TOLERANCE);
     });
 
     it('should handle large planet correctly', () => {
@@ -220,7 +223,7 @@ describe('Dynamic Orbit Spacing', () => {
       const minSpacing = calculateMinimumSpacingForPlanets(planets);
       
       // Worst case pair: indices 1 and 2, radii 3.0 + 0.8 + 2.0 = 5.8
-      expect(minSpacing).toBeGreaterThanOrEqual(5.8 - 0.001);
+      expect(minSpacing).toBeGreaterThanOrEqual(5.8 - FLOATING_POINT_TOLERANCE);
     });
 
     it('should find maximum required spacing across all pairs', () => {
@@ -237,7 +240,7 @@ describe('Dynamic Orbit Spacing', () => {
       for (let i = 0; i < planets.length - 1; i++) {
         const gap = minSpacing * (planets[i + 1].index - planets[i].index);
         const minGap = planets[i].radius + planets[i + 1].radius + ORBITAL_SPACING.MIN_SEPARATION;
-        expect(gap).toBeGreaterThanOrEqual(minGap - 0.001);
+        expect(gap).toBeGreaterThanOrEqual(minGap - FLOATING_POINT_TOLERANCE);
       }
     });
   });
@@ -287,7 +290,7 @@ describe('Dynamic Orbit Spacing', () => {
       for (let i = 0; i < planets.length - 1; i++) {
         const gap = orbits[i + 1] - orbits[i];
         const minGap = planets[i].radius + planets[i + 1].radius + ORBITAL_SPACING.MIN_SEPARATION;
-        expect(gap).toBeGreaterThanOrEqual(minGap - 0.001);
+        expect(gap).toBeGreaterThanOrEqual(minGap - FLOATING_POINT_TOLERANCE);
       }
       
       // Verify all planets have valid positions
@@ -338,7 +341,7 @@ describe('Dynamic Orbit Spacing', () => {
         const gap = orbitNext - orbitI;
         const minGap = planets[i].radius + planets[i + 1].radius + ORBITAL_SPACING.MIN_SEPARATION;
         
-        expect(gap).toBeGreaterThanOrEqual(minGap - 0.001);
+        expect(gap).toBeGreaterThanOrEqual(minGap - FLOATING_POINT_TOLERANCE);
       }
       
       // Verify all orbits are positive and finite

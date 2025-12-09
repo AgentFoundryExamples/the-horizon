@@ -89,6 +89,8 @@ export function PlanetarySystem({
       const seededRandom = createSeededRandom(seed);
 
       // Keplerian orbit parameters with dynamic spacing
+      // Uses pre-calculated optimal spacing instead of fixed scale.orbitSpacing
+      // to prevent planet overlap and respect viewport constraints
       const semiMajorAxis = calculateDynamicOrbitalRadius(index, optimalSpacing);
       const eccentricity = seededRandom() * scale.orbitEccentricity;
       const inclination = (seededRandom() - 0.5) * scale.orbitInclination;

@@ -338,6 +338,8 @@ export function calculateDynamicSpacing(
       } else {
         // Cannot fit without overlap - prioritize safety over viewport
         // Keep minimum safe spacing and log warning
+        // Note: Using console.warn for development visibility
+        // TODO: Consider structured logging service for production
         console.warn(
           `System has ${planets.length} planets that cannot fit in viewport without overlap. ` +
           `Required spacing: ${minSpacingForSafety.toFixed(2)}, ` +
