@@ -53,3 +53,16 @@ export {
   hasPlanetMaterialPreset,
   createCustomPlanetMaterial,
 } from './presets';
+
+// Material system
+export type { DeviceCapabilities, PlanetShaderMaterialOptions } from './materials';
+export {
+  detectDeviceCapabilities,
+  createPlanetShaderMaterial,
+  createFallbackMaterial,
+  createAtmosphereShell,
+  applyPlanetMaterial,
+  mapThemeToMaterialPreset,
+  clonePlanetMaterial,
+  clampAnimationMultiplier,
+} from './materials';

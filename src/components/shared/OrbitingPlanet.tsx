@@ -5,11 +5,19 @@
  * Used by both GalaxyView and SolarSystemView with different scale parameters
  */
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { Planet } from '@/lib/universe/types';
 import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
+import {
+  DEFAULT_GRAPHICS_CONFIG,
+  getPlanetMaterialPreset,
+  detectDeviceCapabilities,
+  applyPlanetMaterial,
+  mapThemeToMaterialPreset,
+  clonePlanetMaterial,
+} from '@/lib/graphics';
 
 interface OrbitingPlanetProps {
   planet: Planet;
@@ -52,6 +60,49 @@ export function OrbitingPlanet({
 }: OrbitingPlanetProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const setHoveredObject = useHoverStore((state) => state.setHoveredObject);
+  const [atmosphereShell, setAtmosphereShell] = useState<THREE.Mesh | null>(null);
+
+  // Detect device capabilities for material optimization
+  const capabilities = useMemo(() => detectDeviceCapabilities(), []);
+
+  // Get graphics configuration
+  const graphicsConfig = useMemo(() => DEFAULT_GRAPHICS_CONFIG, []);
+  const planetViewConfig = graphicsConfig.planetView;
+
+  // Get material preset based on planet theme
+  const materialPreset = useMemo(() => {
+    const presetId = mapThemeToMaterialPreset(planet.theme);
+    const preset = getPlanetMaterialPreset(presetId);
+    // Clone to prevent reference mutation across multiple planets
+    return preset ? clonePlanetMaterial(preset) : null;
+  }, [planet.theme]);
+
+  // Apply material to planet mesh
+  useEffect(() => {
+    if (meshRef.current && materialPreset) {
+      const mesh = meshRef.current; // Capture ref for cleanup
+      const { material, atmosphereShell: newAtmosphere } = applyPlanetMaterial(
+        mesh,
+        materialPreset,
+        planetViewConfig,
+        capabilities,
+        graphicsConfig.universe.lowPowerMode
+      );
+
+      // Add atmosphere shell if created
+      if (newAtmosphere && mesh) {
+        mesh.add(newAtmosphere);
+        setAtmosphereShell(newAtmosphere);
+      }
+
+      // Cleanup previous atmosphere on unmount
+      return () => {
+        if (newAtmosphere && mesh) {
+          mesh.remove(newAtmosphere);
+        }
+      };
+    }
+  }, [materialPreset, planetViewConfig, capabilities, graphicsConfig.universe.lowPowerMode]);
 
   useFrame((state) => {
     if (!meshRef.current) return;
@@ -127,20 +178,6 @@ export function OrbitingPlanet({
     }
   };
 
-  // Determine color based on theme
-  const color = useMemo(() => {
-    switch (planet.theme) {
-      case 'blue-green':
-        return '#2E86AB';
-      case 'red':
-        return '#E63946';
-      case 'earth-like':
-        return '#4A90E2';
-      default:
-        return '#CCCCCC';
-    }
-  }, [planet.theme]);
-
   return (
     <mesh
       ref={meshRef}
@@ -149,7 +186,7 @@ export function OrbitingPlanet({
       onPointerOut={handlePointerOut}
     >
       <sphereGeometry args={[size, 16, 16]} />
-      <meshStandardMaterial color={color} />
+      {/* Material is applied dynamically via applyPlanetMaterial */}
     </mesh>
   );
 }

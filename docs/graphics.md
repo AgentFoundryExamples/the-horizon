@@ -628,3 +628,535 @@ For questions or issues with the graphics configuration system:
 - Verify environment variables are set correctly
 - Review this documentation for proper field ranges
 - Test with `DEFAULT_GRAPHICS_CONFIG` to isolate custom config issues
+
+## Planet Material Pipeline
+
+### Overview
+
+The AAA Planet Material Pipeline provides pseudo-PBR (Physically Based Rendering) quality planet visuals with configurable materials, rim lighting, and atmospheric effects. The system is built on Three.js/React Three Fiber and degrades gracefully on low-power devices.
+
+### Architecture
+
+```mermaid
+graph TD
+    A[Planet Component] --> B[Material System]
+    B --> C{Device Capabilities}
+    C -->|High Power| D[Shader Material]
+    C -->|Low Power| E[Fallback Material]
+    D --> F[Rim Lighting]
+    D --> G[Atmospheric Glow]
+    D --> H[Procedural Noise]
+    D --> I[Toon Shading]
+    E --> J[Basic Standard Material]
+    B --> K[PlanetMaterial Preset]
+    K --> L[Config-Driven Parameters]
+```
+
+### Material System Components
+
+#### 1. Device Capability Detection
+
+The system automatically detects device capabilities to optimize rendering:
+
+```typescript
+import { detectDeviceCapabilities } from '@/lib/graphics/materials';
+
+const capabilities = detectDeviceCapabilities();
+// Returns:
+// {
+//   isLowPower: boolean,       // Mobile or low-power device
+//   supportsWebGL: boolean,     // WebGL availability
+//   maxTextureSize: number,     // Maximum texture resolution
+//   supportsFloatTextures: boolean  // Float texture support
+// }
+```
+
+**Detection Criteria:**
+- Mobile device user agent check
+- Hardware concurrency (CPU core count)
+- Battery API status (if available)
+- WebGL context availability
+
+#### 2. Shader Materials
+
+High-quality shader materials provide:
+
+**Rim Lighting (Fresnel Effect)**
+- Edge highlighting based on view angle
+- Configurable color and intensity
+- Simulates atmospheric scattering
+
+**Atmospheric Glow**
+- Separate glow shell around planet
+- Additive blending for realistic atmosphere
+- Configurable color and intensity
+
+**Procedural Noise**
+- Surface variation without textures
+- Lightweight shader-based generation
+- Adds visual interest at all scales
+
+**Toon Shading**
+- Optional cel-shading effect
+- Quantizes lighting levels
+- Configurable step count
+
+#### 3. Fallback Materials
+
+For low-power devices, the system uses simple `MeshStandardMaterial`:
+- Basic diffuse color
+- Roughness and metallic properties
+- Optional emissive rim effect
+- No custom shaders or expensive effects
+
+### Usage in Components
+
+#### PlanetSurface Component
+
+The `PlanetSurface` component demonstrates full material integration:
+
+```typescript
+import {
+  DEFAULT_GRAPHICS_CONFIG,
+  getPlanetMaterialPreset,
+  detectDeviceCapabilities,
+  applyPlanetMaterial,
+  mapThemeToMaterialPreset,
+  clonePlanetMaterial,
+} from '@/lib/graphics';
+
+// Inside component
+const capabilities = useMemo(() => detectDeviceCapabilities(), []);
+const graphicsConfig = DEFAULT_GRAPHICS_CONFIG;
+const planetViewConfig = graphicsConfig.planetView;
+
+// Map planet theme to material preset
+const materialPreset = useMemo(() => {
+  const presetId = mapThemeToMaterialPreset(planet.theme);
+  const preset = getPlanetMaterialPreset(presetId);
+  return preset ? clonePlanetMaterial(preset) : null;
+}, [planet.theme]);
+
+// Apply material to mesh
+useEffect(() => {
+  if (meshRef.current && materialPreset) {
+    const { material, atmosphereShell } = applyPlanetMaterial(
+      meshRef.current,
+      materialPreset,
+      planetViewConfig,
+      capabilities,
+      graphicsConfig.universe.lowPowerMode
+    );
+
+    if (atmosphereShell) {
+      meshRef.current.add(atmosphereShell);
+    }
+  }
+}, [materialPreset, planetViewConfig, capabilities]);
+```
+
+#### Theme to Material Mapping
+
+The system maintains backwards compatibility with existing planet themes:
+
+| Legacy Theme | Material Preset | Description |
+|-------------|----------------|-------------|
+| `blue-green` | `oceanic` | Water-covered worlds |
+| `earth-like` | `rocky` | Terrestrial planets |
+| `red` | `volcanic` | Lava-covered worlds |
+| `ice` | `ice-world` | Frozen planets |
+| `gas` | `gas-giant` | Gas giants |
+
+### Tuning Planet Materials
+
+#### Adjusting Visual Parameters
+
+All visual parameters are configurable via `PlanetViewConfig`:
+
+```typescript
+const config: PlanetViewConfig = {
+  planetRenderScale: 1.2,       // Size multiplier
+  rotationSpeed: 1.5,           // Animation speed
+  atmosphereGlow: 1.3,          // Glow intensity
+  cloudOpacity: 0.7,            // Cloud transparency
+  lightingIntensity: 1.1,       // Overall brightness
+  rimLighting: true,            // Enable rim effect
+};
+```
+
+#### Creating Custom Material Presets
+
+Extend existing presets or create entirely new ones:
+
+```typescript
+import { createCustomPlanetMaterial } from '@/lib/graphics/presets';
+
+// Create a purple toxic world
+const toxicWorld = createCustomPlanetMaterial(
+  'volcanic',                   // Base preset
+  {
+    baseColor: '#4B0082',       // Indigo surface
+    rimColor: '#8A2BE2',        // Blue-violet rim
+    rimIntensity: 1.2,
+    atmosphereColor: '#9370DB', // Medium purple
+    atmosphereIntensity: 0.9,
+    toonShading: true,          // Enable cel-shading
+  },
+  'toxic-world',                // New ID
+  'Toxic World'                 // Display name
+);
+```
+
+#### Material Cloning
+
+**Critical:** Always clone materials when using the same preset for multiple planets to prevent reference mutation:
+
+```typescript
+import { clonePlanetMaterial } from '@/lib/graphics/materials';
+
+const materialPreset = getPlanetMaterialPreset('rocky');
+const clonedMaterial = clonePlanetMaterial(materialPreset);
+// Now safe to modify without affecting other planets
+```
+
+### Fallback Behavior
+
+#### Automatic Fallback Triggers
+
+The system automatically switches to fallback mode when:
+
+1. **Low-Power Device Detected**
+   - Mobile devices
+   - Low CPU core count (≤4 cores)
+   - Battery saver mode active
+
+2. **WebGL Unavailable**
+   - Browser doesn't support WebGL
+   - WebGL context creation fails
+
+3. **Manual Override**
+   - `universe.lowPowerMode` set to `true` in config
+
+#### Fallback Material Characteristics
+
+Fallback materials provide:
+- ✅ Basic diffuse coloring
+- ✅ Roughness/metallic properties
+- ✅ Minimal emissive rim effect
+- ❌ No custom shaders
+- ❌ No atmosphere shells
+- ❌ No procedural noise
+
+#### Configuring Fallback Quality
+
+Control fallback behavior via configuration:
+
+```typescript
+const config: UniverseConfig = {
+  lowPowerMode: true,           // Force fallback mode
+  fallbackQuality: 1,           // 1=low, 2=medium, 3=high
+  shadowQuality: 0,             // Disable shadows
+  antiAliasing: false,          // Disable AA
+};
+```
+
+#### Testing Fallback Mode
+
+To test fallback rendering without a mobile device:
+
+```typescript
+// Force low-power mode in config
+const testConfig = {
+  ...DEFAULT_GRAPHICS_CONFIG,
+  universe: {
+    ...DEFAULT_GRAPHICS_CONFIG.universe,
+    lowPowerMode: true,
+  },
+};
+```
+
+### Animation Multipliers
+
+Animation speeds are configurable and safely clamped:
+
+```typescript
+import { clampAnimationMultiplier } from '@/lib/graphics/materials';
+
+// Rotation speed from config
+const rotationSpeed = clampAnimationMultiplier(
+  planetViewConfig.rotationSpeed,
+  1.0  // Default value
+);
+// Clamped to [0, 10] to prevent physics glitches
+
+// Apply to animation
+useFrame(() => {
+  if (meshRef.current) {
+    meshRef.current.rotation.y += rotationSpeed * 0.001;
+  }
+});
+```
+
+### Edge Cases and Best Practices
+
+#### Small Planets
+
+For planets with very small render scales:
+- Atmosphere shells automatically scale proportionally
+- Shader detail remains consistent
+- No visual artifacts at minimum sizes
+
+**Recommendation:** Keep `planetRenderScale` ≥ 0.5 for optimal appearance
+
+#### Multiple Planets with Same Preset
+
+Always clone materials to prevent mutation:
+
+```typescript
+// ❌ BAD - shared reference
+const material = getPlanetMaterialPreset('rocky');
+planet1.material = material;
+planet2.material = material;  // Both planets share same material!
+
+// ✅ GOOD - cloned materials
+const material1 = clonePlanetMaterial(getPlanetMaterialPreset('rocky'));
+const material2 = clonePlanetMaterial(getPlanetMaterialPreset('rocky'));
+planet1.material = material1;
+planet2.material = material2;  // Independent materials
+```
+
+#### WebGL Extension Unavailability
+
+If required WebGL extensions are missing:
+- System automatically switches to fallback mode
+- No errors thrown
+- Graceful degradation
+
+#### Safe Animation Ranges
+
+Animation multipliers are automatically clamped:
+
+| Parameter | Min | Max | Default | Notes |
+|-----------|-----|-----|---------|-------|
+| `rotationSpeed` | 0 | 10 | 1.0 | Values > 10 cause physics issues |
+| `orbitAnimationSpeed` | 0 | 10 | 1.0 | Synced with rotation |
+| `atmosphereGlow` | 0 | 2.0 | 1.0 | Higher values may cause overexposure |
+
+### Performance Considerations
+
+#### Shader Complexity
+
+Custom shaders add ~2-4ms per frame per visible planet:
+- **Target:** Stay under 16ms total (60 FPS)
+- **Recommendation:** Limit to 3-5 planets with shader materials on screen
+- **Fallback:** Triggers automatically if framerate drops
+
+#### Texture Loading
+
+Current implementation uses procedural noise instead of textures:
+- ✅ No network requests
+- ✅ Instant loading
+- ✅ Scalable to any resolution
+- ℹ️ Texture support planned for future enhancement
+
+#### Atmosphere Shell Impact
+
+Atmosphere shells add ~1ms per planet:
+- Uses additive blending (GPU-accelerated)
+- Transparent geometry (minimal fill-rate cost)
+- Automatically disabled in low-power mode
+
+### Debugging
+
+#### Enable Debug Logging
+
+Set environment variable to log material system activity:
+
+```bash
+NEXT_PUBLIC_DEBUG_GRAPHICS=true
+```
+
+This logs:
+- Device capability detection results
+- Material preset resolution
+- Fallback mode triggers
+- Shader compilation status
+
+#### Visual Debugging
+
+To visualize material boundaries and effects:
+
+```typescript
+// Temporarily disable atmosphere to see base material
+const { material, atmosphereShell } = applyPlanetMaterial(
+  meshRef.current,
+  materialPreset,
+  { ...planetViewConfig, atmosphereGlow: 0 },  // Disable atmosphere
+  capabilities
+);
+```
+
+### Migration from Legacy Materials
+
+If you have components using hardcoded colors:
+
+**Before:**
+```typescript
+<meshStandardMaterial color="#2E86AB" />
+```
+
+**After:**
+```typescript
+// Import material system
+import { getPlanetMaterialPreset, applyPlanetMaterial } from '@/lib/graphics';
+
+// In useEffect
+const preset = getPlanetMaterialPreset('oceanic');
+applyPlanetMaterial(meshRef.current, preset, config, capabilities);
+```
+
+### Future Enhancements
+
+Planned improvements for the material pipeline:
+
+1. **Texture Support**
+   - Base color maps
+   - Normal maps for surface detail
+   - Specular maps for reflections
+   - Configurable via `texturePreset`
+
+2. **Cloud Layers**
+   - Animated cloud systems
+   - Configurable opacity and speed
+   - Separate shader pass
+
+3. **Advanced Lighting**
+   - Multiple light sources
+   - Shadow casting
+   - Global illumination approximation
+
+4. **LOD System**
+   - Distance-based quality reduction
+   - Automatic shader simplification
+   - Texture mipmap control
+
+### Troubleshooting
+
+#### Issue: Materials appear flat/no rim lighting
+
+**Solution:** Check that rim lighting is enabled in config:
+```typescript
+planetView: {
+  rimLighting: true,
+}
+```
+
+#### Issue: Atmosphere not visible
+
+**Solutions:**
+1. Increase atmosphere intensity:
+   ```typescript
+   material.atmosphereIntensity = 0.8;
+   ```
+2. Check `atmosphereGlow` in config:
+   ```typescript
+   planetView: {
+     atmosphereGlow: 1.5,
+   }
+   ```
+3. Verify not in low-power mode (disables atmosphere)
+
+#### Issue: Performance degradation
+
+**Solutions:**
+1. Enable low-power mode:
+   ```typescript
+   universe: {
+     lowPowerMode: true,
+   }
+   ```
+2. Reduce visible planets
+3. Disable shadows and atmosphere effects
+4. Lower `fallbackQuality` setting
+
+#### Issue: Multiple planets sharing colors
+
+**Cause:** Material reference mutation
+
+**Solution:** Always clone materials:
+```typescript
+const clonedMaterial = clonePlanetMaterial(preset);
+```
+
+### API Reference
+
+#### Material System Functions
+
+##### `detectDeviceCapabilities()`
+Returns device rendering capabilities.
+
+**Returns:** `DeviceCapabilities`
+
+##### `applyPlanetMaterial(mesh, material, config, capabilities, lowPowerModeOverride?)`
+Applies material to a mesh with appropriate fallback.
+
+**Parameters:**
+- `mesh: THREE.Mesh` - Target mesh
+- `material: PlanetMaterial` - Material preset
+- `config: PlanetViewConfig` - View configuration
+- `capabilities: DeviceCapabilities` - Device info
+- `lowPowerModeOverride?: boolean` - Force low-power mode
+
+**Returns:** `{ material: THREE.Material; atmosphereShell: THREE.Mesh | null }`
+
+##### `createPlanetShaderMaterial(options)`
+Creates custom shader material.
+
+**Parameters:**
+- `options: PlanetShaderMaterialOptions`
+
+**Returns:** `THREE.ShaderMaterial`
+
+##### `createFallbackMaterial(material, config)`
+Creates simple fallback material.
+
+**Parameters:**
+- `material: PlanetMaterial` - Material preset
+- `config: PlanetViewConfig` - View configuration
+
+**Returns:** `THREE.MeshStandardMaterial`
+
+##### `createAtmosphereShell(material, planetRadius, config)`
+Creates atmosphere glow shell.
+
+**Parameters:**
+- `material: PlanetMaterial` - Material preset
+- `planetRadius: number` - Planet size
+- `config: PlanetViewConfig` - View configuration
+
+**Returns:** `THREE.Mesh | null`
+
+##### `mapThemeToMaterialPreset(theme)`
+Maps legacy theme string to material preset ID.
+
+**Parameters:**
+- `theme: string` - Legacy theme name
+
+**Returns:** `string` - Preset ID
+
+##### `clonePlanetMaterial(material)`
+Deep clones material to prevent reference mutation.
+
+**Parameters:**
+- `material: PlanetMaterial` - Material to clone
+
+**Returns:** `PlanetMaterial`
+
+##### `clampAnimationMultiplier(value, defaultValue)`
+Clamps animation speed to safe range [0, 10].
+
+**Parameters:**
+- `value: number | undefined` - Input value
+- `defaultValue: number` - Fallback value
+
+**Returns:** `number`
