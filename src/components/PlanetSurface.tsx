@@ -19,13 +19,14 @@
  * Combines 3D scene with HTML overlay for content display
  */
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { Planet, Moon, SolarSystem } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
 import MarkdownContent from './MarkdownContent';
 import { calculateMoonSize } from '@/lib/universe/scale-constants';
+import { normalizePlanetLayout, layoutConfigToCSS } from '@/lib/universe/planet-layout';
 
 /**
  * Validate and sanitize URL to prevent XSS and malicious URLs
@@ -109,9 +110,22 @@ export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurface
   const { navigateToMoon } = useNavigationStore();
   const planetRef = useRef<THREE.Mesh>(null);
 
-  useFrame((state) => {
+  // Get layout configuration for this planet
+  const layoutConfig = useMemo(() => {
+    return normalizePlanetLayout(planet.layoutConfig);
+  }, [planet.layoutConfig]);
+
+  // Apply scale to planet mesh only when it changes (not in useFrame)
+  useEffect(() => {
     if (planetRef.current) {
-      // Gentle rotation
+      const planetScale = layoutConfig.planetRenderScale;
+      planetRef.current.scale.setScalar(planetScale);
+    }
+  }, [layoutConfig]);
+
+  useFrame(() => {
+    if (planetRef.current) {
+      // Gentle rotation (scale is handled in useEffect above)
       planetRef.current.rotation.y += 0.001;
     }
   });
@@ -213,8 +227,17 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
   const rawExternalLinks = planet.externalLinks || []; // Moons inherit external links from planet
   const externalLinks = rawExternalLinks.filter(link => isValidUrl(link.url)); // Filter valid URLs only
 
+  // Layout configuration - normalize and apply
+  const layoutConfig = useMemo(() => {
+    return normalizePlanetLayout(planet.layoutConfig);
+  }, [planet.layoutConfig]);
+
+  const containerStyle = useMemo(() => {
+    return layoutConfigToCSS(layoutConfig);
+  }, [layoutConfig]);
+
   return (
-    <div className="planet-surface-container">
+    <div className="planet-surface-container" style={containerStyle as React.CSSProperties}>
       {/* Left column - Planet visualization placeholder */}
       <div className="planet-visual-column">
         <div className="planet-visual-label">

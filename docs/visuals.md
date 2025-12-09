@@ -5702,6 +5702,319 @@ The previous system included:
 
 **Migration**: For developers extending or customizing The Horizon, tooltip components and constants are no longer available. Use navigation state and the breadcrumb HUD for context instead.
 
+## Planet Viewer Layout Configuration
+
+The Planet Viewer supports customizable layout parameters that control the positioning and scale of the 3D planet render and content panel. This section documents the visual implementation and CSS architecture.
+
+### Layout Architecture
+
+The Planet Viewer uses a two-column flex layout with configurable parameters:
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Planet Surface Container (flexbox)                 │
+│  ┌──────────────┐  ┌─────────────────────────────┐ │
+│  │   Planet     │  │   Content Column           │ │
+│  │   Visual     │  │   (scrollable)             │ │
+│  │   Column     │  │                            │ │
+│  │              │  │   - Title & Metadata       │ │
+│  │   (3D        │  │   - Featured Image         │ │
+│  │   Render)    │  │   - Markdown Content       │ │
+│  │              │  │   - External Links         │ │
+│  │              │  │   - Moon Navigation        │ │
+│  └──────────────┘  └─────────────────────────────┘ │
+└─────────────────────────────────────────────────────┘
+```
+
+### CSS Custom Properties
+
+The layout system uses CSS custom properties for dynamic configuration:
+
+```css
+.planet-surface-container {
+  /* Configuration via CSS custom properties */
+  --planet-column-width: 30%;           /* Planet column width */
+  --planet-render-scale: 1;             /* 3D planet scale */
+  --planet-offset-x: 0%;                /* Horizontal offset */
+  --planet-offset-y: 0%;                /* Vertical offset */
+  --content-padding: 2rem;              /* Content padding */
+  --content-max-width: 800px;           /* Content max width */
+}
+```
+
+These properties are set dynamically via inline styles when a planet has custom `layoutConfig`.
+
+### Visual Layout Parameters
+
+#### Planet Column Width (20-50%)
+
+Controls the percentage of screen width allocated to the planet visualization:
+
+```
+20%: Minimal planet, maximum content space
+30%: Balanced (default)
+50%: Prominent planet, compact content
+```
+
+**Visual Example:**
+```
+20%                    30%                    50%
+┌──┐ Content...    ┌────┐ Content...    ┌─────────┐ Content
+│  │               │    │               │         │
+└──┘               └────┘               └─────────┘
+```
+
+#### Planet Render Scale (0.5-2.0)
+
+Controls the size of the 3D planet sphere within its column:
+
+```
+0.5: Small, distant planet
+1.0: Standard size (default)
+2.0: Large, prominent planet
+```
+
+The scale is applied via Three.js mesh scale, affecting both the planet and its label.
+
+#### Planet Offset X/Y (-50 to 50%)
+
+Fine-tunes planet position within its column:
+
+```
+Offset X:
+-50%: Far left
+0%: Centered (default)
++50%: Far right
+
+Offset Y:
+-50%: Top
+0%: Centered (default)
++50%: Bottom
+```
+
+Implemented via CSS `transform: translate(var(--planet-offset-x), var(--planet-offset-y))`.
+
+#### Content Padding (1-4 rem)
+
+Controls internal padding of the content column:
+
+```
+1rem: Compact, more content visible
+2rem: Balanced (default)
+4rem: Spacious, comfortable reading
+```
+
+#### Content Max Width (600-1200px)
+
+Limits the maximum width of the content column for optimal readability:
+
+```
+600px: Narrow, mobile-friendly
+800px: Standard blog width (default)
+1200px: Wide, accommodates large images
+```
+
+### Responsive Behavior
+
+The layout configuration applies differently across breakpoints:
+
+**Desktop (> 1024px):**
+- Two-column layout with configurable widths
+- All parameters fully respected
+- Planet and content side-by-side
+
+**Tablet (768px - 1024px):**
+- Two-column layout maintained
+- Planet column slightly expanded (35% default override)
+- Content max-width reduced for fit
+
+**Mobile (< 768px):**
+- Single-column layout (planet on top, content below)
+- `planetColumnWidth` ignored
+- Planet takes full width with reduced height
+- Content flows naturally below
+
+### Implementation Details
+
+#### Component Integration
+
+The `PlanetSurfaceOverlay` component consumes layout configuration:
+
+```typescript
+// Normalize and validate configuration
+const layoutConfig = useMemo(() => {
+  return normalizePlanetLayout(planet.layoutConfig);
+}, [planet.layoutConfig]);
+
+// Convert to CSS custom properties
+const containerStyle = useMemo(() => {
+  return layoutConfigToCSS(layoutConfig);
+}, [layoutConfig]);
+
+// Apply to container
+<div className="planet-surface-container" style={containerStyle as React.CSSProperties}>
+```
+
+#### 3D Render Integration
+
+The `PlanetSurface3D` component applies the render scale:
+
+```typescript
+const layoutConfig = useMemo(() => {
+  return normalizePlanetLayout(planet.layoutConfig);
+}, [planet.layoutConfig]);
+
+const planetScale = layoutConfig.planetRenderScale;
+
+useFrame((state) => {
+  if (planetRef.current) {
+    planetRef.current.rotation.y += 0.001;
+    planetRef.current.scale.setScalar(planetScale);
+  }
+});
+```
+
+### Edge Case Handling
+
+#### Long Planet Names
+
+The planet visual label scales with `planetRenderScale` but uses `transform-origin` and `backdrop-filter` to remain readable:
+
+```css
+.planet-visual-label {
+  transform: translateX(-50%) scale(var(--planet-render-scale));
+  backdrop-filter: blur(4px);
+  max-width: 90%; /* Prevents overflow */
+  word-wrap: break-word;
+}
+```
+
+#### Extreme Planet Column Widths
+
+Values are clamped to 20-50% to prevent:
+- Planet column too narrow (< 20%): Planet barely visible
+- Planet column too wide (> 50%): Content cramped and unreadable
+
+#### Large Render Scales
+
+Scales clamped to 0.5-2.0 to prevent:
+- Too small (< 0.5): Planet difficult to see
+- Too large (> 2.0): Planet extends beyond column boundaries
+
+#### Content Overflow
+
+Content column uses `overflow-y: auto` with styled scrollbar:
+
+```css
+.planet-content-column {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(74, 144, 226, 0.5) rgba(255, 255, 255, 0.05);
+}
+```
+
+### Accessibility Considerations
+
+#### Focus Order
+
+Tab order flows naturally: planet label (non-interactive) → content heading → content links → moon buttons.
+
+#### Screen Reader Experience
+
+Layout configuration is purely visual; screen readers read content in source order regardless of layout.
+
+#### Keyboard Navigation
+
+Content scrolling works with arrow keys, Page Up/Down, and Space. Planet visualization is non-interactive.
+
+#### Reduced Motion
+
+Layout transitions respect `prefers-reduced-motion`:
+- No animated layout shifts
+- Instant application of configuration changes
+
+### Performance
+
+Layout configuration has minimal performance impact:
+
+- **Configuration normalization**: O(1), happens once per planet load
+- **CSS custom property application**: No JavaScript re-rendering
+- **3D scale application**: Single Three.js scale operation per frame
+
+Typical overhead: < 1ms per planet view.
+
+### Visual Examples
+
+#### Default Configuration
+
+```json
+{
+  "planetColumnWidth": 30,
+  "planetRenderScale": 1.0,
+  "planetOffsetX": 0,
+  "planetOffsetY": 0,
+  "contentPadding": 2,
+  "contentMaxWidth": 800
+}
+```
+
+Produces balanced, portfolio-ready layout suitable for most planets.
+
+#### Featured Planet (Jupiter)
+
+```json
+{
+  "planetColumnWidth": 45,
+  "planetRenderScale": 1.8,
+  "contentMaxWidth": 700
+}
+```
+
+Emphasizes planet visualization, reduces content width for dramatic effect.
+
+#### Text-Heavy Planet (Historical Earth)
+
+```json
+{
+  "planetColumnWidth": 25,
+  "contentPadding": 3,
+  "contentMaxWidth": 900
+}
+```
+
+Prioritizes content, provides extra padding for comfortable reading.
+
+### Testing Layouts
+
+To preview layout changes during development:
+
+1. Edit planet data in `public/universe/universe.json`
+2. Add/modify `layoutConfig` field
+3. Refresh browser to see changes
+4. Test responsive behavior by resizing window
+5. Verify mobile layout (< 768px width)
+
+### Troubleshooting Visual Issues
+
+**Planet not visible:**
+- Check `planetRenderScale` (should be ≥ 0.5)
+- Verify Three.js canvas is rendering (check browser console)
+- Ensure planet theme color isn't matching background
+
+**Content overlapping planet:**
+- Reduce `planetColumnWidth`
+- Increase `contentMaxWidth` conservatively
+- Check responsive breakpoints
+
+**Layout not updating:**
+- Verify JSON syntax in `universe.json`
+- Check browser console for validation warnings
+- Clear browser cache and reload
+
+**Mobile layout broken:**
+- Expected: mobile uses single-column layout regardless of config
+- Test in desktop viewport for custom layout
+
 ## References
 
 - [React Three Fiber Documentation](https://docs.pmnd.rs/react-three-fiber)

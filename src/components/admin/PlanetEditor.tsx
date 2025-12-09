@@ -28,7 +28,7 @@ interface PlanetEditorProps {
 
 export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditorProps) {
   const [localPlanet, setLocalPlanet] = useState(planet);
-  const [activeTab, setActiveTab] = useState<'info' | 'content' | 'moons'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'content' | 'moons' | 'layout'>('info');
   const [editingMoon, setEditingMoon] = useState<number | null>(null);
 
   const handleChange = (field: keyof Planet, value: unknown) => {
@@ -110,6 +110,12 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
         >
           Moons ({localPlanet.moons?.length || 0})
         </button>
+        <button
+          onClick={() => setActiveTab('layout')}
+          className={`btn btn-small ${activeTab === 'layout' ? '' : 'btn-secondary'}`}
+        >
+          Layout
+        </button>
       </div>
 
       {activeTab === 'info' && (
@@ -181,6 +187,194 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
             </div>
           </div>
         </div>
+      )}
+
+      {activeTab === 'layout' && (
+        <>
+          <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'rgba(74, 144, 226, 0.1)', borderRadius: '4px', border: '1px solid rgba(74, 144, 226, 0.3)' }}>
+            <h4 style={{ marginTop: 0, marginBottom: '0.5rem', color: '#4A90E2' }}>Layout Configuration</h4>
+            <p style={{ margin: 0, fontSize: '0.9rem', color: '#AAAAAA' }}>
+              Customize the Planet Viewer layout to control positioning and scale of the 3D render and content panel.
+              All values are automatically clamped to safe ranges.
+            </p>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Planet Column Width (%)
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Default: 30%, Range: 20-50%
+              </span>
+            </label>
+            <input
+              type="number"
+              min="20"
+              max="50"
+              step="1"
+              value={localPlanet.layoutConfig?.planetColumnWidth ?? 30}
+              onChange={(e) => {
+                const numValue = parseFloat(e.target.value);
+                const value = !isNaN(numValue) ? numValue : 30;
+                handleChange('layoutConfig', {
+                  ...(localPlanet.layoutConfig || {}),
+                  planetColumnWidth: value,
+                });
+              }}
+            />
+            <span className="form-hint">
+              Percentage of screen width for the planet visualization (left side). Higher values emphasize the planet render.
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Planet Render Scale
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Default: 1.0, Range: 0.5-2.0
+              </span>
+            </label>
+            <input
+              type="number"
+              min="0.5"
+              max="2.0"
+              step="0.1"
+              value={localPlanet.layoutConfig?.planetRenderScale ?? 1.0}
+              onChange={(e) => {
+                const numValue = parseFloat(e.target.value);
+                const value = !isNaN(numValue) ? numValue : 1.0;
+                handleChange('layoutConfig', {
+                  ...(localPlanet.layoutConfig || {}),
+                  planetRenderScale: value,
+                });
+              }}
+            />
+            <span className="form-hint">
+              Scale multiplier for the 3D planet sphere. Use 1.5-2.0 for gas giants, 0.5-0.8 for small bodies.
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Planet Horizontal Offset (%)
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Default: 0%, Range: -50 to 50%
+              </span>
+            </label>
+            <input
+              type="number"
+              min="-50"
+              max="50"
+              step="5"
+              value={localPlanet.layoutConfig?.planetOffsetX ?? 0}
+              onChange={(e) => {
+                const numValue = parseFloat(e.target.value);
+                const value = !isNaN(numValue) ? numValue : 0;
+                handleChange('layoutConfig', {
+                  ...(localPlanet.layoutConfig || {}),
+                  planetOffsetX: value,
+                });
+              }}
+            />
+            <span className="form-hint">
+              Horizontal position adjustment. Negative values move left, positive values move right.
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Planet Vertical Offset (%)
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Default: 0%, Range: -50 to 50%
+              </span>
+            </label>
+            <input
+              type="number"
+              min="-50"
+              max="50"
+              step="5"
+              value={localPlanet.layoutConfig?.planetOffsetY ?? 0}
+              onChange={(e) => {
+                const numValue = parseFloat(e.target.value);
+                const value = !isNaN(numValue) ? numValue : 0;
+                handleChange('layoutConfig', {
+                  ...(localPlanet.layoutConfig || {}),
+                  planetOffsetY: value,
+                });
+              }}
+            />
+            <span className="form-hint">
+              Vertical position adjustment. Negative values move up, positive values move down.
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Content Padding (rem)
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Default: 2, Range: 1-4
+              </span>
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="4"
+              step="0.5"
+              value={localPlanet.layoutConfig?.contentPadding ?? 2}
+              onChange={(e) => {
+                const numValue = parseFloat(e.target.value);
+                const value = !isNaN(numValue) ? numValue : 2;
+                handleChange('layoutConfig', {
+                  ...(localPlanet.layoutConfig || {}),
+                  contentPadding: value,
+                });
+              }}
+            />
+            <span className="form-hint">
+              Internal padding of the content column. Higher values provide more breathing room.
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Content Max Width (px)
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Default: 800, Range: 600-1200
+              </span>
+            </label>
+            <input
+              type="number"
+              min="600"
+              max="1200"
+              step="50"
+              value={localPlanet.layoutConfig?.contentMaxWidth ?? 800}
+              onChange={(e) => {
+                const numValue = parseFloat(e.target.value);
+                const value = !isNaN(numValue) ? numValue : 800;
+                handleChange('layoutConfig', {
+                  ...(localPlanet.layoutConfig || {}),
+                  contentMaxWidth: value,
+                });
+              }}
+            />
+            <span className="form-hint">
+              Maximum width of the content column. Optimal line length for readability is around 800px.
+            </span>
+          </div>
+
+          <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(255, 200, 0, 0.1)', borderRadius: '4px', border: '1px solid rgba(255, 200, 0, 0.3)' }}>
+            <h4 style={{ marginTop: 0, marginBottom: '0.5rem', color: '#FFC800' }}>Reset to Defaults</h4>
+            <button
+              onClick={() => handleChange('layoutConfig', undefined)}
+              className="btn btn-secondary"
+              style={{ marginTop: '0.5rem' }}
+            >
+              Clear Custom Layout
+            </button>
+            <span className="form-hint" style={{ display: 'block', marginTop: '0.5rem' }}>
+              Removes all custom layout settings and uses the default configuration.
+            </span>
+          </div>
+        </>
       )}
 
       {activeTab === 'moons' && (

@@ -1773,6 +1773,160 @@ When adding new content:
 3. Update this guide if adding new features
 4. Consider accessibility in all changes
 
+## Planet Viewer Layout Configuration
+
+The Planet Viewer supports customizable layout to control the positioning and scale of the 3D planet render and content panel. This allows maintainers to fine-tune the visual presentation without editing component code.
+
+### Configuration Options
+
+Each planet can have an optional `layoutConfig` field with the following parameters:
+
+```json
+{
+  "id": "earth",
+  "name": "Earth",
+  "layoutConfig": {
+    "planetColumnWidth": 35,
+    "planetRenderScale": 1.2,
+    "planetOffsetX": 5,
+    "planetOffsetY": -3,
+    "contentPadding": 2.5,
+    "contentMaxWidth": 900
+  }
+}
+```
+
+#### Configuration Parameters
+
+| Parameter | Type | Range | Default | Description |
+|-----------|------|-------|---------|-------------|
+| `planetColumnWidth` | number | 20-50 | 30 | Width percentage of planet visualization column (left side) |
+| `planetRenderScale` | number | 0.5-2.0 | 1.0 | Scale multiplier for 3D planet render |
+| `planetOffsetX` | number | -50 to 50 | 0 | Horizontal position offset within column (percent) |
+| `planetOffsetY` | number | -50 to 50 | 0 | Vertical position offset within column (percent) |
+| `contentPadding` | number | 1-4 | 2 | Content panel padding in rem units |
+| `contentMaxWidth` | number | 600-1200 | 800 | Maximum width of content column in pixels |
+
+### Usage Examples
+
+#### Default Layout
+
+For most planets, the default layout works well. Simply omit `layoutConfig`:
+
+```json
+{
+  "id": "mars",
+  "name": "Mars",
+  "theme": "red",
+  "summary": "The Red Planet",
+  "contentMarkdown": "# Mars\n\n..."
+}
+```
+
+#### Prominent Planet Visualization
+
+For gas giants or featured planets, increase the planet column width and scale:
+
+```json
+{
+  "id": "jupiter",
+  "name": "Jupiter",
+  "layoutConfig": {
+    "planetColumnWidth": 45,
+    "planetRenderScale": 1.8,
+    "contentMaxWidth": 700
+  }
+}
+```
+
+#### Compact Layout
+
+For smaller bodies or text-heavy content, reduce the planet column:
+
+```json
+{
+  "id": "pluto",
+  "name": "Pluto",
+  "layoutConfig": {
+    "planetColumnWidth": 25,
+    "planetRenderScale": 0.8,
+    "contentMaxWidth": 850
+  }
+}
+```
+
+#### Adjusted Planet Position
+
+Fine-tune the planet position within its column:
+
+```json
+{
+  "id": "venus",
+  "name": "Venus",
+  "layoutConfig": {
+    "planetOffsetX": 10,
+    "planetOffsetY": -5
+  }
+}
+```
+
+### Safe Ranges and Validation
+
+All configuration values are automatically clamped to safe ranges to prevent layout breaking:
+
+- Values outside the specified ranges are adjusted to the nearest valid value
+- A warning is logged to the console in development mode
+- The layout remains functional even with extreme values
+
+**Development Warning Example:**
+```
+planetColumnWidth 60 is outside safe range [20, 50]. Value will be clamped.
+```
+
+### Responsive Behavior
+
+The layout configuration applies primarily to desktop and tablet viewports. On mobile devices (≤768px width):
+
+- Layout switches to single-column (planet on top, content below)
+- Custom column widths are ignored
+- Planet scale and offsets are adjusted for touch-friendly viewing
+- Content padding and max-width remain configurable
+
+### Best Practices
+
+1. **Start with defaults**: Only customize when needed
+2. **Test responsive**: Verify layout on mobile, tablet, and desktop
+3. **Use moderate values**: Extreme configurations may look awkward
+4. **Consider content length**: Adjust `contentMaxWidth` based on text amount
+5. **Test with moons**: Ensure moon navigation doesn't overlap planet render
+
+### Troubleshooting
+
+**Planet appears too large/small:**
+- Adjust `planetRenderScale` (range: 0.5-2.0)
+- Check that value is within safe range
+
+**Content column too narrow:**
+- Increase `contentMaxWidth` (range: 600-1200px)
+- Reduce `planetColumnWidth` to give content more space
+
+**Planet not centered:**
+- Adjust `planetOffsetX` and `planetOffsetY` (range: -50 to 50)
+- Use negative values to move left/up, positive to move right/down
+
+**Layout breaks on mobile:**
+- This is expected behavior; mobile uses single-column layout
+- Test in desktop/tablet viewport for custom layout preview
+
+**Configuration not applying:**
+- Check JSON syntax (commas, quotes, brackets)
+- Verify values are numbers, not strings
+- Ensure `layoutConfig` is at planet level, not global
+
+### Legacy Data
+
+Planets without `layoutConfig` use the default layout. No migration is required when updating from older versions of The Horizon.
+
 ## Hover Labels and Tooltips
 
 The Horizon uses a standardized hover label system for all interactive celestial objects. When users hover over galaxies, stars, planets, or moons, consistent tooltips appear above the objects.
