@@ -1042,15 +1042,17 @@ The camera positioning system ensures the planet remains visible:
 #### Moon Orbit Behavior
 The tightened moon orbit system keeps satellites visible and near the planet:
 - **Orbit Radius**: 4 + (moonIndex × 0.8) units
-  - Moon 1: 4.0 units from planet center
-  - Moon 2: 4.8 units
-  - Moon 3: 5.6 units
-  - Moon 4+: Continues incrementing by 0.8 units
+  - Moon 1 (index 0): 4.0 units from planet center
+  - Moon 2 (index 1): 4.8 units
+  - Moon 3 (index 2): 5.6 units
+  - Moon 4 (index 3): 6.4 units
+  - Moon 5+ continues incrementing
 - **Vertical Oscillation**: ±1 unit (sinusoidal) for natural movement
 - **Orbital Speed**: 0.2 radians/second for gentle motion
 - **Multiple Moons**: All moons remain within viewport bounds
-  - Systems with 5+ moons: Outermost moon at ~7.2 units
-  - Tested up to 8 moons: All visible without clipping
+  - Systems with exactly 5 moons (indices 0-4): Outermost at 7.2 units (4 + 4×0.8)
+  - Systems with 8 moons (indices 0-7): Worst case 9.6 units (4 + 7×0.8)
+  - Typical 3-moon systems stay within 5.6 units
 - **Animation Smoothness**: 60 FPS on desktop, 30+ FPS on mobile
 - **No Off-Screen Satellites**: Tighter bounds prevent prolonged absence from view
 
@@ -1220,7 +1222,9 @@ meshRef.current.position.y = Math.sin(time * 0.3 + index) * 0.5;  // Less vertic
 - **Increment**: 0.5-1.0 units per moon for balanced spacing
 - **Max moons tested**: Systems with 8+ moons should keep increment ≤ 0.8
 - **Vertical range**: Keep within ±1 unit to prevent off-screen clipping
-- **Collision detection**: Base radius should exceed planet radius (1.2) + moon radius (0.32 = MIN_SIZE × MOON_SIZE_RATIO = 0.8 × 0.4)
+- **Collision detection**: Base radius should exceed planet radius + moon radius
+  - Current planet radius: 1.2 units (see `PlanetSurface.tsx` sphereGeometry)
+  - Current moon radius: `calculateMoonSize()` = 0.32 units (MIN_SIZE × MOON_SIZE_RATIO from `scale-constants.ts`)
   - Safe minimum: 1.2 + 0.32 = 1.52 units, rounded up to 4 units for comfortable spacing
 
 #### Adjusting Content Width

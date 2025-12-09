@@ -75,8 +75,10 @@ function MoonSphere({ moon, index, onClick }: { moon: Moon; index: number; onCli
     const time = state.clock.getElapsedTime();
     const angle = (index / 3) * Math.PI * 2 + time * 0.2;
     // Reduced from 8 + index * 2 to 4 + index * 0.8 for tighter orbits
-    // Formula ensures moons stay within 7-unit viewport bounds for systems with up to 8 moons
-    // (8 moons: 4 + 7*0.8 = 9.6 units worst case, but typically stay within 6-7 units)
+    // Formula ensures moons stay within reasonable viewport bounds:
+    // - For typical systems (3-5 moons): max radius ~5.6-7.2 units
+    // - For larger systems (8 moons, indices 0-7): worst case 4 + 7*0.8 = 9.6 units
+    // The tighter spacing keeps most moons within 6-7 units during normal viewing
     const radius = 4 + index * 0.8;
 
     meshRef.current.position.x = Math.cos(angle) * radius;
