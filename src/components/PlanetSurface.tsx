@@ -61,6 +61,12 @@ interface PlanetSurfaceProps {
   position: THREE.Vector3;
 }
 
+// Moon orbit configuration constants
+const MOON_BASE_ORBIT_RADIUS = 4; // Base radius for first moon (units)
+const MOON_ORBIT_INCREMENT = 0.8; // Additional radius per moon index (units)
+const MOON_VERTICAL_OSCILLATION = 1; // Maximum vertical oscillation (units)
+const MOON_ORBITAL_SPEED = 0.2; // Orbital speed (radians/second)
+
 /**
  * Moon sphere in the skybox
  */
@@ -71,13 +77,20 @@ function MoonSphere({ moon, index, onClick }: { moon: Moon; index: number; onCli
   useFrame((state) => {
     if (!meshRef.current) return;
 
-    // Gentle orbit animation
+    // Tighter orbit animation - keeps moons close to planet and within viewport
     const time = state.clock.getElapsedTime();
-    const angle = (index / 3) * Math.PI * 2 + time * 0.2;
-    const radius = 8 + index * 2;
+    // Use a non-repeating phase offset for a more natural moon distribution.
+    // Multiplying by 2 ensures a wider spread than a factor of 1.
+    const angle = index * 2 + time * MOON_ORBITAL_SPEED;
+    // Formula ensures moons stay within reasonable viewport bounds:
+    // - For typical systems (3-5 moons): max radius ~5.6-7.2 units
+    // - For larger systems (8 moons, indices 0-7): worst case 4 + 7*0.8 = 9.6 units
+    // The tighter spacing keeps most moons within 6-7 units during normal viewing
+    const radius = MOON_BASE_ORBIT_RADIUS + index * MOON_ORBIT_INCREMENT;
 
     meshRef.current.position.x = Math.cos(angle) * radius;
-    meshRef.current.position.y = Math.sin(time * 0.3 + index) * 2;
+    // Vertical oscillation for natural movement
+    meshRef.current.position.y = Math.sin(time * 0.3 + index) * MOON_VERTICAL_OSCILLATION;
     meshRef.current.position.z = Math.sin(angle) * radius;
   });
 
@@ -105,9 +118,9 @@ export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurface
 
   return (
     <group position={position}>
-      {/* Planet sphere - reduced size for left-column layout */}
+      {/* Planet sphere - optimized size for left-column visibility */}
       <mesh ref={planetRef}>
-        <sphereGeometry args={[1.5, 32, 32]} />
+        <sphereGeometry args={[1.2, 32, 32]} />
         <meshStandardMaterial
           color={
             planet.theme === 'blue-green'
