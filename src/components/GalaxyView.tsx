@@ -13,6 +13,7 @@ import { useNavigationStore } from '@/lib/store';
 import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG } from '@/lib/animation';
 import { GALAXY_VIEW_SCALE } from '@/lib/universe/scale-constants';
+import { createSeededRandom, generateSeedFromId } from '@/lib/seeded-random';
 
 interface OrbitRingProps {
   radius: number;
@@ -48,29 +49,6 @@ function OrbitRing({ radius, color }: OrbitRingProps) {
   );
 }
 
-// Linear Congruential Generator (LCG) constants for deterministic pseudo-random numbers
-// These values are from Numerical Recipes and provide good distribution for small sequences
-// Formula: state = (state * LCG_A + LCG_C) % LCG_M
-// See: https://en.wikipedia.org/wiki/Linear_congruential_generator
-const LCG_A = 9301;      // Multiplier
-const LCG_C = 49297;     // Increment  
-const LCG_M = 233280;    // Modulus
-
-/**
- * Creates a seeded pseudo-random number generator for deterministic randomness
- * Uses Linear Congruential Generator with Numerical Recipes parameters
- * 
- * @param seed - Integer seed value for the generator
- * @returns Function that returns deterministic random values between 0 and 1
- */
-function createSeededRandom(seed: number): () => number {
-  let state = seed;
-  return () => {
-    state = (state * LCG_A + LCG_C) % LCG_M;
-    return state / LCG_M;
-  };
-}
-
 interface PlanetInstanceProps {
   solarSystem: SolarSystem;
   systemPosition: THREE.Vector3;
@@ -96,7 +74,7 @@ function PlanetInstance({ solarSystem, systemPosition, animationConfig }: Planet
   const planetData = useMemo(() => {
     return (solarSystem.planets || []).map((planet, index) => {
       // Create a unique seed for each planet for deterministic randomness
-      const seed = solarSystem.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + index;
+      const seed = generateSeedFromId(solarSystem.id, index);
       const seededRandom = createSeededRandom(seed);
 
       // Simple Keplerian orbit parameters
@@ -311,7 +289,7 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
         Math.sin(angle) * radius
       );
     });
-  }, [galaxy.solarSystems]);
+  }, [galaxy.solarSystems?.map(s => s.id).join(',')]);
 
   // Layout free-floating stars on outer ring
   const starPositions = useMemo(() => {
@@ -319,7 +297,7 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
     const radius = GALAXY_VIEW_SCALE.STAR_RING_RADIUS;
     
     return stars.map((star, index) => {
-      const seed = galaxy.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + index + 1000;
+      const seed = generateSeedFromId(galaxy.id, index + 1000);
       const seededRandom = createSeededRandom(seed);
       
       const angle = (index / stars.length) * Math.PI * 2 + Math.PI / 4;
@@ -329,7 +307,7 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
         Math.sin(angle) * radius
       );
     });
-  }, [galaxy.id, galaxy.stars]);
+  }, [galaxy.id, galaxy.stars?.map(s => s.id).join(',')]);
 
   // Reset original positions when galaxy changes to avoid using stale data
   useEffect(() => {

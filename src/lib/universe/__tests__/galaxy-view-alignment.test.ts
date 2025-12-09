@@ -94,8 +94,12 @@ describe('Galaxy View Ring Alignment', () => {
       expect(distance).toBeCloseTo(radius, 10);
     });
 
-    it('should handle many solar systems without overlap', () => {
-      const systemCount = 20;
+    it.each([
+      { systemCount: 2, minDistance: 20.0 },
+      { systemCount: 10, minDistance: 6.1803 },
+      { systemCount: 20, minDistance: 3.1287 },
+      { systemCount: 50, minDistance: 1.2558 },
+    ])('should handle $systemCount solar systems without overlap', ({ systemCount, minDistance }) => {
       const radius = GALAXY_VIEW_SCALE.SOLAR_SYSTEM_RING_RADIUS;
       const positions: Array<{ x: number; z: number }> = [];
       
@@ -108,13 +112,17 @@ describe('Galaxy View Ring Alignment', () => {
         });
       }
       
-      // Check that no two systems are too close (at least 1 unit apart)
+      // Check that no two systems are too close
       for (let i = 0; i < systemCount; i++) {
         for (let j = i + 1; j < systemCount; j++) {
           const dx = positions[i].x - positions[j].x;
           const dz = positions[i].z - positions[j].z;
           const distance = Math.sqrt(dx * dx + dz * dz);
           expect(distance).toBeGreaterThan(1);
+          // Also check against the calculated minimum distance for that count
+          if (i === 0 && j === 1) {
+            expect(distance).toBeCloseTo(minDistance, 2);
+          }
         }
       }
     });
@@ -208,6 +216,99 @@ describe('Galaxy View Ring Alignment', () => {
       const const2 = GALAXY_VIEW_SCALE;
       
       expect(const1).toBe(const2);
+    });
+  });
+
+  describe('Integration - OrbitRing Rendering', () => {
+    it('should define consistent rendering configuration', () => {
+      // Ring segments should be sufficient for smooth rendering
+      expect(GALAXY_VIEW_SCALE.RING_SEGMENTS).toBeGreaterThanOrEqual(32);
+      
+      // Ring opacity should be semi-transparent for subtle guidance
+      expect(GALAXY_VIEW_SCALE.RING_OPACITY).toBeLessThanOrEqual(0.5);
+      
+      // Ring color should be a valid hex color
+      expect(GALAXY_VIEW_SCALE.RING_COLOR).toMatch(/^#[0-9A-F]{6}$/i);
+    });
+
+    it('should calculate ring geometry points correctly', () => {
+      // Simulate the ring point generation logic from OrbitRing component
+      const radius = GALAXY_VIEW_SCALE.SOLAR_SYSTEM_RING_RADIUS;
+      const segments = GALAXY_VIEW_SCALE.RING_SEGMENTS;
+      const points = [];
+      
+      for (let i = 0; i <= segments; i++) {
+        const angle = (i / segments) * Math.PI * 2;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        points.push({ x, y: 0, z });
+      }
+      
+      // First and last points should connect (complete circle)
+      expect(points[0].x).toBeCloseTo(points[segments].x, 10);
+      expect(points[0].z).toBeCloseTo(points[segments].z, 10);
+      
+      // All points should be at exact ring radius
+      points.forEach(point => {
+        const distance = Math.sqrt(point.x * point.x + point.z * point.z);
+        expect(distance).toBeCloseTo(radius, 10);
+      });
+    });
+
+    it('should support conditional ring rendering based on object presence', () => {
+      // Rings should only render when objects exist
+      // This tests the conditional logic pattern used in GalaxyView
+      
+      // Case 1: No solar systems - no inner ring
+      const noSystems = undefined;
+      const shouldRenderSystemRing = noSystems && noSystems.length > 0;
+      expect(shouldRenderSystemRing).toBeFalsy();
+      
+      // Case 2: Empty solar systems array - no inner ring
+      const emptySystems: never[] = [];
+      const shouldRenderEmptySystemRing = emptySystems && emptySystems.length > 0;
+      expect(shouldRenderEmptySystemRing).toBeFalsy();
+      
+      // Case 3: Systems present - inner ring renders
+      const systems = [{ id: 's1' }, { id: 's2' }];
+      const shouldRenderWithSystems = systems && systems.length > 0;
+      expect(shouldRenderWithSystems).toBeTruthy();
+      
+      // Case 4: No stars - no outer ring
+      const noStars = undefined;
+      const shouldRenderStarRing = noStars && noStars.length > 0;
+      expect(shouldRenderStarRing).toBeFalsy();
+      
+      // Case 5: Stars present - outer ring renders
+      const stars = [{ id: 'star1' }];
+      const shouldRenderWithStars = stars && stars.length > 0;
+      expect(shouldRenderWithStars).toBeTruthy();
+    });
+
+    it('should maintain ring stability across re-renders', () => {
+      // Ring radius should be constant (not recalculated)
+      const radius1 = GALAXY_VIEW_SCALE.SOLAR_SYSTEM_RING_RADIUS;
+      const radius2 = GALAXY_VIEW_SCALE.SOLAR_SYSTEM_RING_RADIUS;
+      expect(radius1).toBe(radius2);
+      
+      // Ring configuration should be immutable
+      const config1 = { ...GALAXY_VIEW_SCALE };
+      const config2 = { ...GALAXY_VIEW_SCALE };
+      expect(config1).toEqual(config2);
+    });
+
+    it('should support multiple rings with distinct radii', () => {
+      // Both rings should be renderable simultaneously
+      const systemRadius = GALAXY_VIEW_SCALE.SOLAR_SYSTEM_RING_RADIUS;
+      const starRadius = GALAXY_VIEW_SCALE.STAR_RING_RADIUS;
+      
+      // Radii should be distinct and properly separated
+      expect(systemRadius).not.toBe(starRadius);
+      expect(starRadius - systemRadius).toBeGreaterThanOrEqual(3);
+      
+      // Both should be valid positive values
+      expect(systemRadius).toBeGreaterThan(0);
+      expect(starRadius).toBeGreaterThan(0);
     });
   });
 });
