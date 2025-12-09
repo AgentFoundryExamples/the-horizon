@@ -68,6 +68,25 @@ export function OrbitRing({
     return pts;
   }, [radius, segments]);
 
+  // Compute line distances for dashed material
+  const lineDistances = useMemo(() => {
+    if (!dashPattern) return null;
+    
+    const distances = new Float32Array(points.length);
+    let distance = 0;
+    distances[0] = 0;
+    
+    for (let i = 1; i < points.length; i++) {
+      const dx = points[i].x - points[i - 1].x;
+      const dy = points[i].y - points[i - 1].y;
+      const dz = points[i].z - points[i - 1].z;
+      distance += Math.sqrt(dx * dx + dy * dy + dz * dz);
+      distances[i] = distance;
+    }
+    
+    return distances;
+  }, [points, dashPattern]);
+
   return (
     <line>
       <bufferGeometry>
@@ -77,6 +96,14 @@ export function OrbitRing({
           array={new Float32Array(points.flatMap((p) => [p.x, p.y, p.z]))}
           itemSize={3}
         />
+        {lineDistances && (
+          <bufferAttribute
+            attach="attributes-lineDistance"
+            count={lineDistances.length}
+            array={lineDistances}
+            itemSize={1}
+          />
+        )}
       </bufferGeometry>
       {dashPattern ? (
         <lineDashedMaterial
