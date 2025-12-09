@@ -2,165 +2,21 @@
 
 /**
  * GalaxyView - Shows galaxy details with solar systems and Keplerian orbits
- * Uses instanced meshes for performance
+ * Uses shared planetary system components for consistency with SolarSystemView
  */
 
 import { useRef, useMemo, useState, useEffect } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import type { Galaxy, SolarSystem, Star } from '@/lib/universe/types';
+import type { Galaxy, Star } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
 import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG } from '@/lib/animation';
-import { GALAXY_VIEW_SCALE, GALAXY_ORBIT_STYLE } from '@/lib/universe/scale-constants';
+import { GALAXY_VIEW_SCALE, GALAXY_ORBIT_STYLE, GALAXY_VIEW_PLANETARY_SCALE } from '@/lib/universe/scale-constants';
 import { createSeededRandom, generateSeedFromId } from '@/lib/seeded-random';
 import { OrbitRing } from './OrbitRing';
-
-interface PlanetInstanceProps {
-  solarSystem: SolarSystem;
-  systemPosition: THREE.Vector3;
-  animationConfig: ReturnType<typeof getAnimationConfig>;
-}
-
-/**
- * Planets orbiting a star using Keplerian motion
- */
-
-// Constants for orbital calculations
-// 5 iterations provides sufficient accuracy for the eccentric anomaly approximation
-// while maintaining 60 FPS performance. More iterations yield diminishing returns.
-const KEPLER_ITERATION_COUNT = 5;
-
-/**
- * Free-floating star rendering
- */
-function PlanetInstance({ solarSystem, systemPosition, animationConfig }: PlanetInstanceProps) {
-  const planetsRef = useRef<THREE.Group>(null);
-  const setHoveredObject = useHoverStore((state) => state.setHoveredObject);
-
-  const planetData = useMemo(() => {
-    return (solarSystem.planets || []).map((planet, index) => {
-      // Create a unique seed for each planet for deterministic randomness
-      const seed = generateSeedFromId(solarSystem.id, index);
-      const seededRandom = createSeededRandom(seed);
-
-      // Simple Keplerian orbit parameters
-      const semiMajorAxis = 2 + index * 1.5;
-      const eccentricity = seededRandom() * 0.1; // Slight ellipse
-      const inclination = (seededRandom() - 0.5) * 0.2; // Small inclination
-      const argumentOfPeriapsis = seededRandom() * Math.PI * 2;
-      const orbitSpeed = 0.5 / (semiMajorAxis * semiMajorAxis); // Kepler's third law approximation
-
-      return {
-        planet,
-        semiMajorAxis,
-        eccentricity,
-        inclination,
-        argumentOfPeriapsis,
-        orbitSpeed,
-        phase: seededRandom() * Math.PI * 2, // Random but deterministic starting position
-        size: 0.3 + (planet.moons?.length || 0) * 0.05,
-      };
-    });
-  }, [solarSystem]);
-
-  useFrame((state) => {
-    if (!planetsRef.current) return;
-
-    const time = state.clock.getElapsedTime();
-
-    planetsRef.current.children.forEach((child, index) => {
-      if (index >= planetData.length) return;
-      
-      const data = planetData[index];
-      const meanAnomaly = data.orbitSpeed * time + data.phase;
-      
-      // Simplified Keplerian orbit calculation
-      let eccentricAnomaly = meanAnomaly;
-      for (let i = 0; i < KEPLER_ITERATION_COUNT; i++) {
-        eccentricAnomaly = meanAnomaly + data.eccentricity * Math.sin(eccentricAnomaly);
-      }
-
-      const trueAnomaly = 2 * Math.atan2(
-        Math.sqrt(1 + data.eccentricity) * Math.sin(eccentricAnomaly / 2),
-        Math.sqrt(1 - data.eccentricity) * Math.cos(eccentricAnomaly / 2)
-      );
-
-      const radius = data.semiMajorAxis * (1 - data.eccentricity * data.eccentricity) / 
-                     (1 + data.eccentricity * Math.cos(trueAnomaly));
-
-      const angle = trueAnomaly + data.argumentOfPeriapsis;
-
-      child.position.x = Math.cos(angle) * radius;
-      child.position.y = Math.sin(angle) * radius * Math.sin(data.inclination);
-      child.position.z = Math.sin(angle) * radius * Math.cos(data.inclination);
-    });
-  });
-
-  return (
-    <group position={systemPosition}>
-      {/* Central star */}
-      <group
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          // Get world position of the mesh for accurate hover tracking
-          const mesh = e.object as THREE.Mesh;
-          const worldPosition = new THREE.Vector3();
-          mesh.getWorldPosition(worldPosition);
-          
-          const hoveredObj: HoveredObject = {
-            id: solarSystem.id,
-            name: solarSystem.name,
-            type: 'solar-system',
-            position: worldPosition,
-            metadata: {
-              planetCount: solarSystem.planets?.length || 0,
-            },
-          };
-          setHoveredObject(hoveredObj);
-        }}
-        onPointerOut={(e) => {
-          e.stopPropagation();
-          setHoveredObject(null);
-        }}
-      >
-        <mesh>
-          <sphereGeometry args={[0.5, 16, 16]} />
-          <meshBasicMaterial color="#FDB813" />
-          <pointLight color="#FDB813" intensity={1} distance={20} />
-        </mesh>
-      </group>
-
-      {/* Orbit rings */}
-      {planetData.map((data, index) => (
-        <OrbitRing
-          key={`orbit-${index}`}
-          radius={data.semiMajorAxis}
-          color={GALAXY_ORBIT_STYLE.COLOR}
-          opacity={GALAXY_ORBIT_STYLE.OPACITY}
-          lineWidth={GALAXY_ORBIT_STYLE.LINE_WIDTH}
-          dashPattern={GALAXY_ORBIT_STYLE.DASH_PATTERN}
-          segments={GALAXY_VIEW_SCALE.RING_SEGMENTS}
-        />
-      ))}
-
-      {/* Planets */}
-      <group ref={planetsRef}>
-        {planetData.map((data, index) => (
-          <group key={`planet-${index}`}>
-            <mesh>
-              <sphereGeometry args={[data.size, 8, 8]} />
-              <meshStandardMaterial
-                color={data.planet.theme === 'blue-green' ? '#2E86AB' : 
-                       data.planet.theme === 'red' ? '#E63946' : '#CCCCCC'}
-              />
-            </mesh>
-          </group>
-        ))}
-      </group>
-    </group>
-  );
-}
+import { PlanetarySystem } from './shared/PlanetarySystem';
+import { CentralStar } from './shared/CentralStar';
 
 interface StarInstanceProps {
   star: Star;
@@ -170,61 +26,19 @@ interface StarInstanceProps {
 
 /**
  * Free-floating star rendering
+ * Now uses shared CentralStar component
  */
 function StarInstance({ star, position, animationConfig }: StarInstanceProps) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const [hovered, setHovered] = useState(false);
-  const setHoveredObject = useHoverStore((state) => state.setHoveredObject);
-
-  useFrame((state) => {
-    if (meshRef.current && animationConfig.rotation) {
-      // Gentle pulsing (controlled by animation config)
-      const scale = 1 + Math.sin(state.clock.getElapsedTime() * 2) * 0.1 * animationConfig.intensity;
-      meshRef.current.scale.setScalar(scale);
-    }
-  });
-
   return (
-    <group position={position}>
-      <mesh
-        ref={meshRef}
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          setHovered(true);
-          // Get world position of the mesh for accurate hover tracking
-          const mesh = e.object as THREE.Mesh;
-          const worldPosition = new THREE.Vector3();
-          mesh.getWorldPosition(worldPosition);
-          
-          const hoveredObj: HoveredObject = {
-            id: star.id,
-            name: star.name,
-            type: 'star',
-            position: worldPosition,
-          };
-          setHoveredObject(hoveredObj);
-        }}
-        onPointerOut={(e) => {
-          e.stopPropagation();
-          setHovered(false);
-          setHoveredObject(null);
-        }}
-      >
-        <sphereGeometry args={[0.4, 16, 16]} />
-        <meshBasicMaterial
-          color={star.theme.includes('yellow') ? '#FDB813' :
-                 star.theme.includes('red') ? '#E63946' :
-                 star.theme.includes('blue') ? '#4A90E2' : '#FFFFFF'}
-        />
-        <pointLight
-          color={star.theme.includes('yellow') ? '#FDB813' :
-                 star.theme.includes('red') ? '#E63946' :
-                 star.theme.includes('blue') ? '#4A90E2' : '#FFFFFF'}
-          intensity={0.5}
-          distance={10}
-        />
-      </mesh>
-    </group>
+    <CentralStar
+      star={star}
+      position={position}
+      radius={0.4}
+      lightIntensity={0.5}
+      lightDistance={10}
+      animationConfig={animationConfig}
+      enablePulse={true} // Enable pulsing for free-floating stars
+    />
   );
 }
 
@@ -338,21 +152,16 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
         />
       )}
 
-      {/* Solar systems with orbiting planets */}
+      {/* Solar systems with orbiting planets - now using shared PlanetarySystem component */}
       {(galaxy.solarSystems || []).map((system, index) => (
-        <group
+        <PlanetarySystem
           key={system.id}
-          onClick={(e) => {
-            e.stopPropagation();
-            navigateToSolarSystem(system.id);
-          }}
-        >
-          <PlanetInstance
-            solarSystem={system}
-            systemPosition={systemPositions[index]}
-            animationConfig={animationConfig}
-          />
-        </group>
+          solarSystem={system}
+          position={systemPositions[index]}
+          onStarClick={() => navigateToSolarSystem(system.id)}
+          scale={GALAXY_VIEW_PLANETARY_SCALE}
+          animationConfig={animationConfig}
+        />
       ))}
 
       {/* Free-floating stars */}
