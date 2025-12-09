@@ -19,6 +19,81 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 ## Changelog
 
+### v0.1.7 - Hover Label Stabilization and Breadcrumb UX Enhancements (December 9, 2025)
+
+*This release focuses on stabilizing hover label rendering using Drei's Html component and enhancing breadcrumb navigation for improved user experience.*
+
+**Hover Label Stabilization (ISS-1):**
+
+1. **Drei Html Integration**
+   - Migrated hover labels to use `@react-three/drei`'s `Html` component for proper R3F Canvas integration
+   - Prevents crashes from rendering DOM elements directly inside Three.js Canvas
+   - Labels now properly positioned in 3D space with automatic screen projection
+   - Distance-based scaling ensures labels remain readable at various zoom levels
+   - Robust input validation prevents crashes from invalid position data (NaN, Infinity)
+
+2. **Rendering Improvements**
+   - Labels use sprite rendering for consistent sizing across distances
+   - No occlusion - labels remain visible even when objects are behind others
+   - Smooth animations with fade-in effects
+   - Performance optimized with efficient R3F rendering pipeline
+
+3. **Safety Guardrails**
+   - Position validation at multiple levels (store + component)
+   - Console warnings for invalid data without crashing the application
+   - Graceful handling of null/undefined values
+   - Type-safe interfaces with comprehensive documentation
+
+**Breadcrumb Navigation Enhancements (ISS-2):**
+
+1. **Improved Context Awareness**
+   - Breadcrumbs now display full navigation hierarchy (Universe → Galaxy → Solar System → Planet)
+   - Current location highlighted for better orientation
+   - Click any breadcrumb level to jump directly to that view
+   - Smooth transitions between navigation levels
+
+2. **Visual Refinements**
+   - Enhanced styling with better contrast and hover states
+   - Responsive design adapts to mobile and tablet viewports
+   - Clear visual separation between navigation levels
+   - Consistent with overall design system
+
+3. **Accessibility Improvements**
+   - ARIA labels for screen reader support
+   - Keyboard navigation with Tab and Enter keys
+   - Focus indicators meet WCAG 2.1 Level AA standards
+   - Reduced motion support for accessibility preferences
+
+**Why These Changes:**
+
+Previous hover label implementations rendered DOM elements directly in the Canvas, causing "Div is not part of the THREE namespace" crashes. The Drei Html component provides proper integration with React Three Fiber's rendering system, ensuring stability and compatibility.
+
+Breadcrumb enhancements provide clearer navigation context, especially important after removing hover tooltips in v0.1.5. Users now have multiple ways to understand their location: breadcrumbs, transition messages, and ARIA labels.
+
+**Technical Details:**
+- No new environment variables required
+- No migration steps needed
+- All existing tests passing
+- Compatible with all v0.1.x releases
+- Build verified with no breaking changes
+
+**Deployment Notes:**
+- No environment variable changes
+- No redeployment required if already on v0.1.6
+- Documentation cross-references validated
+- Manual testing scenarios added
+
+**Verification Steps:**
+1. Hover over celestial objects - labels should appear without crashes
+2. Navigate through levels using breadcrumbs - smooth transitions
+3. Check browser console - no "Div is not part of THREE namespace" errors
+4. Test on mobile - touch interactions should show labels on first tap
+5. Verify screen reader announces breadcrumb navigation correctly
+
+See [docs/visuals.md](docs/visuals.md#overlay-hover-labels) for complete hover label documentation.
+See [MANUAL_TESTING.md](MANUAL_TESTING.md#scenario-14-hover-label-functionality) for testing procedures.
+See [docs/roadmap.md](docs/roadmap.md) for complete version history.
+
 ### v0.1.6 - Documentation Completeness and Version Tracking (December 8, 2025)
 
 *This release captures recent improvements in documentation, ensuring all hash-handling fixes, UI changes, and operational updates are thoroughly documented for maintainability and clarity.*
