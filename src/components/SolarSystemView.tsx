@@ -62,20 +62,29 @@ function PlanetMesh({
 
   // Calculate orbital parameters
   const orbitalData = useMemo(() => {
-    const seed = planet.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const seededRandom = () => {
-      const x = Math.sin(seed + index) * 10000;
-      return x - Math.floor(x);
-    };
-
-    // Use new scale constants for improved usability
+    // Deterministic orbital spacing based on planet index
     const safeSpacing = calculateSafeSpacing(totalPlanets);
     const semiMajorAxis = ORBITAL_SPACING.BASE_RADIUS + index * safeSpacing;
-    const eccentricity = seededRandom() * ORBITAL_SPACING.MAX_ECCENTRICITY;
-    const inclination = (seededRandom() - 0.5) * ORBITAL_SPACING.MAX_INCLINATION * 2;
-    const argumentOfPeriapsis = seededRandom() * Math.PI * 2;
+    
+    // Use minimal eccentricity for near-circular orbits (deterministic)
+    // Small eccentricity adds visual interest while maintaining predictability
+    const eccentricity = ORBITAL_SPACING.MAX_ECCENTRICITY * 0.3;
+    
+    // Use minimal inclination for mostly-flat orbital plane
+    // Small inclination prevents z-fighting without unpredictability
+    const inclination = ORBITAL_SPACING.MAX_INCLINATION * 0.5;
+    
+    // Deterministic starting position based on planet index
+    // Spread planets evenly around the orbit at initialization
+    const phase = (index * Math.PI * 2) / Math.max(totalPlanets, 1);
+    
+    // No argument of periapsis rotation (apses aligned with x-axis)
+    const argumentOfPeriapsis = 0;
+    
+    // Orbital speed follows Kepler's third law approximation
+    // Inner planets orbit faster than outer planets
     const orbitSpeed = 0.5 / (semiMajorAxis * semiMajorAxis);
-    const phase = seededRandom() * Math.PI * 2;
+    
     const size = calculatePlanetSize(planet.moons?.length || 0);
 
     return { semiMajorAxis, eccentricity, inclination, argumentOfPeriapsis, orbitSpeed, phase, size };

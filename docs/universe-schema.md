@@ -101,6 +101,40 @@ interface SolarSystem {
 - `mainStar` (required): The central Star object
 - `planets` (required): Array of Planet objects
 
+**Orbital Mechanics:**
+
+Planets in a solar system orbit the main star using deterministic, physics-inspired mechanics:
+
+- **Deterministic Positioning**: Planet positions are calculated based on their index in the `planets` array, ensuring consistent and predictable orbits across page loads
+- **Circular Orbits**: Planets follow nearly circular paths (minimal eccentricity of ~1.5%) centered on the star
+- **Evenly Spaced**: Orbital radii follow the formula: `BASE_RADIUS + (index × spacing)`
+  - Base radius: 4.0 units from star center
+  - Spacing: 3.0 units between orbits (scales automatically for systems with many planets)
+- **Adaptive Spacing**: Systems with more than 8 planets automatically increase spacing to prevent crowding
+- **Orbital Speed**: Inner planets orbit faster than outer planets, following Kepler's third law approximation
+- **Starting Positions**: Planets are evenly distributed around their orbits at initialization
+- **No Manual Coordinates**: Planet positions are entirely computed - no manual x/y/z coordinates needed in data
+
+**Example Orbital Radii:**
+
+For a system with 5 planets:
+- Planet 0: 4.0 units
+- Planet 1: 7.0 units
+- Planet 2: 10.0 units
+- Planet 3: 13.0 units
+- Planet 4: 16.0 units
+
+For a system with 12 planets (adaptive spacing kicks in):
+- Planet 0: 4.0 units
+- Planet 1: 8.5 units (spacing increased to 4.5)
+- Planet 2: 13.0 units
+- Planet 3: 17.5 units
+- ...and so on
+
+**Configuration:**
+
+Orbital constants are defined in `src/lib/universe/scale-constants.ts` under `ORBITAL_SPACING`. Modify these values to adjust the visual appearance of solar systems.
+
 ### Planet
 
 Represents a planet orbiting a star.
