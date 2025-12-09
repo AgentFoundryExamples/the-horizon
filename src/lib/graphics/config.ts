@@ -623,65 +623,57 @@ function validatePlanetViewConfig(
 
 /**
  * Validate PlanetMaterial
+ * Returns both validation result and sanitized material with clamped numeric values
  */
 export function validatePlanetMaterial(
   material: PlanetMaterial,
   validPresetNames: string[],
   errors: string[],
   warnings: string[]
-): ValidationResult {
+): { result: ValidationResult; sanitizedMaterial: PlanetMaterial } {
   const materialErrors: string[] = [];
-  
+  const sanitized: PlanetMaterial = { ...material };
+
   if (!material.id || typeof material.id !== 'string') {
     materialErrors.push('PlanetMaterial.id is required and must be a string');
   }
-  
+
   if (!material.name || typeof material.name !== 'string') {
     materialErrors.push('PlanetMaterial.name is required and must be a string');
   }
-  
+
   if (!material.baseColor || typeof material.baseColor !== 'string') {
     materialErrors.push('PlanetMaterial.baseColor is required and must be a hex color');
   } else if (!/^#[0-9A-Fa-f]{6}$/.test(material.baseColor)) {
     materialErrors.push(`PlanetMaterial.baseColor "${material.baseColor}" must be a valid hex color (e.g., #FF0000)`);
   }
-  
+
   if (material.rimColor && !/^#[0-9A-Fa-f]{6}$/.test(material.rimColor)) {
     materialErrors.push(`PlanetMaterial.rimColor "${material.rimColor}" must be a valid hex color`);
   }
-  
+
   if (material.atmosphereColor && !/^#[0-9A-Fa-f]{6}$/.test(material.atmosphereColor)) {
     materialErrors.push(`PlanetMaterial.atmosphereColor "${material.atmosphereColor}" must be a valid hex color`);
   }
-  
-  if (material.rimIntensity !== undefined) {
-    validateNumber(material.rimIntensity, 0.5, 0, 2.0, 'PlanetMaterial.rimIntensity', materialErrors, warnings);
-  }
-  
-  if (material.atmosphereIntensity !== undefined) {
-    validateNumber(material.atmosphereIntensity, 0.3, 0, 2.0, 'PlanetMaterial.atmosphereIntensity', materialErrors, warnings);
-  }
-  
-  if (material.roughness !== undefined) {
-    validateNumber(material.roughness, 0.5, 0, 1, 'PlanetMaterial.roughness', materialErrors, warnings);
-  }
-  
-  if (material.metallic !== undefined) {
-    validateNumber(material.metallic, 0.0, 0, 1, 'PlanetMaterial.metallic', materialErrors, warnings);
-  }
-  
+
+  sanitized.rimIntensity = validateNumber(material.rimIntensity, 0.5, 0, 2.0, 'PlanetMaterial.rimIntensity', materialErrors, warnings);
+  sanitized.atmosphereIntensity = validateNumber(material.atmosphereIntensity, 0.3, 0, 2.0, 'PlanetMaterial.atmosphereIntensity', materialErrors, warnings);
+  sanitized.roughness = validateNumber(material.roughness, 0.5, 0, 1, 'PlanetMaterial.roughness', materialErrors, warnings);
+  sanitized.metallic = validateNumber(material.metallic, 0.0, 0, 1, 'PlanetMaterial.metallic', materialErrors, warnings);
+
   if (material.texturePreset) {
-    // Texture preset names are arbitrary strings referencing texture files
-    // Don't validate against material preset IDs
-    validateTexturePreset(material.texturePreset, [], 'PlanetMaterial.texturePreset', materialErrors, warnings);
+    sanitized.texturePreset = validateTexturePreset(material.texturePreset, [], 'PlanetMaterial.texturePreset', materialErrors, warnings);
   }
-  
+
   errors.push(...materialErrors);
-  
+
   return {
-    valid: materialErrors.length === 0,
-    errors: materialErrors,
-    warnings: [],
+    result: {
+      valid: materialErrors.length === 0,
+      errors: materialErrors,
+      warnings: [], // Note: warnings are pushed to the parent array
+    },
+    sanitizedMaterial: sanitized,
   };
 }
 
@@ -729,18 +721,27 @@ export function validateGraphicsConfig(config: Partial<GraphicsConfig>): Validat
 export function sanitizeGraphicsConfig(config: Partial<GraphicsConfig> | undefined): GraphicsConfig {
   const errors: string[] = [];
   const warnings: string[] = [];
-  
+
   if (!config) {
     config = {};
   }
-  
+
+  // Sanitize planet materials
+  const sanitizedMaterials: Record<string, PlanetMaterial> = {};
+  if (config.planetMaterials) {
+    for (const [id, material] of Object.entries(config.planetMaterials)) {
+      const { sanitizedMaterial } = validatePlanetMaterial(material, [], errors, warnings);
+      sanitizedMaterials[id] = sanitizedMaterial;
+    }
+  }
+
   return {
     version: config.version || '1.0.0',
     universe: validateUniverseConfig(config.universe, errors, warnings),
     galaxyView: validateGalaxyViewConfig(config.galaxyView, errors, warnings),
     solarSystemView: validateSolarSystemViewConfig(config.solarSystemView, errors, warnings),
     planetView: validatePlanetViewConfig(config.planetView, errors, warnings),
-    planetMaterials: config.planetMaterials || {},
+    planetMaterials: sanitizedMaterials,
   };
 }
 

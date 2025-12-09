@@ -181,6 +181,27 @@ describe('Graphics Config Validation', () => {
       expect(config.galaxyView.hoverLabels?.fontSize).toBe(14);
       expect(config.galaxyView.hoverLabels?.backgroundOpacity).toBe(0.85);
     });
+
+    it('should sanitize planet materials in config', () => {
+      const input: Partial<GraphicsConfig> = {
+        planetMaterials: {
+          'custom': {
+            id: 'custom',
+            name: 'Custom',
+            description: 'Custom material',
+            baseColor: '#FF0000',
+            rimIntensity: 999, // Out of range
+            atmosphereIntensity: -1, // Out of range
+          },
+        },
+      };
+      
+      const config = sanitizeGraphicsConfig(input);
+      
+      expect(config.planetMaterials['custom']).toBeDefined();
+      expect(config.planetMaterials['custom'].rimIntensity).toBe(2.0); // Clamped
+      expect(config.planetMaterials['custom'].atmosphereIntensity).toBe(0); // Clamped
+    });
   });
   
   describe('Serialization', () => {
@@ -244,7 +265,7 @@ describe('Graphics Config Validation', () => {
       const errors: string[] = [];
       const warnings: string[] = [];
       
-      const result = validatePlanetMaterial(material, [], errors, warnings);
+      const { result } = validatePlanetMaterial(material, [], errors, warnings);
       
       expect(result.valid).toBe(true);
       expect(errors).toHaveLength(0);
@@ -258,7 +279,7 @@ describe('Graphics Config Validation', () => {
       const errors: string[] = [];
       const warnings: string[] = [];
       
-      const result = validatePlanetMaterial(material, [], errors, warnings);
+      const { result } = validatePlanetMaterial(material, [], errors, warnings);
       
       expect(result.valid).toBe(false);
       expect(errors).toContainEqual(
@@ -274,7 +295,7 @@ describe('Graphics Config Validation', () => {
       const errors: string[] = [];
       const warnings: string[] = [];
       
-      const result = validatePlanetMaterial(material, [], errors, warnings);
+      const { result } = validatePlanetMaterial(material, [], errors, warnings);
       
       expect(result.valid).toBe(false);
       expect(errors).toContainEqual(
@@ -292,7 +313,7 @@ describe('Graphics Config Validation', () => {
       const errors: string[] = [];
       const warnings: string[] = [];
       
-      const result = validatePlanetMaterial(material, [], errors, warnings);
+      const { result } = validatePlanetMaterial(material, [], errors, warnings);
       
       expect(result.valid).toBe(false);
       expect(errors).toContainEqual(
@@ -313,7 +334,7 @@ describe('Graphics Config Validation', () => {
         const errors: string[] = [];
         const warnings: string[] = [];
         
-        const result = validatePlanetMaterial(material, [], errors, warnings);
+        const { result } = validatePlanetMaterial(material, [], errors, warnings);
         
         expect(result.valid).toBe(true);
       }
@@ -329,7 +350,7 @@ describe('Graphics Config Validation', () => {
       const errors: string[] = [];
       const warnings: string[] = [];
       
-      const result = validatePlanetMaterial(material, [], errors, warnings);
+      const { result } = validatePlanetMaterial(material, [], errors, warnings);
       
       expect(result.valid).toBe(false);
       expect(errors).toContainEqual(
@@ -361,6 +382,30 @@ describe('Graphics Config Validation', () => {
         expect.stringContaining('texture preset')
       );
       expect(errors).toHaveLength(0);
+    });
+
+    it('should sanitize material numeric properties', () => {
+      const material: PlanetMaterial = {
+        id: 'test',
+        name: 'Test',
+        description: 'Test',
+        baseColor: '#FF0000',
+        rimIntensity: 999, // Out of range, should be clamped to 2.0
+        atmosphereIntensity: -1, // Out of range, should be clamped to 0
+        roughness: 5, // Out of range, should be clamped to 1
+        metallic: -10, // Out of range, should be clamped to 0
+      };
+      const errors: string[] = [];
+      const warnings: string[] = [];
+      
+      const { result, sanitizedMaterial } = validatePlanetMaterial(material, [], errors, warnings);
+      
+      expect(result.valid).toBe(true);
+      expect(sanitizedMaterial.rimIntensity).toBe(2.0);
+      expect(sanitizedMaterial.atmosphereIntensity).toBe(0);
+      expect(sanitizedMaterial.roughness).toBe(1);
+      expect(sanitizedMaterial.metallic).toBe(0);
+      expect(warnings.length).toBeGreaterThan(0); // Should have warnings about clamping
     });
   });
   
@@ -540,7 +585,7 @@ describe('Planet Material Presets', () => {
         const preset = getPlanetMaterialPreset(id);
         expect(preset).toBeDefined();
         
-        const result = validatePlanetMaterial(preset!, [], errors, warnings);
+        const { result } = validatePlanetMaterial(preset!, [], errors, warnings);
         expect(result.valid).toBe(true);
       }
     });
