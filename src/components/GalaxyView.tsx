@@ -48,6 +48,22 @@ function OrbitRing({ radius, color }: OrbitRingProps) {
   );
 }
 
+/**
+ * Creates a seeded pseudo-random number generator for deterministic randomness
+ * Uses Linear Congruential Generator with parameters from Numerical Recipes
+ * (a=9301, c=49297, m=233280) which provides good distribution for small sequences
+ * 
+ * @param seed - Integer seed value for the generator
+ * @returns Function that returns deterministic random values between 0 and 1
+ */
+function createSeededRandom(seed: number): () => number {
+  let state = seed;
+  return () => {
+    state = (state * 9301 + 49297) % 233280;
+    return state / 233280;
+  };
+}
+
 interface PlanetInstanceProps {
   solarSystem: SolarSystem;
   systemPosition: THREE.Vector3;
@@ -71,17 +87,6 @@ function PlanetInstance({ solarSystem, systemPosition, animationConfig }: Planet
   const setHoveredObject = useHoverStore((state) => state.setHoveredObject);
 
   const planetData = useMemo(() => {
-    // Seeded pseudo-random number generator for deterministic orbits
-    // Uses Linear Congruential Generator with parameters from Numerical Recipes
-    // (a=9301, c=49297, m=233280) which provides good distribution for small sequences
-    const createSeededRandom = (seed: number) => {
-      let state = seed;
-      return () => {
-        state = (state * 9301 + 49297) % 233280;
-        return state / 233280;
-      };
-    };
-
     return (solarSystem.planets || []).map((planet, index) => {
       // Create a unique seed for each planet for deterministic randomness
       const seed = solarSystem.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + index;
@@ -305,15 +310,6 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
   const starPositions = useMemo(() => {
     const stars = galaxy.stars || [];
     const radius = GALAXY_VIEW_SCALE.STAR_RING_RADIUS;
-    
-    // Seeded pseudo-random for deterministic Y variance
-    const createSeededRandom = (seed: number) => {
-      let state = seed;
-      return () => {
-        state = (state * 9301 + 49297) % 233280;
-        return state / 233280;
-      };
-    };
     
     return stars.map((star, index) => {
       const seed = galaxy.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + index + 1000;
