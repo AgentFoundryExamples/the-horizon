@@ -305,15 +305,28 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
   const starPositions = useMemo(() => {
     const stars = galaxy.stars || [];
     const radius = GALAXY_VIEW_SCALE.STAR_RING_RADIUS;
-    return stars.map((_, index) => {
+    
+    // Seeded pseudo-random for deterministic Y variance
+    const createSeededRandom = (seed: number) => {
+      let state = seed;
+      return () => {
+        state = (state * 9301 + 49297) % 233280;
+        return state / 233280;
+      };
+    };
+    
+    return stars.map((star, index) => {
+      const seed = galaxy.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) + index + 1000;
+      const seededRandom = createSeededRandom(seed);
+      
       const angle = (index / stars.length) * Math.PI * 2 + Math.PI / 4;
       return new THREE.Vector3(
         Math.cos(angle) * radius,
-        (Math.random() - 0.5) * 5,
+        (seededRandom() - 0.5) * 5, // Deterministic Y variance for depth
         Math.sin(angle) * radius
       );
     });
-  }, [galaxy.stars]);
+  }, [galaxy.id, galaxy.stars]);
 
   // Reset original positions when galaxy changes to avoid using stale data
   useEffect(() => {
