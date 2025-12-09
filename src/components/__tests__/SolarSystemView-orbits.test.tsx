@@ -12,7 +12,9 @@
 import { 
   calculateOrbitalRadius, 
   calculateSafeSpacing, 
-  ORBITAL_SPACING 
+  ORBITAL_SPACING,
+  PLANET_SCALE,
+  STAR_SCALE,
 } from '@/lib/universe/scale-constants';
 import type { Planet, SolarSystem } from '@/lib/universe/types';
 
@@ -330,7 +332,6 @@ describe('SolarSystemView - Deterministic Orbits', () => {
     it('should prevent overlap in typical solar system', () => {
       const planetCount = 8;
       const spacing = calculateSafeSpacing(planetCount);
-      const maxPlanetSize = 1.8; // From PLANET_SCALE.MAX_SIZE
       
       for (let i = 0; i < planetCount - 1; i++) {
         const radius1 = ORBITAL_SPACING.BASE_RADIUS + i * spacing;
@@ -371,13 +372,11 @@ describe('SolarSystemView - Deterministic Orbits', () => {
 
   describe('Configuration Validation', () => {
     it('should have base radius larger than star radius', () => {
-      const starRadius = 1.2; // From STAR_SCALE.RADIUS
-      expect(ORBITAL_SPACING.BASE_RADIUS).toBeGreaterThan(starRadius * 2);
+      expect(ORBITAL_SPACING.BASE_RADIUS).toBeGreaterThan(STAR_SCALE.RADIUS * 2);
     });
 
     it('should have spacing larger than max planet size', () => {
-      const maxPlanetSize = 1.8; // From PLANET_SCALE.MAX_SIZE
-      expect(ORBITAL_SPACING.RADIUS_INCREMENT).toBeGreaterThan(maxPlanetSize);
+      expect(ORBITAL_SPACING.RADIUS_INCREMENT).toBeGreaterThan(PLANET_SCALE.MAX_SIZE);
     });
 
     it('should have reasonable eccentricity for circular orbits', () => {

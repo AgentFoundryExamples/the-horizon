@@ -27,7 +27,6 @@ import { useNavigationStore } from '@/lib/store';
 import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 import {
   calculatePlanetSize,
-  calculateOrbitalRadius,
   calculateSafeSpacing,
   ORBITAL_SPACING,
   STAR_SCALE,
