@@ -87,6 +87,7 @@ export const LABEL_CONFIGS: Record<FocusLevel, LabelConfig> = {
 /**
  * Get label configuration for the current scene
  * Falls back to solar-system config if scene is not recognized
+ * (solar-system provides a balanced middle-ground configuration)
  */
 export function getLabelConfig(focusLevel: FocusLevel): LabelConfig {
   return LABEL_CONFIGS[focusLevel] || LABEL_CONFIGS['solar-system'];

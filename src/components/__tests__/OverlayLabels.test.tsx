@@ -257,7 +257,7 @@ describe('OverlayLabels - Per-Scene Configuration', () => {
       const { container } = render(<OverlayLabels />);
 
       const nameElement = container.querySelector('.overlay-label-name');
-      expect(nameElement).toHaveStyle({ whiteSpace: 'wrap' });
+      expect(nameElement).toHaveStyle({ whiteSpace: 'normal' });
     });
   });
 
