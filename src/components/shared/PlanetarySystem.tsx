@@ -40,6 +40,8 @@ interface PlanetarySystemProps {
     // Planet properties
     planetBaseSize: number;        // Base size for planets
     planetSizeIncrement: number;   // Size increase per moon
+    // Viewport constraints
+    viewportRadius?: number;       // Optional viewport radius constraint
     // Orbit ring styling
     orbitRingColor: string;
     orbitRingOpacity: number;
@@ -74,12 +76,11 @@ export function PlanetarySystem({
     }));
     
     // Calculate optimal spacing considering planet sizes
-    // Note: viewportRadius is passed from scale config (if available)
-    const viewportRadius = (scale as any).viewportRadius;
+    // viewportRadius is now properly typed in the scale interface
     const optimalSpacing = calculateDynamicSpacing(
       planetSizes,
       scale.orbitSpacing,
-      viewportRadius
+      scale.viewportRadius
     );
     
     // Second pass: calculate orbital parameters with optimal spacing

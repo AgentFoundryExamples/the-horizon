@@ -337,15 +337,14 @@ export function calculateDynamicSpacing(
         spacing = maxSpacing;
       } else {
         // Cannot fit without overlap - prioritize safety over viewport
-        // Keep minimum safe spacing and log warning
-        // Note: Using console.warn for development visibility
-        // TODO: Consider structured logging service for production
-        console.warn(
-          `System has ${planets.length} planets that cannot fit in viewport without overlap. ` +
-          `Required spacing: ${minSpacingForSafety.toFixed(2)}, ` +
-          `viewport allows: ${maxSpacing.toFixed(2)}. ` +
-          `Consider reducing planet sizes or increasing viewport.`
-        );
+        // Only log warning in development to avoid console pollution in production
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(
+            `Planetary system spacing constraint: ${planets.length} planets require ` +
+            `${minSpacingForSafety.toFixed(2)} units but viewport allows ${maxSpacing.toFixed(2)} units. ` +
+            `Using safe spacing to prevent overlap.`
+          );
+        }
         spacing = minSpacingForSafety;
       }
     }

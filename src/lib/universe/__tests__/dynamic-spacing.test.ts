@@ -44,14 +44,16 @@ describe('Dynamic Orbit Spacing', () => {
       
       const spacing = calculateDynamicSpacing(planets);
       
-      // Verify no overlaps
+      // Verify no overlaps - use actual planet indices from data
       for (let i = 0; i < planets.length - 1; i++) {
-        const currentRadius = ORBITAL_SPACING.BASE_RADIUS + i * spacing;
-        const nextRadius = ORBITAL_SPACING.BASE_RADIUS + (i + 1) * spacing;
-        const gap = nextRadius - currentRadius;
-        const minGap = planets[i].radius + planets[i + 1].radius + ORBITAL_SPACING.MIN_SEPARATION;
+        const current = planets[i];
+        const next = planets[i + 1];
+        const currentOrbit = calculateDynamicOrbitalRadius(current.index, spacing);
+        const nextOrbit = calculateDynamicOrbitalRadius(next.index, spacing);
+        const gap = nextOrbit - currentOrbit;
+        const minGap = current.radius + next.radius + ORBITAL_SPACING.MIN_SEPARATION;
         
-        expect(gap).toBeGreaterThanOrEqual(minGap);
+        expect(gap).toBeGreaterThanOrEqual(minGap - FLOATING_POINT_TOLERANCE);
       }
     });
 
