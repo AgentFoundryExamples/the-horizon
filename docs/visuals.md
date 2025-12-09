@@ -2754,6 +2754,106 @@ offsetY: -30  // Vertical offset (negative = above)
 - Glow pulse speed: `2s`
 - Backdrop blur: `12px`
 
+### Per-Scene Label Configuration
+
+**Overview (v0.1.9+):**
+
+Hover labels now adapt automatically based on the active scene (Universe, Galaxy, Solar System, or Planet). Each scene has its own configuration for font sizes, offsets, distance factors, and visual effects, ensuring optimal readability at different zoom levels.
+
+**Configuration Module** (`src/lib/label-config.ts`):
+
+The label configuration system defines scene-specific styling through the `LabelConfig` interface:
+
+```typescript
+interface LabelConfig {
+  fontSize: string;           // Font size for label name/title
+  typeFontSize: string;       // Font size for label type
+  offsetY: number;            // Vertical offset in pixels
+  distanceFactor: number;     // Distance scaling factor
+  minWidth?: string;          // Minimum label width
+  maxWidth?: string;          // Maximum label width
+  backgroundOpacity?: number; // Background opacity (0-1)
+  borderColor?: string;       // Border color override
+  enableGlow?: boolean;       // Enable/disable glow effect
+  textWrap?: 'nowrap' | 'wrap'; // Text wrapping behavior
+}
+```
+
+**Default Scene Configurations:**
+
+| Scene | Font Size | Distance Factor | Offset | Glow | Text Wrap |
+|-------|-----------|----------------|--------|------|-----------|
+| Universe | 1.1rem | 150 | 25px | ✓ | nowrap |
+| Galaxy | 1rem | 120 | 22px | ✓ | nowrap |
+| Solar System | 0.95rem | 100 | 20px | ✓ | nowrap |
+| Planet | 0.9rem | 80 | 18px | ✗ | wrap |
+
+**Design Rationale:**
+
+1. **Universe View**: Largest labels with highest distance factor for viewing distant galaxies
+2. **Galaxy View**: Medium-large labels for viewing solar systems from a distance
+3. **Solar System View**: Standard labels for planets at moderate distance
+4. **Planet View**: Smallest labels with reduced effects for close-up moon viewing, allowing text wrapping for longer names
+
+**Usage:**
+
+The system automatically detects the current scene from `useNavigationStore` and applies the appropriate configuration:
+
+```typescript
+// In OverlayLabels.tsx
+const focusLevel = useNavigationStore((state) => state.focusLevel);
+const labelConfig = getLabelConfig(focusLevel);
+
+// Apply to Html component
+<Html distanceFactor={labelConfig.distanceFactor}>
+  <div style={{ fontSize: labelConfig.fontSize }}>
+    {name}
+  </div>
+</Html>
+```
+
+**Customization:**
+
+To customize label configuration for specific scenes, use `mergeLabelConfig`:
+
+```typescript
+import { getLabelConfig, mergeLabelConfig } from '@/lib/label-config';
+
+// Get base config for universe
+const baseConfig = getLabelConfig('universe');
+
+// Override specific properties
+const customConfig = mergeLabelConfig(baseConfig, {
+  fontSize: '1.5rem',
+  enableGlow: false,
+  backgroundOpacity: 0.95
+});
+```
+
+**Scene Transitions:**
+
+Labels smoothly transition when switching between scenes:
+- CSS transitions handle font size and opacity changes (0.2-0.3s duration)
+- Distance factor updates immediately for new projections
+- Hover state is cleared when navigating to prevent stale styles
+
+**Testing:**
+
+Per-scene configuration is tested in:
+- `src/lib/__tests__/label-config.test.ts`: Configuration module tests
+- `src/components/__tests__/OverlayLabels.test.tsx`: Integration with component rendering
+
+**Performance:**
+
+Configuration lookup is O(1) and occurs once per label render. No performance impact compared to fixed configuration.
+
+**Future Enhancements:**
+
+- Admin panel to customize label configs per environment
+- User preference overrides (e.g., "always use large text")
+- Dynamic adjustment based on viewport size
+- Per-object-type configuration (different styles for stars vs planets)
+
 ### Accessibility Notes
 
 **Screen Reader Support:**

@@ -2,8 +2,8 @@
  * Overlay Labels - Hologram-style hover labels
  * Positioned above WebGL canvas using Drei's Html component
  * 
- * Updated to use larger distanceFactor (100) for improved readability
- * with viewport clamping to prevent off-screen rendering
+ * Updated to support per-scene configuration for optimal readability
+ * Applies different styling based on active scene (universe, galaxy, solar-system, planet)
  */
 
 .overlay-label-wrapper {
@@ -15,8 +15,7 @@
   pointer-events: none;
   animation: labelFadeIn 0.2s ease-out;
   user-select: none;
-  transform: translate(-50%, calc(-100% - 20px));
-  white-space: nowrap;
+  /* Transform now applied via inline style for per-scene offset */
 }
 
 @keyframes labelFadeIn {
@@ -51,6 +50,8 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   min-width: 120px;
   max-width: 300px;
+  /* Smooth transition when scene changes */
+  transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.2s ease;
 }
 
 /* Fallback for browsers without backdrop-filter */
@@ -60,8 +61,8 @@
   }
 }
 
-/* Hologram glow effect */
-.overlay-label-content::before {
+/* Hologram glow effect - enabled by default, can be disabled per scene */
+.overlay-label-content.with-glow::before {
   content: '';
   position: absolute;
   inset: -2px;
@@ -76,6 +77,11 @@
   z-index: -1;
   opacity: 0.6;
   animation: glowPulse 2s ease-in-out infinite;
+}
+
+/* No glow variant for closer views */
+.overlay-label-content.no-glow::before {
+  display: none;
 }
 
 @keyframes glowPulse {
@@ -94,6 +100,8 @@
   margin-bottom: 0.25rem;
   text-shadow: 0 0 8px rgba(74, 144, 226, 0.8);
   letter-spacing: 0.02em;
+  /* Font size and text wrapping now controlled via inline styles */
+  transition: font-size 0.2s ease;
 }
 
 .overlay-label-type {
@@ -103,6 +111,8 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.25rem;
+  /* Font size now controlled via inline styles */
+  transition: font-size 0.2s ease;
 }
 
 .overlay-label-description {
