@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 48,
+  "total_files": 49,
   "files": [
     {
       "schema_version": "2.0",
@@ -438,6 +438,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/universe/__tests__/dynamic-spacing.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 13796,
+        "loc": 249,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/universe/__tests__/edge-cases.test.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -641,8 +655,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 17454,
-        "loc": 435,
+        "size_bytes": 23411,
+        "loc": 553,
         "todo_count": 0
       }
     },

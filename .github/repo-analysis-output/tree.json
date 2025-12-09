@@ -478,6 +478,10 @@
                     },
                     {
                       "type": "file",
+                      "name": "dynamic-spacing.test.ts"
+                    },
+                    {
+                      "type": "file",
                       "name": "edge-cases.test.ts"
                     },
                     {
