@@ -79,6 +79,250 @@ Manual galaxy positioning created unbalanced compositions when galaxies were add
 
 See [docs/visuals.md](./visuals.md#symmetric-universe-layout-v018) for complete layout documentation.
 
+---
+
+## Navigation & Layout Overhaul Summary (Part 1 - v0.1.7 - v0.1.8)
+
+### What Was Accomplished
+
+Part 1 of the navigation and layout overhaul focused on establishing robust, accessible navigation systems and creating balanced visual layouts. This phase delivered:
+
+#### 1. **Persistent Sidebar Navigation (v0.1.8)**
+   - Context-aware entity lists (galaxies → solar systems → planets)
+   - Click-to-focus camera navigation
+   - Full keyboard navigation support (arrow keys, Enter, Space, Escape)
+   - Active highlighting of currently focused entities
+   - Collapsible design with responsive behavior (mobile, tablet, desktop)
+   - Touch-friendly interactions with proper ARIA labels
+   - **Impact**: Primary navigation paradigm established, replacing hover-only interactions
+
+#### 2. **Symmetric Universe Layout (v0.1.8)**
+   - Deterministic galaxy positioning based on count (1, 2, 3, 4, 5+ galaxies)
+   - Aesthetic patterns: centered, mirrored, triangle, diamond, circular ring
+   - Automatic spacing validation to prevent overlap
+   - Smooth position interpolation when galaxy count changes
+   - O(n) performance with useMemo caching
+   - **Impact**: Visual balance achieved without manual coordinate tweaking
+
+#### 3. **Galaxy View Ring Alignment (v0.1.8)**
+   - Solar systems positioned precisely on inner ring (radius 10)
+   - Stars positioned precisely on outer ring (radius 15)
+   - Visible orbital guides with semi-transparent rings
+   - Even angular distribution prevents clustering
+   - **Impact**: Clear visual organization, markers never float arbitrarily
+
+#### 4. **Hover Label Stabilization (v0.1.7 - ISS-1)**
+   - Migrated to Drei's Html component for proper R3F integration
+   - Multi-level position validation prevents crashes
+   - Distance-based scaling (distanceFactor=100) for readability
+   - Viewport boundary clamping to prevent off-screen labels
+   - Console warnings instead of crashes for invalid data
+   - **Impact**: Application stability, no more "Div is not part of THREE namespace" crashes
+
+#### 5. **Breadcrumb Navigation Enhancements (v0.1.7 - ISS-2)**
+   - Full navigation hierarchy display (Universe → Galaxy → Solar System → Planet)
+   - Click any breadcrumb to jump directly to that level
+   - Enhanced styling with better contrast and hover states
+   - Responsive design for mobile, tablet, desktop
+   - WCAG 2.1 Level AA accessibility compliance
+   - **Impact**: Clear context for user location, multiple navigation affordances
+
+### Part 1 Technical Achievements
+
+- **Accessibility**: Keyboard navigation, ARIA labels, screen reader support, reduced motion support
+- **Responsiveness**: Mobile-first design with touch-optimized targets (44-52px)
+- **Performance**: Efficient rendering with useMemo, no frame rate regressions
+- **Documentation**: Comprehensive docs for all features with testing checklists
+- **Testing**: Unit tests for layout calculations, manual testing scenarios documented
+
+### Part 1 Known Constraints
+
+- **Sidebar Scope**: Only shows next-level entities (galaxies, then solar systems, then planets)
+- **Layout Patterns**: Limited to 5 patterns (1-4 galaxies, 5+); no hexagonal grid or 3D spherical arrangements
+- **Ring Alignment**: Fixed ring radii, no elliptical or inclined rings
+- **Hover Labels**: Secondary to sidebar; larger labels may impact performance during rapid camera movement
+- **Label Positioning**: Distance-based scaling, no smart collision avoidance for dense clusters
+
+---
+
+## Part 2 Planning: High-Fidelity Visual & UX Polish
+
+### Overview
+
+Part 2 will focus on graphical refinements, advanced visual effects, and enhanced user experience polish. The foundation is stable; now we add the "wow factor."
+
+### Proposed Enhancements
+
+#### A. **Advanced Visual Effects**
+
+1. **Shader-Based Enhancements**
+   - [ ] Glow/bloom effects for stars and galaxies (post-processing)
+   - [ ] Atmospheric scattering for planet surfaces
+   - [ ] Particle trails during camera transitions
+   - [ ] Nebula clouds with procedural noise shaders
+   - [ ] Dynamic lighting with shadow mapping
+
+2. **Material & Texture Improvements**
+   - [ ] High-resolution planet textures (procedural or asset-based)
+   - [ ] Normal maps for surface detail (mountains, craters)
+   - [ ] Emissive maps for city lights on planets
+   - [ ] Roughness/metalness for realistic material rendering
+   - [ ] Animated cloud layers for terrestrial planets
+
+3. **Particle System Enhancements**
+   - [ ] Asteroid belts with instanced rendering
+   - [ ] Comet tails with procedural generation
+   - [ ] Dust clouds in galaxy views
+   - [ ] Animated starfield backgrounds with parallax
+   - [ ] Solar flares and prominence animations
+
+#### B. **Typography & Font System**
+
+1. **UI Font Improvements**
+   - [ ] Custom typography system with web fonts (e.g., Inter, Space Grotesk)
+   - [ ] Hierarchy with distinct font weights and sizes
+   - [ ] Improved readability with optimized line heights and letter spacing
+   - [ ] Consistent typographic scale across all UI elements
+
+2. **Label & Tooltip Design**
+   - [ ] Refined hover label typography (currently functional but basic)
+   - [ ] Icon integration for entity types (galaxy, star, planet, moon)
+   - [ ] Subtle text shadows and strokes for better legibility on varying backgrounds
+   - [ ] Adaptive font sizes based on zoom level and screen size
+
+3. **Breadcrumb & Navigation Polish**
+   - [ ] Icon separators instead of arrows (→)
+   - [ ] Enhanced hover animations (scale, glow)
+   - [ ] Breadcrumb abbreviation on small screens (e.g., "U → G → SS → P")
+   - [ ] Smooth color transitions matching scene theme
+
+#### C. **Layout & Composition Refinements**
+
+1. **Universe View Enhancements**
+   - [ ] 3D spherical arrangement option for 10+ galaxies
+   - [ ] Hexagonal grid layout for very large galaxy counts (50+)
+   - [ ] Clustered layouts for themed galaxy groups
+   - [ ] Z-axis variation for dramatic depth
+   - [ ] Viewport-aware scaling adjustments
+
+2. **Galaxy View Refinements**
+   - [ ] Multiple ring layers for different object types (planets, stations, anomalies)
+   - [ ] Elliptical rings for dramatic visuals
+   - [ ] Animated ring transitions (expand/contract on focus)
+   - [ ] Ring color customization per galaxy theme
+   - [ ] Adaptive angular offsets for dense clusters
+
+3. **Planet Surface Layout**
+   - [ ] Featured image support for planet pages (already documented, needs implementation)
+   - [ ] Rich metadata display (author, publish date, tags)
+   - [ ] External links section for related resources
+   - [ ] Improved mobile scrolling with natural page flow
+   - [ ] Moon navigation carousel with thumbnails
+
+#### D. **Animation & Interaction Polish**
+
+1. **Camera Transitions**
+   - [ ] Easing function variety (ease-in-quad, ease-out-elastic, etc.)
+   - [ ] Transition speed customization per destination type
+   - [ ] Path interpolation options (arc, spiral, direct)
+   - [ ] Camera shake for dramatic moments (optional, reduced-motion aware)
+   - [ ] Field-of-view (FOV) adjustments during transitions
+
+2. **UI Micro-interactions**
+   - [ ] Sidebar item hover effects (scale, glow, icon bounce)
+   - [ ] Breadcrumb click animations (ripple, pulse)
+   - [ ] Button press feedback (subtle scale down, shadow change)
+   - [ ] Loading states with skeleton screens
+   - [ ] Toast notifications for actions (save, navigate, etc.)
+
+3. **Scene Ambient Animations**
+   - [ ] Galaxy rotation with adjustable speed
+   - [ ] Star pulsing with varied frequencies
+   - [ ] Orbital motion speed controls (time acceleration)
+   - [ ] Particle drift and flow animations
+   - [ ] Background nebula movement
+
+#### E. **Accessibility & UX Enhancements**
+
+1. **Keyboard Navigation Improvements**
+   - [ ] Focus trap for modals and sidebars
+   - [ ] Skip-to-content link for faster navigation
+   - [ ] Shortcut key overlay (press '?' to show)
+   - [ ] Customizable key bindings
+   - [ ] Arrow key navigation in 3D scene (pan, zoom)
+
+2. **Screen Reader Optimizations**
+   - [ ] Live region updates for camera transitions
+   - [ ] Detailed ARIA descriptions for complex visuals
+   - [ ] Landmark regions for major UI sections
+   - [ ] Announcement queue to prevent speech interruptions
+   - [ ] Alternative text for procedural graphics
+
+3. **Responsive Design Refinements**
+   - [ ] Tablet-specific layout optimizations (768-1024px)
+   - [ ] Landscape mode handling on mobile
+   - [ ] Sidebar behavior on ultrawide monitors
+   - [ ] Touch gesture support (pinch-to-zoom, swipe navigation)
+   - [ ] Progressive enhancement for low-bandwidth users
+
+#### F. **Performance & Optimization**
+
+1. **Rendering Optimizations**
+   - [ ] Level-of-detail (LOD) for distant objects
+   - [ ] Frustum culling for off-screen entities
+   - [ ] Instanced rendering for repeated geometries
+   - [ ] Texture atlasing for reduced draw calls
+   - [ ] Deferred rendering pipeline for complex scenes
+
+2. **Animation Performance**
+   - [ ] Throttled projection updates (30 FPS) for hover labels on low-end devices
+   - [ ] RequestAnimationFrame pooling for shared animations
+   - [ ] GPU-accelerated CSS transforms for UI
+   - [ ] Web Worker offloading for layout calculations
+   - [ ] Adaptive quality based on FPS monitoring
+
+3. **Asset Loading**
+   - [ ] Progressive image loading (blur-up technique)
+   - [ ] Lazy loading for off-screen content
+   - [ ] Service worker caching for static assets
+   - [ ] CDN integration for large resources
+   - [ ] Preload hints for critical assets
+
+### Part 2 Success Metrics
+
+- **Visual Quality**: Enhanced graphics comparable to modern space exploration apps
+- **Performance**: Maintain 60 FPS on desktop, 30+ FPS on mobile after enhancements
+- **Accessibility**: WCAG 2.1 Level AAA compliance where feasible
+- **User Satisfaction**: Positive feedback on polish and refinement
+- **Code Quality**: No regressions, comprehensive tests for new features
+
+### Part 2 Timeline Estimate
+
+- **Phase 2A (Visual Effects)**: 3-4 weeks
+- **Phase 2B (Typography)**: 1-2 weeks
+- **Phase 2C (Layout Refinements)**: 2-3 weeks
+- **Phase 2D (Animation Polish)**: 2-3 weeks
+- **Phase 2E (Accessibility)**: 1-2 weeks
+- **Phase 2F (Performance)**: 2-3 weeks
+- **Total Estimate**: 11-17 weeks (depends on scope prioritization)
+
+### Part 2 Risks
+
+- **Scope Creep**: Feature additions may extend timeline
+- **Performance Trade-offs**: Advanced effects may require LOD or quality toggles
+- **Browser Compatibility**: Shader effects may not work on older browsers
+- **Testing Effort**: Comprehensive testing across devices and screen readers
+
+### Part 2 Open Questions
+
+- Should visual effects be toggle-able for user preference?
+- Which typography system aligns with brand identity?
+- Do we need a design system / style guide first?
+- Should Part 2 include mobile app packaging (PWA, Capacitor)?
+- Is VR support in scope for Part 2 or deferred to Part 3?
+
+---
+
 ### Previous Release: v0.1.7 (December 9, 2025)
 
 This release focuses on hover label stabilization using Drei's Html component and breadcrumb navigation enhancements for improved user experience and application stability.

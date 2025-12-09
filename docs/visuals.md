@@ -2,6 +2,62 @@
 
 This document describes the 3D scene controls, camera animations, navigation UI, and performance optimizations in The Horizon application.
 
+---
+
+## Part 1 Navigation & Layout Overview
+
+This section provides a high-level summary of the navigation and layout improvements delivered in Part 1 (v0.1.7 - v0.1.8). For detailed implementation, see individual sections below.
+
+### Part 1 Deliverables
+
+**Navigation Systems:**
+- **[Persistent Sidebar Navigation](#persistent-sidebar-navigation-v018)**: Primary navigation paradigm with context-aware entity lists
+- **[Breadcrumb Navigation](#breadcrumb-navigation-iss-2---v017)**: Full hierarchy display with click-to-jump functionality
+- **[Overlay Hover Labels](#overlay-hover-labels)**: Stabilized using Drei Html component, viewport-clamped with distance-based scaling
+
+**Layout Systems:**
+- **[Symmetric Universe Layout](#symmetric-universe-layout-v018)**: Deterministic galaxy positioning with 5 aesthetic patterns
+- **[Galaxy View Ring Alignment](#galaxy-view-ring-alignment)**: Precise orbital ring placement for solar systems and stars
+
+### Design Decisions
+
+**Sidebar as Primary Navigation:**
+- Replaced hover-only interactions with explicit sidebar selection
+- Provides persistent context for current location and available entities
+- Accessible via keyboard, mouse, and touch
+- Collapsible to maximize 3D scene visibility
+
+**Hover Labels as Secondary Cues:**
+- Complement sidebar with contextual on-hover information
+- Toggle-able visibility via HUD button
+- Designed for quick identification, not primary navigation
+- Viewport-clamped and scaled for readability at all distances
+
+**Symmetric Layout Philosophy:**
+- Deterministic positioning ensures consistent experience
+- Aesthetic patterns adapt to galaxy count (1, 2, 3, 4, 5+)
+- Eliminates manual coordinate tweaking for content authors
+- Smooth interpolation prevents jarring position changes
+
+**Ring Alignment Rationale:**
+- Precise orbital placement provides clear visual organization
+- Markers never float arbitrarily in space
+- Visible rings guide user understanding of spatial relationships
+- Even angular distribution prevents overlap
+
+### Part 2 Proposals
+
+Part 2 will build on this foundation with graphical refinements:
+- Advanced shader effects (glow, bloom, atmospheric scattering)
+- Typography system with custom web fonts
+- Layout enhancements (3D spherical arrangements, hexagonal grids, multiple ring layers)
+- Animation polish (easing variety, micro-interactions, scene ambient animations)
+- Performance optimizations (LOD, frustum culling, texture atlasing)
+
+See [docs/roadmap.md](./roadmap.md#part-2-planning-high-fidelity-visual--ux-polish) for complete Part 2 proposal.
+
+---
+
 ## Persistent Sidebar Navigation (v0.1.8)
 
 ### Overview

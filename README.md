@@ -19,6 +19,73 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 ## Changelog
 
+### v0.1.8 - Navigation & Layout Overhaul Summary (December 2025)
+
+*This release captures the scope of Part 1 improvements, documenting the navigation and layout work completed in v0.1.7 and v0.1.8, and outlining Part 2 graphical polish plans.*
+
+**Part 1 Navigation & Layout Accomplishments:**
+
+Part 1 established a robust, accessible navigation foundation with balanced visual layouts:
+
+1. **Persistent Sidebar Navigation**
+   - Context-aware entity lists replace hover-only navigation
+   - Click-to-focus camera system with keyboard support
+   - Full accessibility: ARIA labels, screen reader support, keyboard navigation
+   - Responsive design: mobile, tablet, desktop optimized
+   - **Impact**: Primary navigation paradigm for exploring the universe hierarchy
+
+2. **Symmetric Universe Layout**
+   - Deterministic galaxy positioning (centered, mirrored, triangle, diamond, ring patterns)
+   - Automatic spacing validation prevents overlap
+   - Smooth position interpolation when galaxy count changes
+   - **Impact**: Visual balance without manual coordinate tweaking
+
+3. **Galaxy View Ring Alignment**
+   - Solar systems on inner ring (radius 10), stars on outer ring (radius 15)
+   - Visible orbital guides with semi-transparent rings
+   - Even angular distribution prevents clustering
+   - **Impact**: Clear visual organization, no arbitrary floating markers
+
+4. **Hover Label Stabilization**
+   - Migrated to Drei's Html component for proper R3F integration
+   - Multi-level position validation prevents crashes
+   - Viewport boundary clamping, distance-based scaling
+   - **Impact**: No more "Div is not part of THREE namespace" crashes
+
+5. **Breadcrumb Navigation Enhancements**
+   - Full hierarchy display (Universe → Galaxy → Solar System → Planet)
+   - Click-to-jump navigation, enhanced styling, responsive design
+   - WCAG 2.1 Level AA accessibility compliance
+   - **Impact**: Clear context for user location
+
+**Part 2 Planning: High-Fidelity Visual & UX Polish:**
+
+Part 2 will focus on graphical refinements and enhanced user experience polish:
+
+- **Advanced Visual Effects**: Glow/bloom, atmospheric scattering, particle trails, nebula clouds
+- **Typography & Font System**: Custom web fonts, improved hierarchy, icon integration
+- **Layout Refinements**: 3D spherical arrangements, hexagonal grids, multiple ring layers
+- **Animation Polish**: Easing variety, micro-interactions, scene ambient animations
+- **Accessibility Enhancements**: Focus traps, keyboard shortcuts, screen reader optimizations
+- **Performance Optimizations**: LOD, frustum culling, texture atlasing, deferred rendering
+
+See [docs/roadmap.md](docs/roadmap.md#part-2-planning-high-fidelity-visual--ux-polish) for complete Part 2 proposal with timeline estimates and success metrics.
+
+**Technical Details:**
+- No new environment variables required
+- No migration steps needed
+- All tests passing (748/755, 7 pre-existing crypto failures)
+- Compatible with all v0.1.x releases
+- Build verified with no breaking changes
+
+**Deployment Notes:**
+- No environment variable changes
+- Documentation cross-references validated
+- Manual testing scenarios added (see MANUAL_TESTING.md)
+
+See [docs/roadmap.md](docs/roadmap.md#navigation--layout-overhaul-summary-part-1) for complete Part 1 summary.
+See [docs/visuals.md](docs/visuals.md#persistent-sidebar-navigation-v018) for sidebar and layout documentation.
+
 ### v0.1.7 - Hover Label Stabilization and Breadcrumb UX Enhancements (December 9, 2025)
 
 *This release focuses on stabilizing hover label rendering using Drei's Html component and enhancing breadcrumb navigation for improved user experience.*
