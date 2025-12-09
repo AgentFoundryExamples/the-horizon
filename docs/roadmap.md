@@ -2,6 +2,8 @@
 
 This document outlines the current state of The Horizon, what has been shipped, known limitations, and planned future enhancements.
 
+> **For detailed release notes and version history**, see [CHANGELOG.md](CHANGELOG.md).
+
 ## Current Release: v0.1.8 (December 2025)
 
 This release implements a symmetric universe layout system that positions galaxies deterministically based on count, ensuring visual balance and aesthetic composition without manual coordinate tweaking.
