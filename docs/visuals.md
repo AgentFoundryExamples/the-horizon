@@ -2,6 +2,8 @@
 
 This document describes the 3D scene controls, camera animations, navigation UI, and performance optimizations in The Horizon application.
 
+> **For release notes and version history**, see [CHANGELOG.md](CHANGELOG.md).
+
 ---
 
 ## Part 1 Navigation & Layout Overview
