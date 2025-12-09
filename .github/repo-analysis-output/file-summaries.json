@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 59,
+  "total_files": 63,
   "files": [
     {
       "schema_version": "2.0",
@@ -368,6 +368,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/graphics/__tests__/galaxy.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 15504,
+        "loc": 455,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/graphics/__tests__/materials.test.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -377,6 +391,20 @@
       "metrics": {
         "size_bytes": 15174,
         "loc": 380,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/graphics/__tests__/starfield.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 13293,
+        "loc": 321,
         "todo_count": 0
       }
     },
@@ -396,6 +424,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/graphics/galaxy.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 18017,
+        "loc": 520,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/graphics/index.ts",
       "language": "TypeScript",
       "role": "entry-point",
@@ -403,8 +445,8 @@
       "summary": "TypeScript main entry point (role: entry-point)",
       "summary_text": "TypeScript main entry point (role: entry-point)",
       "metrics": {
-        "size_bytes": 1809,
-        "loc": 47,
+        "size_bytes": 2321,
+        "loc": 65,
         "todo_count": 0
       }
     },
@@ -433,6 +475,20 @@
       "metrics": {
         "size_bytes": 6768,
         "loc": 234,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/graphics/starfield.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 13345,
+        "loc": 332,
         "todo_count": 0
       }
     },

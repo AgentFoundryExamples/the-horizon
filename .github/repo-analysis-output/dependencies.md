@@ -8,8 +8,8 @@ Includes classification of external dependencies as stdlib vs third-party.
 
 ## Statistics
 
-- **Total files**: 59
-- **Intra-repo dependencies**: 53
+- **Total files**: 63
+- **Intra-repo dependencies**: 59
 - **External stdlib dependencies**: 5
 - **External third-party dependencies**: 21
 
@@ -54,9 +54,9 @@ Total: 21 unique packages
 ## Most Depended Upon Files (Intra-Repo)
 
 - `src/lib/universe/types.ts` (13 dependents)
+- `src/lib/graphics/config.ts` (8 dependents)
 - `src/lib/universe/mutate.ts` (6 dependents)
 - `src/lib/crypto.ts` (4 dependents)
-- `src/lib/graphics/config.ts` (4 dependents)
 - `src/lib/store.ts` (3 dependents)
 - `src/lib/universe/persist.ts` (3 dependents)
 - `src/lib/universe/scale-constants.ts` (3 dependents)
@@ -71,8 +71,8 @@ Total: 21 unique packages
 - `src/lib/universe/__tests__/integration-save-workflow.test.ts` (3 dependencies)
 - `src/lib/__tests__/label-config.test.ts` (2 dependencies)
 - `src/lib/graphics/__tests__/config.test.ts` (2 dependencies)
+- `src/lib/graphics/__tests__/galaxy.test.ts` (2 dependencies)
+- `src/lib/graphics/__tests__/starfield.test.ts` (2 dependencies)
 - `src/lib/universe/__tests__/edge-cases.test.ts` (2 dependencies)
 - `src/lib/universe/__tests__/galaxy-creation.test.ts` (2 dependencies)
 - `src/lib/universe/__tests__/mutate.test.ts` (2 dependencies)
-- `src/lib/universe/__tests__/persist.test.ts` (2 dependencies)
-- `src/lib/universe/__tests__/planet-layout.test.ts` (2 dependencies)

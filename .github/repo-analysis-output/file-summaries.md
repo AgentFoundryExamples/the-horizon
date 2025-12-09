@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 59
+Total files: 63
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -240,6 +240,15 @@ Total files: 59
 **LOC:** 522  
 **TODOs/FIXMEs:** 0  
 
+## src/lib/graphics/__tests__/galaxy.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 15.14 KB  
+**LOC:** 455  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/graphics/__tests__/materials.test.ts
 **Language:** TypeScript  
 **Role:** implementation  
@@ -247,6 +256,15 @@ Total files: 59
 **Summary:** TypeScript core implementation  
 **Size:** 14.82 KB  
 **LOC:** 380  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/graphics/__tests__/starfield.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 12.98 KB  
+**LOC:** 321  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/graphics/config.ts
@@ -258,13 +276,22 @@ Total files: 59
 **LOC:** 673  
 **TODOs/FIXMEs:** 0  
 
+## src/lib/graphics/galaxy.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 17.59 KB  
+**LOC:** 520  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/graphics/index.ts
 **Language:** TypeScript  
 **Role:** entry-point  
 **Role Justification:** common entry point name 'index'  
 **Summary:** TypeScript main entry point (role: entry-point)  
-**Size:** 1.77 KB  
-**LOC:** 47  
+**Size:** 2.27 KB  
+**LOC:** 65  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/graphics/materials.ts
@@ -283,6 +310,15 @@ Total files: 59
 **Summary:** TypeScript core implementation  
 **Size:** 6.61 KB  
 **LOC:** 234  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/graphics/starfield.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 13.03 KB  
+**LOC:** 332  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/hover-store.ts

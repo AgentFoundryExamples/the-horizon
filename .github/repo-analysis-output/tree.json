@@ -486,13 +486,25 @@
                     },
                     {
                       "type": "file",
+                      "name": "galaxy.test.ts"
+                    },
+                    {
+                      "type": "file",
                       "name": "materials.test.ts"
+                    },
+                    {
+                      "type": "file",
+                      "name": "starfield.test.ts"
                     }
                   ]
                 },
                 {
                   "type": "file",
                   "name": "config.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "galaxy.ts"
                 },
                 {
                   "type": "file",
@@ -505,6 +517,10 @@
                 {
                   "type": "file",
                   "name": "presets.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "starfield.ts"
                 }
               ]
             },

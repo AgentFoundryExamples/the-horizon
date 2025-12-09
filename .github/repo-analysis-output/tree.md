@@ -108,11 +108,15 @@
     ├── graphics
       ├── __tests__
         ├── config.test.ts
-        └── materials.test.ts
+        ├── galaxy.test.ts
+        ├── materials.test.ts
+        └── starfield.test.ts
       ├── config.ts
+      ├── galaxy.ts
       ├── index.ts
       ├── materials.ts
-      └── presets.ts
+      ├── presets.ts
+      └── starfield.ts
     ├── universe
       ├── __tests__
         ├── admin-modal-save-workflow.test.ts

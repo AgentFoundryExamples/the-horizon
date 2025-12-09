@@ -294,6 +294,15 @@
       }
     },
     {
+      "id": "src/lib/graphics/__tests__/galaxy.test.ts",
+      "path": "src/lib/graphics/__tests__/galaxy.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/graphics/__tests__/materials.test.ts",
       "path": "src/lib/graphics/__tests__/materials.test.ts",
       "type": "file",
@@ -305,12 +314,32 @@
       }
     },
     {
+      "id": "src/lib/graphics/__tests__/starfield.test.ts",
+      "path": "src/lib/graphics/__tests__/starfield.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/graphics/config.ts",
       "path": "src/lib/graphics/config.ts",
       "type": "file",
       "external_dependencies": {
         "stdlib": [],
         "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/graphics/galaxy.ts",
+      "path": "src/lib/graphics/galaxy.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "three"
+        ]
       }
     },
     {
@@ -340,6 +369,17 @@
       "external_dependencies": {
         "stdlib": [],
         "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/graphics/starfield.ts",
+      "path": "src/lib/graphics/starfield.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "three"
+        ]
       }
     },
     {
@@ -696,6 +736,14 @@
       "target": "src/lib/graphics/presets.ts"
     },
     {
+      "source": "src/lib/graphics/__tests__/galaxy.test.ts",
+      "target": "src/lib/graphics/galaxy.ts"
+    },
+    {
+      "source": "src/lib/graphics/__tests__/galaxy.test.ts",
+      "target": "src/lib/graphics/config.ts"
+    },
+    {
       "source": "src/lib/graphics/__tests__/materials.test.ts",
       "target": "src/lib/graphics/materials.ts"
     },
@@ -708,11 +756,27 @@
       "target": "src/lib/graphics/presets.ts"
     },
     {
+      "source": "src/lib/graphics/__tests__/starfield.test.ts",
+      "target": "src/lib/graphics/starfield.ts"
+    },
+    {
+      "source": "src/lib/graphics/__tests__/starfield.test.ts",
+      "target": "src/lib/graphics/config.ts"
+    },
+    {
+      "source": "src/lib/graphics/galaxy.ts",
+      "target": "src/lib/graphics/config.ts"
+    },
+    {
       "source": "src/lib/graphics/materials.ts",
       "target": "src/lib/graphics/config.ts"
     },
     {
       "source": "src/lib/graphics/presets.ts",
+      "target": "src/lib/graphics/config.ts"
+    },
+    {
+      "source": "src/lib/graphics/starfield.ts",
       "target": "src/lib/graphics/config.ts"
     },
     {
