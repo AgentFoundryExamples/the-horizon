@@ -63,41 +63,86 @@ export const PLANET_SCALE = {
 /**
  * Orbital spacing configuration
  * Ensures even distribution and prevents overlaps
+ * 
+ * DETERMINISTIC ORBIT RULES:
+ * - Planets orbit in circular paths centered on the star
+ * - Orbital radius = BASE_RADIUS + (planet_index × spacing)
+ * - Spacing scales automatically for systems with many planets
+ * - Eccentricity and inclination are minimal for predictability
+ * - Starting positions are evenly distributed around orbit
+ * - Orbital speeds follow Kepler's third law (inner planets faster)
+ * 
+ * CONFIGURATION NOTES:
+ * - BASE_RADIUS: First planet starts at this distance from star
+ * - RADIUS_INCREMENT: Base spacing between adjacent orbits
+ * - Spacing adapts when planet count exceeds ADAPTIVE_SPACING_THRESHOLD
+ * - Small eccentricity/inclination adds visual interest while maintaining determinism
  */
 export const ORBITAL_SPACING = {
   /**
    * Base orbital radius (distance from star)
    * Orbital radius for the innermost planet (index 0)
+   * 
+   * This value ensures clear separation from the central star (radius 1.2)
+   * Minimum value should be > 2× star radius to prevent visual overlap
    */
   BASE_RADIUS: 4.0,
   
   /**
    * Spacing increment between planet orbits
    * Increases linearly with planet index
+   * 
+   * For planet at index i:
+   *   radius = BASE_RADIUS + (i × RADIUS_INCREMENT × density_factor)
+   * 
+   * Where density_factor = max(1.0, planet_count / ADAPTIVE_SPACING_THRESHOLD)
+   * 
+   * This value is large enough to prevent overlap even with max-sized planets
    */
   RADIUS_INCREMENT: 3.0,
   
   /**
    * Minimum safe distance between adjacent planet orbits
    * Prevents visual overlap considering planet sizes
+   * 
+   * Note: This is a guideline value. Actual spacing is computed dynamically
+   * via calculateSafeSpacing() to accommodate planet sizes and count
    */
   MIN_SEPARATION: 2.0,
   
   /**
    * Maximum eccentricity (orbit ellipticity)
    * Keeps orbits mostly circular for predictable spacing
+   * 
+   * Value of 0.05 = 5% ellipticity (nearly circular)
+   * Actual eccentricity used in SolarSystemView is 30% of this (0.015)
+   * This creates visually circular orbits while maintaining determinism
    */
   MAX_ECCENTRICITY: 0.05,
   
   /**
    * Maximum orbital inclination (in radians)
    * Creates 3D depth while avoiding z-fighting
+   * 
+   * Value of 0.15 radians ≈ 8.6 degrees
+   * Actual inclination used is 50% of this (0.075 rad ≈ 4.3°)
+   * Small inclination prevents planets from appearing perfectly flat
+   * while keeping orbits predictable
    */
   MAX_INCLINATION: 0.15,
   
   /**
    * Planet count threshold for adaptive spacing
    * Systems with more planets get increased spacing to prevent crowding
+   * 
+   * When planet_count > ADAPTIVE_SPACING_THRESHOLD:
+   *   spacing = RADIUS_INCREMENT × (planet_count / ADAPTIVE_SPACING_THRESHOLD)
+   * 
+   * Example with threshold=8:
+   * - 4 planets: uses standard 3.0 spacing
+   * - 8 planets: uses standard 3.0 spacing (threshold)
+   * - 12 planets: uses 4.5 spacing (1.5× standard)
+   * - 16 planets: uses 6.0 spacing (2× standard)
    */
   ADAPTIVE_SPACING_THRESHOLD: 8,
 } as const;
@@ -142,10 +187,31 @@ export function calculateMoonSize(): number {
 
 /**
  * Calculate orbital radius for a planet at given index
- * Ensures even spacing that accommodates planet sizes
+ * Uses fixed spacing without adaptive scaling
+ * 
+ * Note: For actual rendering, SolarSystemView uses calculateSafeSpacing()
+ * which applies adaptive spacing for systems with many planets.
+ * This function is provided for simple calculations and testing.
+ * 
+ * @param planetIndex - Zero-based index of the planet (0 = innermost)
+ * @returns Orbital radius in Three.js units
  */
 export function calculateOrbitalRadius(planetIndex: number): number {
   return ORBITAL_SPACING.BASE_RADIUS + (planetIndex * ORBITAL_SPACING.RADIUS_INCREMENT);
+}
+
+/**
+ * Calculate orbital radius for a planet with adaptive spacing
+ * Uses adaptive spacing that scales with total planet count
+ * This matches the actual implementation in SolarSystemView
+ * 
+ * @param planetIndex - Zero-based index of the planet (0 = innermost)
+ * @param totalPlanets - Total number of planets in the system
+ * @returns Orbital radius in Three.js units with adaptive spacing applied
+ */
+export function calculateAdaptiveOrbitalRadius(planetIndex: number, totalPlanets: number): number {
+  const spacing = calculateSafeSpacing(totalPlanets);
+  return ORBITAL_SPACING.BASE_RADIUS + (planetIndex * spacing);
 }
 
 /**

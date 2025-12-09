@@ -27,7 +27,6 @@ import { useNavigationStore } from '@/lib/store';
 import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 import {
   calculatePlanetSize,
-  calculateOrbitalRadius,
   calculateSafeSpacing,
   ORBITAL_SPACING,
   STAR_SCALE,
@@ -62,23 +61,29 @@ function PlanetMesh({
 
   // Calculate orbital parameters
   const orbitalData = useMemo(() => {
-    const seed = planet.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const seededRandom = () => {
-      const x = Math.sin(seed + index) * 10000;
-      return x - Math.floor(x);
-    };
-
-    // Use new scale constants for improved usability
+    // Deterministic orbital spacing based on planet index
     const safeSpacing = calculateSafeSpacing(totalPlanets);
     const semiMajorAxis = ORBITAL_SPACING.BASE_RADIUS + index * safeSpacing;
-    const eccentricity = seededRandom() * ORBITAL_SPACING.MAX_ECCENTRICITY;
-    const inclination = (seededRandom() - 0.5) * ORBITAL_SPACING.MAX_INCLINATION * 2;
-    const argumentOfPeriapsis = seededRandom() * Math.PI * 2;
+    
+    // Use minimal eccentricity for near-circular orbits (deterministic)
+    // Small eccentricity adds visual interest while maintaining predictability
+    const eccentricity = ORBITAL_SPACING.MAX_ECCENTRICITY * 0.3;
+    
+    // Use minimal inclination for mostly-flat orbital plane
+    // Small inclination prevents z-fighting without unpredictability
+    const inclination = ORBITAL_SPACING.MAX_INCLINATION * 0.5;
+    
+    // Deterministic starting position based on planet index
+    // Spread planets evenly around the orbit at initialization
+    const phase = (index * Math.PI * 2) / Math.max(totalPlanets, 1);
+    
+    // Orbital speed follows Kepler's third law approximation
+    // Inner planets orbit faster than outer planets
     const orbitSpeed = 0.5 / (semiMajorAxis * semiMajorAxis);
-    const phase = seededRandom() * Math.PI * 2;
+    
     const size = calculatePlanetSize(planet.moons?.length || 0);
 
-    return { semiMajorAxis, eccentricity, inclination, argumentOfPeriapsis, orbitSpeed, phase, size };
+    return { semiMajorAxis, eccentricity, inclination, orbitSpeed, phase, size };
   }, [planet, index, totalPlanets]);
 
   useFrame((state) => {
@@ -101,7 +106,8 @@ function PlanetMesh({
       (orbitalData.semiMajorAxis * (1 - orbitalData.eccentricity * orbitalData.eccentricity)) /
       (1 + orbitalData.eccentricity * Math.cos(trueAnomaly));
 
-    const angle = trueAnomaly + orbitalData.argumentOfPeriapsis;
+    // Since apses are aligned with x-axis (no rotation), angle = trueAnomaly
+    const angle = trueAnomaly;
 
     meshRef.current.position.x = systemPosition.x + Math.cos(angle) * radius;
     meshRef.current.position.y = systemPosition.y + Math.sin(angle) * radius * Math.sin(orbitalData.inclination);

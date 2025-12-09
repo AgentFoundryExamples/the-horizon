@@ -1850,6 +1850,48 @@ ORBITAL_SPACING = {
 }
 ```
 
+**Deterministic Orbit Rules:**
+
+The solar system view uses deterministic orbital mechanics to ensure predictable, centered orbits:
+
+1. **Circular Orbits**: Planets follow nearly circular paths centered on the star
+   - Actual eccentricity used: 30% of MAX_ECCENTRICITY = 0.015 (1.5% ellipticity)
+   - This creates visually circular orbits while adding subtle variation
+
+2. **Fixed Spacing**: Orbital radius determined by planet index
+   - Formula: `radius = BASE_RADIUS + (index × spacing)`
+   - Spacing is deterministic and scales with planet count
+   - No randomness - same index always produces same radius
+
+3. **Adaptive Spacing**: Systems with many planets get increased spacing
+   - Threshold: 8 planets
+   - Below threshold: uses RADIUS_INCREMENT (3.0 units)
+   - Above threshold: spacing scales proportionally
+   - Example: 12 planets use 4.5 unit spacing (1.5× base)
+
+4. **Even Distribution**: Planets start at evenly-spaced positions around their orbits
+   - Starting angle: `(index × 2π) / planet_count`
+   - This prevents clustering at initialization
+   - Creates a balanced visual appearance
+
+5. **Kepler's Third Law**: Orbital speeds follow physics-inspired model
+   - Formula: `speed = 0.5 / (radius²)`
+   - Inner planets orbit faster than outer planets
+   - Creates realistic relative motion
+
+6. **Minimal Inclination**: Orbits are nearly flat but not perfectly so
+   - Actual inclination: 50% of MAX_INCLINATION = 0.075 rad (≈4.3°)
+   - Prevents z-fighting without introducing unpredictability
+   - All planets use same inclination for consistency
+
+**Why These Values:**
+- `BASE_RADIUS` of 4.0 provides clear separation from the central star (radius 1.2)
+- `RADIUS_INCREMENT` of 3.0 ensures planets don't overlap even with maximum sizes
+- `MAX_ECCENTRICITY` of 0.05 keeps orbits nearly circular for predictable spacing
+- `MAX_INCLINATION` of 0.15 radians (~8.6 degrees) adds 3D depth without causing z-fighting
+- `ADAPTIVE_SPACING_THRESHOLD` of 8 planets triggers proportional spacing increase for larger systems
+```
+
 **Why These Values:**
 - `BASE_RADIUS` of 4.0 provides clear separation from the central star (radius 1.2)
 - `RADIUS_INCREMENT` of 3.0 ensures planets don't overlap even with maximum sizes
@@ -1885,6 +1927,51 @@ To adjust when adaptive spacing kicks in:
 ```typescript
 ADAPTIVE_SPACING_THRESHOLD: 10,  // Instead of 8
 ```
+
+**Orbit Configuration Examples:**
+
+```typescript
+// Example 1: Single planet system (edge case)
+// Planet 0: radius = 4.0 + (0 × 3.0) = 4.0 units
+// Appears centered and balanced around the star
+
+// Example 2: Three planet system (typical)
+// Planet 0: radius = 4.0 + (0 × 3.0) = 4.0 units
+// Planet 1: radius = 4.0 + (1 × 3.0) = 7.0 units
+// Planet 2: radius = 4.0 + (2 × 3.0) = 10.0 units
+// Spacing: 3.0 units between each orbit
+
+// Example 3: Twelve planet system (adaptive spacing)
+// Spacing = 3.0 × (12 / 8) = 4.5 units
+// Planet 0: radius = 4.0 + (0 × 4.5) = 4.0 units
+// Planet 1: radius = 4.0 + (1 × 4.5) = 8.5 units
+// Planet 2: radius = 4.0 + (2 × 4.5) = 13.0 units
+// ...
+// Planet 11: radius = 4.0 + (11 × 4.5) = 53.5 units
+// Increased spacing prevents crowding and overlap
+```
+
+**Edge Cases Handled:**
+
+1. **Single Planet Systems**: 
+   - Planet appears at BASE_RADIUS (4.0 units)
+   - Centered and balanced around the star
+   - No adaptive spacing needed
+
+2. **Systems with Many Planets (10+)**:
+   - Spacing automatically increases to prevent overlap
+   - Outermost planet remains within reasonable render distance
+   - All planets maintain minimum tap target size
+
+3. **Legacy Data with Manual Coordinates**:
+   - Manual coordinates are ignored
+   - Positions are always computed deterministically
+   - Ensures consistency across all systems
+
+4. **Label Overlap Prevention**:
+   - Orbital spacing accounts for planet sizes
+   - Labels positioned above planets avoid overlap
+   - See `OverlayLabels.tsx` for label positioning logic
 
 For more elliptical orbits (more dramatic):
 ```typescript
