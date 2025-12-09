@@ -283,9 +283,9 @@ describe('Sidebar Component', () => {
   });
 
   describe('Active Item Highlighting', () => {
-    it('should highlight active galaxy', () => {
+    it('should highlight active galaxy when navigating from universe', () => {
       (useNavigationStore as unknown as jest.Mock).mockReturnValue({
-        focusLevel: 'galaxy',
+        focusLevel: 'universe',
         focusedGalaxyId: 'galaxy-1',
         focusedSolarSystemId: null,
         focusedPlanetId: null,
@@ -296,14 +296,13 @@ describe('Sidebar Component', () => {
 
       render(<Sidebar galaxies={mockGalaxies} />);
       
-      const activeSystem = screen.getByText('Alpha System').closest('button');
-      // Should not be active yet since we're at galaxy level, not solar-system level
-      expect(activeSystem).not.toHaveClass('sidebar__item--active');
+      const activeGalaxy = screen.getByText('Andromeda').closest('button');
+      expect(activeGalaxy).toHaveClass('sidebar__item--active');
     });
 
-    it('should highlight active solar system', () => {
+    it('should highlight active solar system when navigating from galaxy', () => {
       (useNavigationStore as unknown as jest.Mock).mockReturnValue({
-        focusLevel: 'solar-system',
+        focusLevel: 'galaxy',
         focusedGalaxyId: 'galaxy-1',
         focusedSolarSystemId: 'system-1',
         focusedPlanetId: null,
@@ -314,9 +313,25 @@ describe('Sidebar Component', () => {
 
       render(<Sidebar galaxies={mockGalaxies} />);
       
+      const activeSystem = screen.getByText('Alpha System').closest('button');
+      expect(activeSystem).toHaveClass('sidebar__item--active');
+    });
+
+    it('should highlight active planet when navigating from solar system', () => {
+      (useNavigationStore as unknown as jest.Mock).mockReturnValue({
+        focusLevel: 'solar-system',
+        focusedGalaxyId: 'galaxy-1',
+        focusedSolarSystemId: 'system-1',
+        focusedPlanetId: 'planet-1',
+        navigateToGalaxy: mockNavigateToGalaxy,
+        navigateToSolarSystem: mockNavigateToSolarSystem,
+        navigateToPlanet: mockNavigateToPlanet,
+      });
+
+      render(<Sidebar galaxies={mockGalaxies} />);
+      
       const activePlanet = screen.getByText('Earth-like').closest('button');
-      // Should not be active yet since we're at solar-system level, not planet level
-      expect(activePlanet).not.toHaveClass('sidebar__item--active');
+      expect(activePlanet).toHaveClass('sidebar__item--active');
     });
   });
 
@@ -343,7 +358,7 @@ describe('Sidebar Component', () => {
       (useNavigationStore as unknown as jest.Mock).mockReturnValue({
         focusLevel: 'galaxy',
         focusedGalaxyId: 'galaxy-1',
-        focusedSolarSystemId: null,
+        focusedSolarSystemId: 'system-1',
         focusedPlanetId: null,
         navigateToGalaxy: mockNavigateToGalaxy,
         navigateToSolarSystem: mockNavigateToSolarSystem,
@@ -353,8 +368,7 @@ describe('Sidebar Component', () => {
       render(<Sidebar galaxies={mockGalaxies} />);
       
       const activeSystem = screen.getByText('Alpha System').closest('button');
-      // Should not have aria-current since we're showing the list, not highlighting a specific one
-      expect(activeSystem).not.toHaveAttribute('aria-current');
+      expect(activeSystem).toHaveAttribute('aria-current', 'location');
     });
   });
 });

@@ -73,11 +73,11 @@ export default function Sidebar({ galaxies }: SidebarProps) {
   const listItems = getListItems();
 
   // Determine the currently active item ID
+  // The sidebar shows the next level down, so we highlight what we're about to navigate into
   const getActiveItemId = (): string | null => {
-    if (focusLevel === 'universe') return null; // No active galaxy at universe level
-    if (focusLevel === 'galaxy') return focusedGalaxyId;
-    if (focusLevel === 'solar-system') return focusedSolarSystemId;
-    if (focusLevel === 'planet') return focusedPlanetId;
+    if (focusLevel === 'universe') return focusedGalaxyId;
+    if (focusLevel === 'galaxy') return focusedSolarSystemId;
+    if (focusLevel === 'solar-system') return focusedPlanetId;
     return null;
   };
 
