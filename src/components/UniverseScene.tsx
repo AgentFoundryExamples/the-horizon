@@ -28,9 +28,9 @@ import OverlayLabels from './OverlayLabels';
 import '../styles/planet.css';
 
 // Planet surface view constants - optimized for tighter moon orbits and better framing
-const PLANET_SURFACE_POSITION = new THREE.Vector3(-3, 0, 0);
-const PLANET_CAMERA_OFFSET = new THREE.Vector3(2, 0, 6); // Moved closer for better planet framing
-const PLANET_CAMERA_LOOKAT_OFFSET = new THREE.Vector3(0.5, 0, 0); // Adjusted to center planet better in left column
+const PLANET_SURFACE_POSITION = new THREE.Vector3(10, 0, 0);
+const PLANET_CAMERA_OFFSET = new THREE.Vector3(2, 0, 24); // Moved closer for better planet framing
+const PLANET_CAMERA_LOOKAT_OFFSET = new THREE.Vector3(24, 0, 0); // Adjusted to center planet better in left column
 
 /**
  * Particle shader for galaxy rendering
