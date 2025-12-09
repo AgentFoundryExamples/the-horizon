@@ -462,6 +462,10 @@
                     },
                     {
                       "type": "file",
+                      "name": "layout.test.ts"
+                    },
+                    {
+                      "type": "file",
                       "name": "mutate.test.ts"
                     },
                     {
@@ -485,6 +489,10 @@
                 {
                   "type": "file",
                   "name": "index.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "layout.ts"
                 },
                 {
                   "type": "file",

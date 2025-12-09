@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 45,
+  "total_files": 47,
   "files": [
     {
       "schema_version": "2.0",
@@ -480,6 +480,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/universe/__tests__/layout.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 15147,
+        "loc": 277,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/universe/__tests__/mutate.test.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -557,8 +571,22 @@
       "summary": "TypeScript main entry point (role: entry-point)",
       "summary_text": "TypeScript main entry point (role: entry-point)",
       "metrics": {
-        "size_bytes": 740,
-        "loc": 6,
+        "size_bytes": 766,
+        "loc": 7,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/universe/layout.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 7001,
+        "loc": 135,
         "todo_count": 0
       }
     },

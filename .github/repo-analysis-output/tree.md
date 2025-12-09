@@ -103,12 +103,14 @@
         ├── galaxy-creation.test.ts
         ├── galaxy-view-alignment.test.ts
         ├── integration-save-workflow.test.ts
+        ├── layout.test.ts
         ├── mutate.test.ts
         ├── persist.test.ts
         ├── scale-constants.test.ts
         └── types.test.ts
       ├── data-service.ts
       ├── index.ts
+      ├── layout.ts
       ├── mutate.ts
       ├── persist.ts
       ├── scale-constants.ts

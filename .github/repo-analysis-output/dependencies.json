@@ -377,6 +377,17 @@
       }
     },
     {
+      "id": "src/lib/universe/__tests__/layout.test.ts",
+      "path": "src/lib/universe/__tests__/layout.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "three"
+        ]
+      }
+    },
+    {
       "id": "src/lib/universe/__tests__/mutate.test.ts",
       "path": "src/lib/universe/__tests__/mutate.test.ts",
       "type": "file",
@@ -435,6 +446,17 @@
       "external_dependencies": {
         "stdlib": [],
         "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/universe/layout.ts",
+      "path": "src/lib/universe/layout.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "three"
+        ]
       }
     },
     {
@@ -593,6 +615,10 @@
     {
       "source": "src/lib/universe/__tests__/integration-save-workflow.test.ts",
       "target": "src/lib/universe/types.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/layout.test.ts",
+      "target": "src/lib/universe/layout.ts"
     },
     {
       "source": "src/lib/universe/__tests__/mutate.test.ts",
