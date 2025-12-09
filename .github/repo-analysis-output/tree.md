@@ -16,6 +16,7 @@
   └── workflows
     └── af_maintenance.yml
 ├── docs
+  ├── CHANGELOG.md
   ├── content-authoring.md
   ├── deployment.md
   ├── roadmap.md

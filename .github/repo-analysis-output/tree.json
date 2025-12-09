@@ -76,6 +76,10 @@
       "children": [
         {
           "type": "file",
+          "name": "CHANGELOG.md"
+        },
+        {
+          "type": "file",
           "name": "content-authoring.md"
         },
         {
