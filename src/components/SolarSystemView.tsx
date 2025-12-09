@@ -27,6 +27,7 @@ import { useNavigationStore } from '@/lib/store';
 import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 import {
   calculatePlanetSize,
+  calculateAdaptiveOrbitalRadius,
   calculateSafeSpacing,
   ORBITAL_SPACING,
   STAR_SCALE,
@@ -169,11 +170,10 @@ export default function SolarSystemView({ solarSystem, position }: SolarSystemVi
   const { navigateToPlanet } = useNavigationStore();
   const totalPlanets = (solarSystem.planets || []).length;
 
-  // Calculate orbital radii for rendering orbit rings
+  // Calculate orbital radii for both rings and planets
   const orbitalRadii = useMemo(() => {
-    const safeSpacing = calculateSafeSpacing(totalPlanets);
     return (solarSystem.planets || []).map((_, index) => 
-      ORBITAL_SPACING.BASE_RADIUS + index * safeSpacing
+      calculateAdaptiveOrbitalRadius(index, totalPlanets)
     );
   }, [solarSystem.planets, totalPlanets]);
 

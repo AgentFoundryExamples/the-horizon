@@ -300,7 +300,7 @@ export const GALAXY_ORBIT_STYLE = {
    * Dash pattern for galaxy rings
    * Solid lines (undefined) for continuous structural guides
    */
-  DASH_PATTERN: undefined as [number, number] | undefined,
+  DASH_PATTERN: undefined,
 } as const;
 
 /**
@@ -331,7 +331,7 @@ export const SOLAR_ORBIT_STYLE = {
    * Dash pattern for solar rings
    * Dashed pattern [2, 2] distinguishes from galaxy solid lines
    */
-  DASH_PATTERN: [2, 2] as [number, number] | undefined,
+  DASH_PATTERN: [2, 2],
 } as const;
 
 /**

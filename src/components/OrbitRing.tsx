@@ -31,7 +31,7 @@ export interface OrbitRingStyleProps {
    * [dash length, gap length]
    * undefined = solid line
    */
-  dashPattern?: [number, number];
+  dashPattern?: readonly [number, number] | [number, number];
 }
 
 export interface OrbitRingProps extends OrbitRingStyleProps {
