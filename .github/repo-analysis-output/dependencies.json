@@ -508,6 +508,10 @@
       "target": "src/lib/crypto.ts"
     },
     {
+      "source": "src/lib/store.ts",
+      "target": "src/lib/hover-store.ts"
+    },
+    {
       "source": "src/lib/universe/__tests__/admin-modal-save-workflow.test.ts",
       "target": "src/lib/universe/types.ts"
     },

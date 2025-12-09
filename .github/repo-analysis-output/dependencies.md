@@ -9,7 +9,7 @@ Includes classification of external dependencies as stdlib vs third-party.
 ## Statistics
 
 - **Total files**: 42
-- **Intra-repo dependencies**: 35
+- **Intra-repo dependencies**: 36
 - **External stdlib dependencies**: 5
 - **External third-party dependencies**: 16
 
@@ -53,11 +53,11 @@ Total: 16 unique packages
 - `src/lib/crypto.ts` (4 dependents)
 - `src/lib/universe/persist.ts` (3 dependents)
 - `src/lib/github.ts` (2 dependents)
+- `src/lib/hover-store.ts` (2 dependents)
 - `src/lib/universe/data-service.ts` (2 dependents)
 - `src/lib/animation.ts` (1 dependents)
 - `src/lib/auth.ts` (1 dependents)
 - `src/lib/camera.ts` (1 dependents)
-- `src/lib/hover-store.ts` (1 dependents)
 
 ## Files with Most Dependencies (Intra-Repo)
 
