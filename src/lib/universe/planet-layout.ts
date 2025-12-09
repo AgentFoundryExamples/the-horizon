@@ -102,45 +102,16 @@ export function normalizePlanetLayout(
 export function validateLayoutConfig(config: PlanetLayoutConfig): string[] {
   const warnings: string[] = [];
 
-  if (config.planetColumnWidth !== undefined) {
-    const { min, max } = LAYOUT_RANGES.planetColumnWidth;
-    if (config.planetColumnWidth < min || config.planetColumnWidth > max) {
-      warnings.push(`planetColumnWidth ${config.planetColumnWidth} is outside safe range [${min}, ${max}]. Value will be clamped.`);
-    }
-  }
-
-  if (config.planetRenderScale !== undefined) {
-    const { min, max } = LAYOUT_RANGES.planetRenderScale;
-    if (config.planetRenderScale < min || config.planetRenderScale > max) {
-      warnings.push(`planetRenderScale ${config.planetRenderScale} is outside safe range [${min}, ${max}]. Value will be clamped.`);
-    }
-  }
-
-  if (config.planetOffsetX !== undefined) {
-    const { min, max } = LAYOUT_RANGES.planetOffsetX;
-    if (config.planetOffsetX < min || config.planetOffsetX > max) {
-      warnings.push(`planetOffsetX ${config.planetOffsetX} is outside safe range [${min}, ${max}]. Value will be clamped.`);
-    }
-  }
-
-  if (config.planetOffsetY !== undefined) {
-    const { min, max } = LAYOUT_RANGES.planetOffsetY;
-    if (config.planetOffsetY < min || config.planetOffsetY > max) {
-      warnings.push(`planetOffsetY ${config.planetOffsetY} is outside safe range [${min}, ${max}]. Value will be clamped.`);
-    }
-  }
-
-  if (config.contentPadding !== undefined) {
-    const { min, max } = LAYOUT_RANGES.contentPadding;
-    if (config.contentPadding < min || config.contentPadding > max) {
-      warnings.push(`contentPadding ${config.contentPadding} is outside safe range [${min}, ${max}]. Value will be clamped.`);
-    }
-  }
-
-  if (config.contentMaxWidth !== undefined) {
-    const { min, max } = LAYOUT_RANGES.contentMaxWidth;
-    if (config.contentMaxWidth < min || config.contentMaxWidth > max) {
-      warnings.push(`contentMaxWidth ${config.contentMaxWidth} is outside safe range [${min}, ${max}]. Value will be clamped.`);
+  // Iterate through each configuration key and validate against its range
+  for (const key in LAYOUT_RANGES) {
+    const configKey = key as keyof PlanetLayoutConfig;
+    const value = config[configKey];
+    
+    if (value !== undefined) {
+      const { min, max } = LAYOUT_RANGES[configKey];
+      if (value < min || value > max) {
+        warnings.push(`${configKey} ${value} is outside safe range [${min}, ${max}]. Value will be clamped.`);
+      }
     }
   }
 

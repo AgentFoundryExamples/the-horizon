@@ -116,13 +116,12 @@ export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurface
   }, [planet.layoutConfig]);
 
   // Apply scale to planet mesh only when it changes (not in useFrame)
-  const planetScale = layoutConfig.planetRenderScale;
-  
   useEffect(() => {
     if (planetRef.current) {
+      const planetScale = layoutConfig.planetRenderScale;
       planetRef.current.scale.setScalar(planetScale);
     }
-  }, [planetScale]);
+  }, [layoutConfig]);
 
   useFrame(() => {
     if (planetRef.current) {

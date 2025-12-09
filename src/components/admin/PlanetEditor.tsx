@@ -213,7 +213,8 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               step="1"
               value={localPlanet.layoutConfig?.planetColumnWidth ?? 30}
               onChange={(e) => {
-                const value = parseFloat(e.target.value);
+                const numValue = parseFloat(e.target.value);
+                const value = !isNaN(numValue) ? numValue : 30;
                 handleChange('layoutConfig', {
                   ...(localPlanet.layoutConfig || {}),
                   planetColumnWidth: value,
@@ -239,7 +240,8 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               step="0.1"
               value={localPlanet.layoutConfig?.planetRenderScale ?? 1.0}
               onChange={(e) => {
-                const value = parseFloat(e.target.value);
+                const numValue = parseFloat(e.target.value);
+                const value = !isNaN(numValue) ? numValue : 1.0;
                 handleChange('layoutConfig', {
                   ...(localPlanet.layoutConfig || {}),
                   planetRenderScale: value,
@@ -265,7 +267,8 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               step="5"
               value={localPlanet.layoutConfig?.planetOffsetX ?? 0}
               onChange={(e) => {
-                const value = parseFloat(e.target.value);
+                const numValue = parseFloat(e.target.value);
+                const value = !isNaN(numValue) ? numValue : 0;
                 handleChange('layoutConfig', {
                   ...(localPlanet.layoutConfig || {}),
                   planetOffsetX: value,
@@ -291,7 +294,8 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               step="5"
               value={localPlanet.layoutConfig?.planetOffsetY ?? 0}
               onChange={(e) => {
-                const value = parseFloat(e.target.value);
+                const numValue = parseFloat(e.target.value);
+                const value = !isNaN(numValue) ? numValue : 0;
                 handleChange('layoutConfig', {
                   ...(localPlanet.layoutConfig || {}),
                   planetOffsetY: value,
@@ -317,7 +321,8 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               step="0.5"
               value={localPlanet.layoutConfig?.contentPadding ?? 2}
               onChange={(e) => {
-                const value = parseFloat(e.target.value);
+                const numValue = parseFloat(e.target.value);
+                const value = !isNaN(numValue) ? numValue : 2;
                 handleChange('layoutConfig', {
                   ...(localPlanet.layoutConfig || {}),
                   contentPadding: value,
@@ -343,7 +348,8 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               step="50"
               value={localPlanet.layoutConfig?.contentMaxWidth ?? 800}
               onChange={(e) => {
-                const value = parseFloat(e.target.value);
+                const numValue = parseFloat(e.target.value);
+                const value = !isNaN(numValue) ? numValue : 800;
                 handleChange('layoutConfig', {
                   ...(localPlanet.layoutConfig || {}),
                   contentMaxWidth: value,
