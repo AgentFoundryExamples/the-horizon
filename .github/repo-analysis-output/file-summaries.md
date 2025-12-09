@@ -299,8 +299,8 @@ Total files: 47
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 12.53 KB  
-**LOC:** 215  
+**Size:** 12.80 KB  
+**LOC:** 222  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/__tests__/integration-save-workflow.test.ts
@@ -407,8 +407,8 @@ Total files: 47
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 12.96 KB  
-**LOC:** 322  
+**Size:** 14.94 KB  
+**LOC:** 389  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/types.ts

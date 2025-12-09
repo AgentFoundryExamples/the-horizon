@@ -74,6 +74,7 @@
     ├── ContextualWelcomeMessage.tsx
     ├── GalaxyView.tsx
     ├── MarkdownContent.tsx
+    ├── OrbitRing.tsx
     ├── OverlayLabels.tsx
     ├── PlanetSurface.tsx
     ├── SceneHUD.tsx
