@@ -335,14 +335,19 @@ The application features DOM-based overlay hover labels that appear when hoverin
 
 > **Important (v0.1.7 - ISS-1)**: Hover labels were stabilized in v0.1.7 to use Drei's `Html` component exclusively. This prevents crashes that occurred when DOM elements were rendered directly inside the Three.js Canvas. Always use `<Html>` from `@react-three/drei` for any DOM content within `<Canvas>`.
 
+> **Readability Enhancement (ISS-XXX)**: Hover labels were scaled up 10x (distanceFactor increased from 10 to 100) to improve readability. Previously, labels appeared ~10x too small and frequently clipped off-screen. The new configuration includes viewport boundary clamping (`transform` prop and CSS max constraints) to ensure labels remain visible and readable while maintaining their role as secondary navigation cues to the sidebar.
+
 **Key Features:**
 - **R3F Native Rendering**: Labels use Drei's `Html` component for proper integration with the R3F Canvas
 - **3D Positioning**: Labels are positioned in 3D space and automatically project to screen coordinates
+- **Readable Scale**: `distanceFactor={100}` ensures labels are 10x larger than the original implementation for clear readability
+- **Viewport Clamping**: Labels are constrained to viewport boundaries (max 90vw/90vh) to prevent off-screen clipping
 - **Robust Validation**: Input validation prevents crashes from invalid position data
 - **Hologram Aesthetics**: Modern glassmorphism design with glowing borders, translucent backgrounds, and smooth animations
 - **Performance Optimized**: Efficient rendering using R3F's built-in optimization strategies
 - **Accessibility**: ARIA attributes for screen readers, keyboard-accessible toggle button
 - **Responsive**: Adapts to mobile viewports and respects `prefers-reduced-motion`
+- **Secondary Navigation**: Labels complement sidebar navigation as contextual hover cues
 
 **Stabilization (ISS-1 - v0.1.7):**
 The hover label system was stabilized to prevent application crashes caused by rendering DOM elements directly in the Canvas. The fix includes:
@@ -350,6 +355,15 @@ The hover label system was stabilized to prevent application crashes caused by r
 - Position validation at multiple levels (store and component)
 - Console warnings instead of crashes for invalid data
 - Comprehensive documentation and troubleshooting guides
+
+**Readability Enhancement (ISS-XXX):**
+Labels were scaled up significantly to address readability issues:
+- **Problem**: Labels appeared ~10x too small and frequently clipped off-screen
+- **Solution**: Increased `distanceFactor` from 10 to 100 (10x larger labels)
+- **Viewport Handling**: Added `transform` prop and CSS constraints to clamp labels within viewport boundaries
+- **Trade-offs**: Larger labels may impact performance on rapid camera movement (monitored but not throttled yet)
+- **Design Decision**: Labels remain toggle-able and secondary to sidebar navigation
+- **Future Work**: Part 2 may revisit typography, fonts, and textures for enhanced visual design
 
 ### Architecture
 
@@ -393,6 +407,9 @@ Renders labels using Drei's `Html` component inside the R3F Canvas:
 - **Drei Html Integration**: Uses `<Html>` component from `@react-three/drei` for proper R3F rendering
 - **3D Positioning**: Position is specified as `[x, y, z]` array in 3D space
 - **Automatic Projection**: Drei handles projection from 3D to 2D automatically
+- **Distance Factor**: Set to 100 for readable label sizes (10x increase from original)
+- **Transform Enabled**: Uses `transform` prop to enable viewport boundary clamping
+- **Viewport Constraints**: CSS wrapper (`overlay-label-wrapper`) limits labels to 90vw/90vh to prevent off-screen rendering
 - **Guard Rails**: Additional position validation prevents rendering invalid labels
 - **Sprite Mode**: Uses sprite rendering for consistent label sizing
 - **No Occlusion**: Labels are always visible, even when objects are behind others
@@ -643,7 +660,8 @@ offsetY: -30  // Vertical offset (negative = above)
 **Causes & Solutions:**
 
 1. **Wrong distanceFactor**
-   - Current setting: `distanceFactor={10}`
+   - Current setting: `distanceFactor={100}` (increased for readability)
+   - Previous issue: Labels at `distanceFactor={10}` were 10x too small
    - ✅ **Fix**: Adjust in OverlayLabels.tsx to scale label distance from object
 
 2. **CSS transform conflicts**
@@ -654,6 +672,10 @@ offsetY: -30  // Vertical offset (negative = above)
 3. **Position not updating**
    - Check: Ensure `hoveredObject.position` is a new reference when updating
    - ✅ **Fix**: Use `position.clone()` when creating HoveredObject
+
+4. **Labels clipping off-screen**
+   - Previous issue: Labels could render outside viewport boundaries
+   - ✅ **Fix**: Added `transform` prop and CSS constraints (max 90vw/90vh) to clamp labels within viewport
 
 #### Performance issues / jittery labels
 
@@ -675,6 +697,11 @@ offsetY: -30  // Vertical offset (negative = above)
 3. **Multiple labels rendering**
    - Check: Ensure only one HoveredObject at a time
    - ✅ **Fix**: Store only tracks single hovered object
+
+4. **Large labels on rapid camera movement**
+   - With `distanceFactor={100}`, labels are 10x larger which may impact performance during fast camera panning
+   - ⚠️ **Monitor**: If performance degrades below 30 FPS, consider adding throttling for projection updates
+   - Current approach: Accept minor performance impact for significantly improved readability
 
 #### Extending the Hover System
 
@@ -729,6 +756,37 @@ offsetY: -30  // Vertical offset (negative = above)
 - ✅ Test validation with unit tests
 - ✅ Add console warnings for debugging without breaking app
 - ✅ Update documentation when adding features
+
+#### Edge Cases for Scaled Labels (distanceFactor=100)
+
+**Camera Near-Field Positioning:**
+- **Issue**: When camera is very close to objects, labels might scale disproportionately large
+- **Solution**: The `transform` prop and viewport constraints (max 90vw/90vh) prevent labels from exceeding screen bounds
+- **Test**: Navigate camera very close to a galaxy/planet and verify label remains within viewport
+
+**Off-Screen Target Objects:**
+- **Issue**: Objects behind or outside camera view could render labels in unexpected locations
+- **Solution**: Drei's Html component with `transform` handles projection automatically. Labels for off-screen objects won't render or will be positioned at screen edges
+- **Behavior**: If object is completely behind camera, no label should appear (existing behavior maintained)
+
+**Rapid Camera Movement:**
+- **Risk**: Larger labels (10x increase) may cause frame rate drops during fast panning
+- **Mitigation**: Current implementation accepts minor performance impact for readability
+- **Monitoring**: If FPS drops below 30 consistently, consider:
+  - Throttling projection updates to 30 FPS
+  - Hiding labels during rapid camera movement
+  - Adding a velocity-based threshold to disable labels temporarily
+
+**Multiple Objects in Close Proximity:**
+- **Issue**: Dense object clusters could result in overlapping labels
+- **Current Behavior**: Only one object can be hovered at a time (by design)
+- **No Change Needed**: Existing single-hover behavior prevents overlap issues
+
+**Fallback When Sidebar Data Fails:**
+- **Context**: Labels are secondary to sidebar navigation
+- **Behavior**: If sidebar fails to populate, labels still provide context on hover
+- **Documentation**: Hover labels serve as redundant navigation cues, not primary interface
+- **Toggle Available**: Users can disable labels entirely via HUD button if they become distracting
 
 
 

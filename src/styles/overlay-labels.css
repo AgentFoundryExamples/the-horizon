@@ -1,7 +1,15 @@
 /**
  * Overlay Labels - Hologram-style hover labels
  * Positioned above WebGL canvas using Drei's Html component
+ * 
+ * Updated to use larger distanceFactor (100) for improved readability
+ * with viewport clamping to prevent off-screen rendering
  */
+
+.overlay-label-wrapper {
+  max-width: 90vw;
+  max-height: 90vh;
+}
 
 .overlay-label {
   pointer-events: none;

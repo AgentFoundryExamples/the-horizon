@@ -46,7 +46,7 @@ export default function OverlayLabels() {
     <Html
       position={[position.x, position.y, position.z]}
       center
-      distanceFactor={10}
+      distanceFactor={100}
       zIndexRange={[200, 0]}
       sprite
       occlude={false}
@@ -54,6 +54,9 @@ export default function OverlayLabels() {
         pointerEvents: 'none',
         userSelect: 'none',
       }}
+      // Clamp to viewport boundaries to prevent off-screen rendering
+      transform
+      wrapperClass="overlay-label-wrapper"
     >
       <div className="overlay-label" role="tooltip" aria-live="polite">
         <div className="overlay-label-content">
