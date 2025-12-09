@@ -2,7 +2,95 @@
 
 This document outlines the current state of The Horizon, what has been shipped, known limitations, and planned future enhancements.
 
-## Current Release: v0.1.6 (December 8, 2025)
+## Current Release: v0.1.7 (December 9, 2025)
+
+This release focuses on hover label stabilization using Drei's Html component and breadcrumb navigation enhancements for improved user experience and application stability.
+
+**Hover Label Stabilization (ISS-1):**
+
+1. **Drei Html Component Integration**
+   - Migrated all hover labels to use `@react-three/drei`'s `Html` component
+   - Prevents "Div is not part of the THREE namespace" crashes
+   - Proper integration with React Three Fiber rendering pipeline
+   - Labels positioned in 3D space with automatic screen projection
+   - Distance-based scaling for consistent readability
+
+2. **Robust Validation and Error Handling**
+   - Multi-level position validation (store + component)
+   - Checks for NaN, Infinity in position coordinates
+   - Console warnings instead of application crashes
+   - Graceful handling of null/undefined values
+   - Type-safe interfaces with comprehensive documentation
+
+3. **Performance and Rendering**
+   - Efficient R3F optimization strategies
+   - Sprite rendering for consistent label sizing
+   - No occlusion - labels visible even when objects are behind others
+   - Smooth fade-in animations
+   - Minimal re-render overhead
+
+**Breadcrumb Navigation Enhancements (ISS-2):**
+
+1. **Improved Context Awareness**
+   - Full navigation hierarchy display (Universe → Galaxy → Solar System → Planet)
+   - Current location clearly highlighted
+   - Click any level to jump directly to that view
+   - Smooth camera transitions between levels
+   - Integration with transition messages
+
+2. **Visual and UX Refinements**
+   - Enhanced styling with better contrast
+   - Clear hover states for interactive elements
+   - Visual separation between navigation levels
+   - Responsive design for mobile, tablet, and desktop
+   - Consistent with overall design system
+
+3. **Accessibility Enhancements**
+   - ARIA labels for screen reader support
+   - Keyboard navigation (Tab, Enter)
+   - Focus indicators meet WCAG 2.1 Level AA
+   - Reduced motion support
+   - Touch-friendly targets on mobile (52px minimum)
+
+**Why This Release:**
+
+Hover label stability was critical:
+- Previous implementation caused crashes by rendering DOM directly in Canvas
+- Drei's Html component provides proper R3F integration
+- Validation prevents crashes from invalid position data
+- Comprehensive documentation prevents future regressions
+
+Breadcrumb improvements enhance navigation:
+- Clearer context after tooltip removal in v0.1.5
+- Multiple navigation affordances (breadcrumbs, transitions, ARIA)
+- Better user orientation in deep hierarchies
+- Improved accessibility for all users
+
+**Technical Details:**
+- No new environment variables required
+- No migration steps needed
+- All tests passing (same count as v0.1.6)
+- Compatible with all v0.1.x releases
+- Build verified with no breaking changes
+
+**Deployment Notes:**
+- No environment variable changes
+- No redeployment required if already on v0.1.6
+- Documentation cross-references validated
+- Manual testing scenarios added (Scenarios 14-15)
+
+**Verification:**
+- Hover over celestial objects - labels appear without crashes
+- Check console - no "Div is not part of THREE namespace" errors
+- Navigate using breadcrumbs - smooth transitions
+- Test on mobile - touch interactions work correctly
+- Screen reader announces breadcrumb navigation
+
+See [docs/visuals.md](./visuals.md#overlay-hover-labels) for hover label documentation.
+See [docs/visuals.md](./visuals.md#breadcrumb-navigation-iss-2-v017) for breadcrumb documentation.
+See [MANUAL_TESTING.md](../MANUAL_TESTING.md#scenario-14-hover-label-functionality) for testing procedures.
+
+### Previous Release: v0.1.6 (December 8, 2025)
 
 This release focuses on documentation completeness, ensuring all recent improvements are thoroughly captured for long-term maintainability and operator clarity.
 
@@ -278,6 +366,8 @@ The larger scope was necessary and acceptable because:
 - [x] GPU-accelerated rendering with instanced meshes
 - [x] Performance optimizations (LOD, shader-based particles)
 - [x] Accessibility features (keyboard navigation, reduced motion support)
+- [x] **Hover label stabilization with Drei Html component (ISS-1, v0.1.7)**
+- [x] **Enhanced breadcrumb navigation with improved UX (ISS-2, v0.1.7)**
 
 #### Content Management
 - [x] Rich markdown content support for planets and moons
@@ -490,6 +580,17 @@ Before deploying a new version, complete these verification steps:
 - [ ] Troubleshooting guide is current
 
 ## Version History
+
+### v0.1.7 - Hover Label Stabilization and Breadcrumb UX (December 9, 2025)
+
+- **Hover Label Stabilization (ISS-1)**: Migrated to Drei Html component, preventing Canvas crashes
+- **Position Validation**: Multi-level validation with console warnings instead of crashes
+- **Breadcrumb Enhancements (ISS-2)**: Improved navigation context and visual refinements
+- **Accessibility**: Enhanced ARIA labels, keyboard navigation, and touch targets
+- **Documentation**: Complete hover label and breadcrumb documentation added
+- **Testing**: New manual testing scenarios (14-15) for both features
+
+See "Current Release" section above for complete details.
 
 ### v0.1.6 - Documentation Completeness and Version Tracking (December 8, 2025)
 

@@ -620,6 +620,328 @@ grep -r "emissive" src/components/ | grep -v "test"
 
 ---
 
+### Scenario 14: Hover Label Functionality (v0.1.7 - ISS-1)
+
+**Purpose**: Verify that hover labels render correctly using Drei Html component without crashes
+
+**Prerequisites**: None (visual and functional inspection)
+
+**Context**: v0.1.7 stabilized hover labels by migrating to Drei's Html component, preventing crashes that occurred when DOM elements were rendered directly in the Canvas.
+
+**Steps**:
+
+1. **Universe View - Galaxy Hover**
+   - Navigate to `http://localhost:3000`
+   - Hover mouse over any galaxy particle cloud
+   - ✅ Expected: Hover label appears above the galaxy with name and metadata
+   - ✅ Expected: Label displays with hologram styling (translucent, glowing border)
+   - ✅ Expected: NO console errors about "Div is not part of THREE namespace"
+   - ✅ Expected: Label follows galaxy as camera moves/orbits
+   - Move mouse away from galaxy
+   - ✅ Expected: Label fades out smoothly
+
+2. **Galaxy View - Solar System and Star Hover**
+   - Click on a galaxy to enter galaxy view
+   - Hover over a central star (solar system)
+   - ✅ Expected: Label shows system name and planet count
+   - ✅ Expected: Label positioned above the star
+   - Hover over a free-floating star
+   - ✅ Expected: Label shows star name
+   - Move mouse between multiple objects
+   - ✅ Expected: Labels switch smoothly, one at a time
+
+3. **Solar System View - Planet Hover**
+   - Click on a solar system to enter system view
+   - Hover over an orbiting planet
+   - ✅ Expected: Label appears with planet name
+   - ✅ Expected: Label follows planet during orbital motion
+   - ✅ Expected: Label scales appropriately with distance
+   - Wait for planet to orbit behind another object
+   - ✅ Expected: Label remains visible (no occlusion)
+
+4. **Planet Surface - Moon Hover**
+   - Click on a planet to land on surface
+   - Hover over moons in the skybox
+   - ✅ Expected: Labels appear for each moon
+   - ✅ Expected: Touch-friendly behavior (tap to show label)
+
+**Desktop Testing:**
+1. Open browser DevTools → Console
+2. Perform all hover actions above
+3. ✅ Expected: Zero console errors or warnings
+4. ✅ Expected: No "Div is not part of THREE namespace" errors
+5. ✅ Expected: No "Invalid position data" warnings (unless intentionally testing edge cases)
+
+**Mobile/Touch Testing:**
+1. Open site on mobile device or use browser DevTools device emulation
+2. Tap on a galaxy
+   - ✅ Expected: Label appears on first tap
+   - ✅ Expected: Navigation occurs on second tap
+3. Tap elsewhere to dismiss label
+   - ✅ Expected: Label fades out
+
+**Performance Verification:**
+1. Open browser DevTools → Performance tab
+2. Start recording
+3. Hover rapidly over multiple celestial objects
+4. Stop recording
+5. ✅ Expected: Consistent 60 FPS (or 30+ FPS on mobile)
+6. ✅ Expected: No frame drops during label rendering
+7. ✅ Expected: Smooth animations throughout
+
+**Edge Case Testing:**
+
+**Test: Rapid hover on/off**
+- Move mouse quickly over and away from objects
+- ✅ Expected: Labels appear/disappear smoothly
+- ✅ Expected: No flickering or glitches
+- ✅ Expected: No memory leaks
+
+**Test: Invalid position data (optional developer/QA scenario)**
+- **Note**: This test is optional and requires code modification. Skip if not performing deep validation testing.
+- **Setup**: Temporarily modify hover state to inject test data with `NaN` or `Infinity` coordinates
+- **How to test**: 
+  1. Open `src/lib/hover-store.ts` or relevant component
+  2. Inject test object: `setHoveredObject({ id: 'test', name: 'Test', type: 'galaxy', position: new THREE.Vector3(NaN, 0, 0) })`
+  3. Check browser console for validation warnings
+- **Expected behavior**:
+  - ✅ Console warning logged about invalid position data
+  - ✅ Application continues without crash
+  - ✅ Label does not render for invalid object
+- **Cleanup**: Remove test code after validation
+
+**Browser Console Verification:**
+Look for these patterns (should NOT appear):
+```
+❌ "Div is not part of the THREE namespace"
+❌ "Cannot read property of undefined"
+❌ Uncaught TypeError related to hover labels
+```
+
+Should see (if verbose logging enabled):
+```
+✅ Label visibility toggled
+✅ Hover object set: [object name]
+```
+
+**Accessibility Testing:**
+
+1. **Screen Reader Test**
+   - Enable screen reader (NVDA, JAWS, VoiceOver)
+   - Hover over objects
+   - ✅ Expected: Screen reader announces label content
+   - ✅ Expected: ARIA live region updates
+
+2. **Keyboard Navigation**
+   - Tab to label visibility toggle button (if present in HUD)
+   - Press Enter or Space
+   - ✅ Expected: Labels toggle on/off
+   - ✅ Expected: Setting persists across navigation
+
+3. **Reduced Motion**
+   - Enable "Reduce motion" in OS settings
+   - Hover over objects
+   - ✅ Expected: Labels appear instantly (no fade animation)
+   - ✅ Expected: Full functionality maintained
+
+**What This Tests:**
+- ✅ Drei Html component correctly integrated
+- ✅ No Canvas crashes from DOM element rendering
+- ✅ Position validation prevents invalid data crashes
+- ✅ Labels render efficiently without performance impact
+- ✅ Touch and desktop interactions work correctly
+- ✅ Accessibility features function properly
+- ✅ Edge cases handled gracefully
+
+**Known Limitations (Documented):**
+- Only one object can be hovered at a time (by design)
+- Labels don't persist when mouse moves away (not "pinnable")
+- Performance may vary on low-end devices < 30 FPS
+
+---
+
+### Scenario 15: Breadcrumb Navigation (v0.1.7 - ISS-2)
+
+**Purpose**: Verify breadcrumb navigation displays correctly and enables intuitive navigation between hierarchy levels
+
+**Prerequisites**: Universe data with at least one galaxy containing solar systems and planets
+
+**Context**: v0.1.7 enhanced breadcrumb navigation with improved styling, accessibility, and context awareness after tooltip removal in v0.1.5.
+
+**Steps**:
+
+1. **Universe View - Initial State**
+   - Navigate to `http://localhost:3000`
+   - Look at the top of the viewport
+   - ✅ Expected: Breadcrumb shows "Universe" (or is minimal/hidden)
+   - ✅ Expected: No navigation links (already at top level)
+
+2. **Galaxy View - First Level Navigation**
+   - Click on any galaxy to enter galaxy view
+   - Observe breadcrumb update
+   - ✅ Expected: Breadcrumb shows "Universe → [Galaxy Name]"
+   - ✅ Expected: "Universe" is a clickable link
+   - ✅ Expected: "[Galaxy Name]" is highlighted (current location)
+   - ✅ Expected: Arrow separator (→) between levels
+   - Hover over "Universe" link
+   - ✅ Expected: Hover state visible (color change, underline)
+
+3. **Solar System View - Second Level Navigation**
+   - Click on a solar system within the galaxy
+   - Observe breadcrumb update
+   - ✅ Expected: Breadcrumb shows "Universe → [Galaxy] → [Solar System]"
+   - ✅ Expected: "Universe" and "[Galaxy]" are clickable links
+   - ✅ Expected: "[Solar System]" is highlighted (current)
+   - ✅ Expected: Smooth transition animation during navigation
+
+4. **Planet Surface - Third Level Navigation**
+   - Click on a planet to land on its surface
+   - Observe breadcrumb update
+   - ✅ Expected: Breadcrumb shows "Universe → [Galaxy] → [System] → [Planet]"
+   - ✅ Expected: All previous levels are clickable
+   - ✅ Expected: "[Planet]" is highlighted
+
+5. **Moon View - Fourth Level (if applicable)**
+   - Click on a moon from planet surface
+   - Observe breadcrumb update
+   - ✅ Expected: Breadcrumb shows full path including moon
+   - ✅ Expected: Path may truncate on small screens
+
+**Click Navigation Testing:**
+
+1. From Planet Surface, click "[Galaxy]" in breadcrumb
+   - ✅ Expected: Navigate back to galaxy view
+   - ✅ Expected: Smooth camera transition
+   - ✅ Expected: Breadcrumb updates to "Universe → [Galaxy]"
+
+2. From Solar System View, click "Universe" in breadcrumb
+   - ✅ Expected: Navigate to universe view
+   - ✅ Expected: Camera zooms out to show all galaxies
+   - ✅ Expected: Breadcrumb resets to minimal state
+
+3. Rapid breadcrumb clicks
+   - Click "[Galaxy]" then immediately click "Universe"
+   - ✅ Expected: Navigation queues properly
+   - ✅ Expected: No visual glitches
+   - ✅ Expected: Final destination is universe view
+
+**Responsive Design Testing:**
+
+**Desktop (> 1024px):**
+1. Full browser window
+   - ✅ Expected: Full breadcrumb path visible
+   - ✅ Expected: Generous spacing between levels
+   - ✅ Expected: Hover effects clear and smooth
+
+**Tablet (768px - 1024px):**
+1. Resize browser to 800px wide
+   - ✅ Expected: Breadcrumb may truncate long names with ellipsis
+   - ✅ Expected: Touch-friendly hit targets (48px minimum)
+   - ✅ Expected: All levels still accessible
+
+**Mobile (< 768px):**
+1. Resize browser to 375px wide (mobile)
+   - ✅ Expected: Breadcrumb shows last 2-3 levels
+   - ✅ Expected: Earlier levels indicated with "..."
+   - ✅ Expected: Large touch targets (52px minimum)
+   - ✅ Expected: Responsive font sizing
+
+**Accessibility Testing:**
+
+1. **Keyboard Navigation**
+   - Tab through page elements
+   - ✅ Expected: Breadcrumb links receive keyboard focus
+   - ✅ Expected: Clear focus indicators (outline, highlight)
+   - Press Enter on focused breadcrumb link
+   - ✅ Expected: Navigation occurs
+   - Press Escape
+   - ✅ Expected: Focus returns to safe location
+
+2. **Screen Reader Test**
+   - Enable screen reader
+   - Navigate to breadcrumb
+   - ✅ Expected: Announced as "Breadcrumb navigation"
+   - ✅ Expected: Each level announced with context
+   - ✅ Expected: Current location indicated as "Current page"
+   - Example: "Universe, link. Arrow. Andromeda Galaxy, link. Arrow. Solar System Alpha, current page."
+
+3. **Reduced Motion**
+   - Enable "Reduce motion" in OS settings
+   - Click breadcrumb links to navigate
+   - ✅ Expected: Navigation instant (no camera animation)
+   - ✅ Expected: Breadcrumb updates immediately
+   - ✅ Expected: Full functionality maintained
+
+**Visual Styling Verification:**
+
+1. **Styling Consistency**
+   - Check breadcrumb appearance
+   - ✅ Expected: Consistent with app design system
+   - ✅ Expected: Semi-transparent dark background (rgba(0,0,0,0.8))
+   - ✅ Expected: Blue accent color for links (#4A90E2)
+   - ✅ Expected: White text for current location
+   - ✅ Expected: Backdrop blur effect for depth
+
+2. **Hover States**
+   - Hover over each link
+   - ✅ Expected: Color change visible
+   - ✅ Expected: Underline appears
+   - ✅ Expected: Smooth transition (0.2s)
+
+**Integration with Other Features:**
+
+1. **Transition Messages**
+   - Click breadcrumb to navigate
+   - ✅ Expected: Transition message appears ("Warping to galaxy...")
+   - ✅ Expected: Breadcrumb and message update together
+   - ✅ Expected: Both provide consistent context
+
+2. **Back Button**
+   - Use back button (if present) instead of breadcrumb
+   - Navigate one level back
+   - ✅ Expected: Breadcrumb updates correctly
+   - ✅ Expected: Behavior consistent with breadcrumb navigation
+
+**Edge Cases:**
+
+**Test: Very long names**
+1. Navigate to entity with long name (> 30 characters)
+   - ✅ Expected: Text truncates with ellipsis on small screens
+   - ✅ Expected: Full name visible on hover (tooltip or title attribute)
+   - ✅ Expected: No horizontal scrolling
+
+**Test: Deep hierarchy (5+ levels)**
+1. If data supports deep nesting
+   - ✅ Expected: Breadcrumb shows last 3 levels with "..." prefix
+   - ✅ Expected: Clicking "..." shows dropdown or expands path (if implemented)
+
+**Test: Direct URL navigation**
+1. Manually navigate to `/galaxy/[id]` URL
+   - ✅ Expected: Breadcrumb reconstructs correct path
+   - ✅ Expected: Shows "Universe → [Galaxy Name]"
+
+**Performance:**
+1. Rapid navigation through levels
+   - ✅ Expected: Breadcrumb updates smoothly
+   - ✅ Expected: No lag or delayed rendering
+   - ✅ Expected: Consistent 60 FPS
+
+**What This Tests:**
+- ✅ Breadcrumb displays correct navigation hierarchy
+- ✅ Click navigation works for all levels
+- ✅ Visual styling meets design system standards
+- ✅ Responsive design adapts to all viewports
+- ✅ Accessibility features function correctly
+- ✅ Integration with transitions and other features
+- ✅ Edge cases handled gracefully
+
+**Known Enhancements (Future):**
+- Copy current path to clipboard
+- Dropdown history for recent locations
+- Search from breadcrumb bar
+
+---
+
 ## UI Component Test Scenarios
 
 The following scenarios test the visual and interactive aspects of the admin interface.

@@ -2,11 +2,173 @@
 
 This document describes the 3D scene controls, camera animations, hover labels, and performance optimizations in The Horizon application.
 
+## Breadcrumb Navigation (ISS-2 - v0.1.7)
+
+### Overview
+
+The breadcrumb navigation system provides clear context about the user's current location in the universe hierarchy and enables quick navigation between levels.
+
+**Navigation Hierarchy:**
+```
+Universe → Galaxy → Solar System → Planet → Moon
+```
+
+**Key Features:**
+- **Full Context**: Shows complete path from universe to current location
+- **Click Navigation**: Click any breadcrumb to jump directly to that level
+- **Current Highlight**: Active level visually distinguished
+- **Smooth Transitions**: Animated camera movements between levels
+- **Responsive**: Adapts to mobile, tablet, and desktop viewports
+
+**Enhancements (v0.1.7):**
+- Improved visual styling with better contrast and hover states
+- Enhanced accessibility with ARIA labels and keyboard navigation
+- Responsive design adapts to smaller screens
+- Integration with transition messages for better context
+- Clear visual separation between navigation levels
+
+### Implementation
+
+The breadcrumb navigation appears in the SceneHUD component at the top of the viewport:
+
+```typescript
+// Example breadcrumb structure
+<nav aria-label="Breadcrumb navigation">
+  <ol className="breadcrumb">
+    <li><a href="/" onClick={navigateToUniverse}>Universe</a></li>
+    <li><a href="#" onClick={navigateToGalaxy}>Andromeda Galaxy</a></li>
+    <li aria-current="page">Solar System Alpha</li>
+  </ol>
+</nav>
+```
+
+### Styling
+
+```css
+.breadcrumb {
+  display: flex;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+}
+
+.breadcrumb li:not(:last-child)::after {
+  content: '→';
+  margin-left: 0.5rem;
+  color: rgba(74, 144, 226, 0.6);
+}
+
+.breadcrumb a {
+  color: #4A90E2;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.breadcrumb a:hover {
+  color: #5BA3F5;
+  text-decoration: underline;
+}
+
+.breadcrumb li[aria-current="page"] {
+  color: #FFFFFF;
+  font-weight: 600;
+}
+```
+
+### Accessibility Features
+
+**Keyboard Navigation:**
+- Tab through breadcrumb links
+- Enter or Space to activate navigation
+- Escape to close any open modals
+
+**Screen Reader Support:**
+```html
+<nav aria-label="Breadcrumb navigation">
+  <ol>
+    <li><a href="/" aria-label="Navigate to Universe view">Universe</a></li>
+    <li><a href="#" aria-label="Navigate to Andromeda Galaxy">Andromeda</a></li>
+    <li aria-current="page">Solar System Alpha</li>
+  </ol>
+</nav>
+```
+
+**Reduced Motion:**
+- Breadcrumb navigation respects `prefers-reduced-motion`
+- Transitions become instant (0.01ms) instead of animated
+- Full functionality maintained without motion
+
+### Responsive Behavior
+
+**Desktop (> 1024px):**
+- Full breadcrumb path visible
+- Hover effects on links
+- Generous spacing between levels
+
+**Tablet (768px - 1024px):**
+- Breadcrumb text may truncate with ellipsis
+- Touch-friendly hit targets (48px minimum)
+- Adequate spacing for tap interactions
+
+**Mobile (< 768px):**
+- Breadcrumb may show abbreviated path
+- Last 2-3 levels visible with "..." for earlier levels
+- Large touch targets (52px minimum)
+- Responsive font sizing
+
+### Integration with Other Features
+
+**Transition Messages:**
+Breadcrumbs work in tandem with transition indicators:
+- Breadcrumb shows destination during transition
+- Transition message reinforces the navigation action
+- Both update simultaneously when navigation completes
+
+**Alternative Context Cues:**
+Since hover tooltips were removed in v0.1.5, breadcrumbs are the primary navigation context mechanism:
+- Breadcrumbs: Show current location in hierarchy
+- Transition messages: "Warping to galaxy...", "Traveling to system..."
+- ARIA labels: Announce location changes to screen readers
+- Visual hierarchy: Clear distinction between celestial object types
+
+### Testing
+
+**Manual Testing Checklist:**
+- [ ] Breadcrumb displays correct path for each level
+- [ ] Clicking breadcrumb navigates to correct view
+- [ ] Current level is highlighted
+- [ ] Separator arrows display between levels
+- [ ] Hover effects work on interactive links
+- [ ] Keyboard navigation with Tab and Enter
+- [ ] Screen reader announces location changes
+- [ ] Mobile view shows abbreviated path appropriately
+- [ ] Reduced motion setting disables animations
+
+**Edge Cases:**
+- Very long galaxy/system names: Truncate with ellipsis
+- Deep nesting (5+ levels): Show last 3 with "..." prefix
+- Rapid navigation: Queue transitions, update breadcrumb on completion
+- Direct URL navigation: Breadcrumb reconstructs from route params
+
+### Future Enhancements
+
+Potential improvements for breadcrumb navigation:
+- Copy current path to clipboard
+- Share link to specific location
+- Bookmark favorite locations
+- History dropdown showing recent navigation
+- Search from breadcrumb bar
+
 ## Overlay Hover Labels
 
 ### Overview
 
 The application features DOM-based overlay hover labels that appear when hovering over celestial objects in the 3D scene. These labels are rendered using Drei's `Html` component, which provides seamless integration with React Three Fiber's rendering pipeline.
+
+> **Important (v0.1.7 - ISS-1)**: Hover labels were stabilized in v0.1.7 to use Drei's `Html` component exclusively. This prevents crashes that occurred when DOM elements were rendered directly inside the Three.js Canvas. Always use `<Html>` from `@react-three/drei` for any DOM content within `<Canvas>`.
 
 **Key Features:**
 - **R3F Native Rendering**: Labels use Drei's `Html` component for proper integration with the R3F Canvas
@@ -16,6 +178,13 @@ The application features DOM-based overlay hover labels that appear when hoverin
 - **Performance Optimized**: Efficient rendering using R3F's built-in optimization strategies
 - **Accessibility**: ARIA attributes for screen readers, keyboard-accessible toggle button
 - **Responsive**: Adapts to mobile viewports and respects `prefers-reduced-motion`
+
+**Stabilization (ISS-1 - v0.1.7):**
+The hover label system was stabilized to prevent application crashes caused by rendering DOM elements directly in the Canvas. The fix includes:
+- Migration to Drei's `Html` component for all labels
+- Position validation at multiple levels (store and component)
+- Console warnings instead of crashes for invalid data
+- Comprehensive documentation and troubleshooting guides
 
 ### Architecture
 
