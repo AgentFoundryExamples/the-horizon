@@ -110,10 +110,20 @@ export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurface
   const { navigateToMoon } = useNavigationStore();
   const planetRef = useRef<THREE.Mesh>(null);
 
+  // Get layout configuration for this planet
+  const layoutConfig = useMemo(() => {
+    return normalizePlanetLayout(planet.layoutConfig);
+  }, [planet.layoutConfig]);
+
+  // Apply scale to planet mesh
+  const planetScale = layoutConfig.planetRenderScale;
+
   useFrame((state) => {
     if (planetRef.current) {
       // Gentle rotation
       planetRef.current.rotation.y += 0.001;
+      // Apply configured scale
+      planetRef.current.scale.setScalar(planetScale);
     }
   });
 
