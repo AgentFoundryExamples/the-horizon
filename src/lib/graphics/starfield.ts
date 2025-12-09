@@ -55,6 +55,11 @@ const MAX_STARS = 10000; // Hard limit to maintain <16ms frame budget
 const MIN_STARS = 100;
 const DEFAULT_STARS = 2000;
 
+// Rendering constants
+const POINT_SIZE_SCALE = 300.0; // Scale factor for point size calculation
+const SIZE_RANGE_NORMAL: [number, number] = [0.5, 3.0];
+const SIZE_RANGE_LOW_POWER: [number, number] = [0.5, 1.5];
+
 // Color temperature palette (K to RGB approximation)
 const COLOR_TEMPERATURES = {
   cool: new THREE.Color(0.7, 0.8, 1.0),      // Blue-white
@@ -134,7 +139,7 @@ export function createStarfieldConfig(
     colorVariance: 0.3,  // Some color variation
     animationSpeed: 1.0,
     enableParallax: !lowPowerMode,
-    sizeRange: lowPowerMode ? [0.5, 1.5] : [0.5, 3.0],
+    sizeRange: lowPowerMode ? SIZE_RANGE_LOW_POWER : SIZE_RANGE_NORMAL,
     distributionRadius: 500, // Large sphere around scene
     lowPowerMode,
   };

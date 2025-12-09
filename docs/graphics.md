@@ -1285,8 +1285,10 @@ const result = validateStarfieldDensity(20000);
 When `lowPowerMode` is enabled:
 - Star count reduced by 50%
 - Parallax animation disabled
-- Size range reduced: [0.5, 1.5] instead of [0.5, 3.0]
-- Fallback material used instead of shader
+- Size range reduced to smaller particles
+- If shader compilation is successful, shaders are still used but with reduced particle counts
+
+Note: The fallback material is used only when shader compilation fails, not automatically in low power mode.
 
 ```typescript
 const config = createStarfieldConfig(

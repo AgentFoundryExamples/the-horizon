@@ -118,6 +118,15 @@ export interface GalaxyData {
 const MAX_GALAXY_PARTICLES = 15000;
 const MIN_GALAXY_PARTICLES = 500;
 
+// Rendering constants
+const POINT_SIZE_SCALE = 300.0; // Scale factor for point size calculation
+
+// Pseudo-random noise coefficients for shader
+const NOISE_COEFF_1 = 12.9898;
+const NOISE_COEFF_2 = 78.233;
+const NOISE_COEFF_3 = 45.5432;
+const NOISE_MULTIPLIER = 43758.5453;
+
 /**
  * Galaxy vertex shader with noise and rotation
  */
@@ -132,9 +141,9 @@ const galaxyVertexShader = `
   uniform float time;
   uniform float rotationSpeed;
   
-  // Simple 3D noise function
+  // Simple 3D noise function using pseudo-random coefficients
   float noise3D(vec3 p) {
-    return fract(sin(dot(p, vec3(12.9898, 78.233, 45.5432))) * 43758.5453);
+    return fract(sin(dot(p, vec3(${NOISE_COEFF_1}, ${NOISE_COEFF_2}, ${NOISE_COEFF_3}))) * ${NOISE_MULTIPLIER});
   }
   
   void main() {
