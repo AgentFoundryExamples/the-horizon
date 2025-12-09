@@ -12,42 +12,9 @@ import type { Galaxy, SolarSystem, Star } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
 import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG } from '@/lib/animation';
-import { GALAXY_VIEW_SCALE } from '@/lib/universe/scale-constants';
+import { GALAXY_VIEW_SCALE, GALAXY_ORBIT_STYLE } from '@/lib/universe/scale-constants';
 import { createSeededRandom, generateSeedFromId } from '@/lib/seeded-random';
-
-interface OrbitRingProps {
-  radius: number;
-  color: string;
-}
-
-/**
- * Simple orbit ring visualization
- * Renders a circular path at the specified radius
- */
-function OrbitRing({ radius, color }: OrbitRingProps) {
-  const points = useMemo(() => {
-    const pts = [];
-    for (let i = 0; i <= GALAXY_VIEW_SCALE.RING_SEGMENTS; i++) {
-      const angle = (i / GALAXY_VIEW_SCALE.RING_SEGMENTS) * Math.PI * 2;
-      pts.push(new THREE.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius));
-    }
-    return pts;
-  }, [radius]);
-
-  return (
-    <line>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={points.length}
-          array={new Float32Array(points.flatMap((p) => [p.x, p.y, p.z]))}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <lineBasicMaterial color={color} transparent opacity={GALAXY_VIEW_SCALE.RING_OPACITY} />
-    </line>
-  );
-}
+import { OrbitRing } from './OrbitRing';
 
 interface PlanetInstanceProps {
   solarSystem: SolarSystem;
@@ -169,7 +136,11 @@ function PlanetInstance({ solarSystem, systemPosition, animationConfig }: Planet
         <OrbitRing
           key={`orbit-${index}`}
           radius={data.semiMajorAxis}
-          color="#4A90E2"
+          color={GALAXY_ORBIT_STYLE.COLOR}
+          opacity={GALAXY_ORBIT_STYLE.OPACITY}
+          lineWidth={GALAXY_ORBIT_STYLE.LINE_WIDTH}
+          dashPattern={GALAXY_ORBIT_STYLE.DASH_PATTERN}
+          segments={GALAXY_VIEW_SCALE.RING_SEGMENTS}
         />
       ))}
 
@@ -349,13 +320,21 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
       {(galaxy.solarSystems && galaxy.solarSystems.length > 0) && (
         <OrbitRing
           radius={GALAXY_VIEW_SCALE.SOLAR_SYSTEM_RING_RADIUS}
-          color={GALAXY_VIEW_SCALE.RING_COLOR}
+          color={GALAXY_ORBIT_STYLE.COLOR}
+          opacity={GALAXY_ORBIT_STYLE.OPACITY}
+          lineWidth={GALAXY_ORBIT_STYLE.LINE_WIDTH}
+          dashPattern={GALAXY_ORBIT_STYLE.DASH_PATTERN}
+          segments={GALAXY_VIEW_SCALE.RING_SEGMENTS}
         />
       )}
       {(galaxy.stars && galaxy.stars.length > 0) && (
         <OrbitRing
           radius={GALAXY_VIEW_SCALE.STAR_RING_RADIUS}
-          color={GALAXY_VIEW_SCALE.RING_COLOR}
+          color={GALAXY_ORBIT_STYLE.COLOR}
+          opacity={GALAXY_ORBIT_STYLE.OPACITY}
+          lineWidth={GALAXY_ORBIT_STYLE.LINE_WIDTH}
+          dashPattern={GALAXY_ORBIT_STYLE.DASH_PATTERN}
+          segments={GALAXY_VIEW_SCALE.RING_SEGMENTS}
         />
       )}
 

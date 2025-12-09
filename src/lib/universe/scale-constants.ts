@@ -236,6 +236,11 @@ export function calculateSafeSpacing(planetCount: number): number {
  * - Markers are positioned using polar coordinates at exact ring radii
  * - Angular spacing divides 2π by object count for even distribution
  * - Rings are visualized with semi-transparent orbit lines
+ * 
+ * VISUAL HIERARCHY:
+ * - Galaxy-level rings are more prominent (higher opacity, thicker strokes)
+ * - These rings guide understanding of solar system and star positions
+ * - Color: cyan/blue (#4A90E2) indicates galaxy-scale orbital paths
  */
 export const GALAXY_VIEW_SCALE = {
   /**
@@ -251,11 +256,82 @@ export const GALAXY_VIEW_SCALE = {
   STAR_RING_RADIUS: 15,
   
   /**
-   * Visual appearance of orbit rings
+   * Number of segments for smooth circle rendering
    */
-  RING_COLOR: '#4A90E2', // Blue accent color for rings
-  RING_OPACITY: 0.3,     // Semi-transparent for subtle guidance
-  RING_SEGMENTS: 64,      // Number of segments for smooth circles
+  RING_SEGMENTS: 64,
+} as const;
+
+/**
+ * Orbit ring styling tokens
+ * Define visual appearance for galaxy-level and solar-system-level orbit rings
+ * 
+ * DESIGN RATIONALE:
+ * - Galaxy orbits: More prominent to establish spatial organization of systems/stars
+ * - Solar orbits: More subtle to avoid overwhelming planet detail view
+ * - Both use blue family colors to maintain visual consistency
+ * - Opacity and stroke weight differentiate the scales
+ */
+
+/**
+ * Galaxy-level orbit ring styling
+ * Used for solar system and star placement rings in GalaxyView
+ * These rings are structural guides showing how objects are organized
+ */
+export const GALAXY_ORBIT_STYLE = {
+  /**
+   * Color for galaxy-level orbit rings
+   * Cyan/blue indicates macro-scale orbital structures
+   */
+  COLOR: '#4A90E2',
+  
+  /**
+   * Opacity for galaxy-level rings
+   * Higher opacity (0.4) makes structural organization clear
+   */
+  OPACITY: 0.4,
+  
+  /**
+   * Line width for galaxy orbit rings
+   * Note: lineWidth may not render consistently across all WebGL implementations
+   */
+  LINE_WIDTH: 2,
+  
+  /**
+   * Dash pattern for galaxy rings
+   * Solid lines (undefined) for continuous structural guides
+   */
+  DASH_PATTERN: undefined,
+} as const;
+
+/**
+ * Solar system-level orbit ring styling
+ * Used for planet orbital paths in SolarSystemView
+ * These rings are subtle guides for individual planet trajectories
+ */
+export const SOLAR_ORBIT_STYLE = {
+  /**
+   * Color for solar system-level orbit rings
+   * Lighter blue-gray indicates individual planet orbits
+   */
+  COLOR: '#7BA5D1',
+  
+  /**
+   * Opacity for solar system rings
+   * Lower opacity (0.2) keeps focus on planets, not guides
+   */
+  OPACITY: 0.2,
+  
+  /**
+   * Line width for solar orbit rings
+   * Thinner than galaxy rings to reinforce hierarchy
+   */
+  LINE_WIDTH: 1,
+  
+  /**
+   * Dash pattern for solar rings
+   * Dashed pattern [2, 2] distinguishes from galaxy solid lines
+   */
+  DASH_PATTERN: [2, 2],
 } as const;
 
 /**

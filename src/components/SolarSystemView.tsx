@@ -27,10 +27,13 @@ import { useNavigationStore } from '@/lib/store';
 import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 import {
   calculatePlanetSize,
+  calculateAdaptiveOrbitalRadius,
   calculateSafeSpacing,
   ORBITAL_SPACING,
   STAR_SCALE,
+  SOLAR_ORBIT_STYLE,
 } from '@/lib/universe/scale-constants';
+import { OrbitRing } from './OrbitRing';
 
 interface SolarSystemViewProps {
   solarSystem: SolarSystem;
@@ -167,6 +170,13 @@ export default function SolarSystemView({ solarSystem, position }: SolarSystemVi
   const { navigateToPlanet } = useNavigationStore();
   const totalPlanets = (solarSystem.planets || []).length;
 
+  // Calculate orbital radii for both rings and planets
+  const orbitalRadii = useMemo(() => {
+    return (solarSystem.planets || []).map((_, index) => 
+      calculateAdaptiveOrbitalRadius(index, totalPlanets)
+    );
+  }, [solarSystem.planets, totalPlanets]);
+
   return (
     <group position={position}>
       {/* Central star */}
@@ -179,6 +189,19 @@ export default function SolarSystemView({ solarSystem, position }: SolarSystemVi
           distance={STAR_SCALE.LIGHT_DISTANCE}
         />
       </mesh>
+
+      {/* Orbit rings - showing planet orbital paths */}
+      {orbitalRadii.map((radius, index) => (
+        <OrbitRing
+          key={`orbit-${index}`}
+          radius={radius}
+          color={SOLAR_ORBIT_STYLE.COLOR}
+          opacity={SOLAR_ORBIT_STYLE.OPACITY}
+          lineWidth={SOLAR_ORBIT_STYLE.LINE_WIDTH}
+          dashPattern={SOLAR_ORBIT_STYLE.DASH_PATTERN}
+          segments={64}
+        />
+      ))}
 
       {/* Planets */}
       {(solarSystem.planets || []).map((planet, index) => (

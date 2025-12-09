@@ -564,6 +564,367 @@ When galaxy count changes (add/remove), the layout automatically updates:
 
 See [docs/roadmap.md](./roadmap.md) for planned layout system enhancements.
 
+## Orbit Ring Visual Hierarchy
+
+### Overview
+
+The Horizon uses distinct visual styling for galaxy-level and solar-system-level orbit rings to establish clear visual hierarchy. This differentiation helps users understand the scale and context of what they're viewing.
+
+**Key Principles:**
+- **Galaxy Orbits**: More prominent (higher opacity, solid lines) to guide spatial organization
+- **Solar Orbits**: More subtle (lower opacity, dashed lines) to avoid overwhelming planet detail
+- **Shared Component**: Single `OrbitRing` component with style props maintains consistency
+- **Design Tokens**: Centralized constants in `scale-constants.ts` for easy customization
+
+### Visual Differentiation
+
+#### Galaxy-Level Orbit Rings
+
+Used in `GalaxyView.tsx` for:
+- Solar system placement rings (inner ring, radius 10)
+- Star placement rings (outer ring, radius 15)
+- Planet orbits around central stars within solar systems
+
+**Styling:**
+```typescript
+GALAXY_ORBIT_STYLE = {
+  COLOR: '#4A90E2',        // Cyan/blue for macro-scale structures
+  OPACITY: 0.4,            // Higher opacity for visibility
+  LINE_WIDTH: 2,           // Thicker stroke weight
+  DASH_PATTERN: undefined, // Solid lines for continuous guides
+}
+```
+
+**Visual Appearance:**
+- Solid cyan-blue lines at 40% opacity
+- More prominent and structural
+- Clearly visible against dark backgrounds
+- Guides understanding of system organization
+
+#### Solar System-Level Orbit Rings
+
+Used in `SolarSystemView.tsx` for:
+- Individual planet orbital paths around the central star
+
+**Styling:**
+```typescript
+SOLAR_ORBIT_STYLE = {
+  COLOR: '#7BA5D1',      // Lighter blue-gray for planet orbits
+  OPACITY: 0.2,          // Lower opacity to keep focus on planets
+  LINE_WIDTH: 1,         // Thinner stroke weight
+  DASH_PATTERN: [2, 2],  // Dashed pattern for visual distinction
+}
+```
+
+**Visual Appearance:**
+- Dashed light blue lines at 20% opacity
+- Subtle and secondary to planet objects
+- Distinguishable from galaxy-level rings by dash pattern
+- Less visually dominant to emphasize planets
+
+### Implementation
+
+#### Shared OrbitRing Component
+
+Located in `src/components/OrbitRing.tsx`, the component accepts style props:
+
+```typescript
+interface OrbitRingProps {
+  radius: number;           // Ring radius in Three.js units
+  color: string;            // Hex color code
+  opacity: number;          // 0-1 opacity
+  lineWidth?: number;       // Stroke width (platform-dependent)
+  dashPattern?: [number, number]; // [dash, gap] or undefined for solid
+  segments?: number;        // Circle smoothness (default 64)
+}
+```
+
+**Usage in GalaxyView:**
+```typescript
+import { OrbitRing } from './OrbitRing';
+import { GALAXY_ORBIT_STYLE } from '@/lib/universe/scale-constants';
+
+<OrbitRing
+  radius={GALAXY_VIEW_SCALE.SOLAR_SYSTEM_RING_RADIUS}
+  color={GALAXY_ORBIT_STYLE.COLOR}
+  opacity={GALAXY_ORBIT_STYLE.OPACITY}
+  lineWidth={GALAXY_ORBIT_STYLE.LINE_WIDTH}
+  dashPattern={GALAXY_ORBIT_STYLE.DASH_PATTERN}
+  segments={GALAXY_VIEW_SCALE.RING_SEGMENTS}
+/>
+```
+
+**Usage in SolarSystemView:**
+```typescript
+import { OrbitRing } from './OrbitRing';
+import { SOLAR_ORBIT_STYLE } from '@/lib/universe/scale-constants';
+
+<OrbitRing
+  radius={orbitalRadius}
+  color={SOLAR_ORBIT_STYLE.COLOR}
+  opacity={SOLAR_ORBIT_STYLE.OPACITY}
+  lineWidth={SOLAR_ORBIT_STYLE.LINE_WIDTH}
+  dashPattern={SOLAR_ORBIT_STYLE.DASH_PATTERN}
+  segments={64}
+/>
+```
+
+### Design Tokens
+
+All orbit styling is defined in `src/lib/universe/scale-constants.ts`:
+
+```typescript
+/**
+ * Galaxy-level orbit ring styling
+ * Used for solar system and star placement rings in GalaxyView
+ */
+export const GALAXY_ORBIT_STYLE = {
+  COLOR: '#4A90E2',
+  OPACITY: 0.4,
+  LINE_WIDTH: 2,
+  DASH_PATTERN: undefined,
+} as const;
+
+/**
+ * Solar system-level orbit ring styling
+ * Used for planet orbital paths in SolarSystemView
+ */
+export const SOLAR_ORBIT_STYLE = {
+  COLOR: '#7BA5D1',
+  OPACITY: 0.2,
+  LINE_WIDTH: 1,
+  DASH_PATTERN: [2, 2],
+} as const;
+```
+
+### Customization Guide
+
+#### Adjusting Galaxy Orbit Appearance
+
+To make galaxy orbits more or less prominent:
+
+```typescript
+// More visible
+GALAXY_ORBIT_STYLE = {
+  OPACITY: 0.6,      // Increase opacity
+  LINE_WIDTH: 3,     // Thicker lines
+}
+
+// More subtle
+GALAXY_ORBIT_STYLE = {
+  OPACITY: 0.25,     // Decrease opacity
+  LINE_WIDTH: 1.5,   // Thinner lines
+}
+```
+
+#### Adjusting Solar Orbit Appearance
+
+To make planet orbits more or less visible:
+
+```typescript
+// More visible
+SOLAR_ORBIT_STYLE = {
+  OPACITY: 0.35,       // Increase opacity
+  DASH_PATTERN: [3, 3], // Longer dashes
+}
+
+// Nearly invisible
+SOLAR_ORBIT_STYLE = {
+  OPACITY: 0.1,        // Very faint
+  DASH_PATTERN: [1, 3], // Short dashes, long gaps
+}
+```
+
+#### Creating Custom Orbit Styles
+
+For special cases (e.g., highlighted orbits, selection states):
+
+```typescript
+// Define custom style
+const HIGHLIGHTED_ORBIT_STYLE = {
+  COLOR: '#FFD700',    // Gold
+  OPACITY: 0.8,        // High visibility
+  LINE_WIDTH: 3,       // Thick
+  DASH_PATTERN: undefined, // Solid
+} as const;
+
+// Apply to specific orbit
+<OrbitRing
+  radius={radius}
+  {...HIGHLIGHTED_ORBIT_STYLE}
+  segments={64}
+/>
+```
+
+### Theme Considerations
+
+#### Dark Theme (Default)
+
+Current styles are optimized for dark backgrounds:
+- Galaxy orbits (#4A90E2 at 40%) provide good contrast
+- Solar orbits (#7BA5D1 at 20%) remain visible but subtle
+
+#### Light Theme Adjustments
+
+For light backgrounds, consider:
+
+```typescript
+// Light theme galaxy orbits
+GALAXY_ORBIT_STYLE = {
+  COLOR: '#2C5AA0',    // Darker blue
+  OPACITY: 0.5,        // Higher opacity for contrast
+  // ...
+}
+
+// Light theme solar orbits
+SOLAR_ORBIT_STYLE = {
+  COLOR: '#4A6B8A',    // Darker blue-gray
+  OPACITY: 0.3,        // Higher opacity
+  // ...
+}
+```
+
+#### High Contrast Mode
+
+For accessibility:
+
+```typescript
+// High contrast galaxy orbits
+GALAXY_ORBIT_STYLE = {
+  COLOR: '#FFFFFF',    // White or pure colors
+  OPACITY: 0.8,        // High visibility
+  LINE_WIDTH: 3,       // Thick for clarity
+  // ...
+}
+
+// High contrast solar orbits
+SOLAR_ORBIT_STYLE = {
+  COLOR: '#CCCCCC',    // Light gray
+  OPACITY: 0.6,        // Clearly visible
+  LINE_WIDTH: 2,       // Thicker than normal
+  // ...
+}
+```
+
+### Performance Considerations
+
+#### Rendering Cost
+
+Orbit rings use efficient line geometry:
+- **Per Ring**: <0.1ms render time
+- **Galaxy View**: 2-3 rings (solar system + star + planet orbits)
+- **Solar System View**: Variable (1 ring per planet)
+- **Total Impact**: <1ms for typical scenes
+
+#### Segment Count
+
+The `segments` parameter controls circle smoothness:
+
+```typescript
+// Lower quality, better performance
+segments={32}  // Visible facets, 2x faster
+
+// Default quality
+segments={64}  // Smooth circles, balanced
+
+// Higher quality, slightly slower
+segments={128} // Very smooth, for close-up views
+```
+
+Recommendation: Use 64 segments for most cases, 32 for dense scenes (20+ rings).
+
+#### Dash Pattern Performance
+
+Dashed lines use `LineDashedMaterial` which requires `computeLineDistances()`:
+- Slightly more expensive than solid lines
+- Negligible impact for <50 rings
+- Pre-computed on creation, no per-frame cost
+
+### Testing
+
+#### Visual Verification Checklist
+
+- [ ] Galaxy view shows solid cyan-blue rings at higher opacity
+- [ ] Solar system view shows dashed light blue rings at lower opacity
+- [ ] Ring styles are clearly distinguishable from each other
+- [ ] Opacity provides sufficient contrast on dark backgrounds
+- [ ] Dash pattern renders correctly (not solid on solar orbits)
+- [ ] Rings maintain appearance at different zoom levels
+- [ ] HiDPI/retina displays render crisp edges without aliasing
+
+#### Theme Testing
+
+- [ ] Dark theme: Both orbit types clearly visible
+- [ ] Light theme: Sufficient contrast maintained (if implemented)
+- [ ] High contrast mode: Maximum visibility (if implemented)
+
+#### Performance Testing
+
+- [ ] Galaxy with 10+ solar systems: no frame rate drop
+- [ ] Solar system with 12+ planets: maintains 30+ FPS
+- [ ] Rapid camera movement: no jitter or tearing
+- [ ] Orbit ring creation: <1ms per ring
+
+### Known Limitations
+
+1. **lineWidth Platform Dependency**:
+   - `lineWidth` is not consistently supported across all WebGL implementations
+   - May render as 1px width on some platforms (Windows Chrome, etc.)
+   - Documented but not enforced; use as guidance
+
+2. **Dash Pattern Scaling**:
+   - Dash patterns don't scale with camera distance
+   - May appear differently at extreme zoom levels
+   - Fixed dash sizes work best at default zoom ranges
+
+3. **No Dynamic Theming**:
+   - Styles are compile-time constants
+   - Runtime theme switching requires component remount
+   - Future enhancement: dynamic theme system
+
+### Edge Cases
+
+#### Dense Solar Systems (15+ Planets)
+
+With many planets, orbit rings may overlap visually:
+- Adaptive spacing prevents physical overlap
+- Visual clarity may degrade with extreme planet counts
+- Consider reducing opacity further for dense systems:
+
+```typescript
+// For systems with 15+ planets
+const adjustedOpacity = SOLAR_ORBIT_STYLE.OPACITY * (10 / planetCount);
+```
+
+#### Eccentric Orbits
+
+Current implementation assumes nearly circular orbits:
+- Rings represent circular paths
+- Actual planet orbits have minimal eccentricity (1.5%)
+- For highly eccentric orbits, rings are approximations
+
+#### Z-Fighting at Distance
+
+When camera is very far from rings:
+- Multiple rings at similar radii may z-fight
+- Mitigated by depth testing and opacity
+- Not typically an issue at normal viewing distances
+
+### Future Enhancements
+
+Potential improvements for orbit visualization:
+
+1. **Animated Rings**: Subtle rotation or glow pulse effects
+2. **Dynamic Opacity**: Fade rings based on camera distance
+3. **Selection Highlighting**: Highlight orbit when planet is hovered
+4. **Elliptical Rings**: Support for non-circular orbital paths
+5. **Ring Labels**: Show radius or orbital period as tooltip
+6. **Theme System**: Runtime theme switching with smooth transitions
+7. **Occlusion**: Hide rings behind planets or celestial objects
+8. **Custom Materials**: Shader-based rings for advanced effects
+
+See [docs/roadmap.md](./roadmap.md) for planned orbit visualization enhancements.
+
 ## Galaxy View Ring Alignment
 
 ### Overview

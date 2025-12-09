@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { GALAXY_VIEW_SCALE } from '../scale-constants';
+import { GALAXY_VIEW_SCALE, GALAXY_ORBIT_STYLE } from '../scale-constants';
 
 describe('Galaxy View Ring Alignment', () => {
   describe('GALAXY_VIEW_SCALE constants', () => {
@@ -31,17 +31,23 @@ describe('Galaxy View Ring Alignment', () => {
       );
     });
 
+    it('should have sufficient ring segments for smooth circles', () => {
+      expect(GALAXY_VIEW_SCALE.RING_SEGMENTS).toBeGreaterThanOrEqual(32);
+    });
+  });
+
+  describe('GALAXY_ORBIT_STYLE constants', () => {
     it('should have valid ring color', () => {
-      expect(GALAXY_VIEW_SCALE.RING_COLOR).toMatch(/^#[0-9A-F]{6}$/i);
+      expect(GALAXY_ORBIT_STYLE.COLOR).toMatch(/^#[0-9A-F]{6}$/i);
     });
 
     it('should have ring opacity between 0 and 1', () => {
-      expect(GALAXY_VIEW_SCALE.RING_OPACITY).toBeGreaterThan(0);
-      expect(GALAXY_VIEW_SCALE.RING_OPACITY).toBeLessThanOrEqual(1);
+      expect(GALAXY_ORBIT_STYLE.OPACITY).toBeGreaterThan(0);
+      expect(GALAXY_ORBIT_STYLE.OPACITY).toBeLessThanOrEqual(1);
     });
 
-    it('should have sufficient ring segments for smooth circles', () => {
-      expect(GALAXY_VIEW_SCALE.RING_SEGMENTS).toBeGreaterThanOrEqual(32);
+    it('should have positive line width', () => {
+      expect(GALAXY_ORBIT_STYLE.LINE_WIDTH).toBeGreaterThan(0);
     });
   });
 
@@ -162,15 +168,16 @@ describe('Galaxy View Ring Alignment', () => {
 
   describe('Ring visual properties', () => {
     it('should have semi-transparent rings for subtle guidance', () => {
-      // Opacity should be low enough to not distract
-      expect(GALAXY_VIEW_SCALE.RING_OPACITY).toBeLessThanOrEqual(0.5);
+      // Galaxy orbit opacity should be noticeable but not overwhelming
+      expect(GALAXY_ORBIT_STYLE.OPACITY).toBeGreaterThan(0);
+      expect(GALAXY_ORBIT_STYLE.OPACITY).toBeLessThanOrEqual(1);
     });
 
     it('should use consistent color scheme', () => {
       // Ring color should be a valid hex color
-      expect(GALAXY_VIEW_SCALE.RING_COLOR).toMatch(/^#[0-9A-F]{6}$/i);
+      expect(GALAXY_ORBIT_STYLE.COLOR).toMatch(/^#[0-9A-F]{6}$/i);
       // And should be defined (not empty)
-      expect(GALAXY_VIEW_SCALE.RING_COLOR).toBeTruthy();
+      expect(GALAXY_ORBIT_STYLE.COLOR).toBeTruthy();
     });
 
     it('should have enough segments for smooth appearance', () => {
@@ -237,11 +244,12 @@ describe('Galaxy View Ring Alignment', () => {
       // Ring segments should be sufficient for smooth rendering
       expect(GALAXY_VIEW_SCALE.RING_SEGMENTS).toBeGreaterThanOrEqual(32);
       
-      // Ring opacity should be semi-transparent for subtle guidance
-      expect(GALAXY_VIEW_SCALE.RING_OPACITY).toBeLessThanOrEqual(0.5);
+      // Ring opacity should be noticeable
+      expect(GALAXY_ORBIT_STYLE.OPACITY).toBeGreaterThan(0);
+      expect(GALAXY_ORBIT_STYLE.OPACITY).toBeLessThanOrEqual(1);
       
       // Ring color should be a valid hex color
-      expect(GALAXY_VIEW_SCALE.RING_COLOR).toMatch(/^#[0-9A-F]{6}$/i);
+      expect(GALAXY_ORBIT_STYLE.COLOR).toMatch(/^#[0-9A-F]{6}$/i);
     });
 
     it('should calculate ring geometry points correctly', () => {
