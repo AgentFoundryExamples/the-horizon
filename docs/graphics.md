@@ -369,52 +369,218 @@ if (loaded.validation.valid) {
 }
 ```
 
-## Admin Editor Integration
+## Admin UI Integration
 
-The admin interface can consume the GraphicsConfig shape without touching shader code:
+The Graphics Configuration Editor provides a complete admin interface for tuning all visual settings without code changes. It is integrated into the main admin dashboard at `/admin`.
 
-```typescript
-import { DEFAULT_GRAPHICS_CONFIG } from '@/lib/graphics/presets';
-import { validateGraphicsConfig } from '@/lib/graphics/config';
+### Accessing the Graphics Editor
 
-function GraphicsConfigEditor() {
-  const [config, setConfig] = useState(DEFAULT_GRAPHICS_CONFIG);
-  
-  const handleSave = () => {
-    const validation = validateGraphicsConfig(config);
-    if (!validation.valid) {
-      alert(`Invalid config: ${validation.errors.join(', ')}`);
-      return;
-    }
-    
-    // Save to backend
-    saveGraphicsConfig(config);
-  };
-  
-  return (
-    <form>
-      <label>
-        Global Scale:
-        <input 
-          type="number" 
-          min={0.1} 
-          max={5.0} 
-          step={0.1}
-          value={config.universe.globalScaleMultiplier}
-          onChange={(e) => setConfig({
-            ...config,
-            universe: {
-              ...config.universe,
-              globalScaleMultiplier: parseFloat(e.target.value)
-            }
-          })}
-        />
-      </label>
-      {/* More fields... */}
-    </form>
-  );
+1. Navigate to the admin dashboard at `/admin`
+2. Log in with admin credentials
+3. Click the "🎨 Graphics Configuration" tab
+4. All configuration changes are saved automatically to localStorage
+
+### Configuration Tabs
+
+The editor is organized into tabs for different aspects of the rendering system:
+
+#### Universe Tab
+Global settings affecting the entire scene:
+- **Global Scale Multiplier**: Scales all 3D objects uniformly (0.1-5.0)
+- **Background Star Density**: Density of background starfield (0-1)
+- **Low Power Mode**: Enable mobile/low-power optimizations
+- **Fallback Quality**: Quality level when auto-detection fails (1=low, 2=medium, 3=high)
+- **Anti-Aliasing**: Smooth edges (may impact performance)
+- **Shadow Quality**: Shadow rendering quality (0=off, 1=low, 2=high)
+
+#### Galaxy View Tab
+Settings for galaxy overview rendering:
+- **Galaxy Opacity**: Transparency of galaxy particle clouds (0-1)
+- **Star Brightness**: Brightness multiplier for stars (0.1-3.0)
+- **Star Density**: Number of visible stars (0.1-2.0)
+- **Rotation Speed**: Galaxy rotation animation speed (0-5.0)
+- **Camera Zoom**: Default camera zoom level (0.5-2.0)
+- **Hover Labels**: Configure font size, opacity, visibility distance, and show delay
+
+#### Solar System Tab
+Settings for solar system rendering with orbiting planets:
+- **Orbit Stroke Width**: Width of orbit path lines (0.5-5.0)
+- **Planet Scale Multiplier**: Scale of planets relative to system (0.1-3.0)
+- **Orbit Animation Speed**: Speed of orbital motion (0-10.0)
+- **Star Glow Intensity**: Intensity of central star glow (0-2.0)
+- **Orbital Spacing**: Distance between orbital planes (0.5-3.0)
+- **Camera Distance**: Camera distance from system center (0.5-2.0)
+- **Hover Labels**: Configure font size, opacity, visibility distance, and show delay
+
+#### Planet View Tab
+Settings for detailed planet rendering:
+- **Planet Render Scale**: Size of the 3D planet model (0.5-2.0)
+- **Rotation Speed**: Planet rotation speed (0-5.0)
+- **Atmosphere Glow**: Atmospheric glow intensity (0-2.0)
+- **Cloud Opacity**: Cloud layer transparency (0-1)
+- **Lighting Intensity**: Overall lighting brightness (0.1-3.0)
+- **Rim Lighting**: Enable rim lighting effect (edge highlighting)
+- **Hover Labels**: Configure font size, opacity, visibility distance, and show delay for moons
+
+#### Materials Tab
+View available planet material presets:
+- **Rocky Planet**: Terrestrial planets with solid surfaces
+- **Gas Giant**: Massive planets with thick atmospheres
+- **Ice World**: Frozen planets with glacial ice
+- **Volcanic Planet**: Hellish worlds with molten lava
+- **Oceanic Planet**: Water-covered worlds with deep oceans
+
+Custom material editing will be available in a future release.
+
+#### Import/Export Tab
+Manage configuration backups and sharing:
+- **Export Current Config**: Generate JSON representation of current settings
+- **Import Config**: Load configuration from JSON (with validation)
+- **Clear**: Clear the import/export text area
+
+### Using the Admin Controls
+
+#### Recommended Tuning Workflow
+
+1. **Start with defaults**: Begin with `DEFAULT_GRAPHICS_CONFIG` values
+2. **Test one setting at a time**: Avoid changing multiple values simultaneously
+3. **Observe the effect**: View changes in the main application (live preview)
+4. **Check validation warnings**: Address any warnings that appear
+5. **Export your config**: Save working configurations for backup
+6. **Document your changes**: Note which settings were changed and why
+
+#### Performance Tuning
+
+For optimal performance on different devices:
+
+**High-End Desktop**:
+```json
+{
+  "universe": {
+    "globalScaleMultiplier": 1.2,
+    "backgroundStarDensity": 0.8,
+    "antiAliasing": true,
+    "shadowQuality": 2
+  },
+  "galaxyView": {
+    "starDensity": 1.5,
+    "starBrightness": 1.3
+  }
 }
 ```
+
+**Mid-Range Device**:
+```json
+{
+  "universe": {
+    "globalScaleMultiplier": 1.0,
+    "backgroundStarDensity": 0.5,
+    "antiAliasing": true,
+    "shadowQuality": 1
+  },
+  "galaxyView": {
+    "starDensity": 1.0,
+    "starBrightness": 1.0
+  }
+}
+```
+
+**Mobile/Low-Power**:
+```json
+{
+  "universe": {
+    "globalScaleMultiplier": 1.0,
+    "backgroundStarDensity": 0.3,
+    "lowPowerMode": true,
+    "antiAliasing": false,
+    "shadowQuality": 0
+  },
+  "galaxyView": {
+    "starDensity": 0.5,
+    "starBrightness": 0.8
+  }
+}
+```
+
+#### Guardrails and Warnings
+
+The system automatically validates all inputs and provides warnings for:
+
+- **Values outside safe ranges**: Automatically clamped to valid range
+- **Extreme performance impact**: Warnings when settings may cause lag
+- **Invalid color formats**: Rejected with error message
+- **Configuration conflicts**: Detected and reported
+
+**Critical Warnings**:
+- Setting `starDensity` above 1.5 may impact frame rate on mid-range devices
+- Setting `orbitAnimationSpeed` above 5.0 may cause motion discomfort
+- Disabling `antiAliasing` may cause visual artifacts on some displays
+- Setting `globalScaleMultiplier` below 0.5 or above 2.0 may break layouts
+
+### Persistence and Storage
+
+Graphics configurations are stored in browser localStorage:
+
+- **Storage Key**: `the-horizon-graphics-config`
+- **Version Key**: `the-horizon-graphics-config-version`
+- **Automatic Save**: Changes saved immediately on update
+- **Automatic Load**: Configuration loaded on page load
+- **Cross-Tab Sync**: Changes sync across browser tabs (requires page refresh)
+
+To clear stored configuration:
+1. Open browser DevTools (F12)
+2. Navigate to Application > Local Storage
+3. Delete `the-horizon-graphics-config` key
+4. Or use the "Reset to Defaults" button in the admin UI
+
+### Live Preview
+
+The admin UI supports live preview of configuration changes:
+
+- Changes take effect immediately in open universe viewer tabs
+- No page reload required for most settings
+- Some settings (like low power mode) may require a full page refresh for complete effect
+- Open the universe in a separate tab while editing for best experience
+
+### Edge Cases and Troubleshooting
+
+#### Extreme Values
+
+**Problem**: Setting values to extremes breaks the layout
+**Solution**: The system automatically clamps values to safe ranges. If you see warnings, reduce the value.
+
+**Problem**: High density values cause performance issues
+**Solution**: Enable "Low Power Mode" or reduce `starDensity` and `backgroundStarDensity`.
+
+#### Concurrent Edits
+
+**Problem**: Multiple admins editing config simultaneously
+**Solution**: Last write wins. Export your config before making changes, and import after to avoid losing work.
+
+**Problem**: Config changes not appearing
+**Solution**: Clear browser cache and localStorage, then refresh the page.
+
+#### Offline Behavior
+
+**Problem**: Making edits while offline
+**Solution**: Changes are saved to localStorage. They persist when coming back online. No synchronization issues.
+
+### API Integration (Future)
+
+While currently localStorage-based, the admin UI is designed to support backend API integration:
+
+```typescript
+// Future API endpoints
+POST /api/admin/graphics-config    // Save config to server
+GET  /api/admin/graphics-config     // Load config from server
+PUT  /api/admin/graphics-config     // Update specific settings
+```
+
+This will enable:
+- Server-side config storage
+- Multi-user synchronization
+- Version control for configurations
+- Rollback to previous configurations
 
 ## Validation and Error Handling
 
