@@ -71,13 +71,15 @@ function MoonSphere({ moon, index, onClick }: { moon: Moon; index: number; onCli
   useFrame((state) => {
     if (!meshRef.current) return;
 
-    // Gentle orbit animation
+    // Tighter orbit animation - keeps moons close to planet and within viewport
     const time = state.clock.getElapsedTime();
     const angle = (index / 3) * Math.PI * 2 + time * 0.2;
-    const radius = 8 + index * 2;
+    // Reduced from 8 + index * 2 to 4 + index * 0.8 for tighter orbits
+    const radius = 4 + index * 0.8;
 
     meshRef.current.position.x = Math.cos(angle) * radius;
-    meshRef.current.position.y = Math.sin(time * 0.3 + index) * 2;
+    // Reduced vertical movement from 2 to 1 to keep moons closer to orbital plane
+    meshRef.current.position.y = Math.sin(time * 0.3 + index) * 1;
     meshRef.current.position.z = Math.sin(angle) * radius;
   });
 
@@ -105,9 +107,9 @@ export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurface
 
   return (
     <group position={position}>
-      {/* Planet sphere - reduced size for left-column layout */}
+      {/* Planet sphere - optimized size for left-column visibility */}
       <mesh ref={planetRef}>
-        <sphereGeometry args={[1.5, 32, 32]} />
+        <sphereGeometry args={[1.2, 32, 32]} />
         <meshStandardMaterial
           color={
             planet.theme === 'blue-green'

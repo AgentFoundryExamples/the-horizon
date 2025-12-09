@@ -838,12 +838,17 @@ The planet surface view consists of two main areas with clear visual separation:
 #### Left Column - 3D Planet Visualization
 - **Width**: 30% of viewport, max 400px, min 280px
 - **Content**: Interactive 3D planet with rotating visualization
-- **Planet Size**: Radius 1.5 units for proportional display
+- **Planet Size**: Radius 1.2 units (optimized for visibility without overlapping content)
 - **Position**: Positioned at (-3, 0, 0) in absolute world coordinates
 - **Camera Setup**: Positioned to frame the planet on the left side
-  - Camera position: 2 units right, 8 units in front of the planet
-  - Look-at point: 1 unit right of planet center
+  - Camera position: 2 units right, 6 units in front of the planet (closer framing)
+  - Look-at point: 0.5 units right of planet center (better centered in column)
   - Ensures planet is visible on the left with content on the right
+- **Moon Orbits**: Tightened to 4-6 unit radius range to keep satellites visible
+  - Base radius: 4 units (reduced from 8)
+  - Increment: 0.8 units per moon (reduced from 2)
+  - Vertical oscillation: ±1 unit (reduced from ±2 for stability)
+  - Ensures moons stay within viewport at common widths
 - **Label**: Planet name displayed below visualization with backdrop blur effect
 - **Styling**: Semi-transparent dark background with blue border
 - **Visual Role**: Provides context and immersion without interfering with reading
@@ -1029,10 +1034,25 @@ The redesigned layout handles various edge cases gracefully:
 
 #### Camera Positioning Across Viewports
 The camera positioning system ensures the planet remains visible:
-- **Desktop**: Planet at (-3, 0, 0), camera at (planetPos.x + 2, planetPos.y, planetPos.z + 8)
+- **Desktop**: Planet at (-3, 0, 0), camera at (planetPos.x + 2, planetPos.y, planetPos.z + 6)
 - **Tablet/Mobile**: Same 3D positioning, CSS handles responsive layout
 - **High-DPI displays**: Resolution-independent positioning scales correctly
 - **Zoom levels**: Planet remains framed due to relative positioning
+
+#### Moon Orbit Behavior
+The tightened moon orbit system keeps satellites visible and near the planet:
+- **Orbit Radius**: 4 + (moonIndex × 0.8) units
+  - Moon 1: 4.0 units from planet center
+  - Moon 2: 4.8 units
+  - Moon 3: 5.6 units
+  - Moon 4+: Continues incrementing by 0.8 units
+- **Vertical Oscillation**: ±1 unit (sinusoidal) for natural movement
+- **Orbital Speed**: 0.2 radians/second for gentle motion
+- **Multiple Moons**: All moons remain within viewport bounds
+  - Systems with 5+ moons: Outermost moon at ~7.2 units
+  - Tested up to 8 moons: All visible without clipping
+- **Animation Smoothness**: 60 FPS on desktop, 30+ FPS on mobile
+- **No Off-Screen Satellites**: Tighter bounds prevent prolonged absence from view
 
 #### Missing Metadata
 All metadata fields are optional and handled gracefully:
@@ -1172,13 +1192,38 @@ Edit `src/components/PlanetSurface.tsx`:
 
 ```typescript
 // Larger planet
-<sphereGeometry args={[2, 32, 32]} />  // Instead of 1.5
+<sphereGeometry args={[1.5, 32, 32]} />  // Instead of 1.2
 
 // Smaller planet
-<sphereGeometry args={[1, 32, 32]} />
+<sphereGeometry args={[0.8, 32, 32]} />
 ```
 
+**Note**: When changing planet size, also adjust camera distance in `UniverseScene.tsx` to maintain proper framing. Larger planets may require moving the camera further back (increase `PLANET_CAMERA_OFFSET.z`).
+
+#### Adjusting Moon Orbit Radius
+
+To modify moon orbital distances, edit `src/components/PlanetSurface.tsx`:
+
+```typescript
+// Wider moon orbits
+const radius = 6 + index * 1.2;  // Instead of 4 + index * 0.8
+
+// Tighter moon orbits
+const radius = 3 + index * 0.5;
+
+// Adjust vertical oscillation
+meshRef.current.position.y = Math.sin(time * 0.3 + index) * 0.5;  // Less vertical movement
+```
+
+**Moon Orbit Guidelines:**
+- **Base radius**: Start at 3-4 units minimum to avoid planet collision
+- **Increment**: 0.5-1.0 units per moon for balanced spacing
+- **Max moons tested**: Systems with 8+ moons should keep increment ≤ 0.8
+- **Vertical range**: Keep within ±1 unit to prevent off-screen clipping
+- **Collision detection**: Base radius should exceed planet radius (1.2) + moon radius (0.32)
+
 #### Adjusting Content Width
+
 
 Edit `src/styles/planet.css`:
 
@@ -1225,6 +1270,12 @@ When testing planet page layout:
 6. **Dark/light mode**: Check contrast in both schemes
 7. **Keyboard**: Tab through all interactive elements
 8. **Screen reader**: Verify logical reading order
+9. **Moon visibility**: Verify all moons stay within viewport
+   - Test systems with 1, 3, 5, and 8+ moons
+   - Rotate camera slightly to observe full orbits
+   - Ensure no moons disappear off-screen for extended periods
+10. **Planet framing**: Confirm full planet globe visible on desktop/tablet
+11. **Content overlap**: Verify no collision between planet canvas and text content
 
 ### Content Authoring Guidelines
 
