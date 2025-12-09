@@ -1046,11 +1046,11 @@ The tightened moon orbit system keeps satellites visible and near the planet:
   - Moon 2 (index 1): 4.8 units
   - Moon 3 (index 2): 5.6 units
   - Moon 4 (index 3): 6.4 units
-  - Moon 5+ continues incrementing
+  - Moon 5 (index 4): 7.2 units
 - **Vertical Oscillation**: ±1 unit (sinusoidal) for natural movement
 - **Orbital Speed**: 0.2 radians/second for gentle motion
 - **Multiple Moons**: All moons remain within viewport bounds
-  - Systems with exactly 5 moons (indices 0-4): Outermost at 7.2 units (4 + 4×0.8)
+  - Systems with 5 moons (indices 0-4): Outermost moon (index 4) is at 7.2 units.
   - Systems with 8 moons (indices 0-7): Worst case 9.6 units (4 + 7×0.8)
   - Typical 3-moon systems stay within 5.6 units
 - **Animation Smoothness**: 60 FPS on desktop, 30+ FPS on mobile
@@ -1193,28 +1193,31 @@ This ensures the planet appears on the left side of the screen with the content 
 Edit `src/components/PlanetSurface.tsx`:
 
 ```typescript
-// Larger planet (substantially bigger than default)
+// Larger planet (substantially bigger than default 1.2)
+// This example shows how to increase size - actual value depends on your needs
 <sphereGeometry args={[2.0, 32, 32]} />  // Instead of 1.2
 
-// Smaller planet
-<sphereGeometry args={[0.8, 32, 32]} />
+// Smaller planet (smaller than default 1.2)
+<sphereGeometry args={[0.8, 32, 32]} />  // Instead of 1.2
 ```
 
-**Note**: When changing planet size, also adjust camera distance in `UniverseScene.tsx` to maintain proper framing. Larger planets may require moving the camera further back (increase `PLANET_CAMERA_OFFSET.z`).
+**Note**: When changing planet size, also adjust camera distance in `UniverseScene.tsx` to maintain proper framing. Larger planets may require moving the camera further back (increase `PLANET_CAMERA_OFFSET.z`). The current production value is 1.2 units.
 
 #### Adjusting Moon Orbit Radius
 
 To modify moon orbital distances, edit `src/components/PlanetSurface.tsx`:
 
 ```typescript
-// Wider moon orbits
-const radius = 6 + index * 1.2;  // Instead of 4 + index * 0.8
+// Adjust the constants at the top of the file:
+const MOON_BASE_ORBIT_RADIUS = 6; // Instead of 4
+const MOON_ORBIT_INCREMENT = 1.2;  // Instead of 0.8
 
-// Tighter moon orbits
-const radius = 3 + index * 0.5;
+// For tighter orbits:
+const MOON_BASE_ORBIT_RADIUS = 3;
+const MOON_ORBIT_INCREMENT = 0.5;
 
-// Adjust vertical oscillation
-meshRef.current.position.y = Math.sin(time * 0.3 + index) * 0.5;  // Less vertical movement
+// Adjust vertical oscillation:
+const MOON_VERTICAL_OSCILLATION = 0.5;  // Instead of 1 for less vertical movement
 ```
 
 **Moon Orbit Guidelines:**
@@ -1226,6 +1229,7 @@ meshRef.current.position.y = Math.sin(time * 0.3 + index) * 0.5;  // Less vertic
   - Current planet radius: 1.2 units (see `PlanetSurface.tsx` sphereGeometry)
   - Current moon radius: `calculateMoonSize()` = 0.32 units (MIN_SIZE × MOON_SIZE_RATIO from `scale-constants.ts`)
   - Safe minimum: 1.2 + 0.32 = 1.52 units, rounded up to 4 units for comfortable spacing
+- **Current values**: `MOON_BASE_ORBIT_RADIUS = 4`, `MOON_ORBIT_INCREMENT = 0.8`, `MOON_VERTICAL_OSCILLATION = 1`
 
 #### Adjusting Content Width
 
