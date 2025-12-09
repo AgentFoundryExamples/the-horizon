@@ -56,10 +56,18 @@ const initialState: NavigationState = {
 
 /**
  * Helper function to clear hover state when navigating
+ * Includes error handling to prevent runtime errors if hover store is not initialized
  */
 function clearHoverState() {
-  const { clearHover } = useHoverStore.getState();
-  clearHover();
+  try {
+    const hoverStore = useHoverStore.getState();
+    if (hoverStore && typeof hoverStore.clearHover === 'function') {
+      hoverStore.clearHover();
+    }
+  } catch (error) {
+    // Log error but don't throw - hover state cleanup is not critical for navigation
+    console.warn('Failed to clear hover state during navigation:', error);
+  }
 }
 
 export const useNavigationStore = create<NavigationStore>((set, get) => ({

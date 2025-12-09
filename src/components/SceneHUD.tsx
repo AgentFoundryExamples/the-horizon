@@ -5,6 +5,7 @@
  * Shows breadcrumb trail, back button, and overlay hover labels
  */
 
+import { useState } from 'react';
 import { useNavigationStore } from '@/lib/store';
 import { useHoverStore } from '@/lib/hover-store';
 import type { Galaxy } from '@/lib/universe/types';
@@ -39,6 +40,10 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
   } = useNavigationStore();
   
   const { labelsVisible, toggleLabelsVisibility } = useHoverStore();
+  
+  // State for managing focus and hover styles declaratively
+  const [focusedBreadcrumb, setFocusedBreadcrumb] = useState<string | null>(null);
+  const [hoveredBreadcrumb, setHoveredBreadcrumb] = useState<string | null>(null);
 
   const focusedGalaxy = galaxies.find((g) => g.id === focusedGalaxyId);
   const focusedSolarSystem = focusedGalaxy?.solarSystems?.find(
@@ -56,32 +61,49 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
   };
 
   // Common styles for breadcrumb buttons
-  const getBreadcrumbButtonStyle = (isActive: boolean, isDisabled: boolean) => ({
-    background: 'none',
-    border: 'none',
-    padding: '0.25rem 0.5rem',
-    margin: '-0.25rem -0.5rem',
-    color: isActive ? '#FFFFFF' : '#CCCCCC',
-    fontWeight: isActive ? ('bold' as const) : ('normal' as const),
-    fontSize: '0.9rem',
-    cursor: isDisabled ? 'default' : 'pointer',
-    pointerEvents: 'auto' as const,
-    textDecoration: 'none',
-    borderRadius: '4px',
-    transition: 'all 0.2s',
-    opacity: isTransitioning ? 0.5 : 1,
-  });
+  const getBreadcrumbButtonStyle = (
+    breadcrumbId: string,
+    isActive: boolean, 
+    isDisabled: boolean
+  ) => {
+    const isFocused = focusedBreadcrumb === breadcrumbId;
+    const isHovered = hoveredBreadcrumb === breadcrumbId;
+    
+    return {
+      background: 'none',
+      border: 'none',
+      padding: '0.25rem 0.5rem',
+      margin: '-0.25rem -0.5rem',
+      color: isActive ? '#FFFFFF' : (isHovered ? '#FFFFFF' : '#CCCCCC'),
+      fontWeight: isActive ? ('bold' as const) : ('normal' as const),
+      fontSize: '0.9rem',
+      cursor: isDisabled ? 'default' : 'pointer',
+      pointerEvents: 'auto' as const,
+      textDecoration: isHovered && !isActive ? 'underline' : 'none',
+      borderRadius: '4px',
+      transition: 'all 0.2s',
+      opacity: isTransitioning ? 0.5 : 1,
+      outline: isFocused && !isActive ? '2px solid #4A90E2' : 'none',
+      outlineOffset: isFocused && !isActive ? '2px' : '0',
+    };
+  };
 
-  const handleBreadcrumbFocus = (event: React.FocusEvent<HTMLButtonElement>, isActive: boolean) => {
+  // Consolidated hover handler
+  const handleBreadcrumbHover = (breadcrumbId: string, isActive: boolean, isEntering: boolean) => {
     if (!isTransitioning && !isActive) {
-      event.currentTarget.style.outline = '2px solid #4A90E2';
-      event.currentTarget.style.outlineOffset = '2px';
+      setHoveredBreadcrumb(isEntering ? breadcrumbId : null);
     }
   };
 
-  const handleBreadcrumbBlur = (event: React.FocusEvent<HTMLButtonElement>) => {
-    event.currentTarget.style.outline = '';
-    event.currentTarget.style.outlineOffset = '';
+  // Consolidated focus handler
+  const handleBreadcrumbFocus = (breadcrumbId: string, isActive: boolean) => {
+    if (!isTransitioning && !isActive) {
+      setFocusedBreadcrumb(breadcrumbId);
+    }
+  };
+
+  const handleBreadcrumbBlur = () => {
+    setFocusedBreadcrumb(null);
   };
 
   return (
@@ -114,20 +136,10 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
           disabled={isTransitioning || focusLevel === 'universe'}
           aria-label="Navigate to Universe view"
           aria-current={focusLevel === 'universe' ? 'page' : undefined}
-          style={getBreadcrumbButtonStyle(focusLevel === 'universe', isTransitioning || focusLevel === 'universe')}
-          onMouseEnter={(e) => {
-            if (!isTransitioning && focusLevel !== 'universe') {
-              e.currentTarget.style.color = '#FFFFFF';
-              e.currentTarget.style.textDecoration = 'underline';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isTransitioning && focusLevel !== 'universe') {
-              e.currentTarget.style.color = '#CCCCCC';
-              e.currentTarget.style.textDecoration = 'none';
-            }
-          }}
-          onFocus={(e) => handleBreadcrumbFocus(e, focusLevel === 'universe')}
+          style={getBreadcrumbButtonStyle('universe', focusLevel === 'universe', isTransitioning || focusLevel === 'universe')}
+          onMouseEnter={() => handleBreadcrumbHover('universe', focusLevel === 'universe', true)}
+          onMouseLeave={() => handleBreadcrumbHover('universe', focusLevel === 'universe', false)}
+          onFocus={() => handleBreadcrumbFocus('universe', focusLevel === 'universe')}
           onBlur={handleBreadcrumbBlur}
         >
           Universe
@@ -143,18 +155,10 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
               disabled={isTransitioning || focusLevel === 'galaxy' || !focusedGalaxyId}
               aria-label={`Navigate to ${focusedGalaxy?.name || 'Galaxy'} view`}
               aria-current={focusLevel === 'galaxy' ? 'page' : undefined}
-              style={getBreadcrumbButtonStyle(true, isTransitioning || focusLevel === 'galaxy')}
-              onMouseEnter={(e) => {
-                if (!isTransitioning && focusLevel !== 'galaxy') {
-                  e.currentTarget.style.textDecoration = 'underline';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isTransitioning && focusLevel !== 'galaxy') {
-                  e.currentTarget.style.textDecoration = 'none';
-                }
-              }}
-              onFocus={(e) => handleBreadcrumbFocus(e, focusLevel === 'galaxy')}
+              style={getBreadcrumbButtonStyle('galaxy', focusLevel === 'galaxy', isTransitioning || focusLevel === 'galaxy')}
+              onMouseEnter={() => handleBreadcrumbHover('galaxy', focusLevel === 'galaxy', true)}
+              onMouseLeave={() => handleBreadcrumbHover('galaxy', focusLevel === 'galaxy', false)}
+              onFocus={() => handleBreadcrumbFocus('galaxy', focusLevel === 'galaxy')}
               onBlur={handleBreadcrumbBlur}
             >
               {focusedGalaxy?.name || 'Galaxy'}
@@ -172,18 +176,10 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
               disabled={isTransitioning || focusLevel === 'solar-system' || !focusedSolarSystemId}
               aria-label={`Navigate to ${focusedSolarSystem?.name || 'Solar System'} view`}
               aria-current={focusLevel === 'solar-system' ? 'page' : undefined}
-              style={getBreadcrumbButtonStyle(true, isTransitioning || focusLevel === 'solar-system')}
-              onMouseEnter={(e) => {
-                if (!isTransitioning && focusLevel !== 'solar-system') {
-                  e.currentTarget.style.textDecoration = 'underline';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isTransitioning && focusLevel !== 'solar-system') {
-                  e.currentTarget.style.textDecoration = 'none';
-                }
-              }}
-              onFocus={(e) => handleBreadcrumbFocus(e, focusLevel === 'solar-system')}
+              style={getBreadcrumbButtonStyle('solar-system', focusLevel === 'solar-system', isTransitioning || focusLevel === 'solar-system')}
+              onMouseEnter={() => handleBreadcrumbHover('solar-system', focusLevel === 'solar-system', true)}
+              onMouseLeave={() => handleBreadcrumbHover('solar-system', focusLevel === 'solar-system', false)}
+              onFocus={() => handleBreadcrumbFocus('solar-system', focusLevel === 'solar-system')}
               onBlur={handleBreadcrumbBlur}
             >
               {focusedSolarSystem?.name || 'Solar System'}
