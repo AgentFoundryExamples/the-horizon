@@ -461,3 +461,60 @@ export function calculateGalaxyScaleWithOverride(
   // Use automatic scaling
   return calculateGalaxyScale(galaxyCount);
 }
+
+/**
+ * Scale presets for PlanetarySystem component
+ * These presets define the visual parameters for planetary systems at different scales
+ */
+
+/**
+ * Galaxy view scale preset
+ * Used for miniature solar systems displayed within galaxy view
+ * Small scale with tighter orbits for compact representation
+ */
+export const GALAXY_VIEW_PLANETARY_SCALE = {
+  // Star properties
+  starRadius: 0.5,
+  starLightIntensity: 1,
+  starLightDistance: 20,
+  // Orbit properties
+  orbitBaseRadius: 2,      // Tighter starting radius
+  orbitSpacing: 1.5,       // Closer orbit spacing
+  orbitEccentricity: 0.1,  // Slight ellipse
+  orbitInclination: 0.2,   // Small inclination for 3D effect
+  // Planet properties
+  planetBaseSize: 0.3,     // Smaller planets
+  planetSizeIncrement: 0.05, // Small size increase per moon
+  // Orbit ring styling
+  orbitRingColor: GALAXY_ORBIT_STYLE.COLOR,
+  orbitRingOpacity: GALAXY_ORBIT_STYLE.OPACITY,
+  orbitRingLineWidth: GALAXY_ORBIT_STYLE.LINE_WIDTH,
+  orbitRingDashPattern: GALAXY_ORBIT_STYLE.DASH_PATTERN,
+  orbitRingSegments: GALAXY_VIEW_SCALE.RING_SEGMENTS,
+} as const;
+
+/**
+ * Solar system view scale preset
+ * Used for dedicated solar system view with full detail
+ * Larger scale with wider orbits for detailed exploration
+ */
+export const SOLAR_SYSTEM_VIEW_PLANETARY_SCALE = {
+  // Star properties
+  starRadius: STAR_SCALE.RADIUS,
+  starLightIntensity: STAR_SCALE.LIGHT_INTENSITY,
+  starLightDistance: STAR_SCALE.LIGHT_DISTANCE,
+  // Orbit properties
+  orbitBaseRadius: ORBITAL_SPACING.BASE_RADIUS,
+  orbitSpacing: ORBITAL_SPACING.RADIUS_INCREMENT,
+  orbitEccentricity: ORBITAL_SPACING.MAX_ECCENTRICITY * 0.3, // 30% of max for near-circular orbits
+  orbitInclination: ORBITAL_SPACING.MAX_INCLINATION * 0.5,   // 50% of max for mostly flat plane
+  // Planet properties
+  planetBaseSize: PLANET_SCALE.MIN_SIZE,
+  planetSizeIncrement: PLANET_SCALE.MOON_MULTIPLIER,
+  // Orbit ring styling
+  orbitRingColor: SOLAR_ORBIT_STYLE.COLOR,
+  orbitRingOpacity: SOLAR_ORBIT_STYLE.OPACITY,
+  orbitRingLineWidth: SOLAR_ORBIT_STYLE.LINE_WIDTH,
+  orbitRingDashPattern: SOLAR_ORBIT_STYLE.DASH_PATTERN,
+  orbitRingSegments: 64,
+} as const;

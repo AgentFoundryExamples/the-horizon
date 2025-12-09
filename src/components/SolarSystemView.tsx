@@ -16,204 +16,37 @@
 
 /**
  * SolarSystemView - Displays a solar system with clickable planets
- * Extends the existing GalaxyView with planet interaction
+ * Uses shared PlanetarySystem component for consistency with GalaxyView
  */
 
-import { useRef, useMemo, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import type { SolarSystem, Planet } from '@/lib/universe/types';
+import type { SolarSystem } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
-import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
-import {
-  calculatePlanetSize,
-  calculateAdaptiveOrbitalRadius,
-  calculateSafeSpacing,
-  ORBITAL_SPACING,
-  STAR_SCALE,
-  SOLAR_ORBIT_STYLE,
-} from '@/lib/universe/scale-constants';
-import { OrbitRing } from './OrbitRing';
+import { SOLAR_SYSTEM_VIEW_PLANETARY_SCALE } from '@/lib/universe/scale-constants';
+import { PlanetarySystem } from './shared/PlanetarySystem';
+import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG } from '@/lib/animation';
 
 interface SolarSystemViewProps {
   solarSystem: SolarSystem;
   position: THREE.Vector3;
 }
 
-// Constants for orbital calculations
-const KEPLER_ITERATION_COUNT = 5;
-
-/**
- * Clickable planet with Keplerian orbit
- */
-function PlanetMesh({
-  planet,
-  index,
-  systemPosition,
-  onClick,
-  totalPlanets,
-}: {
-  planet: Planet;
-  index: number;
-  systemPosition: THREE.Vector3;
-  onClick: () => void;
-  totalPlanets: number;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const setHoveredObject = useHoverStore((state) => state.setHoveredObject);
-
-  // Calculate orbital parameters
-  const orbitalData = useMemo(() => {
-    // Deterministic orbital spacing based on planet index
-    const safeSpacing = calculateSafeSpacing(totalPlanets);
-    const semiMajorAxis = ORBITAL_SPACING.BASE_RADIUS + index * safeSpacing;
-    
-    // Use minimal eccentricity for near-circular orbits (deterministic)
-    // Small eccentricity adds visual interest while maintaining predictability
-    const eccentricity = ORBITAL_SPACING.MAX_ECCENTRICITY * 0.3;
-    
-    // Use minimal inclination for mostly-flat orbital plane
-    // Small inclination prevents z-fighting without unpredictability
-    const inclination = ORBITAL_SPACING.MAX_INCLINATION * 0.5;
-    
-    // Deterministic starting position based on planet index
-    // Spread planets evenly around the orbit at initialization
-    const phase = (index * Math.PI * 2) / Math.max(totalPlanets, 1);
-    
-    // Orbital speed follows Kepler's third law approximation
-    // Inner planets orbit faster than outer planets
-    const orbitSpeed = 0.5 / (semiMajorAxis * semiMajorAxis);
-    
-    const size = calculatePlanetSize(planet.moons?.length || 0);
-
-    return { semiMajorAxis, eccentricity, inclination, orbitSpeed, phase, size };
-  }, [planet, index, totalPlanets]);
-
-  useFrame((state) => {
-    if (!meshRef.current) return;
-
-    const time = state.clock.getElapsedTime();
-    const meanAnomaly = orbitalData.orbitSpeed * time + orbitalData.phase;
-
-    let eccentricAnomaly = meanAnomaly;
-    for (let i = 0; i < KEPLER_ITERATION_COUNT; i++) {
-      eccentricAnomaly = meanAnomaly + orbitalData.eccentricity * Math.sin(eccentricAnomaly);
-    }
-
-    const trueAnomaly = 2 * Math.atan2(
-      Math.sqrt(1 + orbitalData.eccentricity) * Math.sin(eccentricAnomaly / 2),
-      Math.sqrt(1 - orbitalData.eccentricity) * Math.cos(eccentricAnomaly / 2)
-    );
-
-    const radius =
-      (orbitalData.semiMajorAxis * (1 - orbitalData.eccentricity * orbitalData.eccentricity)) /
-      (1 + orbitalData.eccentricity * Math.cos(trueAnomaly));
-
-    // Since apses are aligned with x-axis (no rotation), angle = trueAnomaly
-    const angle = trueAnomaly;
-
-    meshRef.current.position.x = systemPosition.x + Math.cos(angle) * radius;
-    meshRef.current.position.y = systemPosition.y + Math.sin(angle) * radius * Math.sin(orbitalData.inclination);
-    meshRef.current.position.z = systemPosition.z + Math.sin(angle) * radius * Math.cos(orbitalData.inclination);
-  });
-
-  return (
-    <mesh
-      ref={meshRef}
-      onClick={onClick}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        if (meshRef.current) {
-          // Get world position of the mesh for accurate hover tracking
-          const worldPosition = new THREE.Vector3();
-          meshRef.current.getWorldPosition(worldPosition);
-          
-          const hoveredObj: HoveredObject = {
-            id: planet.id,
-            name: planet.name,
-            type: 'planet',
-            position: worldPosition,
-            metadata: {
-              description: planet.summary,
-              moonCount: planet.moons?.length || 0,
-              theme: planet.theme,
-            },
-          };
-          setHoveredObject(hoveredObj);
-        }
-      }}
-      onPointerOut={(e) => {
-        e.stopPropagation();
-        setHoveredObject(null);
-      }}
-    >
-      <sphereGeometry args={[orbitalData.size, 16, 16]} />
-      <meshStandardMaterial
-        color={
-          planet.theme === 'blue-green'
-            ? '#2E86AB'
-            : planet.theme === 'red'
-            ? '#E63946'
-            : planet.theme === 'earth-like'
-            ? '#4A90E2'
-            : '#CCCCCC'
-        }
-      />
-    </mesh>
-  );
-}
-
 /**
  * Solar system view with orbiting planets
+ * Now uses shared PlanetarySystem component with solar system scale preset
  */
 export default function SolarSystemView({ solarSystem, position }: SolarSystemViewProps) {
   const { navigateToPlanet } = useNavigationStore();
-  const totalPlanets = (solarSystem.planets || []).length;
-
-  // Calculate orbital radii for both rings and planets
-  const orbitalRadii = useMemo(() => {
-    return (solarSystem.planets || []).map((_, index) => 
-      calculateAdaptiveOrbitalRadius(index, totalPlanets)
-    );
-  }, [solarSystem.planets, totalPlanets]);
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const animationConfig = getAnimationConfig(DEFAULT_ANIMATION_CONFIG, prefersReducedMotion);
 
   return (
-    <group position={position}>
-      {/* Central star */}
-      <mesh>
-        <sphereGeometry args={[STAR_SCALE.RADIUS, 16, 16]} />
-        <meshBasicMaterial color="#FDB813" />
-        <pointLight
-          color="#FDB813"
-          intensity={STAR_SCALE.LIGHT_INTENSITY}
-          distance={STAR_SCALE.LIGHT_DISTANCE}
-        />
-      </mesh>
-
-      {/* Orbit rings - showing planet orbital paths */}
-      {orbitalRadii.map((radius, index) => (
-        <OrbitRing
-          key={`orbit-${index}`}
-          radius={radius}
-          color={SOLAR_ORBIT_STYLE.COLOR}
-          opacity={SOLAR_ORBIT_STYLE.OPACITY}
-          lineWidth={SOLAR_ORBIT_STYLE.LINE_WIDTH}
-          dashPattern={SOLAR_ORBIT_STYLE.DASH_PATTERN}
-          segments={64}
-        />
-      ))}
-
-      {/* Planets */}
-      {(solarSystem.planets || []).map((planet, index) => (
-        <PlanetMesh
-          key={planet.id}
-          planet={planet}
-          index={index}
-          systemPosition={position}
-          onClick={() => navigateToPlanet(planet.id)}
-          totalPlanets={totalPlanets}
-        />
-      ))}
-    </group>
+    <PlanetarySystem
+      solarSystem={solarSystem}
+      position={position}
+      onPlanetClick={(planet) => navigateToPlanet(planet.id)}
+      scale={SOLAR_SYSTEM_VIEW_PLANETARY_SCALE}
+      animationConfig={animationConfig}
+    />
   );
 }
