@@ -1,6 +1,171 @@
 # Visual Scene Controls and Animation Tuning
 
-This document describes the 3D scene controls, camera animations, hover labels, and performance optimizations in The Horizon application.
+This document describes the 3D scene controls, camera animations, navigation UI, and performance optimizations in The Horizon application.
+
+## Persistent Sidebar Navigation (v0.1.8)
+
+### Overview
+
+The persistent sidebar provides the primary navigation method for exploring galaxies, solar systems, and planets across different scene views. It replaces hover labels as the main interaction paradigm for entity selection and camera focus.
+
+**Key Features:**
+- **Context-Aware Display**: Shows galaxies at universe level, solar systems at galaxy level, and planets at solar system level
+- **Click-to-Focus**: Selecting an item focuses the camera on that entity and triggers scene transitions
+- **Keyboard Navigation**: Full keyboard support with arrow keys, Enter, Space, and Escape
+- **Active Highlighting**: Currently focused entity is visually distinguished
+- **Collapsible Design**: Can be collapsed to minimize screen real estate usage
+- **Responsive Layout**: Adapts to mobile, tablet, and desktop viewports
+- **Touch-Friendly**: Optimized for touch interactions on mobile devices
+
+### Navigation Hierarchy
+
+```
+Universe View    → Sidebar lists all Galaxies
+Galaxy View      → Sidebar lists Solar Systems in focused galaxy
+Solar System     → Sidebar lists Planets in focused solar system
+Planet Detail    → Sidebar hidden (full-screen content)
+```
+
+### Implementation
+
+The Sidebar component is rendered alongside the 3D scene on Universe, Galaxy, and Solar System views:
+
+```typescript
+// src/components/Sidebar.tsx
+export default function Sidebar({ galaxies }: SidebarProps) {
+  const { focusLevel, navigateToGalaxy, navigateToSolarSystem, navigateToPlanet } = useNavigationStore();
+  
+  // Don't render on planet detail view
+  if (focusLevel === 'planet') return null;
+  
+  // Render entity list based on current focus level
+  // ...
+}
+```
+
+### Keyboard Navigation
+
+**Arrow Keys:**
+- `↓` (ArrowDown): Move focus to next item in list
+- `↑` (ArrowUp): Move focus to previous item in list
+- Focus wraps around at list boundaries
+
+**Action Keys:**
+- `Enter` or `Space`: Activate focused item (navigate and focus camera)
+- `Escape`: Collapse sidebar
+
+**Mouse/Touch:**
+- Click/Tap item to navigate
+- Hover over item to focus it (keyboard accessible)
+- Click collapse button to toggle sidebar visibility
+
+### Styling and Responsive Behavior
+
+**Desktop (> 1024px):**
+- Sidebar: 300px wide, right-aligned
+- Full entity names and descriptions visible
+- Smooth hover animations
+
+**Tablet (768px - 1024px):**
+- Sidebar: 250px wide
+- Descriptions may truncate with ellipsis
+- Touch-optimized interaction targets
+
+**Mobile (< 768px):**
+- Sidebar: Full width (max 300px), slides in from right
+- Collapsed state shows only toggle button at screen edge
+- Overlay mode to avoid obscuring 3D scene
+- Backdrop filter for better content visibility
+
+**Small Mobile (< 480px):**
+- Sidebar: max 280px wide
+- Fully slides off-screen when collapsed
+- Floating toggle button for easy access
+
+### Accessibility
+
+**ARIA Attributes:**
+```html
+<aside role="navigation" aria-label="Entity navigation">
+  <button aria-label="Collapse sidebar" aria-expanded="true">
+  <div role="list">
+    <button role="listitem" aria-current="location">Galaxy Name</button>
+  </div>
+</aside>
+```
+
+**Screen Reader Support:**
+- Navigation landmarks for structure
+- Current location announced via `aria-current`
+- Button labels describe actions clearly
+- List semantics for entity collections
+
+**Keyboard Focus Management:**
+- Visual focus indicators with outline
+- Focus stays within sidebar when using arrow keys
+- Escape returns focus to main scene
+
+**Reduced Motion:**
+- Respects `prefers-reduced-motion` setting
+- Disables slide/transform animations
+- Instant state changes instead of transitions
+
+### Integration with Scene
+
+**Camera Focus:**
+When a sidebar item is clicked:
+1. Navigation store updates focus level and entity ID
+2. Camera animator calculates target position
+3. Smooth camera transition to focused entity
+4. Entity highlighted in 3D scene (via existing hover system)
+5. Sidebar updates to show next level's entities (if applicable)
+
+**Synchronization:**
+- Sidebar highlights match navigation store's focused entity IDs
+- List updates automatically when focus level changes
+- Camera transitions trigger simultaneously with sidebar updates
+
+### Edge Cases
+
+**Empty States:**
+- "No items to display" message when list is empty
+- Graceful degradation for missing entity data
+
+**Large Entity Counts:**
+- Vertical scroll with styled scrollbar
+- Smooth scrolling with `scroll-behavior`
+- Focused item auto-scrolls into view
+
+**Screen Size Constraints:**
+- Sidebar doesn't obscure critical 3D content
+- Collapsible to maximize scene visibility
+- Mobile overlay pattern for minimal interference
+
+### Testing
+
+**Unit Tests:**
+- Entity list rendering for each view level
+- Navigation function calls on item click
+- Keyboard navigation behavior
+- Collapse/expand functionality
+- Active item highlighting
+- Accessibility attributes
+
+**Manual Testing Checklist:**
+- [ ] Sidebar renders on Universe, Galaxy, Solar System views
+- [ ] Sidebar hidden on Planet detail view
+- [ ] Entity lists populate correctly for each level
+- [ ] Clicking item focuses camera and navigates
+- [ ] Keyboard arrows navigate through list
+- [ ] Enter/Space activate focused item
+- [ ] Escape collapses sidebar
+- [ ] Active entity highlighted in sidebar
+- [ ] Collapse button toggles sidebar visibility
+- [ ] Responsive behavior on mobile/tablet
+- [ ] Scrolling works with many entities
+- [ ] Touch interactions work on mobile
+- [ ] Screen reader announces navigation
+- [ ] Reduced motion disables animations
 
 ## Breadcrumb Navigation (ISS-2 - v0.1.7)
 

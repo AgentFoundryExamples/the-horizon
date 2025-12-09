@@ -2,6 +2,7 @@ import { getGalaxies } from '@/lib/universe';
 import UniverseScene from '@/components/UniverseScene';
 import SceneHUD from '@/components/SceneHUD';
 import ContextualWelcomeMessage from '@/components/ContextualWelcomeMessage';
+import Sidebar from '@/components/Sidebar';
 
 export default async function HomePage() {
   const galaxies = await getGalaxies();
@@ -23,6 +24,7 @@ export default async function HomePage() {
       <ContextualWelcomeMessage galaxies={galaxies} />
       <UniverseScene galaxies={galaxies} />
       <SceneHUD galaxies={galaxies} />
+      <Sidebar galaxies={galaxies} />
     </main>
   );
 }
