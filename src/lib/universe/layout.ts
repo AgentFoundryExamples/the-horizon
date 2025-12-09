@@ -90,18 +90,18 @@ export function calculateGalaxyLayout(
   
   // Pattern 4: Four galaxies - square arrangement
   else if (count === 4) {
-    // Arrange in square rotated 45° (diamond shape)
-    // For a square rotated 45°, if side length = spacing, 
-    // then distance from center to corner = spacing / √2
-    const halfDiagonal = spacing / 2;
+    // Arrange in a square rotated 45° (diamond shape).
+    // To make the side length equal to `spacing`, the distance from the center
+    // to a vertex must be `spacing / sqrt(2)`.
+    const distanceToVertex = spacing / Math.sqrt(2);
     
     // Place vertices at the four cardinal directions
-    positions.set(galaxyIds[0], new THREE.Vector3(0, 0, -halfDiagonal)); // North
-    positions.set(galaxyIds[1], new THREE.Vector3(-halfDiagonal, 0, 0)); // West
-    positions.set(galaxyIds[2], new THREE.Vector3(halfDiagonal, 0, 0));  // East
-    positions.set(galaxyIds[3], new THREE.Vector3(0, 0, halfDiagonal));  // South
+    positions.set(galaxyIds[0], new THREE.Vector3(0, 0, -distanceToVertex)); // North
+    positions.set(galaxyIds[1], new THREE.Vector3(-distanceToVertex, 0, 0)); // West
+    positions.set(galaxyIds[2], new THREE.Vector3(distanceToVertex, 0, 0));  // East
+    positions.set(galaxyIds[3], new THREE.Vector3(0, 0, distanceToVertex));  // South
     
-    boundingRadius = halfDiagonal;
+    boundingRadius = distanceToVertex;
   }
   
   // Pattern 5: Five or more galaxies - circular ring
@@ -156,4 +156,35 @@ export function validateSpacing(
   galaxyMaxDiameter: number = 44
 ): boolean {
   return spacing > galaxyMaxDiameter;
+}
+
+/**
+ * Validate that spacing is sufficient for circular ring layout (5+ galaxies)
+ * Checks chord distance between adjacent galaxies on the ring
+ * @param galaxyCount - Number of galaxies in the ring
+ * @param spacing - Spacing used to calculate ring radius
+ * @param galaxyMaxDiameter - Maximum diameter of any galaxy
+ * @returns true if chord distance between adjacent galaxies exceeds diameter
+ */
+export function validateRingSpacing(
+  galaxyCount: number,
+  spacing: number,
+  galaxyMaxDiameter: number = 44
+): boolean {
+  if (galaxyCount < 5) {
+    return true; // Not a ring layout
+  }
+  
+  // Calculate ring radius: r = (n * spacing) / (2π)
+  const radius = (galaxyCount * spacing) / (2 * Math.PI);
+  
+  // Calculate angle between adjacent galaxies
+  const angleStep = (2 * Math.PI) / galaxyCount;
+  
+  // Calculate chord distance between adjacent galaxies
+  // Chord length = 2r * sin(θ/2)
+  const chordDistance = 2 * radius * Math.sin(angleStep / 2);
+  
+  // Chord distance must exceed galaxy diameter to prevent overlap
+  return chordDistance > galaxyMaxDiameter;
 }

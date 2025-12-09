@@ -247,11 +247,12 @@ The layout system implements five distinct patterns optimized for different gala
 - Arranged in diamond (square rotated 45°)
 - Vertices on cardinal directions (N, S, E, W)
 - North/South aligned on Z-axis, East/West on X-axis
-- Distance from center to vertex: `spacing / 2`
-- Bounding radius: `spacing / 2`
+- Distance from center to vertex: `spacing / √2`
+- Bounding radius: `spacing / √2`
 
 **Geometry:**
-- Diagonal length: `spacing`
+- Side length (distance between adjacent galaxies): `spacing`
+- Distance from center to vertex: `spacing / √2 ≈ 0.707 × spacing`
 - All vertices equidistant from origin
 - 90° angles between adjacent vertices
 
@@ -301,8 +302,12 @@ calculateGalaxyLayout(galaxyIds, spacing): GalaxyLayout
 // Get camera distance for layout
 getRecommendedCameraDistance(boundingRadius, galaxyMaxRadius): number
 
-// Validate spacing sufficiency
+// Validate spacing sufficiency (general)
 validateSpacing(spacing, galaxyMaxDiameter): boolean
+
+// Validate spacing for circular ring (5+ galaxies)
+// Checks chord distance between adjacent galaxies on the ring
+validateRingSpacing(galaxyCount, spacing, galaxyMaxDiameter): boolean
 ```
 
 ### Integration with UniverseScene
@@ -351,9 +356,25 @@ MIN_SPACING = MAX_GALAXY_DIAMETER + SAFETY_MARGIN
 
 **Runtime Validation:**
 - Development mode checks spacing sufficiency
-- Warns if spacing < max diameter
+- `validateSpacing()` checks that spacing > max diameter
+- `validateRingSpacing()` validates chord distance for circular rings (5+ galaxies)
+- For ring layouts, chord distance between adjacent galaxies must exceed diameter
+- Warns if validation fails
 - Suggests increased spacing value
 - Production skips validation for performance
+
+**Ring Spacing Formula:**
+```
+For n galaxies on a ring:
+- Radius: r = (n × spacing) / (2π)
+- Angle between adjacent galaxies: θ = 2π / n
+- Chord distance: d = 2r × sin(θ/2)
+- Required: d > galaxy_diameter
+```
+
+**Example:** For 5 galaxies with spacing=50:
+- Radius ≈ 39.79 units
+- Chord distance ≈ 46.78 units > 44 units ✓
 
 ### Camera Focus Calculations
 

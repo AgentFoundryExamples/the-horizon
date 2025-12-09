@@ -7,6 +7,7 @@ import {
   calculateGalaxyLayout,
   getRecommendedCameraDistance,
   validateSpacing,
+  validateRingSpacing,
   type GalaxyLayout,
 } from '../layout';
 
@@ -172,6 +173,31 @@ describe('Galaxy Layout System', () => {
         expect(Math.abs(centerX)).toBeLessThan(0.01);
         expect(Math.abs(centerZ)).toBeLessThan(0.01);
       });
+      
+      it('should maintain correct spacing between adjacent galaxies', () => {
+        const spacing = 50;
+        const layout = calculateGalaxyLayout(['galaxy-1', 'galaxy-2', 'galaxy-3', 'galaxy-4'], spacing);
+        
+        const positions = [
+          layout.positions.get('galaxy-1')!, // North
+          layout.positions.get('galaxy-2')!, // West
+          layout.positions.get('galaxy-3')!, // East
+          layout.positions.get('galaxy-4')!, // South
+        ];
+        
+        // Check distance between adjacent galaxies (N-W, W-S, S-E, E-N)
+        const distances = [
+          positions[0].distanceTo(positions[1]), // N to W
+          positions[1].distanceTo(positions[3]), // W to S
+          positions[3].distanceTo(positions[2]), // S to E
+          positions[2].distanceTo(positions[0]), // E to N
+        ];
+        
+        // All adjacent distances should equal spacing (within floating point tolerance)
+        distances.forEach(dist => {
+          expect(Math.abs(dist - spacing)).toBeLessThan(0.01);
+        });
+      });
     });
     
     describe('Five+ Galaxies (Circular Ring)', () => {
@@ -329,6 +355,40 @@ describe('Galaxy Layout System', () => {
     
     it('should handle edge case of equal spacing and diameter', () => {
       expect(validateSpacing(50, 50)).toBe(false);
+    });
+  });
+  
+  describe('validateRingSpacing', () => {
+    it('should return true for non-ring layouts (< 5 galaxies)', () => {
+      expect(validateRingSpacing(1, 50, 44)).toBe(true);
+      expect(validateRingSpacing(4, 50, 44)).toBe(true);
+    });
+    
+    it('should validate chord distance for ring layouts', () => {
+      // For 5 galaxies with spacing 50:
+      // radius = (5 * 50) / (2π) ≈ 39.79
+      // angleStep = 2π / 5 = 72°
+      // chordDistance = 2 * 39.79 * sin(36°) ≈ 46.78
+      // This is > 44, so should be valid
+      expect(validateRingSpacing(5, 50, 44)).toBe(true);
+    });
+    
+    it('should detect insufficient chord distance', () => {
+      // For 20 galaxies with spacing 30:
+      // radius = (20 * 30) / (2π) ≈ 95.49
+      // angleStep = 2π / 20 = 18°
+      // chordDistance = 2 * 95.49 * sin(9°) ≈ 29.88
+      // This is < 44, so should be invalid
+      expect(validateRingSpacing(20, 30, 44)).toBe(false);
+    });
+    
+    it('should work for large galaxy counts', () => {
+      // For 100 galaxies with spacing 50:
+      // radius = (100 * 50) / (2π) ≈ 795.77
+      // angleStep = 2π / 100 = 3.6°
+      // chordDistance = 2 * 795.77 * sin(1.8°) ≈ 49.99
+      // This is > 44, so should be valid
+      expect(validateRingSpacing(100, 50, 44)).toBe(true);
     });
   });
 });
