@@ -23,6 +23,10 @@ import Modal from './Modal';
 import NotificationBanner, { NotificationType } from './NotificationBanner';
 import InlineNotification from './InlineNotification';
 
+// Graphics configuration is available for future enhancement
+// See docs/graphics.md for usage details
+// import { DEFAULT_GRAPHICS_CONFIG, GraphicsConfig } from '@/lib/graphics';
+
 interface UniverseEditorProps {
   universe: Universe;
   gitBaseHash: string;
