@@ -799,6 +799,118 @@ While not enforced, keep in mind:
 - Server-side validation prevents saving duplicates
 
 
+## Scene Navigation with Breadcrumbs
+
+The Horizon provides intuitive breadcrumb navigation in the 3D scene, allowing users to quickly jump between different levels of the universe hierarchy without stepping back sequentially.
+
+### Using Breadcrumb Navigation
+
+**What are Breadcrumbs?**
+
+Breadcrumbs are interactive navigation controls displayed at the top of the scene that show your current location in the universe hierarchy. They provide one-click navigation to any parent level.
+
+**Breadcrumb Hierarchy:**
+```
+Universe → Galaxy → Solar System → Planet
+```
+
+**How to Use:**
+1. **Click any breadcrumb** to navigate directly to that level
+2. **Use keyboard navigation**: Press Tab to focus breadcrumbs, then Enter or Space to activate
+3. **Current location** is highlighted in bold and disabled (non-clickable)
+4. **Parent levels** are clickable and allow instant navigation
+
+### Navigation Examples
+
+**From Planet to Universe:**
+```
+Universe (clickable) → Milky Way (clickable) → Solar System (clickable) → Earth (current)
+                                                                          ↓ click Universe
+Universe (current)
+```
+
+**From Solar System to Galaxy:**
+```
+Universe (clickable) → Milky Way (clickable) → Solar System (current)
+                                ↓ click Milky Way
+Universe (clickable) → Milky Way (current)
+```
+
+### Keyboard Navigation
+
+Breadcrumb navigation is fully keyboard accessible:
+
+- **Tab**: Move focus between breadcrumb buttons
+- **Shift+Tab**: Move focus backwards
+- **Enter** or **Space**: Activate the focused breadcrumb
+- **Focus indicator**: A blue outline shows the currently focused breadcrumb
+
+### Accessibility Features
+
+The breadcrumb system includes comprehensive accessibility support:
+
+- **ARIA labels**: Each breadcrumb has a descriptive label (e.g., "Navigate to Milky Way view")
+- **aria-current**: The current page is marked with `aria-current="page"` for screen readers
+- **Disabled state**: Active breadcrumbs are disabled to prevent redundant navigation
+- **Focus outlines**: Clear visual indicators for keyboard navigation
+- **Hover effects**: Visual feedback on mouse hover for clickable breadcrumbs
+
+### Behavior and Edge Cases
+
+**Active Breadcrumb:**
+- The breadcrumb for your current location is displayed in bold
+- It is disabled and does not respond to clicks
+- This prevents unnecessary navigation to the current page
+
+**Transition Safety:**
+- During scene transitions, all breadcrumbs are temporarily disabled
+- This prevents navigation conflicts and ensures smooth animations
+- Breadcrumbs re-enable once the transition completes
+
+**Rapid Navigation:**
+- Multiple rapid clicks are queued safely by the navigation system
+- The system ensures smooth transitions even with quick navigation
+- Each navigation completes before the next begins
+
+**Hover State Cleanup:**
+- When navigating via breadcrumbs, any hover labels are automatically cleared
+- This prevents stale hover tooltips from lingering after navigation
+- Ensures a clean visual state at each navigation level
+
+**Missing Hierarchy Data:**
+- If intermediate hierarchy data is missing (e.g., no solar systems in a galaxy)
+- Breadcrumbs adapt by showing only available levels
+- The system gracefully handles truncated hierarchies
+
+**Small Screen Support:**
+- Breadcrumbs remain tappable on mobile devices
+- Touch targets are sized for easy interaction
+- Layout adjusts to prevent overlapping with other HUD elements
+
+### Developer Notes
+
+**Store Integration:**
+The breadcrumb system integrates with the global navigation store (`src/lib/store.ts`):
+- `navigateToUniverse()`: Navigate to universe view
+- `navigateToGalaxy(galaxyId)`: Navigate to specific galaxy
+- `navigateToSolarSystem(solarSystemId)`: Navigate to specific solar system
+- All methods include hover state cleanup and transition queueing
+
+**Component Location:**
+Breadcrumb navigation is implemented in `src/components/SceneHUD.tsx`
+
+**Testing:**
+Comprehensive unit tests cover:
+- Click navigation for all breadcrumb levels
+- Keyboard navigation (Enter/Space)
+- ARIA labels and accessibility
+- No-op behavior for active breadcrumbs
+- Hover state cleanup
+- Rapid click queueing
+
+See `src/components/__tests__/SceneHUD.test.tsx` for test implementations.
+
+
 ## Overview
 
 Planets and moons in The Horizon use **markdown** to render rich, readable content. When users click on a planet, they land on its surface and see a scrollable markdown pane with:

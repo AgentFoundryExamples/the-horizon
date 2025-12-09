@@ -5,6 +5,7 @@
  * Shows breadcrumb trail, back button, and overlay hover labels
  */
 
+import { useState } from 'react';
 import { useNavigationStore } from '@/lib/store';
 import { useHoverStore } from '@/lib/hover-store';
 import type { Galaxy } from '@/lib/universe/types';
@@ -33,9 +34,16 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
     focusedMoonId,
     isTransitioning,
     navigateBack,
+    navigateToUniverse,
+    navigateToGalaxy,
+    navigateToSolarSystem,
   } = useNavigationStore();
   
   const { labelsVisible, toggleLabelsVisibility } = useHoverStore();
+  
+  // State for managing focus and hover styles declaratively
+  const [focusedBreadcrumb, setFocusedBreadcrumb] = useState<string | null>(null);
+  const [hoveredBreadcrumb, setHoveredBreadcrumb] = useState<string | null>(null);
 
   const focusedGalaxy = galaxies.find((g) => g.id === focusedGalaxyId);
   const focusedSolarSystem = focusedGalaxy?.solarSystems?.find(
@@ -43,6 +51,60 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
   );
   const focusedPlanet = focusedSolarSystem?.planets?.find((p) => p.id === focusedPlanetId);
   const focusedMoon = focusedPlanet?.moons?.find((m) => m.id === focusedMoonId);
+
+  // Handler for keyboard navigation
+  const handleBreadcrumbKeyPress = (event: React.KeyboardEvent, handler: () => void) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handler();
+    }
+  };
+
+  // Common styles for breadcrumb buttons
+  const getBreadcrumbButtonStyle = (
+    breadcrumbId: string,
+    isActive: boolean, 
+    isDisabled: boolean
+  ) => {
+    const isFocused = focusedBreadcrumb === breadcrumbId;
+    const isHovered = hoveredBreadcrumb === breadcrumbId;
+    
+    return {
+      background: 'none',
+      border: 'none',
+      padding: '0.25rem 0.5rem',
+      margin: '-0.25rem -0.5rem',
+      color: isActive ? '#FFFFFF' : (isHovered ? '#FFFFFF' : '#CCCCCC'),
+      fontWeight: isActive ? ('bold' as const) : ('normal' as const),
+      fontSize: '0.9rem',
+      cursor: isDisabled ? 'default' : 'pointer',
+      pointerEvents: 'auto' as const,
+      textDecoration: isHovered && !isActive ? 'underline' : 'none',
+      borderRadius: '4px',
+      transition: 'all 0.2s',
+      opacity: isTransitioning ? 0.5 : 1,
+      outline: isFocused && !isActive ? '2px solid #4A90E2' : 'none',
+      outlineOffset: isFocused && !isActive ? '2px' : '0',
+    };
+  };
+
+  // Consolidated hover handler
+  const handleBreadcrumbHover = (breadcrumbId: string, isActive: boolean, isEntering: boolean) => {
+    if (!isTransitioning && !isActive) {
+      setHoveredBreadcrumb(isEntering ? breadcrumbId : null);
+    }
+  };
+
+  // Consolidated focus handler
+  const handleBreadcrumbFocus = (breadcrumbId: string, isActive: boolean) => {
+    if (!isTransitioning && !isActive) {
+      setFocusedBreadcrumb(breadcrumbId);
+    }
+  };
+
+  const handleBreadcrumbBlur = () => {
+    setFocusedBreadcrumb(null);
+  };
 
   return (
     <>
@@ -67,27 +129,76 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
           color: '#CCCCCC',
         }}
       >
-        <span>Universe</span>
+        {/* Universe breadcrumb - always clickable unless at universe level */}
+        <button
+          onClick={() => navigateToUniverse()}
+          onKeyDown={(e) => handleBreadcrumbKeyPress(e, navigateToUniverse)}
+          disabled={isTransitioning || focusLevel === 'universe'}
+          aria-label="Navigate to Universe view"
+          aria-current={focusLevel === 'universe' ? 'page' : undefined}
+          style={getBreadcrumbButtonStyle('universe', focusLevel === 'universe', isTransitioning || focusLevel === 'universe')}
+          onMouseEnter={() => handleBreadcrumbHover('universe', focusLevel === 'universe', true)}
+          onMouseLeave={() => handleBreadcrumbHover('universe', focusLevel === 'universe', false)}
+          onFocus={() => handleBreadcrumbFocus('universe', focusLevel === 'universe')}
+          onBlur={handleBreadcrumbBlur}
+        >
+          Universe
+        </button>
+        
         {focusLevel !== 'universe' && (
           <>
             <span>→</span>
-            <span style={{ color: '#FFFFFF', fontWeight: 'bold' }}>
+            {/* Galaxy breadcrumb - clickable when not at galaxy level */}
+            <button
+              onClick={() => focusedGalaxyId && navigateToGalaxy(focusedGalaxyId)}
+              onKeyDown={(e) => handleBreadcrumbKeyPress(e, () => focusedGalaxyId && navigateToGalaxy(focusedGalaxyId))}
+              disabled={isTransitioning || focusLevel === 'galaxy' || !focusedGalaxyId}
+              aria-label={`Navigate to ${focusedGalaxy?.name || 'Galaxy'} view`}
+              aria-current={focusLevel === 'galaxy' ? 'page' : undefined}
+              style={getBreadcrumbButtonStyle('galaxy', focusLevel === 'galaxy', isTransitioning || focusLevel === 'galaxy')}
+              onMouseEnter={() => handleBreadcrumbHover('galaxy', focusLevel === 'galaxy', true)}
+              onMouseLeave={() => handleBreadcrumbHover('galaxy', focusLevel === 'galaxy', false)}
+              onFocus={() => handleBreadcrumbFocus('galaxy', focusLevel === 'galaxy')}
+              onBlur={handleBreadcrumbBlur}
+            >
               {focusedGalaxy?.name || 'Galaxy'}
-            </span>
+            </button>
           </>
         )}
+        
         {(focusLevel === 'solar-system' || focusLevel === 'planet') && (
           <>
             <span>→</span>
-            <span style={{ color: '#FFFFFF', fontWeight: 'bold' }}>
+            {/* Solar System breadcrumb - clickable when at planet level */}
+            <button
+              onClick={() => focusedSolarSystemId && navigateToSolarSystem(focusedSolarSystemId)}
+              onKeyDown={(e) => handleBreadcrumbKeyPress(e, () => focusedSolarSystemId && navigateToSolarSystem(focusedSolarSystemId))}
+              disabled={isTransitioning || focusLevel === 'solar-system' || !focusedSolarSystemId}
+              aria-label={`Navigate to ${focusedSolarSystem?.name || 'Solar System'} view`}
+              aria-current={focusLevel === 'solar-system' ? 'page' : undefined}
+              style={getBreadcrumbButtonStyle('solar-system', focusLevel === 'solar-system', isTransitioning || focusLevel === 'solar-system')}
+              onMouseEnter={() => handleBreadcrumbHover('solar-system', focusLevel === 'solar-system', true)}
+              onMouseLeave={() => handleBreadcrumbHover('solar-system', focusLevel === 'solar-system', false)}
+              onFocus={() => handleBreadcrumbFocus('solar-system', focusLevel === 'solar-system')}
+              onBlur={handleBreadcrumbBlur}
+            >
               {focusedSolarSystem?.name || 'Solar System'}
-            </span>
+            </button>
           </>
         )}
+        
         {focusLevel === 'planet' && (
           <>
             <span>→</span>
-            <span style={{ color: '#FFFFFF', fontWeight: 'bold' }}>
+            {/* Planet breadcrumb - currently active, not clickable */}
+            <span 
+              style={{ 
+                color: '#FFFFFF', 
+                fontWeight: 'bold',
+                padding: '0.25rem 0.5rem',
+              }}
+              aria-current="page"
+            >
               {focusedMoon ? focusedMoon.name : focusedPlanet?.name || 'Planet'}
             </span>
           </>
