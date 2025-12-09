@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 51,
+  "total_files": 53,
   "files": [
     {
       "schema_version": "2.0",
@@ -578,6 +578,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/universe/__tests__/planet-layout.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 11085,
+        "loc": 258,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/universe/__tests__/scale-constants.test.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -676,6 +690,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/universe/planet-layout.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 4690,
+        "loc": 123,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/universe/scale-constants.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -697,8 +725,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 9236,
-        "loc": 245,
+        "size_bytes": 10524,
+        "loc": 285,
         "todo_count": 0
       }
     },

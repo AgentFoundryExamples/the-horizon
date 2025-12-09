@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 51
+Total files: 53
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -375,6 +375,15 @@ Total files: 51
 **LOC:** 239  
 **TODOs/FIXMEs:** 0  
 
+## src/lib/universe/__tests__/planet-layout.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 10.83 KB  
+**LOC:** 258  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/universe/__tests__/scale-constants.test.ts
 **Language:** TypeScript  
 **Role:** implementation  
@@ -438,6 +447,15 @@ Total files: 51
 **LOC:** 96  
 **TODOs/FIXMEs:** 0  
 
+## src/lib/universe/planet-layout.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 4.58 KB  
+**LOC:** 123  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/universe/scale-constants.ts
 **Language:** TypeScript  
 **Role:** implementation  
@@ -452,8 +470,8 @@ Total files: 51
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 9.02 KB  
-**LOC:** 245  
+**Size:** 10.28 KB  
+**LOC:** 285  
 **TODOs/FIXMEs:** 0  
 
 ## src/middleware.ts

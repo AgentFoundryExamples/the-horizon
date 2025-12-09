@@ -8,8 +8,8 @@ Includes classification of external dependencies as stdlib vs third-party.
 
 ## Statistics
 
-- **Total files**: 51
-- **Intra-repo dependencies**: 43
+- **Total files**: 53
+- **Intra-repo dependencies**: 46
 - **External stdlib dependencies**: 5
 - **External third-party dependencies**: 21
 
@@ -53,7 +53,7 @@ Total: 21 unique packages
 
 ## Most Depended Upon Files (Intra-Repo)
 
-- `src/lib/universe/types.ts` (11 dependents)
+- `src/lib/universe/types.ts` (13 dependents)
 - `src/lib/universe/mutate.ts` (6 dependents)
 - `src/lib/crypto.ts` (4 dependents)
 - `src/lib/store.ts` (3 dependents)
@@ -73,6 +73,6 @@ Total: 21 unique packages
 - `src/lib/universe/__tests__/galaxy-creation.test.ts` (2 dependencies)
 - `src/lib/universe/__tests__/mutate.test.ts` (2 dependencies)
 - `src/lib/universe/__tests__/persist.test.ts` (2 dependencies)
+- `src/lib/universe/__tests__/planet-layout.test.ts` (2 dependencies)
 - `src/lib/universe/data-service.ts` (2 dependencies)
 - `src/lib/universe/persist.ts` (2 dependencies)
-- `src/lib/__tests__/animation.test.ts` (1 dependencies)

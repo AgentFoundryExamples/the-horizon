@@ -453,6 +453,15 @@
       }
     },
     {
+      "id": "src/lib/universe/__tests__/planet-layout.test.ts",
+      "path": "src/lib/universe/__tests__/planet-layout.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/universe/__tests__/scale-constants.test.ts",
       "path": "src/lib/universe/__tests__/scale-constants.test.ts",
       "type": "file",
@@ -521,6 +530,15 @@
           "fs/promises",
           "path"
         ],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/universe/planet-layout.ts",
+      "path": "src/lib/universe/planet-layout.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
         "third-party": []
       }
     },
@@ -696,6 +714,14 @@
       "target": "src/lib/universe/types.ts"
     },
     {
+      "source": "src/lib/universe/__tests__/planet-layout.test.ts",
+      "target": "src/lib/universe/planet-layout.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/planet-layout.test.ts",
+      "target": "src/lib/universe/types.ts"
+    },
+    {
       "source": "src/lib/universe/__tests__/scale-constants.test.ts",
       "target": "src/lib/universe/scale-constants.ts"
     },
@@ -722,6 +748,10 @@
     {
       "source": "src/lib/universe/persist.ts",
       "target": "src/lib/universe/mutate.ts"
+    },
+    {
+      "source": "src/lib/universe/planet-layout.ts",
+      "target": "src/lib/universe/types.ts"
     },
     {
       "source": "src/middleware.ts",
