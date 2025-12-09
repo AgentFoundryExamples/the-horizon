@@ -115,7 +115,7 @@ export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurface
     return normalizePlanetLayout(planet.layoutConfig);
   }, [planet.layoutConfig]);
 
-  // Apply scale to planet mesh only when it changes
+  // Apply scale to planet mesh only when it changes (not in useFrame)
   const planetScale = layoutConfig.planetRenderScale;
   
   useEffect(() => {
@@ -124,9 +124,9 @@ export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurface
     }
   }, [planetScale]);
 
-  useFrame((state) => {
+  useFrame(() => {
     if (planetRef.current) {
-      // Gentle rotation
+      // Gentle rotation (scale is handled in useEffect above)
       planetRef.current.rotation.y += 0.001;
     }
   });

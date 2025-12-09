@@ -93,7 +93,12 @@
   position: absolute;
   bottom: var(--spacing-xl);
   left: 50%;
-  /* Don't scale label with planet render - keep it readable */
+  /* 
+   * Note: We intentionally do NOT apply var(--planet-render-scale) here.
+   * The label should remain readable regardless of planet size.
+   * Scaling the label with the planet would make text tiny on small planets
+   * and oversized on large planets, harming readability.
+   */
   transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.9);
   border: 2px solid rgba(74, 144, 226, 0.6);
