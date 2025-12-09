@@ -697,12 +697,18 @@ grep -r "emissive" src/components/ | grep -v "test"
 - ✅ Expected: No flickering or glitches
 - ✅ Expected: No memory leaks
 
-**Test: Invalid position data (developer scenario)**
-- This would require code modification to inject invalid data
-- If position contains NaN or Infinity:
-  - ✅ Expected: Console warning logged
-  - ✅ Expected: Application continues without crash
-  - ✅ Expected: Label does not render for invalid object
+**Test: Invalid position data (optional developer/QA scenario)**
+- **Note**: This test is optional and requires code modification. Skip if not performing deep validation testing.
+- **Setup**: Temporarily modify hover state to inject test data with `NaN` or `Infinity` coordinates
+- **How to test**: 
+  1. Open `src/lib/hover-store.ts` or relevant component
+  2. Inject test object: `setHoveredObject({ id: 'test', name: 'Test', type: 'galaxy', position: new THREE.Vector3(NaN, 0, 0) })`
+  3. Check browser console for validation warnings
+- **Expected behavior**:
+  - ✅ Console warning logged about invalid position data
+  - ✅ Application continues without crash
+  - ✅ Label does not render for invalid object
+- **Cleanup**: Remove test code after validation
 
 **Browser Console Verification:**
 Look for these patterns (should NOT appear):

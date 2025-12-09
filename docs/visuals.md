@@ -36,7 +36,7 @@ The breadcrumb navigation appears in the SceneHUD component at the top of the vi
 <nav aria-label="Breadcrumb navigation">
   <ol className="breadcrumb">
     <li><a href="/" onClick={navigateToUniverse}>Universe</a></li>
-    <li><a onClick={navigateToGalaxy}>Andromeda Galaxy</a></li>
+    <li><a href="#" onClick={navigateToGalaxy}>Andromeda Galaxy</a></li>
     <li aria-current="page">Solar System Alpha</li>
   </ol>
 </nav>
@@ -90,7 +90,7 @@ The breadcrumb navigation appears in the SceneHUD component at the top of the vi
 <nav aria-label="Breadcrumb navigation">
   <ol>
     <li><a href="/" aria-label="Navigate to Universe view">Universe</a></li>
-    <li><a aria-label="Navigate to Andromeda Galaxy">Andromeda</a></li>
+    <li><a href="#" aria-label="Navigate to Andromeda Galaxy">Andromeda</a></li>
     <li aria-current="page">Solar System Alpha</li>
   </ol>
 </nav>
