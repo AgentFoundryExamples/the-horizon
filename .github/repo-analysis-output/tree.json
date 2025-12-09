@@ -329,6 +329,34 @@
               ]
             },
             {
+              "type": "directory",
+              "name": "shared",
+              "children": [
+                {
+                  "type": "directory",
+                  "name": "__tests__",
+                  "children": [
+                    {
+                      "type": "file",
+                      "name": "planetary-system.test.ts"
+                    }
+                  ]
+                },
+                {
+                  "type": "file",
+                  "name": "CentralStar.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "OrbitingPlanet.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "PlanetarySystem.tsx"
+                }
+              ]
+            },
+            {
               "type": "file",
               "name": "ContextualWelcomeMessage.tsx"
             },

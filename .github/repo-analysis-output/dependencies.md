@@ -8,10 +8,10 @@ Includes classification of external dependencies as stdlib vs third-party.
 
 ## Statistics
 
-- **Total files**: 47
+- **Total files**: 48
 - **Intra-repo dependencies**: 39
 - **External stdlib dependencies**: 5
-- **External third-party dependencies**: 16
+- **External third-party dependencies**: 21
 
 ## External Dependencies
 
@@ -27,16 +27,21 @@ Total: 5 unique modules
 
 ### Third-Party Packages
 
-Total: 16 unique packages
+Total: 21 unique packages
 
 - `@/../public/universe/universe.json`
+- `@/components/shared/CentralStar`
+- `@/components/shared/OrbitingPlanet`
+- `@/components/shared/PlanetarySystem`
 - `@/lib/auth`
 - `@/lib/crypto`
 - `@/lib/github`
 - `@/lib/hover-store`
 - `@/lib/universe/mutate`
 - `@/lib/universe/persist`
+- `@/lib/universe/scale-constants`
 - `@/lib/universe/types`
+- `@jest/globals`
 - `@testing-library/jest-dom`
 - `@testing-library/react`
 - `next/headers`
@@ -44,7 +49,7 @@ Total: 16 unique packages
 - `next/server`
 - `react`
 - `three`
-- `zustand`
+- ... and 1 more (see JSON for full list)
 
 ## Most Depended Upon Files (Intra-Repo)
 

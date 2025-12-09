@@ -71,6 +71,12 @@
       ├── PlanetEditor.tsx
       ├── SolarSystemEditor.tsx
       └── UniverseEditor.tsx
+    ├── shared
+      ├── __tests__
+        └── planetary-system.test.ts
+      ├── CentralStar.tsx
+      ├── OrbitingPlanet.tsx
+      └── PlanetarySystem.tsx
     ├── ContextualWelcomeMessage.tsx
     ├── GalaxyView.tsx
     ├── MarkdownContent.tsx

@@ -93,6 +93,22 @@
       }
     },
     {
+      "id": "src/components/shared/__tests__/planetary-system.test.ts",
+      "path": "src/components/shared/__tests__/planetary-system.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": [
+          "@/components/shared/CentralStar",
+          "@/components/shared/OrbitingPlanet",
+          "@/components/shared/PlanetarySystem",
+          "@/lib/universe/scale-constants",
+          "@jest/globals",
+          "three"
+        ]
+      }
+    },
+    {
       "id": "src/lib/__tests__/animation.test.ts",
       "path": "src/lib/__tests__/animation.test.ts",
       "type": "file",
@@ -679,13 +695,18 @@
     ],
     "third-party": [
       "@/../public/universe/universe.json",
+      "@/components/shared/CentralStar",
+      "@/components/shared/OrbitingPlanet",
+      "@/components/shared/PlanetarySystem",
       "@/lib/auth",
       "@/lib/crypto",
       "@/lib/github",
       "@/lib/hover-store",
       "@/lib/universe/mutate",
       "@/lib/universe/persist",
+      "@/lib/universe/scale-constants",
       "@/lib/universe/types",
+      "@jest/globals",
       "@testing-library/jest-dom",
       "@testing-library/react",
       "next/headers",
@@ -696,6 +717,6 @@
       "zustand"
     ],
     "stdlib_count": 5,
-    "third-party_count": 16
+    "third-party_count": 21
   }
 }
