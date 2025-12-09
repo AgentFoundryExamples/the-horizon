@@ -252,6 +252,10 @@
                 },
                 {
                   "type": "file",
+                  "name": "SolarSystemView-orbits.test.tsx"
+                },
+                {
+                  "type": "file",
                   "name": "UniverseScene.test.tsx"
                 },
                 {

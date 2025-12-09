@@ -362,8 +362,8 @@ Total files: 42
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 8.88 KB  
-**LOC:** 228  
+**Size:** 11.87 KB  
+**LOC:** 293  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/types.ts

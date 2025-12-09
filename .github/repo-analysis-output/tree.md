@@ -53,6 +53,7 @@
       ├── ContextualWelcomeMessage.test.tsx
       ├── SceneHUD.test.tsx
       ├── Sidebar.test.tsx
+      ├── SolarSystemView-orbits.test.tsx
       ├── UniverseScene.test.tsx
       └── WelcomeMessage.test.tsx
     ├── admin
