@@ -14,6 +14,11 @@ import { CentralStar } from './CentralStar';
 import { createSeededRandom, generateSeedFromId } from '@/lib/seeded-random';
 import type { getAnimationConfig } from '@/lib/animation';
 
+// Kepler's third law approximation factor
+// orbital_speed = KEPLER_ORBITAL_SPEED_FACTOR / (semiMajorAxis^2)
+// This gives inner planets faster orbital speeds than outer planets
+const KEPLER_ORBITAL_SPEED_FACTOR = 0.5;
+
 interface PlanetarySystemProps {
   solarSystem: SolarSystem;
   position: THREE.Vector3;
@@ -69,7 +74,7 @@ export function PlanetarySystem({
       const eccentricity = seededRandom() * scale.orbitEccentricity;
       const inclination = (seededRandom() - 0.5) * scale.orbitInclination;
       const argumentOfPeriapsis = seededRandom() * Math.PI * 2;
-      const orbitSpeed = 0.5 / (semiMajorAxis * semiMajorAxis); // Kepler's third law approximation
+      const orbitSpeed = KEPLER_ORBITAL_SPEED_FACTOR / (semiMajorAxis * semiMajorAxis); // Kepler's third law approximation
 
       // Planet visual properties
       const size = scale.planetBaseSize + (planet.moons?.length || 0) * scale.planetSizeIncrement;

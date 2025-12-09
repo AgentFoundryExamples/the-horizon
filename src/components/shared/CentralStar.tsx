@@ -29,6 +29,12 @@ interface CentralStarProps {
   enablePulse?: boolean;
 }
 
+// Star pulsing animation constants
+// Frequency multiplier for pulsing effect
+const PULSE_FREQUENCY = 2;
+// Amplitude of the pulsing scale effect (0.1 = 10% size variation)
+const PULSE_AMPLITUDE = 0.1;
+
 /**
  * CentralStar component
  * Renders a star with optional pulsing animation and lighting
@@ -70,7 +76,7 @@ export function CentralStar({
   // Pulsing animation for standalone stars
   useFrame((state) => {
     if (meshRef.current && enablePulse && animationConfig?.rotation) {
-      const scale = 1 + Math.sin(state.clock.getElapsedTime() * 2) * 0.1 * (animationConfig.intensity || 1);
+      const scale = 1 + Math.sin(state.clock.getElapsedTime() * PULSE_FREQUENCY) * PULSE_AMPLITUDE * (animationConfig.intensity || 1);
       meshRef.current.scale.setScalar(scale);
     }
   });
