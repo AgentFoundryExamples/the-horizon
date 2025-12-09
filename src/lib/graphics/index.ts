@@ -66,3 +66,25 @@ export {
   clonePlanetMaterial,
   clampAnimationMultiplier,
 } from './materials';
+
+// Starfield system
+export type { StarfieldConfig, StarfieldData } from './starfield';
+export {
+  createStarfieldConfig,
+  generateStarfield,
+  updateStarfield,
+  disposeStarfield,
+  validateStarfieldDensity,
+} from './starfield';
+
+// Galaxy renderer
+export type { GalaxyTheme, GalaxyRenderConfig, GalaxyLayer, GalaxyData } from './galaxy';
+export {
+  createGalaxyRenderConfig,
+  generateGalaxy,
+  updateGalaxy,
+  setGalaxyOpacity,
+  disposeGalaxy,
+  getGalaxyThemes,
+  validateGalaxyConfig,
+} from './galaxy';
