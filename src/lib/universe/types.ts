@@ -15,6 +15,9 @@
  * Core data models for the Horizon universe
  * Describes the hierarchical structure: Universe > Galaxy > SolarSystem > Planet > Moon
  * and independent Stars
+ * 
+ * Note: Graphics and rendering configuration is managed separately in @/lib/graphics
+ * See GraphicsConfig interface for visual customization options.
  */
 
 /**
