@@ -90,7 +90,7 @@ export const LABEL_CONFIGS: Record<FocusLevel, LabelConfig> = {
  * (solar-system provides a balanced middle-ground configuration)
  */
 export function getLabelConfig(focusLevel: FocusLevel): LabelConfig {
-  return LABEL_CONFIGS[focusLevel] || LABEL_CONFIGS['solar-system'];
+  return LABEL_CONFIGS[focusLevel] ?? LABEL_CONFIGS['solar-system'];
 }
 
 /**

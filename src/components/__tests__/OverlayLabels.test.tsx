@@ -261,6 +261,99 @@ describe('OverlayLabels - Per-Scene Configuration', () => {
     });
   });
 
+  describe('Vertical offset configuration', () => {
+    it('should apply universe offsetY to label transform', () => {
+      const { result: hoverResult } = renderHook(() => useHoverStore());
+
+      act(() => {
+        hoverResult.current.setHoveredObject({
+          id: 'test',
+          name: 'Test Galaxy',
+          type: 'galaxy',
+          position: new THREE.Vector3(0, 0, 0),
+        });
+      });
+
+      const { container } = render(<OverlayLabels />);
+
+      const labelElement = container.querySelector('.overlay-label');
+      const expectedTransform = `translate(-50%, calc(-100% - ${LABEL_CONFIGS.universe.offsetY}px))`;
+      expect(labelElement).toHaveStyle({ transform: expectedTransform });
+    });
+
+    it('should apply galaxy offsetY to label transform', () => {
+      const { result: navResult } = renderHook(() => useNavigationStore());
+      const { result: hoverResult } = renderHook(() => useHoverStore());
+
+      act(() => {
+        navResult.current.navigateToGalaxy('test-galaxy');
+        navResult.current.finishTransition();
+        hoverResult.current.setHoveredObject({
+          id: 'test',
+          name: 'Test System',
+          type: 'solar-system',
+          position: new THREE.Vector3(0, 0, 0),
+        });
+      });
+
+      const { container } = render(<OverlayLabels />);
+
+      const labelElement = container.querySelector('.overlay-label');
+      const expectedTransform = `translate(-50%, calc(-100% - ${LABEL_CONFIGS.galaxy.offsetY}px))`;
+      expect(labelElement).toHaveStyle({ transform: expectedTransform });
+    });
+
+    it('should apply solar-system offsetY to label transform', () => {
+      const { result: navResult } = renderHook(() => useNavigationStore());
+      const { result: hoverResult } = renderHook(() => useHoverStore());
+
+      act(() => {
+        navResult.current.navigateToGalaxy('test-galaxy');
+        navResult.current.finishTransition();
+        navResult.current.navigateToSolarSystem('test-system');
+        navResult.current.finishTransition();
+        hoverResult.current.setHoveredObject({
+          id: 'test',
+          name: 'Test Planet',
+          type: 'planet',
+          position: new THREE.Vector3(0, 0, 0),
+        });
+      });
+
+      const { container } = render(<OverlayLabels />);
+
+      const labelElement = container.querySelector('.overlay-label');
+      const expectedTransform = `translate(-50%, calc(-100% - ${LABEL_CONFIGS['solar-system'].offsetY}px))`;
+      expect(labelElement).toHaveStyle({ transform: expectedTransform });
+    });
+
+    it('should apply planet offsetY to label transform', () => {
+      const { result: navResult } = renderHook(() => useNavigationStore());
+      const { result: hoverResult } = renderHook(() => useHoverStore());
+
+      act(() => {
+        navResult.current.navigateToGalaxy('test-galaxy');
+        navResult.current.finishTransition();
+        navResult.current.navigateToSolarSystem('test-system');
+        navResult.current.finishTransition();
+        navResult.current.navigateToPlanet('test-planet');
+        navResult.current.finishTransition();
+        hoverResult.current.setHoveredObject({
+          id: 'test',
+          name: 'Test Moon',
+          type: 'planet',
+          position: new THREE.Vector3(0, 0, 0),
+        });
+      });
+
+      const { container } = render(<OverlayLabels />);
+
+      const labelElement = container.querySelector('.overlay-label');
+      const expectedTransform = `translate(-50%, calc(-100% - ${LABEL_CONFIGS.planet.offsetY}px))`;
+      expect(labelElement).toHaveStyle({ transform: expectedTransform });
+    });
+  });
+
   describe('Scene transitions', () => {
     it('should update config when transitioning from universe to galaxy', () => {
       const { result: navResult } = renderHook(() => useNavigationStore());

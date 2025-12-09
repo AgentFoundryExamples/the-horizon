@@ -91,6 +91,7 @@ export default function OverlayLabels() {
             style={{
               fontSize: labelConfig.fontSize,
               // Map 'wrap' to 'normal' for valid CSS whiteSpace value
+              // Default to 'nowrap' if textWrap is undefined
               whiteSpace: labelConfig.textWrap === 'wrap' ? 'normal' : 'nowrap',
             }}
           >{name}</div>

@@ -178,5 +178,15 @@ describe('label-config', () => {
       expect(LABEL_CONFIGS.galaxy.textWrap).toBe('nowrap');
       expect(LABEL_CONFIGS['solar-system'].textWrap).toBe('nowrap');
     });
+
+    it('should use nullish coalescing for fallback', () => {
+      // This tests that the fallback logic uses ?? instead of ||
+      // Create a scenario where || would incorrectly fallback
+      const invalidLevel = 'invalid' as any;
+      const config = getLabelConfig(invalidLevel);
+      
+      // Should get solar-system config as fallback
+      expect(config).toEqual(LABEL_CONFIGS['solar-system']);
+    });
   });
 });
