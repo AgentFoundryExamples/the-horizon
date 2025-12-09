@@ -21,6 +21,14 @@ import {
 } from '@/lib/camera';
 import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG as DEFAULT_ANIM_CONFIG } from '@/lib/animation';
 import { calculateGalaxyScaleWithOverride, calculateGalaxyScale } from '@/lib/universe/scale-constants';
+import {
+  DEFAULT_GRAPHICS_CONFIG,
+  createStarfieldConfig,
+  generateStarfield,
+  updateStarfield,
+  disposeStarfield,
+  type StarfieldData,
+} from '@/lib/graphics';
 import GalaxyView from './GalaxyView';
 import SolarSystemView from './SolarSystemView';
 import { PlanetSurface3D, PlanetSurfaceOverlay } from './PlanetSurface';
@@ -214,6 +222,53 @@ function GalaxyParticles({ galaxy, position, onClick, isActive, animationConfig,
   );
 }
 
+/**
+ * Background starfield component
+ * Renders config-driven starfield with parallax
+ */
+function BackgroundStarfield() {
+  const starfieldRef = useRef<THREE.Points | null>(null);
+  const starfieldDataRef = useRef<StarfieldData | null>(null);
+  const { isTransitioning } = useNavigationStore();
+  
+  // Generate starfield on mount
+  useEffect(() => {
+    const config = createStarfieldConfig(
+      DEFAULT_GRAPHICS_CONFIG.universe,
+      DEFAULT_GRAPHICS_CONFIG.galaxyView
+    );
+    const starfieldData = generateStarfield(config);
+    starfieldDataRef.current = starfieldData;
+    
+    return () => {
+      if (starfieldDataRef.current) {
+        disposeStarfield(starfieldDataRef.current);
+      }
+    };
+  }, []);
+  
+  // Update starfield animation each frame
+  useFrame((state, delta) => {
+    if (starfieldDataRef.current) {
+      // Pause parallax during camera transitions to avoid motion sickness
+      updateStarfield(starfieldDataRef.current, delta, isTransitioning);
+    }
+  });
+  
+  // Render starfield if data is available
+  if (!starfieldDataRef.current) {
+    return null;
+  }
+  
+  return (
+    <points
+      ref={starfieldRef}
+      geometry={starfieldDataRef.current.geometry}
+      material={starfieldDataRef.current.material}
+    />
+  );
+}
+
 interface SceneContentProps {
   galaxies: Galaxy[];
 }
@@ -391,6 +446,9 @@ function SceneContent({ galaxies }: SceneContentProps) {
     <>
       <ambientLight intensity={0.3} />
       <pointLight position={[10, 10, 10]} intensity={0.8} />
+      
+      {/* Background starfield - always visible */}
+      <BackgroundStarfield />
       
       {/* Render galaxies or galaxy detail view */}
       {focusLevel === 'universe' && galaxies.map((galaxy) => {

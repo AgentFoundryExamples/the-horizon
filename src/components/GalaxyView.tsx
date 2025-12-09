@@ -14,6 +14,15 @@ import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG } from '@/lib/animation';
 import { GALAXY_VIEW_SCALE, GALAXY_ORBIT_STYLE, GALAXY_VIEW_PLANETARY_SCALE } from '@/lib/universe/scale-constants';
 import { createSeededRandom, generateSeedFromId } from '@/lib/seeded-random';
+import {
+  DEFAULT_GRAPHICS_CONFIG,
+  createGalaxyRenderConfig,
+  generateGalaxy,
+  updateGalaxy,
+  disposeGalaxy,
+  type GalaxyData,
+  type GalaxyTheme,
+} from '@/lib/graphics';
 import { OrbitRing } from './OrbitRing';
 import { PlanetarySystem } from './shared/PlanetarySystem';
 import { CentralStar } from './shared/CentralStar';
@@ -42,6 +51,26 @@ function StarInstance({ star, position, animationConfig }: StarInstanceProps) {
   );
 }
 
+/**
+ * Map galaxy particle color theme to galaxy renderer theme
+ */
+function mapGalaxyTheme(particleColor?: string): GalaxyTheme {
+  if (!particleColor) return 'classic';
+  
+  const color = new THREE.Color(particleColor);
+  const hsl = { h: 0, s: 0, l: 0 };
+  color.getHSL(hsl);
+  
+  // Map based on hue
+  if (hsl.s < 0.2) return 'ethereal'; // Low saturation = ethereal
+  if (hsl.h < 0.15 || hsl.h > 0.95) return 'molten'; // Red/orange
+  if (hsl.h >= 0.15 && hsl.h < 0.4) return 'neon'; // Green/cyan
+  if (hsl.h >= 0.6 && hsl.h < 0.75) return 'neon'; // Blue/purple
+  if (hsl.h >= 0.75 && hsl.h < 0.95) return 'dark-matter'; // Deep purple
+  
+  return 'classic';
+}
+
 interface GalaxyViewProps {
   galaxy: Galaxy;
   position: THREE.Vector3;
@@ -58,9 +87,29 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
   const groupRef = useRef<THREE.Group>(null);
   const particlesRef = useRef<THREE.Points>(null);
   const originalPositionsRef = useRef<Float32Array | null>(null);
+  const galaxyDataRef = useRef<GalaxyData | null>(null);
+  const galaxyLayerRefs = useRef<(THREE.Points | null)[]>([]);
   const { navigateToSolarSystem } = useNavigationStore();
   const prefersReducedMotion = usePrefersReducedMotion();
   const animationConfig = getAnimationConfig(DEFAULT_ANIMATION_CONFIG, prefersReducedMotion);
+
+  // Generate layered galaxy background on mount
+  useEffect(() => {
+    const theme = mapGalaxyTheme(galaxy.particleColor);
+    const config = createGalaxyRenderConfig(
+      DEFAULT_GRAPHICS_CONFIG.galaxyView,
+      theme,
+      DEFAULT_GRAPHICS_CONFIG.universe.lowPowerMode ?? false
+    );
+    const galaxyData = generateGalaxy(config);
+    galaxyDataRef.current = galaxyData;
+    
+    return () => {
+      if (galaxyDataRef.current) {
+        disposeGalaxy(galaxyDataRef.current);
+      }
+    };
+  }, [galaxy.id, galaxy.particleColor]);
 
   // Layout solar systems in a circle aligned to ring
   const systemPositions = useMemo(() => {
@@ -105,7 +154,12 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
       groupRef.current.rotation.y += 0.001 * animationConfig.rotationSpeed * animationConfig.intensity;
     }
     
-    // Particle drift animation
+    // Update layered galaxy animation
+    if (galaxyDataRef.current) {
+      updateGalaxy(galaxyDataRef.current, state.clock.getElapsedTime());
+    }
+    
+    // Particle drift animation for simple background particles
     if (particlesRef.current && animationConfig.particleDrift) {
       const time = state.clock.getElapsedTime();
       const geometry = particlesRef.current.geometry;
@@ -130,6 +184,16 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
 
   return (
     <group ref={groupRef} position={position}>
+      {/* Layered galaxy background renderer */}
+      {galaxyDataRef.current && galaxyDataRef.current.layers.map((layer, index) => (
+        <points
+          key={`${galaxy.id}-layer-${index}`}
+          ref={(el) => { galaxyLayerRefs.current[index] = el; }}
+          geometry={layer.geometry}
+          material={layer.material}
+        />
+      ))}
+      
       {/* Galaxy rings for visual alignment */}
       {(galaxy.solarSystems && galaxy.solarSystems.length > 0) && (
         <OrbitRing
