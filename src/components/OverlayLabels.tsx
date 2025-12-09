@@ -9,10 +9,23 @@
 
 import { Html } from '@react-three/drei';
 import { useHoverStore } from '@/lib/hover-store';
-import { useNavigationStore } from '@/lib/store';
+import { useNavigationStore, type FocusLevel } from '@/lib/store';
 import { getLabelConfig, applyHoverLabelConfig } from '@/lib/label-config';
 import { useGraphicsConfigReadOnly } from '@/lib/graphics-context';
+import type { GraphicsConfig } from '@/lib/graphics/config';
 import '../styles/overlay-labels.css';
+
+/**
+ * Get the appropriate hover label config for the current focus level
+ */
+function getHoverLabelConfigForFocusLevel(graphicsConfig: GraphicsConfig, focusLevel: FocusLevel) {
+  if (focusLevel === 'universe' || focusLevel === 'galaxy') {
+    return graphicsConfig.galaxyView.hoverLabels;
+  } else if (focusLevel === 'planet') {
+    return graphicsConfig.planetView.hoverLabels;
+  }
+  return graphicsConfig.solarSystemView.hoverLabels;
+}
 
 /**
  * OverlayLabels component - must be inside Canvas
@@ -35,14 +48,7 @@ export default function OverlayLabels() {
 
   // Get per-scene label configuration and apply GraphicsConfig overrides
   const baseLabelConfig = getLabelConfig(focusLevel);
-  
-  // Determine which hover label config to apply based on focus level
-  let hoverLabelConfig = graphicsConfig.solarSystemView.hoverLabels;
-  if (focusLevel === 'universe' || focusLevel === 'galaxy') {
-    hoverLabelConfig = graphicsConfig.galaxyView.hoverLabels;
-  } else if (focusLevel === 'planet') {
-    hoverLabelConfig = graphicsConfig.planetView.hoverLabels;
-  }
+  const hoverLabelConfig = getHoverLabelConfigForFocusLevel(graphicsConfig, focusLevel);
 
   // Check if labels are enabled in config
   if (hoverLabelConfig && hoverLabelConfig.enabled === false) {

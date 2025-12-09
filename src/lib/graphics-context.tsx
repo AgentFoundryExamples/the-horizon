@@ -44,6 +44,7 @@ export function GraphicsConfigProvider({ children, initialConfig }: GraphicsConf
   const [lastError, setLastError] = useState<string | null>(null);
 
   // Load config from localStorage on mount
+  // Only runs on client side (typeof window !== 'undefined' check)
   useEffect(() => {
     try {
       if (typeof window === 'undefined') {
@@ -88,6 +89,7 @@ export function GraphicsConfigProvider({ children, initialConfig }: GraphicsConf
   }, []);
 
   // Save config to localStorage whenever it changes
+  // Skip during initial load to avoid overwriting the loaded config
   useEffect(() => {
     if (isLoading) return; // Don't save during initial load
 
