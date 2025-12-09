@@ -19,7 +19,7 @@
  * Combines 3D scene with HTML overlay for content display
  */
 
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { Planet, Moon, SolarSystem } from '@/lib/universe/types';
@@ -27,6 +27,15 @@ import { useNavigationStore } from '@/lib/store';
 import MarkdownContent from './MarkdownContent';
 import { calculateMoonSize } from '@/lib/universe/scale-constants';
 import { normalizePlanetLayout, layoutConfigToCSS } from '@/lib/universe/planet-layout';
+import {
+  DEFAULT_GRAPHICS_CONFIG,
+  getPlanetMaterialPreset,
+  detectDeviceCapabilities,
+  applyPlanetMaterial,
+  mapThemeToMaterialPreset,
+  clonePlanetMaterial,
+  clampAnimationMultiplier,
+} from '@/lib/graphics';
 
 /**
  * Validate and sanitize URL to prevent XSS and malicious URLs
@@ -109,24 +118,71 @@ function MoonSphere({ moon, index, onClick }: { moon: Moon; index: number; onCli
 export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurfaceProps) {
   const { navigateToMoon } = useNavigationStore();
   const planetRef = useRef<THREE.Mesh>(null);
+  const [atmosphereShell, setAtmosphereShell] = useState<THREE.Mesh | null>(null);
+
+  // Detect device capabilities for material optimization
+  const capabilities = useMemo(() => detectDeviceCapabilities(), []);
+
+  // Get graphics configuration
+  const graphicsConfig = useMemo(() => DEFAULT_GRAPHICS_CONFIG, []);
+  const planetViewConfig = graphicsConfig.planetView;
 
   // Get layout configuration for this planet
   const layoutConfig = useMemo(() => {
     return normalizePlanetLayout(planet.layoutConfig);
   }, [planet.layoutConfig]);
 
+  // Get material preset based on planet theme
+  const materialPreset = useMemo(() => {
+    const presetId = mapThemeToMaterialPreset(planet.theme);
+    const preset = getPlanetMaterialPreset(presetId);
+    // Clone to prevent reference mutation across multiple planets
+    return preset ? clonePlanetMaterial(preset) : null;
+  }, [planet.theme]);
+
+  // Apply material to planet mesh
+  useEffect(() => {
+    if (planetRef.current && materialPreset) {
+      const { material, atmosphereShell: newAtmosphere } = applyPlanetMaterial(
+        planetRef.current,
+        materialPreset,
+        planetViewConfig,
+        capabilities,
+        graphicsConfig.universe.lowPowerMode
+      );
+
+      // Add atmosphere shell if created
+      if (newAtmosphere && planetRef.current) {
+        planetRef.current.add(newAtmosphere);
+        setAtmosphereShell(newAtmosphere);
+      }
+
+      // Cleanup previous atmosphere on unmount
+      return () => {
+        if (atmosphereShell && planetRef.current) {
+          planetRef.current.remove(atmosphereShell);
+        }
+      };
+    }
+  }, [materialPreset, planetViewConfig, capabilities, graphicsConfig.universe.lowPowerMode]);
+
   // Apply scale to planet mesh only when it changes (not in useFrame)
   useEffect(() => {
     if (planetRef.current) {
-      const planetScale = layoutConfig.planetRenderScale;
+      const planetScale = layoutConfig.planetRenderScale * (planetViewConfig.planetRenderScale ?? 1.0);
       planetRef.current.scale.setScalar(planetScale);
     }
-  }, [layoutConfig]);
+  }, [layoutConfig, planetViewConfig.planetRenderScale]);
+
+  // Animation with configurable rotation speed
+  const rotationSpeed = useMemo(() => {
+    return clampAnimationMultiplier(planetViewConfig.rotationSpeed, 1.0) * 0.001;
+  }, [planetViewConfig.rotationSpeed]);
 
   useFrame(() => {
     if (planetRef.current) {
-      // Gentle rotation (scale is handled in useEffect above)
-      planetRef.current.rotation.y += 0.001;
+      // Rotation with configurable speed
+      planetRef.current.rotation.y += rotationSpeed;
     }
   });
 
@@ -135,22 +191,12 @@ export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurface
       {/* Planet sphere - optimized size for left-column visibility */}
       <mesh ref={planetRef}>
         <sphereGeometry args={[1.2, 32, 32]} />
-        <meshStandardMaterial
-          color={
-            planet.theme === 'blue-green'
-              ? '#2E86AB'
-              : planet.theme === 'red'
-              ? '#E63946'
-              : planet.theme === 'earth-like'
-              ? '#4A90E2'
-              : '#CCCCCC'
-          }
-        />
+        {/* Material is applied dynamically via applyPlanetMaterial */}
       </mesh>
 
       {/* Ambient lighting for planet */}
-      <ambientLight intensity={0.4} />
-      <directionalLight position={[10, 10, 5]} intensity={1} />
+      <ambientLight intensity={0.4 * (planetViewConfig.lightingIntensity ?? 1.0)} />
+      <directionalLight position={[10, 10, 5]} intensity={1.0 * (planetViewConfig.lightingIntensity ?? 1.0)} />
 
       {/* Moons in skybox */}
       {(planet.moons || []).map((moon, index) => (
