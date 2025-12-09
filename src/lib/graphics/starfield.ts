@@ -48,6 +48,7 @@ export interface StarfieldData {
   originalPositions: Float32Array; // For resetting
   config: StarfieldConfig;
   fallbackMode: boolean;
+  shaderError?: string; // Optional error message if shader compilation failed
 }
 
 // Performance constants
@@ -306,13 +307,16 @@ export function generateStarfield(config: StarfieldConfig): StarfieldData {
   // Try shader material first, fallback to simple material if it fails
   let material: THREE.ShaderMaterial | THREE.PointsMaterial;
   let fallbackMode = false;
+  let shaderError: string | undefined;
   
   try {
     material = createStarfieldShaderMaterial();
   } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
     console.warn('Starfield shader compilation failed, using fallback material', error);
     material = createFallbackMaterial();
     fallbackMode = true;
+    shaderError = `Shader compilation failed: ${errorMsg}`;
   }
   
   return {
@@ -325,6 +329,7 @@ export function generateStarfield(config: StarfieldConfig): StarfieldData {
     originalPositions: positions.slice(), // Store original for reset
     config,
     fallbackMode,
+    shaderError,
   };
 }
 
@@ -357,16 +362,19 @@ export function updateStarfield(
     positions[i + 1] += velocities[i + 1] * speed * deltaTime;
     positions[i + 2] += velocities[i + 2] * speed * deltaTime;
     
-    // Wrap around if too far from origin (maintain sphere distribution)
+    // Smooth wrapping: gradually pull particles back toward origin when they drift too far
+    // This avoids visual discontinuities from hard resets
     const dx = positions[i] - originalPositions[i];
     const dy = positions[i + 1] - originalPositions[i + 1];
     const dz = positions[i + 2] - originalPositions[i + 2];
     const distSq = dx * dx + dy * dy + dz * dz;
     
     if (distSq > 10000) { // ~100 units from original
-      positions[i] = originalPositions[i];
-      positions[i + 1] = originalPositions[i + 1];
-      positions[i + 2] = originalPositions[i + 2];
+      // Instead of hard reset, smoothly interpolate back toward original position
+      const t = 0.1; // Interpolation factor (adjust for smoother/faster return)
+      positions[i] = positions[i] * (1 - t) + originalPositions[i] * t;
+      positions[i + 1] = positions[i + 1] * (1 - t) + originalPositions[i + 1] * t;
+      positions[i + 2] = positions[i + 2] * (1 - t) + originalPositions[i + 2] * t;
     }
   }
   

@@ -62,10 +62,12 @@ function mapGalaxyTheme(particleColor?: string): GalaxyTheme {
   color.getHSL(hsl);
   
   // Map based on hue
+  // HSL hue ranges: 0=red, 0.15=orange/yellow, 0.33=green, 0.5=cyan, 0.67=blue, 0.83=purple, 1=red
   if (hsl.s < 0.2) return 'ethereal'; // Low saturation = ethereal
   if (hsl.h < 0.15 || hsl.h > 0.95) return 'molten'; // Red/orange
-  if (hsl.h >= 0.15 && hsl.h < 0.4) return 'neon'; // Green/cyan
-  if (hsl.h >= 0.6 && hsl.h < 0.75) return 'neon'; // Blue/purple
+  if (hsl.h >= 0.15 && hsl.h < 0.4) return 'neon'; // Yellow/green/cyan
+  // Fix: Cover the cyan/blue range (0.4-0.75) that was previously split
+  if (hsl.h >= 0.4 && hsl.h < 0.75) return 'neon'; // Cyan/blue/purple
   if (hsl.h >= 0.75 && hsl.h < 0.95) return 'dark-matter'; // Deep purple
   
   return 'classic';
@@ -103,6 +105,11 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
     );
     const galaxyData = generateGalaxy(config);
     galaxyDataRef.current = galaxyData;
+    
+    // Log warning if shader compilation failed
+    if (galaxyData.fallbackMode && galaxyData.shaderError) {
+      console.warn('Galaxy using fallback rendering:', galaxyData.shaderError);
+    }
     
     return () => {
       if (galaxyDataRef.current) {

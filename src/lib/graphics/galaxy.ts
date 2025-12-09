@@ -112,6 +112,7 @@ export interface GalaxyData {
   layers: GalaxyLayer[];
   config: GalaxyRenderConfig;
   fallbackMode: boolean;
+  shaderError?: string; // Optional error message if shader compilation failed
 }
 
 // Performance constants
@@ -498,6 +499,7 @@ function createGalaxyLayer(
 export function generateGalaxy(config: GalaxyRenderConfig): GalaxyData {
   const layers: GalaxyLayer[] = [];
   let fallbackMode = false;
+  let shaderError: string | undefined;
   
   try {
     // Always create core
@@ -518,14 +520,17 @@ export function generateGalaxy(config: GalaxyRenderConfig): GalaxyData {
       layers.push(createGalaxyLayer('nebula', config));
     }
   } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
     console.warn('Galaxy generation encountered errors, some layers may be missing', error);
     fallbackMode = true;
+    shaderError = `Galaxy layer generation failed: ${errorMsg}`;
   }
   
   return {
     layers,
     config,
     fallbackMode,
+    shaderError,
   };
 }
 

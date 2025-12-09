@@ -240,6 +240,11 @@ function BackgroundStarfield() {
     const starfieldData = generateStarfield(config);
     starfieldDataRef.current = starfieldData;
     
+    // Log warning if shader compilation failed
+    if (starfieldData.fallbackMode && starfieldData.shaderError) {
+      console.warn('Starfield using fallback rendering:', starfieldData.shaderError);
+    }
+    
     return () => {
       if (starfieldDataRef.current) {
         disposeStarfield(starfieldDataRef.current);

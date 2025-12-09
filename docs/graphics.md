@@ -1323,18 +1323,34 @@ Color variance can be adjusted via `colorVariance` parameter (0 = no variance, 1
 
 #### Parallax Wrapping
 
-Stars that drift too far from their original position (>100 units) automatically wrap back:
+Stars that drift too far from their original position (>100 units) smoothly interpolate back to avoid visual discontinuities:
 
 ```typescript
 // In updateStarfield:
 const distSq = dx * dx + dy * dy + dz * dz;
 if (distSq > 10000) {
-  // Reset to original position
-  positions[i] = originalPositions[i];
+  // Smooth interpolation back toward original position (avoids jarring jumps)
+  const t = 0.1; // Interpolation factor
+  positions[i] = positions[i] * (1 - t) + originalPositions[i] * t;
 }
 ```
 
-This maintains spherical distribution while allowing infinite drift.
+This maintains spherical distribution while allowing infinite drift without visible jumps.
+
+#### Shader Compilation Status
+
+The starfield system exposes shader compilation status through the API:
+
+```typescript
+const starfield = generateStarfield(config);
+
+if (starfield.fallbackMode) {
+  console.warn('Using fallback renderer:', starfield.shaderError);
+  // Optionally display user-facing warning or adjust UI
+}
+```
+
+This allows consuming components to react appropriately when shader compilation fails.
 
 ### Integration Example
 
@@ -1627,10 +1643,31 @@ const config = createGalaxyRenderConfig(
 If shader compilation fails:
 - Falls back to simple `PointsMaterial`
 - `fallbackMode` flag set to `true`
+- `shaderError` contains error message for debugging
 - Visual quality reduced but still functional
 
 ```typescript
 const galaxy = generateGalaxy(config);
+
+if (galaxy.fallbackMode) {
+  console.warn('Using fallback galaxy renderer:', galaxy.shaderError);
+  // Optionally display user-facing warning or adjust UI
+}
+```
+
+#### Theme Mapping
+
+Galaxy themes are automatically mapped from particle colors using HSL hue ranges:
+
+```typescript
+// HSL hue ranges: 0=red, 0.33=green, 0.5=cyan, 0.67=blue, 0.83=purple, 1=red
+// Low saturation (<0.2) → ethereal
+// Red/orange (0-0.15 or 0.95-1.0) → molten
+// Yellow/green/cyan/blue/purple (0.15-0.75) → neon
+// Deep purple (0.75-0.95) → dark-matter
+```
+
+For explicit theme control, pass the theme directly to `createGalaxyRenderConfig()` instead of relying on automatic mapping.
 
 if (galaxy.fallbackMode) {
   console.warn('Using fallback galaxy renderer');
