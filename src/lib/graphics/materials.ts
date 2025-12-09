@@ -43,8 +43,6 @@ export function detectDeviceCapabilities(): DeviceCapabilities {
   const isLowPower = 
     // Mobile device detection
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-    // Battery API (if available)
-    (navigator as any).getBattery?.()?.then((battery: any) => battery.charging === false) ||
     // Hardware concurrency (fewer cores = likely mobile)
     (navigator.hardwareConcurrency !== undefined && navigator.hardwareConcurrency <= 4) ||
     false;
@@ -125,6 +123,7 @@ const planetFragmentShader = `
 
   // Toon shading quantization
   float toonify(float value, int steps) {
+    if (steps <= 0) return value;
     return floor(value * float(steps)) / float(steps);
   }
 
@@ -248,13 +247,18 @@ export function createAtmosphereShell(
     return null;
   }
 
+  const atmosphereGlow = config.atmosphereGlow ?? 1.0;
+  if (atmosphereGlow <= 0) {
+    return null;
+  }
+
   const atmosphereScale = 1.15; // 15% larger than planet
   const geometry = new THREE.SphereGeometry(planetRadius * atmosphereScale, 32, 32);
   
   const atmosphereMaterial = new THREE.ShaderMaterial({
     uniforms: {
       atmosphereColor: { value: new THREE.Color(material.atmosphereColor) },
-      intensity: { value: (material.atmosphereIntensity ?? 0.3) * (config.atmosphereGlow ?? 1.0) },
+      intensity: { value: (material.atmosphereIntensity ?? 0.3) * atmosphereGlow },
     },
     vertexShader: `
       varying vec3 vNormal;

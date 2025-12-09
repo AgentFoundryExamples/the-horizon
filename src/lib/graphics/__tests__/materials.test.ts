@@ -305,7 +305,9 @@ describe('Atmosphere Shell Creation', () => {
 
     expect(shell).not.toBeNull();
     const material = shell?.material as THREE.ShaderMaterial;
-    const expectedIntensity = (ROCKY_PLANET.atmosphereIntensity ?? 0.3) * 1.5;
+    // ROCKY_PLANET.atmosphereIntensity defaults to 0.3 (as defined in presets)
+    const baseIntensity = ROCKY_PLANET.atmosphereIntensity ?? 0.3;
+    const expectedIntensity = baseIntensity * (mockConfig.atmosphereGlow ?? 1.0);
     expect(material.uniforms.intensity.value).toBe(expectedIntensity);
   });
 });
