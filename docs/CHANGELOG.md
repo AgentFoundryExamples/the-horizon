@@ -458,7 +458,7 @@ See [docs/roadmap.md](roadmap.md) for complete feature status and future plans.
 
 ---
 
-## [0.1.1] - Security & Performance Update - 2024-12-08
+## [0.1.1] - Security & Performance Update - December 2024
 
 *This release includes critical security patches, dependency updates, and UI improvements.*
 
@@ -478,7 +478,7 @@ See [docs/roadmap.md](roadmap.md) for complete feature status and future plans.
 - Adjusted scene proportions for better visual hierarchy
 
 ### Deployment Notes
-- **New Environment Variable**: `SESSION_SECRET` is recommended for enhanced security (see [.env.example](.env.example))
+- **New Environment Variable**: `SESSION_SECRET` is recommended for enhanced security (see `../.env.example`)
 - **Admin Re-login Required**: Adding `SESSION_SECRET` will invalidate existing sessions
 
 ### Technical Details
@@ -490,7 +490,7 @@ See [docs/roadmap.md](roadmap.md) for complete security vulnerability details an
 
 ---
 
-## [0.1.0] - Horizon Launch - 2024-12-08
+## [0.1.0] - Horizon Launch - December 2024
 
 *This release establishes the semantic versioning baseline at 0.1.0, representing the first feature-complete iteration before the 1.0 stable release.*
 
