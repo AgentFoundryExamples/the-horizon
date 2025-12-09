@@ -146,10 +146,10 @@ describe('Galaxy View Ring Alignment', () => {
     });
 
     it('should use consistent color scheme', () => {
-      // Ring color should match the configured value in constants
-      expect(GALAXY_VIEW_SCALE.RING_COLOR).toBe(GALAXY_VIEW_SCALE.RING_COLOR);
-      // And should be a valid hex color
+      // Ring color should be a valid hex color
       expect(GALAXY_VIEW_SCALE.RING_COLOR).toMatch(/^#[0-9A-F]{6}$/i);
+      // And should be defined (not empty)
+      expect(GALAXY_VIEW_SCALE.RING_COLOR).toBeTruthy();
     });
 
     it('should have enough segments for smooth appearance', () => {
