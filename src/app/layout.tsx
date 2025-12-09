@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { GraphicsConfigProvider } from '@/lib/graphics-context'
 
 export const metadata: Metadata = {
   title: 'The Horizon - Explore the Universe',
@@ -13,7 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <GraphicsConfigProvider>
+          {children}
+        </GraphicsConfigProvider>
+      </body>
     </html>
   )
 }

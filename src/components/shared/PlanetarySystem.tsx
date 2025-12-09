@@ -14,7 +14,8 @@ import { CentralStar } from './CentralStar';
 import { createSeededRandom, generateSeedFromId } from '@/lib/seeded-random';
 import type { getAnimationConfig } from '@/lib/animation';
 import { calculateDynamicSpacing, calculateDynamicOrbitalRadius, type PlanetSizeInfo } from '@/lib/universe/scale-constants';
-import { DEFAULT_GRAPHICS_CONFIG, clampAnimationMultiplier } from '@/lib/graphics';
+import { clampAnimationMultiplier } from '@/lib/graphics';
+import { useGraphicsConfigReadOnly } from '@/lib/graphics-context';
 
 // Kepler's third law approximation factor
 // orbital_speed = KEPLER_ORBITAL_SPEED_FACTOR / (semiMajorAxis^2)
@@ -66,12 +67,14 @@ export function PlanetarySystem({
   scale,
   animationConfig,
 }: PlanetarySystemProps) {
+  // Get graphics config for orbit animation speed
+  const graphicsConfig = useGraphicsConfigReadOnly();
+  
   // Calculate planet sizes and optimal spacing
   const { spacing, planetData } = useMemo(() => {
     const planets = solarSystem.planets || [];
     
     // Get orbital animation speed from graphics config
-    const graphicsConfig = DEFAULT_GRAPHICS_CONFIG;
     const orbitSpeedMultiplier = clampAnimationMultiplier(
       graphicsConfig.solarSystemView.orbitAnimationSpeed,
       1.0
@@ -123,7 +126,7 @@ export function PlanetarySystem({
     });
     
     return { spacing: optimalSpacing, planetData: data };
-  }, [solarSystem, scale]);
+  }, [solarSystem, scale, graphicsConfig.solarSystemView.orbitAnimationSpeed]);
 
   return (
     <group position={position}>

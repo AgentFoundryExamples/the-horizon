@@ -19,6 +19,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Universe } from '@/lib/universe/types';
 import UniverseEditor from '@/components/admin/UniverseEditor';
+import GraphicsConfigEditor from '@/components/admin/GraphicsConfigEditor';
+import { useGraphicsConfig } from '@/lib/graphics-context';
 
 export default function AdminPage() {
   const [universe, setUniverse] = useState<Universe | null>(null);
@@ -26,7 +28,9 @@ export default function AdminPage() {
   const [localDiskHash, setLocalDiskHash] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeSection, setActiveSection] = useState<'content' | 'graphics'>('content');
   const router = useRouter();
+  const { config: graphicsConfig, updateConfig: updateGraphicsConfig } = useGraphicsConfig();
 
   useEffect(() => {
     fetchUniverse();
@@ -157,22 +161,78 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <UniverseEditor
-        universe={universe}
-        gitBaseHash={gitBaseHash}
-        localDiskHash={localDiskHash}
-        onUpdate={(updatedUniverse, newLocalHash, newGitBaseHash) => {
-          setUniverse(updatedUniverse);
-          // Update local disk hash if provided
-          if (newLocalHash && typeof newLocalHash === 'string' && newLocalHash.trim()) {
-            setLocalDiskHash(newLocalHash);
-          }
-          // Update git base hash if provided (after successful commit)
-          if (newGitBaseHash && typeof newGitBaseHash === 'string' && newGitBaseHash.trim()) {
-            setGitBaseHash(newGitBaseHash);
-          }
-        }}
-      />
+      {/* Section Tabs */}
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '2px solid var(--admin-border)' }}>
+        <button
+          onClick={() => setActiveSection('content')}
+          className={`btn btn-small ${activeSection === 'content' ? '' : 'btn-secondary'}`}
+          style={{
+            borderRadius: '4px 4px 0 0',
+            borderBottom: activeSection === 'content' ? '2px solid #4A90E2' : 'none',
+            marginBottom: '-2px',
+          }}
+        >
+          📝 Content Management
+        </button>
+        <button
+          onClick={() => setActiveSection('graphics')}
+          className={`btn btn-small ${activeSection === 'graphics' ? '' : 'btn-secondary'}`}
+          style={{
+            borderRadius: '4px 4px 0 0',
+            borderBottom: activeSection === 'graphics' ? '2px solid #4A90E2' : 'none',
+            marginBottom: '-2px',
+          }}
+        >
+          🎨 Graphics Configuration
+        </button>
+      </div>
+
+      {/* Content Section */}
+      {activeSection === 'content' && (
+        <UniverseEditor
+          universe={universe}
+          gitBaseHash={gitBaseHash}
+          localDiskHash={localDiskHash}
+          onUpdate={(updatedUniverse, newLocalHash, newGitBaseHash) => {
+            setUniverse(updatedUniverse);
+            // Update local disk hash if provided
+            if (newLocalHash && typeof newLocalHash === 'string' && newLocalHash.trim()) {
+              setLocalDiskHash(newLocalHash);
+            }
+            // Update git base hash if provided (after successful commit)
+            if (newGitBaseHash && typeof newGitBaseHash === 'string' && newGitBaseHash.trim()) {
+              setGitBaseHash(newGitBaseHash);
+            }
+          }}
+        />
+      )}
+
+      {/* Graphics Section */}
+      {activeSection === 'graphics' && (
+        <div className="admin-card">
+          <h2>Graphics Configuration</h2>
+          <p style={{ color: 'var(--admin-text-muted)', marginBottom: '1.5rem' }}>
+            Configure visual settings for all views. Changes are saved automatically to localStorage and take effect immediately.
+          </p>
+          
+          <GraphicsConfigEditor
+            initialConfig={graphicsConfig}
+            onChange={updateGraphicsConfig}
+            showLivePreview={true}
+          />
+
+          <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: 'rgba(74, 144, 226, 0.1)', borderRadius: '4px', border: '1px solid rgba(74, 144, 226, 0.3)' }}>
+            <h4 style={{ marginTop: 0, color: '#4A90E2' }}>💡 Graphics Configuration Tips</h4>
+            <ul style={{ marginBottom: 0, color: '#AAAAAA' }}>
+              <li>All changes are saved automatically to browser localStorage</li>
+              <li>Settings persist across sessions until reset or cleared</li>
+              <li>Use Import/Export to share configurations between browsers/devices</li>
+              <li>Test extreme values carefully - some may impact performance</li>
+              <li>Low Power Mode reduces quality for better performance on mobile devices</li>
+            </ul>
+          </div>
+        </div>
+      )}
     </>
   );
 }

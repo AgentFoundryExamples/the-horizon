@@ -4,23 +4,27 @@
  * OverlayLabels - DOM-based overlay for hover labels
  * Renders 2D labels that float above the 3D canvas using Drei's Html component
  * Now supports per-scene configuration for optimal readability at different zoom levels
+ * Integrates with GraphicsConfig for admin-configurable hover label settings
  */
 
 import { Html } from '@react-three/drei';
 import { useHoverStore } from '@/lib/hover-store';
 import { useNavigationStore } from '@/lib/store';
-import { getLabelConfig } from '@/lib/label-config';
+import { getLabelConfig, applyHoverLabelConfig } from '@/lib/label-config';
+import { useGraphicsConfigReadOnly } from '@/lib/graphics-context';
 import '../styles/overlay-labels.css';
 
 /**
  * OverlayLabels component - must be inside Canvas
  * Uses Drei's Html component to render DOM content in 3D space
  * Applies per-scene styling based on current focus level
+ * Applies GraphicsConfig hover label settings
  */
 export default function OverlayLabels() {
   const hoveredObject = useHoverStore((state) => state.hoveredObject);
   const labelsVisible = useHoverStore((state) => state.labelsVisible);
   const focusLevel = useNavigationStore((state) => state.focusLevel);
+  const graphicsConfig = useGraphicsConfigReadOnly();
 
   // Don't render if no object is hovered or labels are hidden
   if (!hoveredObject || !labelsVisible) {
@@ -29,8 +33,23 @@ export default function OverlayLabels() {
 
   const { name, type, metadata, position } = hoveredObject;
 
-  // Get per-scene label configuration
-  const labelConfig = getLabelConfig(focusLevel);
+  // Get per-scene label configuration and apply GraphicsConfig overrides
+  const baseLabelConfig = getLabelConfig(focusLevel);
+  
+  // Determine which hover label config to apply based on focus level
+  let hoverLabelConfig = graphicsConfig.solarSystemView.hoverLabels;
+  if (focusLevel === 'universe' || focusLevel === 'galaxy') {
+    hoverLabelConfig = graphicsConfig.galaxyView.hoverLabels;
+  } else if (focusLevel === 'planet') {
+    hoverLabelConfig = graphicsConfig.planetView.hoverLabels;
+  }
+
+  // Check if labels are enabled in config
+  if (hoverLabelConfig && hoverLabelConfig.enabled === false) {
+    return null;
+  }
+
+  const labelConfig = applyHoverLabelConfig(baseLabelConfig, hoverLabelConfig);
 
   // Defensive check: ensure position has valid coordinates before rendering
   // This protects against edge cases where store validation might be bypassed

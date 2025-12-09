@@ -16,9 +16,11 @@
 /**
  * Label configuration for per-scene hover labels
  * Defines styling and positioning for hover labels based on active scene
+ * Now integrates with GraphicsConfig for admin-configurable settings
  */
 
 import type { FocusLevel } from './store';
+import type { HoverLabelConfig } from './graphics/config';
 
 export interface LabelConfig {
   /** Font size for the label name/title */
@@ -104,6 +106,25 @@ export const LABEL_CONFIGS: Record<FocusLevel, LabelConfig> = {
  */
 export function getLabelConfig(focusLevel: FocusLevel): LabelConfig {
   return LABEL_CONFIGS[focusLevel] ?? LABEL_CONFIGS['solar-system'];
+}
+
+/**
+ * Apply HoverLabelConfig from GraphicsConfig to LabelConfig
+ * Merges admin-configurable settings with base label configuration
+ */
+export function applyHoverLabelConfig(
+  base: LabelConfig,
+  hoverConfig?: HoverLabelConfig
+): LabelConfig {
+  if (!hoverConfig) return base;
+
+  return {
+    ...base,
+    fontSize: hoverConfig.fontSize ? `${hoverConfig.fontSize}px` : base.fontSize,
+    backgroundOpacity: hoverConfig.backgroundOpacity ?? base.backgroundOpacity,
+    // Note: visibilityDistance and showDelay are not used in LabelConfig
+    // They would be used in hover detection logic (future enhancement)
+  };
 }
 
 /**
