@@ -220,13 +220,19 @@ export function createFallbackMaterial(
   material: PlanetMaterial,
   config: PlanetViewConfig
 ): THREE.MeshStandardMaterial {
-  return new THREE.MeshStandardMaterial({
+  const materialOptions: THREE.MeshStandardMaterialParameters = {
     color: new THREE.Color(material.baseColor),
     roughness: material.roughness ?? 0.5,
     metalness: material.metallic ?? 0.0,
-    emissive: material.rimColor ? new THREE.Color(material.rimColor) : undefined,
-    emissiveIntensity: material.rimColor ? 0.2 : 0,
-  });
+  };
+
+  // Only add emissive properties if rim color is defined
+  if (material.rimColor) {
+    materialOptions.emissive = new THREE.Color(material.rimColor);
+    materialOptions.emissiveIntensity = 0.2;
+  }
+
+  return new THREE.MeshStandardMaterial(materialOptions);
 }
 
 /**

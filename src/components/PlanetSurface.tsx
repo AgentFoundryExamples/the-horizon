@@ -143,8 +143,9 @@ export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurface
   // Apply material to planet mesh
   useEffect(() => {
     if (planetRef.current && materialPreset) {
+      const mesh = planetRef.current; // Capture ref for cleanup
       const { material, atmosphereShell: newAtmosphere } = applyPlanetMaterial(
-        planetRef.current,
+        mesh,
         materialPreset,
         planetViewConfig,
         capabilities,
@@ -152,15 +153,15 @@ export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurface
       );
 
       // Add atmosphere shell if created
-      if (newAtmosphere && planetRef.current) {
-        planetRef.current.add(newAtmosphere);
+      if (newAtmosphere && mesh) {
+        mesh.add(newAtmosphere);
         setAtmosphereShell(newAtmosphere);
       }
 
       // Cleanup previous atmosphere on unmount
       return () => {
-        if (atmosphereShell && planetRef.current) {
-          planetRef.current.remove(atmosphereShell);
+        if (newAtmosphere && mesh) {
+          mesh.remove(newAtmosphere);
         }
       };
     }

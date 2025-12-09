@@ -80,8 +80,9 @@ export function OrbitingPlanet({
   // Apply material to planet mesh
   useEffect(() => {
     if (meshRef.current && materialPreset) {
+      const mesh = meshRef.current; // Capture ref for cleanup
       const { material, atmosphereShell: newAtmosphere } = applyPlanetMaterial(
-        meshRef.current,
+        mesh,
         materialPreset,
         planetViewConfig,
         capabilities,
@@ -89,15 +90,15 @@ export function OrbitingPlanet({
       );
 
       // Add atmosphere shell if created
-      if (newAtmosphere && meshRef.current) {
-        meshRef.current.add(newAtmosphere);
+      if (newAtmosphere && mesh) {
+        mesh.add(newAtmosphere);
         setAtmosphereShell(newAtmosphere);
       }
 
       // Cleanup previous atmosphere on unmount
       return () => {
-        if (atmosphereShell && meshRef.current) {
-          meshRef.current.remove(atmosphereShell);
+        if (newAtmosphere && mesh) {
+          mesh.remove(newAtmosphere);
         }
       };
     }
