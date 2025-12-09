@@ -10,6 +10,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Galaxy } from '@/lib/universe/types';
+import { calculateGalaxyLayout, validateSpacing } from '@/lib/universe/layout';
 import { useNavigationStore } from '@/lib/store';
 import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 import {
@@ -238,40 +239,30 @@ function SceneContent({ galaxies }: SceneContentProps) {
     navigateToGalaxy,
   } = useNavigationStore();
 
-  // Position galaxies in a grid
+  // Position galaxies using symmetric layout helper
   const galaxyPositions = useMemo(() => {
-    const positions = new Map<string, THREE.Vector3>();
+    // Use symmetric layout based on galaxy count
+    const galaxyIds = galaxies.map(g => g.id);
+    
     // Spacing must be > 2× GALAXY_SCALE.MAX_RADIUS to prevent overlap
     // Current: MAX_RADIUS=22, so spacing must be > 44. Using 50 for safety margin.
-    // IMPORTANT: If GALAXY_SCALE.MAX_RADIUS changes, update this spacing accordingly
     const spacing = 50;
-    const cols = Math.ceil(Math.sqrt(galaxies.length));
     
     // Runtime validation: ensure spacing accommodates maximum galaxy diameter
     if (process.env.NODE_ENV !== 'production') {
       const maxDiameter = calculateGalaxyScale(1).maxRadius * 2;
-      if (spacing <= maxDiameter) {
+      if (!validateSpacing(spacing, maxDiameter)) {
         console.warn(
           `Grid spacing (${spacing}) is too small for max galaxy diameter (${maxDiameter}). ` +
           `Increase spacing to at least ${Math.ceil(maxDiameter + 6)}`
         );
       }
     }
-
-    galaxies.forEach((galaxy, index) => {
-      const col = index % cols;
-      const row = Math.floor(index / cols);
-      positions.set(
-        galaxy.id,
-        new THREE.Vector3(
-          (col - (cols - 1) / 2) * spacing,
-          0,
-          (row - Math.floor(galaxies.length / cols) / 2) * spacing
-        )
-      );
-    });
-
-    return positions;
+    
+    // Calculate symmetric layout
+    const layout = calculateGalaxyLayout(galaxyIds, spacing);
+    
+    return layout.positions;
   }, [galaxies]);
 
   const focusedGalaxy = galaxies.find((g) => g.id === focusedGalaxyId);

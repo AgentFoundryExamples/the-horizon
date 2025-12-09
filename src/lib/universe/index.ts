@@ -18,3 +18,4 @@
 
 export * from './types';
 export * from './data-service';
+export * from './layout';
