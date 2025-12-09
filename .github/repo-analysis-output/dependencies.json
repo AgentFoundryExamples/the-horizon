@@ -285,6 +285,42 @@
       }
     },
     {
+      "id": "src/lib/graphics/__tests__/config.test.ts",
+      "path": "src/lib/graphics/__tests__/config.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/graphics/config.ts",
+      "path": "src/lib/graphics/config.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/graphics/index.ts",
+      "path": "src/lib/graphics/index.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/graphics/presets.ts",
+      "path": "src/lib/graphics/presets.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/hover-store.ts",
       "path": "src/lib/hover-store.ts",
       "type": "file",
@@ -628,6 +664,18 @@
     {
       "source": "src/lib/github.ts",
       "target": "src/lib/crypto.ts"
+    },
+    {
+      "source": "src/lib/graphics/__tests__/config.test.ts",
+      "target": "src/lib/graphics/config.ts"
+    },
+    {
+      "source": "src/lib/graphics/__tests__/config.test.ts",
+      "target": "src/lib/graphics/presets.ts"
+    },
+    {
+      "source": "src/lib/graphics/presets.ts",
+      "target": "src/lib/graphics/config.ts"
     },
     {
       "source": "src/lib/label-config.ts",

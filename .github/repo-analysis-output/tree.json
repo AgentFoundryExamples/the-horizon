@@ -88,6 +88,10 @@
         },
         {
           "type": "file",
+          "name": "graphics.md"
+        },
+        {
+          "type": "file",
           "name": "roadmap.md"
         },
         {
@@ -465,6 +469,34 @@
                 {
                   "type": "file",
                   "name": "store.test.ts"
+                }
+              ]
+            },
+            {
+              "type": "directory",
+              "name": "graphics",
+              "children": [
+                {
+                  "type": "directory",
+                  "name": "__tests__",
+                  "children": [
+                    {
+                      "type": "file",
+                      "name": "config.test.ts"
+                    }
+                  ]
+                },
+                {
+                  "type": "file",
+                  "name": "config.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "index.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "presets.ts"
                 }
               ]
             },

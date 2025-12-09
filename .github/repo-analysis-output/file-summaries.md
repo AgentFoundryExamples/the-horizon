@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 53
+Total files: 57
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -229,6 +229,42 @@ Total files: 53
 **Summary:** TypeScript core implementation  
 **Size:** 18.35 KB  
 **LOC:** 457  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/graphics/__tests__/config.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 20.56 KB  
+**LOC:** 522  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/graphics/config.ts
+**Language:** TypeScript  
+**Role:** configuration  
+**Role Justification:** configuration file name 'config'  
+**Summary:** TypeScript configuration file (role: configuration)  
+**Size:** 20.72 KB  
+**LOC:** 673  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/graphics/index.ts
+**Language:** TypeScript  
+**Role:** entry-point  
+**Role Justification:** common entry point name 'index'  
+**Summary:** TypeScript main entry point (role: entry-point)  
+**Size:** 1.43 KB  
+**LOC:** 36  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/graphics/presets.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 6.61 KB  
+**LOC:** 234  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/hover-store.ts
@@ -470,8 +506,8 @@ Total files: 53
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 10.28 KB  
-**LOC:** 285  
+**Size:** 10.43 KB  
+**LOC:** 288  
 **TODOs/FIXMEs:** 0  
 
 ## src/middleware.ts

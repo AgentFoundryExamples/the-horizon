@@ -19,6 +19,7 @@
   ├── CHANGELOG.md
   ├── content-authoring.md
   ├── deployment.md
+  ├── graphics.md
   ├── roadmap.md
   ├── universe-schema.md
   └── visuals.md
@@ -104,6 +105,12 @@
       ├── projection.test.ts
       ├── seeded-random.test.ts
       └── store.test.ts
+    ├── graphics
+      ├── __tests__
+        └── config.test.ts
+      ├── config.ts
+      ├── index.ts
+      └── presets.ts
     ├── universe
       ├── __tests__
         ├── admin-modal-save-workflow.test.ts
