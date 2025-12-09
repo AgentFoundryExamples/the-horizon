@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 57,
+  "total_files": 59,
   "files": [
     {
       "schema_version": "2.0",
@@ -368,6 +368,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/graphics/__tests__/materials.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 15174,
+        "loc": 380,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/graphics/config.ts",
       "language": "TypeScript",
       "role": "configuration",
@@ -389,8 +403,22 @@
       "summary": "TypeScript main entry point (role: entry-point)",
       "summary_text": "TypeScript main entry point (role: entry-point)",
       "metrics": {
-        "size_bytes": 1463,
-        "loc": 36,
+        "size_bytes": 1809,
+        "loc": 47,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/graphics/materials.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 11979,
+        "loc": 294,
         "todo_count": 0
       }
     },

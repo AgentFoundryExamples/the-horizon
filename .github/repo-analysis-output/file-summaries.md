@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 57
+Total files: 59
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -240,6 +240,15 @@ Total files: 57
 **LOC:** 522  
 **TODOs/FIXMEs:** 0  
 
+## src/lib/graphics/__tests__/materials.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 14.82 KB  
+**LOC:** 380  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/graphics/config.ts
 **Language:** TypeScript  
 **Role:** configuration  
@@ -254,8 +263,17 @@ Total files: 57
 **Role:** entry-point  
 **Role Justification:** common entry point name 'index'  
 **Summary:** TypeScript main entry point (role: entry-point)  
-**Size:** 1.43 KB  
-**LOC:** 36  
+**Size:** 1.77 KB  
+**LOC:** 47  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/graphics/materials.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 11.70 KB  
+**LOC:** 294  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/graphics/presets.ts

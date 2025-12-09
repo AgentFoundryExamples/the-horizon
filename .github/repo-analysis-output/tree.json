@@ -483,6 +483,10 @@
                     {
                       "type": "file",
                       "name": "config.test.ts"
+                    },
+                    {
+                      "type": "file",
+                      "name": "materials.test.ts"
                     }
                   ]
                 },
@@ -493,6 +497,10 @@
                 {
                   "type": "file",
                   "name": "index.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "materials.ts"
                 },
                 {
                   "type": "file",
