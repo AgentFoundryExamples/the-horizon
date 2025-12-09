@@ -58,6 +58,363 @@ See [docs/roadmap.md](./roadmap.md#part-2-planning-high-fidelity-visual--ux-poli
 
 ---
 
+## Unified Planetary System Components (v0.1.8)
+
+### Overview
+
+The Horizon uses a unified component architecture for rendering planetary systems across different viewing scales. This ensures visual consistency between the miniature solar systems shown in Galaxy View and the detailed Solar System View.
+
+**Key Benefits:**
+- **Visual Consistency**: Same planet colors, orbit mechanics, and animations at all scales
+- **Code Reuse**: Single source of truth for planetary system rendering logic
+- **Maintainability**: Changes to orbital mechanics automatically apply to both views
+- **Performance**: Shared components optimize rendering across different scales
+
+### Shared Component Stack
+
+#### 1. OrbitingPlanet Component
+
+Renders a single planet following Keplerian orbital mechanics.
+
+**Location**: `src/components/shared/OrbitingPlanet.tsx`
+
+**Features:**
+- Keplerian orbit calculations with configurable parameters
+- Planet sizing based on moon count
+- Theme-based coloring (blue-green, red, earth-like)
+- Hover interactions with world-space position tracking
+- Click handlers for navigation
+
+**Configuration:**
+```typescript
+interface OrbitingPlanetProps {
+  planet: Planet;
+  systemPosition: THREE.Vector3;
+  onClick?: () => void;
+  // Orbital parameters
+  semiMajorAxis: number;       // Orbit radius
+  eccentricity: number;         // 0 = circle, >0 = ellipse
+  inclination: number;          // Tilt in radians
+  argumentOfPeriapsis: number;  // Orbit rotation
+  orbitSpeed: number;           // Angular velocity
+  phase: number;                // Starting angle
+  // Visual parameters
+  size: number;                 // Planet radius
+}
+```
+
+#### 2. CentralStar Component
+
+Renders a central star/sun with lighting and optional pulsing animation.
+
+**Location**: `src/components/shared/CentralStar.tsx`
+
+**Features:**
+- Configurable star size, color, and lighting
+- Optional pulsing animation for free-floating stars
+- Hover interactions with metadata
+- Supports both solar system stars and standalone stars
+- Theme-based coloring (yellow, red, blue)
+
+**Configuration:**
+```typescript
+interface CentralStarProps {
+  solarSystem?: SolarSystem;    // For solar system stars
+  star?: Star;                  // For free-floating stars
+  position: THREE.Vector3;
+  radius: number;               // Star size
+  color?: string;               // Override color
+  lightIntensity?: number;      // Point light brightness
+  lightDistance?: number;       // Point light range
+  animationConfig?: AnimationConfig;  // Animation settings
+  enablePulse?: boolean;        // Enable/disable pulsing
+}
+```
+
+#### 3. PlanetarySystem Component
+
+Combines a central star with orbiting planets into a complete system.
+
+**Location**: `src/components/shared/PlanetarySystem.tsx`
+
+**Features:**
+- Renders central star with configurable properties
+- Generates orbit rings for each planet
+- Positions planets using Keplerian mechanics
+- Applies scale-specific configurations
+- Handles interactions for star and planet clicks
+
+**Configuration:**
+```typescript
+interface PlanetarySystemProps {
+  solarSystem: SolarSystem;
+  position: THREE.Vector3;
+  onStarClick?: () => void;
+  onPlanetClick?: (planet: Planet) => void;
+  scale: PlanetarySystemScale;  // Scale preset
+  animationConfig?: AnimationConfig;
+}
+```
+
+### Scale Presets
+
+The system uses two scale presets defined in `src/lib/universe/scale-constants.ts`:
+
+#### Galaxy View Scale
+
+Used for miniature solar systems displayed within galaxy view:
+
+```typescript
+GALAXY_VIEW_PLANETARY_SCALE = {
+  // Star properties
+  starRadius: 0.5,              // Smaller star
+  starLightIntensity: 1,
+  starLightDistance: 20,
+  // Orbit properties
+  orbitBaseRadius: 2,           // Tighter orbits
+  orbitSpacing: 1.5,            // Closer spacing
+  orbitEccentricity: 0.1,       // Slight ellipse
+  orbitInclination: 0.2,        // Small tilt
+  // Planet properties
+  planetBaseSize: 0.3,          // Smaller planets
+  planetSizeIncrement: 0.05,    // Small size variation
+  // Orbit ring styling
+  orbitRingColor: '#4A90E2',    // Galaxy blue
+  orbitRingOpacity: 0.4,        // More visible
+  orbitRingLineWidth: 2,
+  orbitRingDashPattern: undefined,  // Solid lines
+  orbitRingSegments: 64,
+}
+```
+
+#### Solar System View Scale
+
+Used for dedicated solar system view with full detail:
+
+```typescript
+SOLAR_SYSTEM_VIEW_PLANETARY_SCALE = {
+  // Star properties
+  starRadius: 1.2,              // Larger star
+  starLightIntensity: 2.5,
+  starLightDistance: 30,
+  // Orbit properties
+  orbitBaseRadius: 4.0,         // Wider orbits
+  orbitSpacing: 3.0,            // More spacing
+  orbitEccentricity: 0.015,     // Nearly circular
+  orbitInclination: 0.075,      // Minimal tilt
+  // Planet properties
+  planetBaseSize: 0.8,          // Larger planets
+  planetSizeIncrement: 0.1,     // More size variation
+  // Orbit ring styling
+  orbitRingColor: '#7BA5D1',    // Solar blue-gray
+  orbitRingOpacity: 0.2,        // More subtle
+  orbitRingLineWidth: 1,
+  orbitRingDashPattern: [2, 2], // Dashed lines
+  orbitRingSegments: 64,
+}
+```
+
+### Visual Consistency Rules
+
+#### Planet Colors
+
+Planet colors are determined by theme across all views:
+
+```typescript
+switch (planet.theme) {
+  case 'blue-green': return '#2E86AB';  // Ocean worlds
+  case 'red':        return '#E63946';  // Mars-like
+  case 'earth-like': return '#4A90E2';  // Earth-like
+  default:           return '#CCCCCC';  // Gray default
+}
+```
+
+#### Orbit Mechanics
+
+Both views use identical Keplerian orbit calculations:
+- 5-iteration Newton's method for eccentric anomaly
+- Kepler's third law for orbital speeds
+- Deterministic seeded randomness for reproducible orbits
+- Shared KEPLER_ITERATION_COUNT constant
+
+#### Animation Timing
+
+Animation configurations are respected in both views:
+- Reduced motion preference disables animations
+- Rotation speed multipliers applied consistently
+- Animation intensity scales uniformly
+
+### Usage Examples
+
+#### Galaxy View Usage
+
+```typescript
+// In GalaxyView.tsx
+<PlanetarySystem
+  solarSystem={system}
+  position={systemPositions[index]}
+  onStarClick={() => navigateToSolarSystem(system.id)}
+  scale={GALAXY_VIEW_PLANETARY_SCALE}
+  animationConfig={animationConfig}
+/>
+```
+
+#### Solar System View Usage
+
+```typescript
+// In SolarSystemView.tsx
+<PlanetarySystem
+  solarSystem={solarSystem}
+  position={position}
+  onPlanetClick={(planet) => navigateToPlanet(planet.id)}
+  scale={SOLAR_SYSTEM_VIEW_PLANETARY_SCALE}
+  animationConfig={animationConfig}
+/>
+```
+
+### Customization Guide
+
+#### Creating Custom Scale Presets
+
+To create a new scale preset for a different viewing context:
+
+```typescript
+const CUSTOM_SCALE: PlanetarySystemScale = {
+  // Star properties
+  starRadius: 0.8,
+  starLightIntensity: 1.5,
+  starLightDistance: 25,
+  // Orbit properties - customize spacing and shape
+  orbitBaseRadius: 3.0,
+  orbitSpacing: 2.0,
+  orbitEccentricity: 0.05,  // 0 = circular, higher = more elliptical
+  orbitInclination: 0.1,    // Radians of tilt
+  // Planet properties
+  planetBaseSize: 0.5,
+  planetSizeIncrement: 0.08,
+  // Orbit ring styling
+  orbitRingColor: '#FF6B6B',
+  orbitRingOpacity: 0.3,
+  orbitRingLineWidth: 1.5,
+  orbitRingDashPattern: [4, 2],  // [dash, gap] or undefined
+  orbitRingSegments: 64,
+};
+```
+
+#### Modifying Planet Appearance
+
+To add custom planet themes or colors:
+
+1. Update the color mapping in `OrbitingPlanet.tsx`:
+
+```typescript
+const color = useMemo(() => {
+  switch (planet.theme) {
+    case 'blue-green': return '#2E86AB';
+    case 'red': return '#E63946';
+    case 'earth-like': return '#4A90E2';
+    case 'ice': return '#E0F7FA';  // New theme
+    case 'lava': return '#FF6F00';  // New theme
+    default: return '#CCCCCC';
+  }
+}, [planet.theme]);
+```
+
+2. Add corresponding themes to your planet data in `universe.json`.
+
+### Performance Considerations
+
+#### Rendering Cost
+
+**Galaxy View** (many small systems):
+- Lower polygon count per planet (sphereGeometry segments: 8-16)
+- Fewer orbit ring segments acceptable
+- Multiple systems rendered simultaneously
+
+**Solar System View** (single detailed system):
+- Higher polygon count per planet (sphereGeometry segments: 16-32)
+- More orbit ring segments for smooth circles
+- Single system focus allows higher detail
+
+#### Optimization Strategies
+
+1. **Level of Detail (LOD)**: Adjust sphere geometry segments based on camera distance
+2. **Frustum Culling**: Automatically handled by Three.js for off-screen objects
+3. **Instanced Rendering**: Consider instancing for very large planet counts
+4. **Texture Atlasing**: Future enhancement for planet surface textures
+
+### Testing
+
+#### Unit Tests
+
+Test coverage for shared components should include:
+
+```bash
+# Test orbit calculations
+npm test -- OrbitingPlanet.test.tsx
+
+# Test star rendering
+npm test -- CentralStar.test.tsx
+
+# Test system composition
+npm test -- PlanetarySystem.test.tsx
+```
+
+#### Integration Tests
+
+Verify visual consistency:
+- Planet colors match between Galaxy View and Solar System View
+- Orbit mechanics produce identical paths at different scales
+- Animation timing consistent across views
+- Hover/click interactions work at all scales
+
+#### Visual Regression Tests
+
+Compare screenshots between views:
+- Same planet should have same color in both views
+- Orbit ring styles should match scale preset definitions
+- Star colors consistent between free-floating and system stars
+
+### Edge Cases
+
+#### Systems with Few Planets
+
+Systems with 1-3 planets remain balanced:
+- Orbit rings still render correctly
+- Planets evenly distributed around starting positions
+- No visual clustering or imbalance
+
+#### Systems with Many Planets
+
+Systems with 10+ planets:
+- Adaptive spacing prevents overlap
+- Orbit ring count scales automatically
+- Performance remains acceptable (60 FPS desktop, 30+ FPS mobile)
+
+#### Reduced Motion Preference
+
+When `prefers-reduced-motion` is enabled:
+- Orbital motion continues (essential for spatial understanding)
+- Star pulsing disabled
+- Camera transitions instant instead of animated
+- Galaxy rotation disabled
+
+### Future Enhancements
+
+Potential improvements to the unified component stack:
+
+1. **Planet Textures**: Add texture mapping for realistic surfaces
+2. **Atmospheric Effects**: Shader-based atmosphere glow
+3. **Moon Rendering**: Add visible moons orbiting planets
+4. **Ring Systems**: Saturn-like ring systems for gas giants
+5. **Eclipse Shadows**: Dynamic shadow casting between planets
+6. **Orbit Trails**: Fading trails showing recent orbital paths
+7. **Interactive Orbits**: User-adjustable orbit parameters in admin editor
+
+See [docs/roadmap.md](./roadmap.md) for planned component enhancements.
+
+---
+
 ## Persistent Sidebar Navigation (v0.1.8)
 
 ### Overview
