@@ -399,7 +399,7 @@ describe('OverlayLabels - Per-Scene Configuration', () => {
         });
       });
 
-      rerender(<OverlayLabels />, { wrapper: TestWrapper });
+      rerender(<OverlayLabels />);
 
       // Should now use galaxy config
       htmlComponent = getByTestId('html-component');
