@@ -13,6 +13,7 @@ import { OrbitingPlanet } from './OrbitingPlanet';
 import { CentralStar } from './CentralStar';
 import { createSeededRandom, generateSeedFromId } from '@/lib/seeded-random';
 import type { getAnimationConfig } from '@/lib/animation';
+import { calculateDynamicSpacing, calculateDynamicOrbitalRadius, type PlanetSizeInfo } from '@/lib/universe/scale-constants';
 
 // Kepler's third law approximation factor
 // orbital_speed = KEPLER_ORBITAL_SPEED_FACTOR / (semiMajorAxis^2)
@@ -39,6 +40,8 @@ interface PlanetarySystemProps {
     // Planet properties
     planetBaseSize: number;        // Base size for planets
     planetSizeIncrement: number;   // Size increase per moon
+    // Viewport constraints
+    viewportRadius?: number;       // Optional viewport radius constraint
     // Orbit ring styling
     orbitRingColor: string;
     orbitRingOpacity: number;
@@ -62,22 +65,41 @@ export function PlanetarySystem({
   scale,
   animationConfig,
 }: PlanetarySystemProps) {
-  // Calculate planet orbital parameters
-  const planetData = useMemo(() => {
-    return (solarSystem.planets || []).map((planet, index) => {
+  // Calculate planet sizes and optimal spacing
+  const { spacing, planetData } = useMemo(() => {
+    const planets = solarSystem.planets || [];
+    
+    // First pass: calculate planet sizes
+    const planetSizes: PlanetSizeInfo[] = planets.map((planet, index) => ({
+      index,
+      radius: scale.planetBaseSize + (planet.moons?.length || 0) * scale.planetSizeIncrement,
+    }));
+    
+    // Calculate optimal spacing considering planet sizes
+    // viewportRadius is now properly typed in the scale interface
+    const optimalSpacing = calculateDynamicSpacing(
+      planetSizes,
+      scale.orbitSpacing,
+      scale.viewportRadius
+    );
+    
+    // Second pass: calculate orbital parameters with optimal spacing
+    const data = planets.map((planet, index) => {
       // Create a unique seed for each planet for deterministic randomness
       const seed = generateSeedFromId(solarSystem.id, index);
       const seededRandom = createSeededRandom(seed);
 
-      // Keplerian orbit parameters
-      const semiMajorAxis = scale.orbitBaseRadius + index * scale.orbitSpacing;
+      // Keplerian orbit parameters with dynamic spacing
+      // Uses pre-calculated optimal spacing instead of fixed scale.orbitSpacing
+      // to prevent planet overlap and respect viewport constraints
+      const semiMajorAxis = calculateDynamicOrbitalRadius(index, optimalSpacing);
       const eccentricity = seededRandom() * scale.orbitEccentricity;
       const inclination = (seededRandom() - 0.5) * scale.orbitInclination;
       const argumentOfPeriapsis = seededRandom() * Math.PI * 2;
       const orbitSpeed = KEPLER_ORBITAL_SPEED_FACTOR / (semiMajorAxis * semiMajorAxis); // Kepler's third law approximation
 
       // Planet visual properties
-      const size = scale.planetBaseSize + (planet.moons?.length || 0) * scale.planetSizeIncrement;
+      const size = planetSizes[index].radius;
 
       return {
         planet,
@@ -90,6 +112,8 @@ export function PlanetarySystem({
         size,
       };
     });
+    
+    return { spacing: optimalSpacing, planetData: data };
   }, [solarSystem, scale]);
 
   return (

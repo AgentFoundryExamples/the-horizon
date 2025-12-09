@@ -145,6 +145,25 @@ export const ORBITAL_SPACING = {
    * - 16 planets: uses 6.0 spacing (2× standard)
    */
   ADAPTIVE_SPACING_THRESHOLD: 8,
+  
+  /**
+   * Viewport radius constraint for solar system view
+   * Maximum distance from center where planets should remain visible
+   * Based on typical camera distance and field of view
+   * 
+   * Solar system camera position: (0, 10, 25)
+   * Camera FOV: 75 degrees
+   * Comfortable viewing radius: ~30-35 units
+   */
+  VIEWPORT_RADIUS_SOLAR: 32,
+  
+  /**
+   * Viewport radius constraint for galaxy view
+   * Maximum distance for miniature solar systems in galaxy view
+   * 
+   * Galaxy view has tighter constraints due to smaller scale
+   */
+  VIEWPORT_RADIUS_GALAXY: 12,
 } as const;
 
 /**
@@ -208,6 +227,8 @@ export function calculateOrbitalRadius(planetIndex: number): number {
  * @param planetIndex - Zero-based index of the planet (0 = innermost)
  * @param totalPlanets - Total number of planets in the system
  * @returns Orbital radius in Three.js units with adaptive spacing applied
+ * 
+ * @deprecated Use calculateDynamicOrbitalRadius for size-aware spacing
  */
 export function calculateAdaptiveOrbitalRadius(planetIndex: number, totalPlanets: number): number {
   const spacing = calculateSafeSpacing(totalPlanets);
@@ -215,8 +236,34 @@ export function calculateAdaptiveOrbitalRadius(planetIndex: number, totalPlanets
 }
 
 /**
- * Calculate safe orbital spacing considering planet sizes
+ * Calculate orbital radius with dynamic spacing based on planet sizes
+ * 
+ * @param planetIndex - Zero-based index of the planet (0 = innermost)
+ * @param spacing - Pre-calculated spacing value from calculateDynamicSpacing
+ * @returns Orbital radius in Three.js units
+ */
+export function calculateDynamicOrbitalRadius(planetIndex: number, spacing: number): number {
+  return ORBITAL_SPACING.BASE_RADIUS + (planetIndex * spacing);
+}
+
+/**
+ * Planet size information for spacing calculations
+ */
+export interface PlanetSizeInfo {
+  /** Zero-based index of the planet in the system */
+  index: number;
+  /** Radius of the planet in Three.js units */
+  radius: number;
+}
+
+/**
+ * Calculate safe orbital spacing considering planet count
  * Ensures no overlap between adjacent planets
+ * 
+ * @param planetCount - Total number of planets in the system
+ * @returns Spacing between orbits in Three.js units
+ * 
+ * @deprecated Use calculateDynamicSpacing for size-aware spacing
  */
 export function calculateSafeSpacing(planetCount: number): number {
   if (planetCount <= 1) return ORBITAL_SPACING.RADIUS_INCREMENT;
@@ -224,6 +271,113 @@ export function calculateSafeSpacing(planetCount: number): number {
   // For many planets, increase spacing to prevent crowding
   const densityFactor = Math.max(1.0, planetCount / ORBITAL_SPACING.ADAPTIVE_SPACING_THRESHOLD);
   return ORBITAL_SPACING.RADIUS_INCREMENT * densityFactor;
+}
+
+/**
+ * Calculate dynamic orbital spacing considering individual planet sizes
+ * Ensures no overlap by accounting for the actual radii of adjacent planets
+ * 
+ * @param planets - Array of planet size information (index and radius)
+ * @param baseSpacing - Base spacing to use (defaults to RADIUS_INCREMENT)
+ * @param viewportRadius - Optional maximum radius constraint for viewport bounds
+ * @returns Spacing value in Three.js units
+ */
+export function calculateDynamicSpacing(
+  planets: PlanetSizeInfo[],
+  baseSpacing: number = ORBITAL_SPACING.RADIUS_INCREMENT,
+  viewportRadius?: number
+): number {
+  if (planets.length <= 1) return baseSpacing;
+  
+  // Apply density factor for many planets
+  const densityFactor = Math.max(1.0, planets.length / ORBITAL_SPACING.ADAPTIVE_SPACING_THRESHOLD);
+  let spacing = baseSpacing * densityFactor;
+  
+  // Check if any adjacent planets would overlap with current spacing
+  // and increase spacing if needed
+  for (let i = 0; i < planets.length - 1; i++) {
+    const current = planets[i];
+    const next = planets[i + 1];
+    
+    // Calculate radial distance between orbits
+    const currentOrbitRadius = ORBITAL_SPACING.BASE_RADIUS + current.index * spacing;
+    const nextOrbitRadius = ORBITAL_SPACING.BASE_RADIUS + next.index * spacing;
+    const orbitGap = nextOrbitRadius - currentOrbitRadius;
+    
+    // Minimum gap needed: sum of planet radii plus safety margin
+    const safetyMargin = ORBITAL_SPACING.MIN_SEPARATION;
+    const minGapNeeded = current.radius + next.radius + safetyMargin;
+    
+    // If gap is insufficient, increase spacing
+    if (orbitGap < minGapNeeded) {
+      const requiredSpacing = minGapNeeded / (next.index - current.index);
+      spacing = Math.max(spacing, requiredSpacing);
+    }
+  }
+  
+  // Check viewport constraints if provided
+  if (viewportRadius) {
+    const outermostPlanet = planets[planets.length - 1];
+    
+    // Calculate if current spacing fits in viewport
+    let outermostRadius = ORBITAL_SPACING.BASE_RADIUS + outermostPlanet.index * spacing;
+    let totalRadius = outermostRadius + outermostPlanet.radius;
+    
+    // If system extends beyond viewport, try to scale down spacing
+    if (totalRadius > viewportRadius) {
+      // Calculate maximum spacing that keeps outermost planet in viewport
+      const maxAllowedRadius = viewportRadius - outermostPlanet.radius;
+      const maxSpacing = (maxAllowedRadius - ORBITAL_SPACING.BASE_RADIUS) / outermostPlanet.index;
+      
+      // Check if this scaled spacing would cause overlaps
+      const minSpacingForSafety = calculateMinimumSpacingForPlanets(planets);
+      
+      if (maxSpacing >= minSpacingForSafety) {
+        // Safe to use viewport-constrained spacing
+        spacing = maxSpacing;
+      } else {
+        // Cannot fit without overlap - prioritize safety over viewport
+        // Only log warning in development to avoid console pollution in production
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(
+            `Planetary system spacing constraint: ${planets.length} planets require ` +
+            `${minSpacingForSafety.toFixed(2)} units but viewport allows ${maxSpacing.toFixed(2)} units. ` +
+            `Using safe spacing to prevent overlap.`
+          );
+        }
+        spacing = minSpacingForSafety;
+      }
+    }
+  }
+  
+  return spacing;
+}
+
+/**
+ * Calculate the minimum spacing required to prevent any planet overlap
+ * 
+ * @param planets - Array of planet size information
+ * @returns Minimum spacing in Three.js units
+ */
+export function calculateMinimumSpacingForPlanets(planets: PlanetSizeInfo[]): number {
+  if (planets.length <= 1) return ORBITAL_SPACING.RADIUS_INCREMENT;
+  
+  let maxRequiredSpacing: number = ORBITAL_SPACING.RADIUS_INCREMENT;
+  
+  for (let i = 0; i < planets.length - 1; i++) {
+    const current = planets[i];
+    const next = planets[i + 1];
+    
+    // Minimum gap needed between orbits
+    const safetyMargin = ORBITAL_SPACING.MIN_SEPARATION;
+    const minGapNeeded = current.radius + next.radius + safetyMargin;
+    
+    // Spacing required to achieve this gap
+    const requiredSpacing = minGapNeeded / (next.index - current.index);
+    maxRequiredSpacing = Math.max(maxRequiredSpacing, requiredSpacing);
+  }
+  
+  return maxRequiredSpacing;
 }
 
 /**
@@ -485,6 +639,8 @@ export const GALAXY_VIEW_PLANETARY_SCALE = {
   // Planet properties
   planetBaseSize: 0.3,     // Smaller planets
   planetSizeIncrement: 0.05, // Small size increase per moon
+  // Viewport constraints
+  viewportRadius: ORBITAL_SPACING.VIEWPORT_RADIUS_GALAXY,
   // Orbit ring styling
   orbitRingColor: GALAXY_ORBIT_STYLE.COLOR,
   orbitRingOpacity: GALAXY_ORBIT_STYLE.OPACITY,
@@ -511,6 +667,8 @@ export const SOLAR_SYSTEM_VIEW_PLANETARY_SCALE = {
   // Planet properties
   planetBaseSize: PLANET_SCALE.MIN_SIZE,
   planetSizeIncrement: PLANET_SCALE.MOON_MULTIPLIER,
+  // Viewport constraints
+  viewportRadius: ORBITAL_SPACING.VIEWPORT_RADIUS_SOLAR,
   // Orbit ring styling
   orbitRingColor: SOLAR_ORBIT_STYLE.COLOR,
   orbitRingOpacity: SOLAR_ORBIT_STYLE.OPACITY,
