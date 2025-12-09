@@ -1191,8 +1191,8 @@ This ensures the planet appears on the left side of the screen with the content 
 Edit `src/components/PlanetSurface.tsx`:
 
 ```typescript
-// Larger planet
-<sphereGeometry args={[1.5, 32, 32]} />  // Instead of 1.2
+// Larger planet (substantially bigger than default)
+<sphereGeometry args={[2.0, 32, 32]} />  // Instead of 1.2
 
 // Smaller planet
 <sphereGeometry args={[0.8, 32, 32]} />
@@ -1220,7 +1220,8 @@ meshRef.current.position.y = Math.sin(time * 0.3 + index) * 0.5;  // Less vertic
 - **Increment**: 0.5-1.0 units per moon for balanced spacing
 - **Max moons tested**: Systems with 8+ moons should keep increment ≤ 0.8
 - **Vertical range**: Keep within ±1 unit to prevent off-screen clipping
-- **Collision detection**: Base radius should exceed planet radius (1.2) + moon radius (0.32)
+- **Collision detection**: Base radius should exceed planet radius (1.2) + moon radius (0.32 = MIN_SIZE × MOON_SIZE_RATIO = 0.8 × 0.4)
+  - Safe minimum: 1.2 + 0.32 = 1.52 units, rounded up to 4 units for comfortable spacing
 
 #### Adjusting Content Width
 
