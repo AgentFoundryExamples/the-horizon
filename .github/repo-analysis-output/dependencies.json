@@ -189,6 +189,15 @@
       }
     },
     {
+      "id": "src/lib/__tests__/seeded-random.test.ts",
+      "path": "src/lib/__tests__/seeded-random.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/__tests__/store.test.ts",
       "path": "src/lib/__tests__/store.test.ts",
       "type": "file",
@@ -274,6 +283,15 @@
       }
     },
     {
+      "id": "src/lib/seeded-random.ts",
+      "path": "src/lib/seeded-random.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/store.ts",
       "path": "src/lib/store.ts",
       "type": "file",
@@ -330,6 +348,15 @@
     {
       "id": "src/lib/universe/__tests__/galaxy-creation.test.ts",
       "path": "src/lib/universe/__tests__/galaxy-creation.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/universe/__tests__/galaxy-view-alignment.test.ts",
+      "path": "src/lib/universe/__tests__/galaxy-view-alignment.test.ts",
       "type": "file",
       "external_dependencies": {
         "stdlib": [],
@@ -496,6 +523,10 @@
       "target": "src/lib/projection.ts"
     },
     {
+      "source": "src/lib/__tests__/seeded-random.test.ts",
+      "target": "src/lib/seeded-random.ts"
+    },
+    {
       "source": "src/lib/__tests__/store.test.ts",
       "target": "src/lib/store.ts"
     },
@@ -546,6 +577,10 @@
     {
       "source": "src/lib/universe/__tests__/galaxy-creation.test.ts",
       "target": "src/lib/universe/types.ts"
+    },
+    {
+      "source": "src/lib/universe/__tests__/galaxy-view-alignment.test.ts",
+      "target": "src/lib/universe/scale-constants.ts"
     },
     {
       "source": "src/lib/universe/__tests__/integration-save-workflow.test.ts",

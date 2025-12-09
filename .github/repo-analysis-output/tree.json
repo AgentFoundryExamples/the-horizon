@@ -416,6 +416,10 @@
                 },
                 {
                   "type": "file",
+                  "name": "seeded-random.test.ts"
+                },
+                {
+                  "type": "file",
                   "name": "store.test.ts"
                 }
               ]
@@ -447,6 +451,10 @@
                     {
                       "type": "file",
                       "name": "galaxy-creation.test.ts"
+                    },
+                    {
+                      "type": "file",
+                      "name": "galaxy-view-alignment.test.ts"
                     },
                     {
                       "type": "file",
@@ -523,6 +531,10 @@
             {
               "type": "file",
               "name": "projection.ts"
+            },
+            {
+              "type": "file",
+              "name": "seeded-random.ts"
             },
             {
               "type": "file",

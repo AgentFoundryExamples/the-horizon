@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 42
+Total files: 45
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -150,6 +150,15 @@ Total files: 42
 **LOC:** 267  
 **TODOs/FIXMEs:** 0  
 
+## src/lib/__tests__/seeded-random.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 7.40 KB  
+**LOC:** 163  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/__tests__/store.test.ts
 **Language:** TypeScript  
 **Role:** implementation  
@@ -222,6 +231,15 @@ Total files: 42
 **LOC:** 98  
 **TODOs/FIXMEs:** 0  
 
+## src/lib/seeded-random.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 2.30 KB  
+**LOC:** 44  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/store.ts
 **Language:** TypeScript  
 **Role:** implementation  
@@ -274,6 +292,15 @@ Total files: 42
 **Summary:** TypeScript core implementation  
 **Size:** 13.48 KB  
 **LOC:** 419  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/universe/__tests__/galaxy-view-alignment.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 12.53 KB  
+**LOC:** 215  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/__tests__/integration-save-workflow.test.ts
@@ -362,8 +389,8 @@ Total files: 42
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 11.87 KB  
-**LOC:** 293  
+**Size:** 12.96 KB  
+**LOC:** 322  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/types.ts

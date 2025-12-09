@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 42,
+  "total_files": 45,
   "files": [
     {
       "schema_version": "2.0",
@@ -228,6 +228,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/__tests__/seeded-random.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 7575,
+        "loc": 163,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/__tests__/store.test.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -340,6 +354,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/seeded-random.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 2354,
+        "loc": 44,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/store.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -419,6 +447,20 @@
       "metrics": {
         "size_bytes": 13803,
         "loc": 419,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/universe/__tests__/galaxy-view-alignment.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 12827,
+        "loc": 215,
         "todo_count": 0
       }
     },
@@ -557,8 +599,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 12156,
-        "loc": 293,
+        "size_bytes": 13271,
+        "loc": 322,
         "todo_count": 0
       }
     },
