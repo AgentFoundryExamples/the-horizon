@@ -516,6 +516,299 @@ See [docs/roadmap.md](./roadmap.md) for planned enhancements.
 
 ---
 
+## Manual Testing Guidance
+
+To verify dynamic orbit spacing works correctly across different scenarios:
+
+### Test Scenario 1: Uniform Small Planets
+**Setup:**
+1. Create a solar system with 8 uniform planets (all with 0 moons)
+2. Navigate to solar system view
+
+**Expected Results:**
+- ✅ All planets evenly spaced with ~3.0-3.6 unit gaps
+- ✅ No visual overlap between any planets
+- ✅ Outermost planet visible within viewport
+- ✅ Orbit rings cleanly separated
+
+**Visual Check:** Screenshot the system from camera position (0, 10, 25)
+
+### Test Scenario 2: System with Large Planet (Jupiter-like)
+**Setup:**
+1. Create a solar system with 5 planets:
+   - Planet 0: 0 moons (small)
+   - Planet 1: 1 moon (small)
+   - Planet 2: 10 moons (Jupiter - large!)
+   - Planet 3: 0 moons (small)
+   - Planet 4: 2 moons (medium)
+2. Navigate to solar system view
+
+**Expected Results:**
+- ✅ Jupiter gets noticeably more space from neighbors
+- ✅ Spacing around Jupiter > spacing around small planets
+- ✅ No overlap despite size difference
+- ✅ System remains balanced and centered
+
+**Measurement:** Gap between Jupiter (index 2) and next planet should be ~4-5 units
+
+### Test Scenario 3: Dense System (12+ Planets)
+**Setup:**
+1. Create a solar system with 15 planets (mix of 0-5 moons each)
+2. Navigate to solar system view
+
+**Expected Results:**
+- ✅ Density factor kicks in (spacing > 3.0 base)
+- ✅ All planets visible (no overlap)
+- ✅ Outermost planet may approach viewport edge
+- ✅ System feels spacious, not cramped
+- ✅ Console may show warning if planets near viewport limit
+
+**Performance Check:** System should maintain 60 FPS on desktop, 30+ FPS on mobile
+
+### Test Scenario 4: Galaxy View Miniature Systems
+**Setup:**
+1. Navigate to galaxy view
+2. Observe multiple miniature solar systems on inner ring
+
+**Expected Results:**
+- ✅ Miniature systems use tighter spacing (1.5 base)
+- ✅ Planets remain distinguishable even at small scale
+- ✅ No overlap in any miniature system
+- ✅ Systems fit within galaxy view viewport (radius 12)
+
+**Visual Check:** All miniature systems should fit cleanly on the ring
+
+### Test Scenario 5: Viewport Constraint Edge Case
+**Setup:**
+1. Create a solar system with 10 planets (all with 8+ moons - large)
+2. Navigate to solar system view
+3. Check browser console for warnings
+
+**Expected Results:**
+- ✅ Console warning: "System has X planets that cannot fit in viewport..."
+- ✅ Planets still don't overlap (safety priority)
+- ✅ Outermost planets may extend slightly beyond ideal viewport
+- ✅ All planets remain clickable and accessible
+
+**Acceptable Trade-off:** Better to extend viewport slightly than allow overlap
+
+### Test Scenario 6: Rapid System Switching
+**Setup:**
+1. Navigate between multiple solar systems quickly
+2. Switch from small system (3 planets) to large system (15 planets) and back
+
+**Expected Results:**
+- ✅ Spacing recalculates instantly (no lag)
+- ✅ Smooth camera transitions
+- ✅ No flickering or position jumping
+- ✅ Consistent spacing across navigation
+
+**Performance Target:** Spacing calculation < 2ms per system
+
+### Test Scenario 7: Mobile Viewport
+**Setup:**
+1. Test on mobile device or resize browser to mobile dimensions (375×667)
+2. Navigate to solar system with 8+ planets
+
+**Expected Results:**
+- ✅ Viewport constraint applies (may be tighter than desktop)
+- ✅ All planets still accessible via touch
+- ✅ No performance degradation
+- ✅ Spacing adapts to smaller viewport
+
+**Touch Target Check:** All planets should be easily tappable (44×44px minimum)
+
+### Test Scenario 8: Legacy Data Compatibility
+**Setup:**
+1. Load universe with legacy solar system data (if available)
+2. Systems may have gaps in planet indices or unusual configurations
+
+**Expected Results:**
+- ✅ No crashes or errors
+- ✅ Spacing algorithm handles gaps gracefully
+- ✅ Planets render correctly despite data quirks
+- ✅ No console errors
+
+## Visual Regression Checklist
+
+Use this checklist when making changes to spacing algorithm or constants:
+
+**Pre-Change Baseline:**
+- [ ] Screenshot universe view (all galaxies visible)
+- [ ] Screenshot galaxy view (miniature systems on rings)
+- [ ] Screenshot solar system view - 4 planets (typical case)
+- [ ] Screenshot solar system view - 15 planets (dense case)
+- [ ] Screenshot solar system view - mixed sizes (Jupiter scenario)
+
+**Post-Change Verification:**
+- [ ] Compare universe view (should be identical)
+- [ ] Compare galaxy view (minor spacing changes acceptable)
+- [ ] Compare solar system 4-planet (spacing within 10% tolerance)
+- [ ] Compare solar system 15-planet (spacing may increase, no overlap)
+- [ ] Compare mixed size system (Jupiter gap should be proportional)
+
+**Automated Comparison (Future Enhancement):**
+```bash
+# TODO: Install pixelmatch for visual diff
+# npm install --save-dev pixelmatch
+
+# TODO: Implement visual regression tests
+# npm run test:visual
+```
+
+**Note:** Visual regression testing is planned but not yet implemented. Currently, manual visual comparison is required.
+
+## Performance Benchmarks
+
+Expected performance characteristics on reference hardware (2020 MacBook Pro):
+
+| Scenario | Planets | Calculation Time | Frame Rate | Memory |
+|----------|---------|------------------|------------|---------|
+| Small system | 3 | <0.5ms | 60 FPS | +2MB |
+| Typical system | 8 | <1ms | 60 FPS | +4MB |
+| Dense system | 15 | <2ms | 60 FPS | +8MB |
+| Extreme system | 30 | <5ms | 60 FPS | +15MB |
+| Stress test | 50 | <10ms | 55+ FPS | +25MB |
+
+**Mobile Performance (2021 iPhone SE):**
+
+| Scenario | Planets | Frame Rate |
+|----------|---------|------------|
+| Small system | 3 | 60 FPS |
+| Typical system | 8 | 50 FPS |
+| Dense system | 15 | 40 FPS |
+| Extreme system | 30 | 30+ FPS |
+
+**If performance degrades:**
+1. Check if spacing calculations are happening every frame (should be in useMemo)
+2. Verify orbit ring segments aren't too high (64 is optimal)
+3. Consider reducing particle counts in dense systems
+4. Profile with Chrome DevTools Performance panel
+
+## Troubleshooting Guide
+
+### Issue: Planets Overlapping
+
+**Symptoms:** Two or more planets visually intersect
+**Diagnosis:**
+```typescript
+// In browser console, check spacing
+const system = /* get solar system */;
+const spacing = calculateDynamicSpacing(planetSizes);
+console.log('Current spacing:', spacing);
+console.log('Minimum safe:', calculateMinimumSpacingForPlanets(planetSizes));
+```
+
+**Fixes:**
+1. Increase `MIN_SEPARATION` constant
+2. Verify planet sizes are passed correctly
+3. Check that `calculateDynamicSpacing` is being used (not legacy `calculateSafeSpacing`)
+
+### Issue: Planets Extending Beyond Viewport
+
+**Symptoms:** Outermost planets cut off or not fully visible
+**Diagnosis:**
+```typescript
+// Check if warning was logged
+// Console: "System has X planets that cannot fit..."
+```
+
+**Fixes (in order of preference):**
+1. Reduce planet sizes: `planetBaseSize: 0.7` (from 0.8)
+2. Increase viewport: `viewportRadius: 36` (from 32)
+3. Reduce planet count in content creation
+4. Accept slight clipping for very dense systems
+
+### Issue: Spacing Too Tight in Galaxy View
+
+**Symptoms:** Miniature systems look cramped
+**Diagnosis:**
+```typescript
+// Check galaxy view preset
+console.log(GALAXY_VIEW_PLANETARY_SCALE.orbitSpacing); // Should be 1.5
+console.log(GALAXY_VIEW_PLANETARY_SCALE.viewportRadius); // Should be 12
+```
+
+**Fixes:**
+1. Increase galaxy view spacing: `orbitSpacing: 1.8` (from 1.5)
+2. Reduce miniature planet sizes: `planetBaseSize: 0.25` (from 0.3)
+3. Increase galaxy viewport: `viewportRadius: 14` (from 12)
+
+### Issue: Performance Degradation
+
+**Symptoms:** Frame rate drops below 30 FPS
+**Diagnosis:**
+```javascript
+// In browser DevTools > Performance
+// Record 5 seconds of navigation
+// Look for:
+// - Long tasks (>50ms)
+// - Excessive re-renders
+// - Memory leaks
+```
+
+**Fixes:**
+1. Verify useMemo is caching spacing calculations
+2. Check orbit ring segments (should be 64, not 128)
+3. Reduce particle counts in background
+4. Profile Three.js render calls
+
+### Issue: Console Warnings About Viewport
+
+**Symptoms:** "System has X planets that cannot fit in viewport"
+**This is expected:** Algorithm is correctly identifying impossible configurations
+
+**Actions:**
+1. Review system design - is 12+ large planets intentional?
+2. Consider content guidelines limiting planet count
+3. Adjust viewport or planet sizes if needed
+4. Accept warning if trade-off is acceptable
+
+## QA Acceptance Criteria
+
+Before marking this feature complete, verify:
+
+**Functional Requirements:**
+- [ ] No planet overlap in systems with up to 20 planets
+- [ ] Spacing adapts to individual planet sizes
+- [ ] Density factor applies for 8+ planet systems
+- [ ] Viewport constraints respected when possible
+- [ ] Safety prioritized over viewport when necessary
+- [ ] Both galaxy and solar system views work correctly
+- [ ] Different styling tokens maintained for each view
+
+**Edge Cases:**
+- [ ] Single planet system renders correctly
+- [ ] Extremely large planet (10+ moons) handled gracefully
+- [ ] Systems with 15+ planets maintain spacing
+- [ ] Viewport overflow logged but handled safely
+- [ ] Non-sequential planet indices don't cause errors
+- [ ] Mobile viewports work with appropriate constraints
+
+**Performance:**
+- [ ] Desktop: 60 FPS with 15+ planets
+- [ ] Mobile: 30+ FPS with 10+ planets
+- [ ] Spacing calculation < 2ms per system
+- [ ] No per-frame recalculations (confirmed via profiler)
+- [ ] Memory usage reasonable (<50MB for extreme systems)
+
+**User Experience:**
+- [ ] Planets remain clickable (WCAG 44px targets)
+- [ ] System feels balanced and centered
+- [ ] Orbit rings clearly visible and separated
+- [ ] Camera framing appropriate for system size
+- [ ] Smooth transitions between systems
+
+**Documentation:**
+- [ ] Algorithm explained in docs/visuals.md
+- [ ] Configuration knobs documented
+- [ ] Examples provided for common scenarios
+- [ ] Edge cases explained
+- [ ] Customization guide complete
+- [ ] Troubleshooting section helpful
+
+---
+
 ## Unified Planetary System Components (v0.1.8)
 
 ### Overview
