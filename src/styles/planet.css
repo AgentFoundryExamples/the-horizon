@@ -64,24 +64,36 @@
   box-sizing: border-box;
   z-index: 100;
   overflow: hidden; /* Prevent double scrollbars */
+  
+  /* Layout configuration via CSS custom properties */
+  /* These can be overridden per-planet via layoutConfig */
+  --planet-column-width: 30%;
+  --planet-render-scale: 1;
+  --planet-offset-x: 0%;
+  --planet-offset-y: 0%;
+  --content-padding: 2rem;
+  --content-max-width: 800px;
 }
 
 /* Left column - 3D planet visualization */
 .planet-visual-column {
-  flex: 0 0 30%;
+  flex: 0 0 var(--planet-column-width);
   max-width: 400px;
   min-width: 280px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  
+  /* Apply planet offset */
+  transform: translate(var(--planet-offset-x), var(--planet-offset-y));
 }
 
 .planet-visual-label {
   position: absolute;
   bottom: var(--spacing-xl);
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scale(var(--planet-render-scale));
   background-color: rgba(0, 0, 0, 0.9);
   border: 2px solid rgba(74, 144, 226, 0.6);
   border-radius: 8px;
@@ -98,11 +110,11 @@
 /* Right column - Blog-style content area */
 .planet-content-column {
   flex: 1;
-  max-width: 800px;
+  max-width: var(--content-max-width);
   background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  padding: var(--spacing-2xl);
+  padding: var(--content-padding);
   overflow-y: auto;
   color: var(--color-text-primary);
   display: flex;

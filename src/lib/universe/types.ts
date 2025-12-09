@@ -70,12 +70,58 @@ export interface Planet {
   tags?: string[]; // Array of tags for categorization (optional)
   externalLinks?: ExternalLink[]; // Links to related resources (optional)
   featuredImage?: string; // URL or path to featured image (optional)
+  layoutConfig?: PlanetLayoutConfig; // Layout customization (optional)
 }
 
 export interface ExternalLink {
   title: string;
   url: string;
   description?: string;
+}
+
+/**
+ * Layout configuration for Planet Viewer
+ * Controls the positioning and scale of the 3D planet render and content panel
+ * All values are clamped to safe ranges to prevent layout breaking
+ */
+export interface PlanetLayoutConfig {
+  /**
+   * Width percentage of the planet visualization column (left side)
+   * Range: 20-50 (default: 30)
+   * At 30%, planet takes left 30% and content takes remaining 70%
+   */
+  planetColumnWidth?: number;
+  
+  /**
+   * Scale multiplier for the 3D planet render
+   * Range: 0.5-2.0 (default: 1.0)
+   * Controls the size of the planet sphere in the visualization
+   */
+  planetRenderScale?: number;
+  
+  /**
+   * Horizontal position offset for planet (-50 to 50, default: 0)
+   * Adjusts planet position within its column (0 = centered)
+   */
+  planetOffsetX?: number;
+  
+  /**
+   * Vertical position offset for planet (-50 to 50, default: 0)
+   * Adjusts planet position within its column (0 = centered)
+   */
+  planetOffsetY?: number;
+  
+  /**
+   * Content panel padding in rem units
+   * Range: 1-4 (default: 2)
+   */
+  contentPadding?: number;
+  
+  /**
+   * Maximum width of content column in pixels
+   * Range: 600-1200 (default: 800)
+   */
+  contentMaxWidth?: number;
 }
 
 export interface Star {

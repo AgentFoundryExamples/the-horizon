@@ -26,6 +26,7 @@ import type { Planet, Moon, SolarSystem } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
 import MarkdownContent from './MarkdownContent';
 import { calculateMoonSize } from '@/lib/universe/scale-constants';
+import { normalizePlanetLayout, layoutConfigToCSS } from '@/lib/universe/planet-layout';
 
 /**
  * Validate and sanitize URL to prevent XSS and malicious URLs
@@ -213,8 +214,17 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
   const rawExternalLinks = planet.externalLinks || []; // Moons inherit external links from planet
   const externalLinks = rawExternalLinks.filter(link => isValidUrl(link.url)); // Filter valid URLs only
 
+  // Layout configuration - normalize and apply
+  const layoutConfig = useMemo(() => {
+    return normalizePlanetLayout(planet.layoutConfig);
+  }, [planet.layoutConfig]);
+
+  const containerStyle = useMemo(() => {
+    return layoutConfigToCSS(layoutConfig);
+  }, [layoutConfig]);
+
   return (
-    <div className="planet-surface-container">
+    <div className="planet-surface-container" style={containerStyle as React.CSSProperties}>
       {/* Left column - Planet visualization placeholder */}
       <div className="planet-visual-column">
         <div className="planet-visual-label">
