@@ -12,6 +12,7 @@ import type { Galaxy, SolarSystem, Star } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
 import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 import { usePrefersReducedMotion, getAnimationConfig, DEFAULT_ANIMATION_CONFIG } from '@/lib/animation';
+import { GALAXY_VIEW_SCALE } from '@/lib/universe/scale-constants';
 
 interface OrbitRingProps {
   radius: number;
@@ -20,12 +21,13 @@ interface OrbitRingProps {
 
 /**
  * Simple orbit ring visualization
+ * Renders a circular path at the specified radius
  */
 function OrbitRing({ radius, color }: OrbitRingProps) {
   const points = useMemo(() => {
     const pts = [];
-    for (let i = 0; i <= 64; i++) {
-      const angle = (i / 64) * Math.PI * 2;
+    for (let i = 0; i <= GALAXY_VIEW_SCALE.RING_SEGMENTS; i++) {
+      const angle = (i / GALAXY_VIEW_SCALE.RING_SEGMENTS) * Math.PI * 2;
       pts.push(new THREE.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius));
     }
     return pts;
@@ -41,7 +43,7 @@ function OrbitRing({ radius, color }: OrbitRingProps) {
           itemSize={3}
         />
       </bufferGeometry>
-      <lineBasicMaterial color={color} transparent opacity={0.3} />
+      <lineBasicMaterial color={color} transparent opacity={GALAXY_VIEW_SCALE.RING_OPACITY} />
     </line>
   );
 }
@@ -285,10 +287,10 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const animationConfig = getAnimationConfig(DEFAULT_ANIMATION_CONFIG, prefersReducedMotion);
 
-  // Layout solar systems in a circle
+  // Layout solar systems in a circle aligned to ring
   const systemPositions = useMemo(() => {
     const systems = galaxy.solarSystems || [];
-    const radius = 10;
+    const radius = GALAXY_VIEW_SCALE.SOLAR_SYSTEM_RING_RADIUS;
     return systems.map((_, index) => {
       const angle = (index / systems.length) * Math.PI * 2;
       return new THREE.Vector3(
@@ -299,10 +301,10 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
     });
   }, [galaxy.solarSystems]);
 
-  // Layout free-floating stars
+  // Layout free-floating stars on outer ring
   const starPositions = useMemo(() => {
     const stars = galaxy.stars || [];
-    const radius = 15;
+    const radius = GALAXY_VIEW_SCALE.STAR_RING_RADIUS;
     return stars.map((_, index) => {
       const angle = (index / stars.length) * Math.PI * 2 + Math.PI / 4;
       return new THREE.Vector3(
@@ -349,6 +351,20 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
 
   return (
     <group ref={groupRef} position={position}>
+      {/* Galaxy rings for visual alignment */}
+      {(galaxy.solarSystems && galaxy.solarSystems.length > 0) && (
+        <OrbitRing
+          radius={GALAXY_VIEW_SCALE.SOLAR_SYSTEM_RING_RADIUS}
+          color={GALAXY_VIEW_SCALE.RING_COLOR}
+        />
+      )}
+      {(galaxy.stars && galaxy.stars.length > 0) && (
+        <OrbitRing
+          radius={GALAXY_VIEW_SCALE.STAR_RING_RADIUS}
+          color={GALAXY_VIEW_SCALE.RING_COLOR}
+        />
+      )}
+
       {/* Solar systems with orbiting planets */}
       {(galaxy.solarSystems || []).map((system, index) => (
         <group
