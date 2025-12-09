@@ -248,6 +248,10 @@
                 },
                 {
                   "type": "file",
+                  "name": "Sidebar.test.tsx"
+                },
+                {
+                  "type": "file",
                   "name": "UniverseScene.test.tsx"
                 },
                 {
@@ -343,6 +347,10 @@
             {
               "type": "file",
               "name": "SceneHUD.tsx"
+            },
+            {
+              "type": "file",
+              "name": "Sidebar.tsx"
             },
             {
               "type": "file",
@@ -529,6 +537,10 @@
             {
               "type": "file",
               "name": "planet.css"
+            },
+            {
+              "type": "file",
+              "name": "sidebar.css"
             }
           ]
         },

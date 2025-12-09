@@ -52,6 +52,7 @@
     ├── __tests__
       ├── ContextualWelcomeMessage.test.tsx
       ├── SceneHUD.test.tsx
+      ├── Sidebar.test.tsx
       ├── UniverseScene.test.tsx
       └── WelcomeMessage.test.tsx
     ├── admin
@@ -75,6 +76,7 @@
     ├── OverlayLabels.tsx
     ├── PlanetSurface.tsx
     ├── SceneHUD.tsx
+    ├── Sidebar.tsx
     ├── SolarSystemView.tsx
     ├── UniverseScene.tsx
     └── WelcomeMessage.tsx
@@ -118,7 +120,8 @@
     └── store.ts
   ├── styles
     ├── overlay-labels.css
-    └── planet.css
+    ├── planet.css
+    └── sidebar.css
   └── middleware.ts
 ├── .env.example
 ├── .eslintrc.json
