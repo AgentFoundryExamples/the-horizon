@@ -48,10 +48,17 @@ function OrbitRing({ radius, color }: OrbitRingProps) {
   );
 }
 
+// Linear Congruential Generator (LCG) constants for deterministic pseudo-random numbers
+// These values are from Numerical Recipes and provide good distribution for small sequences
+// Formula: state = (state * LCG_A + LCG_C) % LCG_M
+// See: https://en.wikipedia.org/wiki/Linear_congruential_generator
+const LCG_A = 9301;      // Multiplier
+const LCG_C = 49297;     // Increment  
+const LCG_M = 233280;    // Modulus
+
 /**
  * Creates a seeded pseudo-random number generator for deterministic randomness
- * Uses Linear Congruential Generator with parameters from Numerical Recipes
- * (a=9301, c=49297, m=233280) which provides good distribution for small sequences
+ * Uses Linear Congruential Generator with Numerical Recipes parameters
  * 
  * @param seed - Integer seed value for the generator
  * @returns Function that returns deterministic random values between 0 and 1
@@ -59,8 +66,8 @@ function OrbitRing({ radius, color }: OrbitRingProps) {
 function createSeededRandom(seed: number): () => number {
   let state = seed;
   return () => {
-    state = (state * 9301 + 49297) % 233280;
-    return state / 233280;
+    state = (state * LCG_A + LCG_C) % LCG_M;
+    return state / LCG_M;
   };
 }
 
