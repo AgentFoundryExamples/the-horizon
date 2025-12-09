@@ -19,7 +19,7 @@
  * Combines 3D scene with HTML overlay for content display
  */
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { Planet, Moon, SolarSystem } from '@/lib/universe/types';
@@ -115,15 +115,19 @@ export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurface
     return normalizePlanetLayout(planet.layoutConfig);
   }, [planet.layoutConfig]);
 
-  // Apply scale to planet mesh
+  // Apply scale to planet mesh only when it changes
   const planetScale = layoutConfig.planetRenderScale;
+  
+  useEffect(() => {
+    if (planetRef.current) {
+      planetRef.current.scale.setScalar(planetScale);
+    }
+  }, [planetScale]);
 
   useFrame((state) => {
     if (planetRef.current) {
       // Gentle rotation
       planetRef.current.rotation.y += 0.001;
-      // Apply configured scale
-      planetRef.current.scale.setScalar(planetScale);
     }
   });
 

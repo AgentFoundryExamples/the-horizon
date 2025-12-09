@@ -93,7 +93,8 @@
   position: absolute;
   bottom: var(--spacing-xl);
   left: 50%;
-  transform: translateX(-50%) scale(var(--planet-render-scale));
+  /* Don't scale label with planet render - keep it readable */
+  transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.9);
   border: 2px solid rgba(74, 144, 226, 0.6);
   border-radius: 8px;

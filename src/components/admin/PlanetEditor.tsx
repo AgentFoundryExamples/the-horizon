@@ -215,7 +215,7 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
                 handleChange('layoutConfig', {
-                  ...localPlanet.layoutConfig,
+                  ...(localPlanet.layoutConfig || {}),
                   planetColumnWidth: value,
                 });
               }}
@@ -241,7 +241,7 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
                 handleChange('layoutConfig', {
-                  ...localPlanet.layoutConfig,
+                  ...(localPlanet.layoutConfig || {}),
                   planetRenderScale: value,
                 });
               }}
@@ -267,7 +267,7 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
                 handleChange('layoutConfig', {
-                  ...localPlanet.layoutConfig,
+                  ...(localPlanet.layoutConfig || {}),
                   planetOffsetX: value,
                 });
               }}
@@ -293,7 +293,7 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
                 handleChange('layoutConfig', {
-                  ...localPlanet.layoutConfig,
+                  ...(localPlanet.layoutConfig || {}),
                   planetOffsetY: value,
                 });
               }}
@@ -319,7 +319,7 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
                 handleChange('layoutConfig', {
-                  ...localPlanet.layoutConfig,
+                  ...(localPlanet.layoutConfig || {}),
                   contentPadding: value,
                 });
               }}
@@ -345,7 +345,7 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
                 handleChange('layoutConfig', {
-                  ...localPlanet.layoutConfig,
+                  ...(localPlanet.layoutConfig || {}),
                   contentMaxWidth: value,
                 });
               }}
