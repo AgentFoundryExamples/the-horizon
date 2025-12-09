@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 49
+Total files: 51
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -20,8 +20,8 @@ Total files: 49
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** JavaScript module for jest.setup  
-**Size:** 1.52 KB  
-**LOC:** 29  
+**Size:** 1.71 KB  
+**LOC:** 34  
 **TODOs/FIXMEs:** 0  
 
 ## next.config.js
@@ -150,6 +150,15 @@ Total files: 49
 **LOC:** 376  
 **TODOs/FIXMEs:** 0  
 
+## src/lib/__tests__/label-config.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 6.81 KB  
+**LOC:** 158  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/__tests__/projection.test.ts
 **Language:** TypeScript  
 **Role:** implementation  
@@ -229,6 +238,15 @@ Total files: 49
 **Summary:** TypeScript core implementation  
 **Size:** 3.52 KB  
 **LOC:** 81  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/label-config.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 3.46 KB  
+**LOC:** 102  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/projection.ts

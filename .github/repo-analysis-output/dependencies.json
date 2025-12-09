@@ -194,6 +194,15 @@
       }
     },
     {
+      "id": "src/lib/__tests__/label-config.test.ts",
+      "path": "src/lib/__tests__/label-config.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/__tests__/projection.test.ts",
       "path": "src/lib/__tests__/projection.test.ts",
       "type": "file",
@@ -285,6 +294,15 @@
           "three",
           "zustand"
         ]
+      }
+    },
+    {
+      "id": "src/lib/label-config.ts",
+      "path": "src/lib/label-config.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
       }
     },
     {
@@ -566,6 +584,14 @@
       "target": "src/lib/hover-store.ts"
     },
     {
+      "source": "src/lib/__tests__/label-config.test.ts",
+      "target": "src/lib/label-config.ts"
+    },
+    {
+      "source": "src/lib/__tests__/label-config.test.ts",
+      "target": "src/lib/store.ts"
+    },
+    {
       "source": "src/lib/__tests__/projection.test.ts",
       "target": "src/lib/projection.ts"
     },
@@ -584,6 +610,10 @@
     {
       "source": "src/lib/github.ts",
       "target": "src/lib/crypto.ts"
+    },
+    {
+      "source": "src/lib/label-config.ts",
+      "target": "src/lib/store.ts"
     },
     {
       "source": "src/lib/store.ts",

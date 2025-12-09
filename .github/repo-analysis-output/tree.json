@@ -244,6 +244,10 @@
                 },
                 {
                   "type": "file",
+                  "name": "OverlayLabels.test.tsx"
+                },
+                {
+                  "type": "file",
                   "name": "SceneHUD.test.tsx"
                 },
                 {
@@ -444,6 +448,10 @@
                 },
                 {
                   "type": "file",
+                  "name": "label-config.test.ts"
+                },
+                {
+                  "type": "file",
                   "name": "projection.test.ts"
                 },
                 {
@@ -571,6 +579,10 @@
             {
               "type": "file",
               "name": "hover-store.ts"
+            },
+            {
+              "type": "file",
+              "name": "label-config.ts"
             },
             {
               "type": "file",

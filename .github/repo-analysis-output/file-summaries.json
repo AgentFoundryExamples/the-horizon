@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 49,
+  "total_files": 51,
   "files": [
     {
       "schema_version": "2.0",
@@ -25,8 +25,8 @@
       "summary": "JavaScript module for jest.setup",
       "summary_text": "JavaScript module for jest.setup",
       "metrics": {
-        "size_bytes": 1561,
-        "loc": 29,
+        "size_bytes": 1751,
+        "loc": 34,
         "todo_count": 0
       }
     },
@@ -228,6 +228,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/__tests__/label-config.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 6973,
+        "loc": 158,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/__tests__/projection.test.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -349,6 +363,20 @@
       "metrics": {
         "size_bytes": 3609,
         "loc": 81,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/label-config.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 3543,
+        "loc": 102,
         "todo_count": 0
       }
     },

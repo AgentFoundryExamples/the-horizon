@@ -8,8 +8,8 @@ Includes classification of external dependencies as stdlib vs third-party.
 
 ## Statistics
 
-- **Total files**: 49
-- **Intra-repo dependencies**: 40
+- **Total files**: 51
+- **Intra-repo dependencies**: 43
 - **External stdlib dependencies**: 5
 - **External third-party dependencies**: 21
 
@@ -56,18 +56,19 @@ Total: 21 unique packages
 - `src/lib/universe/types.ts` (11 dependents)
 - `src/lib/universe/mutate.ts` (6 dependents)
 - `src/lib/crypto.ts` (4 dependents)
+- `src/lib/store.ts` (3 dependents)
 - `src/lib/universe/persist.ts` (3 dependents)
 - `src/lib/universe/scale-constants.ts` (3 dependents)
 - `src/lib/github.ts` (2 dependents)
 - `src/lib/hover-store.ts` (2 dependents)
 - `src/lib/universe/data-service.ts` (2 dependents)
 - `src/lib/animation.ts` (1 dependents)
-- `src/lib/auth.ts` (1 dependents)
 
 ## Files with Most Dependencies (Intra-Repo)
 
 - `src/lib/universe/__tests__/admin-workflow.test.ts` (3 dependencies)
 - `src/lib/universe/__tests__/integration-save-workflow.test.ts` (3 dependencies)
+- `src/lib/__tests__/label-config.test.ts` (2 dependencies)
 - `src/lib/universe/__tests__/edge-cases.test.ts` (2 dependencies)
 - `src/lib/universe/__tests__/galaxy-creation.test.ts` (2 dependencies)
 - `src/lib/universe/__tests__/mutate.test.ts` (2 dependencies)
@@ -75,4 +76,3 @@ Total: 21 unique packages
 - `src/lib/universe/data-service.ts` (2 dependencies)
 - `src/lib/universe/persist.ts` (2 dependencies)
 - `src/lib/__tests__/animation.test.ts` (1 dependencies)
-- `src/lib/__tests__/auth.test.ts` (1 dependencies)

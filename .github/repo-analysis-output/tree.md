@@ -51,6 +51,7 @@
   ├── components
     ├── __tests__
       ├── ContextualWelcomeMessage.test.tsx
+      ├── OverlayLabels.test.tsx
       ├── SceneHUD.test.tsx
       ├── Sidebar.test.tsx
       ├── SolarSystemView-orbits.test.tsx
@@ -98,6 +99,7 @@
       ├── github.test.ts
       ├── hover-labels-integration.test.ts
       ├── hover-store.test.ts
+      ├── label-config.test.ts
       ├── projection.test.ts
       ├── seeded-random.test.ts
       └── store.test.ts
@@ -129,6 +131,7 @@
     ├── crypto.ts
     ├── github.ts
     ├── hover-store.ts
+    ├── label-config.ts
     ├── projection.ts
     ├── seeded-random.ts
     └── store.ts
