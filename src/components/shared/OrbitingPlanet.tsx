@@ -14,7 +14,6 @@ import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 interface OrbitingPlanetProps {
   planet: Planet;
   index: number;
-  systemPosition: THREE.Vector3;
   onClick?: () => void;
   onHover?: (hoveredObj: HoveredObject | null) => void;
   // Orbital parameters
@@ -33,18 +32,14 @@ interface OrbitingPlanetProps {
 // while maintaining 60 FPS performance. More iterations yield diminishing returns.
 const KEPLER_ITERATION_COUNT = 5;
 
-// Kepler's third law approximation factor
-// orbital_speed = KEPLER_ORBITAL_SPEED_FACTOR / (semiMajorAxis^2)
-// This gives inner planets faster orbital speeds than outer planets
-const KEPLER_ORBITAL_SPEED_FACTOR = 0.5;
-
 /**
  * OrbitingPlanet component
  * Renders a single planet following Keplerian orbital mechanics
+ * Note: Orbital speed is calculated by parent PlanetarySystem component using
+ * KEPLER_ORBITAL_SPEED_FACTOR constant defined there.
  */
 export function OrbitingPlanet({
   planet,
-  systemPosition,
   onClick,
   onHover,
   semiMajorAxis,
@@ -81,14 +76,14 @@ export function OrbitingPlanet({
 
     const angle = trueAnomaly + argumentOfPeriapsis;
 
-    // Position in 3D space with orbital inclination
-    // X-Y plane is the reference orbit plane, inclination tilts the orbit
+    // Position in 3D space with orbital inclination relative to parent group
+    // Parent PlanetarySystem wraps this in a group with position, so coordinates are relative
     // X: Horizontal position in the orbital plane
     // Y: Vertical displacement due to orbital inclination
     // Z: Depth displacement, combining orbital position and inclination
-    meshRef.current.position.x = systemPosition.x + Math.cos(angle) * radius;
-    meshRef.current.position.y = systemPosition.y + Math.sin(angle) * radius * Math.sin(inclination);
-    meshRef.current.position.z = systemPosition.z + Math.sin(angle) * radius * Math.cos(inclination);
+    meshRef.current.position.x = Math.cos(angle) * radius;
+    meshRef.current.position.y = Math.sin(angle) * radius * Math.sin(inclination);
+    meshRef.current.position.z = Math.sin(angle) * radius * Math.cos(inclination);
   });
 
   const handlePointerOver = (e: any) => {

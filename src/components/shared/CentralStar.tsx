@@ -100,9 +100,6 @@ export function CentralStar({
         } : undefined,
       };
 
-      if (onHover) {
-        onHover(hoveredObj);
-      }
       setHoveredObject(hoveredObj);
     }
   };
@@ -110,9 +107,6 @@ export function CentralStar({
   const handlePointerOut = (e: any) => {
     e.stopPropagation();
     setHovered(false);
-    if (onHover) {
-      onHover(null);
-    }
     setHoveredObject(null);
   };
 

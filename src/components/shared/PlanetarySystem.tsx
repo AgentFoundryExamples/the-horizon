@@ -125,7 +125,6 @@ export function PlanetarySystem({
           key={`planet-${data.planet.id}`}
           planet={data.planet}
           index={index}
-          systemPosition={position}
           onClick={() => onPlanetClick?.(data.planet)}
           semiMajorAxis={data.semiMajorAxis}
           eccentricity={data.eccentricity}
