@@ -227,6 +227,38 @@ export function calculateSafeSpacing(planetCount: number): number {
 }
 
 /**
+ * Galaxy view ring configuration
+ * Defines the radii of rings where solar systems and stars are placed
+ * 
+ * RING ALIGNMENT RULES:
+ * - Solar systems sit on the inner ring (SOLAR_SYSTEM_RING_RADIUS)
+ * - Free-floating stars sit on the outer ring (STAR_RING_RADIUS)
+ * - Markers are positioned using polar coordinates at exact ring radii
+ * - Angular spacing divides 2π by object count for even distribution
+ * - Rings are visualized with semi-transparent orbit lines
+ */
+export const GALAXY_VIEW_SCALE = {
+  /**
+   * Radius of the ring where solar systems are placed
+   * Solar systems are positioned at exact intervals around this ring
+   */
+  SOLAR_SYSTEM_RING_RADIUS: 10,
+  
+  /**
+   * Radius of the ring where free-floating stars are placed
+   * Stars are positioned at exact intervals around this ring, offset by π/4
+   */
+  STAR_RING_RADIUS: 15,
+  
+  /**
+   * Visual appearance of orbit rings
+   */
+  RING_COLOR: '#4A90E2', // Blue accent color for rings
+  RING_OPACITY: 0.3,     // Semi-transparent for subtle guidance
+  RING_SEGMENTS: 64,      // Number of segments for smooth circles
+} as const;
+
+/**
  * Galaxy size configuration
  * Scales galaxies based on total count to optimize canvas usage
  * 
