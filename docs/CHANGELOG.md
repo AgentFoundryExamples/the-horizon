@@ -126,7 +126,7 @@ Reusable collapsible section component for better content organization:
 
 See [docs/visuals.md](visuals.md#celestial-visual-themes-system) for celestial theme documentation.
 See [docs/content-authoring.md](content-authoring.md#external-links) for link management workflow.
-See [docs/roadmap.md](roadmap.md#v019---celestial-themes-link-management--collapsible-viewer-december-10-2025) for complete feature summary.
+See [docs/roadmap.md](roadmap.md#current-release-v019-december-2025) for complete feature summary.
 
 ---
 
