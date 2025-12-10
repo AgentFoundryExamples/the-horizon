@@ -108,7 +108,7 @@ a {
 
 .welcome-message-text {
   font-size: clamp(0.8rem, 1.8vw, 1rem);
-  color: #CCCCCC; /* Similar to DARK_PALETTE.text.secondary (#AAAAAA) */
+  color: #AAAAAA; /* DARK_PALETTE.text.secondary - matches for consistency */
   line-height: 1.5;
   margin: 0;
 }

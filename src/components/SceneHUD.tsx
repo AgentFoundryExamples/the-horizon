@@ -244,7 +244,7 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
           onClick={toggleLabelsVisibility}
           style={{
             padding: '0.5rem 1rem',
-            backgroundColor: labelsVisible ? DARK_PALETTE.accent.primary : '#666666',
+            backgroundColor: labelsVisible ? DARK_PALETTE.accent.primary : DARK_PALETTE.ui.buttonSecondary,
             color: DARK_PALETTE.text.primary,
             border: 'none',
             borderRadius: '4px',
@@ -254,10 +254,10 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
             transition: 'all 0.3s',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = labelsVisible ? DARK_PALETTE.accent.active : '#555555';
+            e.currentTarget.style.backgroundColor = labelsVisible ? DARK_PALETTE.accent.active : DARK_PALETTE.ui.buttonSecondaryHover;
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = labelsVisible ? DARK_PALETTE.accent.primary : '#666666';
+            e.currentTarget.style.backgroundColor = labelsVisible ? DARK_PALETTE.accent.primary : DARK_PALETTE.ui.buttonSecondary;
           }}
           title={labelsVisible ? 'Hide hover labels' : 'Show hover labels'}
           aria-label={labelsVisible ? 'Hide hover labels' : 'Show hover labels'}
