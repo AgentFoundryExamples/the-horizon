@@ -565,6 +565,10 @@
                 {
                   "type": "file",
                   "name": "types.ts"
+                },
+                {
+                  "type": "file",
+                  "name": "visual-themes.ts"
                 }
               ]
             },

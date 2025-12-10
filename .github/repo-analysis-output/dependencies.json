@@ -561,6 +561,15 @@
       }
     },
     {
+      "id": "src/lib/universe/visual-themes.ts",
+      "path": "src/lib/universe/visual-themes.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/middleware.ts",
       "path": "src/middleware.ts",
       "type": "file",
@@ -751,6 +760,10 @@
     },
     {
       "source": "src/lib/universe/planet-layout.ts",
+      "target": "src/lib/universe/types.ts"
+    },
+    {
+      "source": "src/lib/universe/visual-themes.ts",
       "target": "src/lib/universe/types.ts"
     },
     {
