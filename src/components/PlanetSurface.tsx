@@ -309,10 +309,12 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
     <div className="planet-surface-container" style={containerStyle as React.CSSProperties}>
       {/* Left column - Planet visualization placeholder */}
       <div className="planet-visual-column">
-        {/* Planet label - positioned at bottom of column */}
-        <div className="planet-visual-label">
-          <span>{title}</span>
-        </div>
+        {/* Empty - planet renders in 3D space */}
+      </div>
+
+      {/* Planet label - positioned at fixed screen location matching 3D planet */}
+      <div className="planet-visual-label">
+        <span>{title}</span>
       </div>
 
       {/* Right column - Content */}

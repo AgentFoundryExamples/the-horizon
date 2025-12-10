@@ -96,10 +96,10 @@
 }
 
 .planet-visual-label {
-  position: absolute; /* Absolute within planet column */
-  bottom: 0; /* Anchor to bottom of column */
-  left: 47%; /* Slightly left of center to align with planet */
-  transform: translate(-50%, 75%); /* Center label and push down 75% of its height */
+  position: fixed; /* Fixed to viewport to match 3D planet projection */
+  left: 22.5vw; /* Approximate horizontal position where planet renders */
+  bottom: 10vh; /* Positioned in lower portion of screen */
+  transform: translateX(-50%); /* Center the label on the position */
   /* 
    * Note: We intentionally do NOT apply var(--planet-render-scale) here.
    * The label should remain readable regardless of planet size.
@@ -118,10 +118,10 @@
   backdrop-filter: blur(4px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   white-space: nowrap; /* Prevent label wrapping */
-  max-width: 90%; /* Relative to column width */
+  max-width: 300px; /* Fixed max width */
   overflow: hidden;
   text-overflow: ellipsis;
-  z-index: 10; /* Above planet in column */
+  z-index: 110; /* Above everything */
 }
 
 /* Right column - Blog-style content area */
