@@ -226,7 +226,7 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
             }}
             onMouseEnter={(e) => {
               if (!isTransitioning) {
-                e.currentTarget.style.backgroundColor = DARK_PALETTE.accent.active;
+                e.currentTarget.style.backgroundColor = DARK_PALETTE.accent.hover;
               }
             }}
             onMouseLeave={(e) => {

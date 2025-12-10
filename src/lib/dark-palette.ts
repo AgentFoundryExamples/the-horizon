@@ -19,10 +19,25 @@
  */
 
 /**
+ * Helper function to deeply freeze an object for runtime immutability
+ */
+function deepFreeze<T>(obj: T): T {
+  Object.freeze(obj);
+  Object.getOwnPropertyNames(obj).forEach((prop) => {
+    const value = (obj as Record<string, unknown>)[prop];
+    if (value && typeof value === 'object') {
+      deepFreeze(value);
+    }
+  });
+  return obj;
+}
+
+/**
  * Core dark palette for The Horizon application.
  * All UI components should reference these constants rather than hardcoding colors.
+ * This object is deeply frozen for both compile-time and runtime immutability.
  */
-export const DARK_PALETTE = {
+export const DARK_PALETTE = deepFreeze({
   /**
    * Text colors optimized for dark backgrounds
    * All meet WCAG AA contrast requirements (4.5:1 for normal text, 3:1 for large)
@@ -154,7 +169,7 @@ export const DARK_PALETTE = {
     shadowDark: 'rgba(0, 0, 0, 0.4)',
     shadowIntense: 'rgba(0, 0, 0, 0.5)',
   },
-} as const;
+} as const);
 
 /**
  * Type for accessing palette colors with autocomplete support
@@ -162,16 +177,16 @@ export const DARK_PALETTE = {
 export type DarkPalette = typeof DARK_PALETTE;
 
 /**
- * Helper function to validate that a color exists in the palette
- * Useful for runtime validation in admin interfaces
+ * Cache of all colors in the palette for efficient validation
+ * Built once at module initialization
  */
-export function isValidPaletteColor(color: string): boolean {
-  const allColors = new Set<string>();
+const allPaletteColors = (() => {
+  const colors = new Set<string>();
   
   function collectColors(obj: Record<string, unknown>): void {
     for (const value of Object.values(obj)) {
       if (typeof value === 'string') {
-        allColors.add(value);
+        colors.add(value);
       } else if (typeof value === 'object' && value !== null) {
         collectColors(value as Record<string, unknown>);
       }
@@ -179,7 +194,15 @@ export function isValidPaletteColor(color: string): boolean {
   }
   
   collectColors(DARK_PALETTE as unknown as Record<string, unknown>);
-  return allColors.has(color);
+  return colors;
+})();
+
+/**
+ * Helper function to validate that a color exists in the palette
+ * Useful for runtime validation in admin interfaces
+ */
+export function isValidPaletteColor(color: string): boolean {
+  return allPaletteColors.has(color);
 }
 
 /**

@@ -177,16 +177,21 @@ describe('Type Safety', () => {
     expect(textPrimary).toBe('#FFFFFF');
   });
 
-  it('should prevent modification through TypeScript typing', () => {
-    // The palette is typed as const, preventing modification at compile time
-    // This is a compile-time check - attempting to modify would cause TypeScript error
-    // @ts-expect-error - Cannot assign to 'primary' because it is a read-only property
-    const attemptModify = () => {
-      DARK_PALETTE.text.primary = '#000000';
-    };
+  it('should be frozen at runtime for immutability', () => {
+    // The palette is deeply frozen with Object.freeze() for runtime protection
+    expect(Object.isFrozen(DARK_PALETTE)).toBe(true);
+    expect(Object.isFrozen(DARK_PALETTE.text)).toBe(true);
+    expect(Object.isFrozen(DARK_PALETTE.accent)).toBe(true);
+    expect(Object.isFrozen(DARK_PALETTE.ui)).toBe(true);
     
-    // TypeScript prevents this at compile time, so we just verify the type is correct
-    expect(typeof DARK_PALETTE.text.primary).toBe('string');
+    // Attempting to modify should fail silently in non-strict mode
+    // or throw in strict mode
+    expect(() => {
+      // @ts-expect-error - Testing runtime immutability
+      DARK_PALETTE.text.primary = '#000000';
+    }).not.toThrow(); // Fails silently in non-strict mode
+    
+    // Value should remain unchanged
     expect(DARK_PALETTE.text.primary).toBe('#FFFFFF');
   });
 });
