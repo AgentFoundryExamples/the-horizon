@@ -104,13 +104,10 @@
   max-height: var(--collapsible-expanded-height);
 }
 
-/* Hidden content should not be focusable */
-.collapsible-section__content[aria-hidden="true"] {
-  visibility: hidden;
-}
-
-.collapsible-section__content[aria-hidden="false"] {
-  visibility: visible;
+/* Hidden content should not be focusable or visible to screen readers
+   Using display:none ensures proper accessibility while maintaining animation */
+.collapsible-section__content[aria-hidden="true"] .collapsible-section__inner {
+  display: none;
 }
 
 /* Inner content wrapper with padding */

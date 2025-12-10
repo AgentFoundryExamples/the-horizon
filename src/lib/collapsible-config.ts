@@ -3,6 +3,14 @@
  * Controls default behavior, sizing, and interaction parameters
  */
 
+// Validation constants
+const MIN_COLLAPSED_HEIGHT = 3;
+const MAX_COLLAPSED_HEIGHT = 8;
+const MIN_EXPANDED_HEIGHT = 15;
+const MAX_EXPANDED_HEIGHT = 40;
+const MIN_TRANSITION_DURATION = 150;
+const MAX_TRANSITION_DURATION = 500;
+
 export interface CollapsibleSectionConfig {
   /**
    * Default collapsed state when section first renders
@@ -60,9 +68,9 @@ export function normalizeCollapsibleConfig(
   
   return {
     defaultCollapsed: merged.defaultCollapsed,
-    collapsedHeight: Math.max(3, Math.min(8, merged.collapsedHeight)),
-    expandedHeight: Math.max(15, Math.min(40, merged.expandedHeight)),
-    transitionDuration: Math.max(150, Math.min(500, merged.transitionDuration)),
+    collapsedHeight: Math.max(MIN_COLLAPSED_HEIGHT, Math.min(MAX_COLLAPSED_HEIGHT, merged.collapsedHeight)),
+    expandedHeight: Math.max(MIN_EXPANDED_HEIGHT, Math.min(MAX_EXPANDED_HEIGHT, merged.expandedHeight)),
+    transitionDuration: Math.max(MIN_TRANSITION_DURATION, Math.min(MAX_TRANSITION_DURATION, merged.transitionDuration)),
     showItemCount: merged.showItemCount,
   };
 }

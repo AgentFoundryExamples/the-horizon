@@ -5,7 +5,7 @@
  * Provides keyboard navigation, screen reader support, and smooth animations
  */
 
-import { useState, useRef, useEffect, ReactNode, KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, useMemo, ReactNode, KeyboardEvent } from 'react';
 import {
   normalizeCollapsibleConfig,
   collapsibleConfigToCSS,
@@ -61,6 +61,11 @@ export default function CollapsibleSection({
   // Track if user has interacted (for auto-expand behavior)
   const hasInteracted = useRef(false);
   
+  // Generate stable IDs for accessibility
+  const sectionId = useMemo(() => title.replace(/\s+/g, '-').toLowerCase(), [title]);
+  const controlsId = useMemo(() => `collapsible-content-${sectionId}`, [sectionId]);
+  const titleId = useMemo(() => `collapsible-title-${sectionId}`, [sectionId]);
+  
   const handleToggle = () => {
     hasInteracted.current = true;
     const newState = !isExpanded;
@@ -71,10 +76,11 @@ export default function CollapsibleSection({
     }
     
     // Scroll to top of content when expanding
+    // Use requestAnimationFrame for better timing
     if (newState && contentRef.current) {
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-      }, 50);
+      });
     }
   };
   
@@ -95,7 +101,7 @@ export default function CollapsibleSection({
     <section
       className={`collapsible-section ${isExpanded ? 'collapsible-section--expanded' : ''} ${className}`}
       style={styleVars as React.CSSProperties}
-      aria-labelledby={`collapsible-title-${title.replace(/\s+/g, '-').toLowerCase()}`}
+      aria-labelledby={titleId}
     >
       <header className="collapsible-section__header">
         <button
@@ -104,8 +110,8 @@ export default function CollapsibleSection({
           onClick={handleToggle}
           onKeyDown={handleKeyDown}
           aria-expanded={isExpanded}
-          aria-controls={`collapsible-content-${title.replace(/\s+/g, '-').toLowerCase()}`}
-          id={`collapsible-title-${title.replace(/\s+/g, '-').toLowerCase()}`}
+          aria-controls={controlsId}
+          id={titleId}
         >
           <span className="collapsible-section__icon" aria-hidden="true">
             {isExpanded ? '▼' : '▶'}
@@ -122,7 +128,7 @@ export default function CollapsibleSection({
       <div
         ref={contentRef}
         className="collapsible-section__content"
-        id={`collapsible-content-${title.replace(/\s+/g, '-').toLowerCase()}`}
+        id={controlsId}
         role="region"
         aria-hidden={!isExpanded}
       >
