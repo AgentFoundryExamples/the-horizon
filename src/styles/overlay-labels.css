@@ -184,32 +184,3 @@
     display: none;
   }
 }
-
-/* Light mode support */
-@media (prefers-color-scheme: light) {
-  .overlay-label-content {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.95),
-      rgba(255, 255, 255, 0.9)
-    );
-    border-color: rgba(74, 144, 226, 0.8);
-  }
-  
-  .overlay-label-name {
-    color: #000000;
-    text-shadow: 0 0 8px rgba(74, 144, 226, 0.4);
-  }
-  
-  .overlay-label-type {
-    color: #2C5AA0;
-  }
-  
-  .overlay-label-description {
-    color: #444444;
-  }
-  
-  .overlay-label-meta {
-    color: #666666;
-  }
-}

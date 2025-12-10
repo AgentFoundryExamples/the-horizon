@@ -2,6 +2,38 @@
 
 This guide covers how to create and manage markdown content for planets and moons in The Horizon universe explorer.
 
+## Dark Mode Enforcement
+
+**The Horizon enforces dark mode globally** across the entire application. This design decision ensures:
+
+- **Consistent Visual Experience**: All users see the same carefully crafted dark aesthetic optimized for viewing 3D space content
+- **Performance**: Eliminates theme switching overhead and CSS complexity
+- **Design Integrity**: Dark backgrounds enhance the visibility of stars, galaxies, and glowing celestial objects
+- **Accessibility**: Dark theme maintains WCAG AA contrast ratios with optimized color choices
+
+### Technical Implementation
+
+The application forces dark mode through:
+- `color-scheme: dark` CSS property on the root HTML element
+- `data-theme="dark"` attribute for explicit theming
+- No light mode CSS media queries or theme switching logic
+- All color values are hardcoded for the dark palette
+
+### User Impact
+
+- Browser/OS light mode preferences are overridden
+- No theme toggle or preference settings are available
+- Users always experience the dark interface regardless of system settings
+- This ensures the 3D universe visualization remains optimal for all users
+
+### For Contributors
+
+When adding new content or components:
+- Use only dark mode color values from the existing palette
+- Do not add `prefers-color-scheme: light` media queries
+- Test color contrast against dark backgrounds only
+- Ensure all text meets WCAG AA standards (4.5:1 for normal text, 3:1 for large text)
+
 ## Redesigned Admin Interface (v0.1.3+)
 
 The admin interface has been redesigned to provide a blog-style authoring experience with clear navigation, immediate feedback, and intuitive workflows.
