@@ -398,8 +398,8 @@ Total files: 54
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 8.12 KB  
-**LOC:** 250  
+**Size:** 17.08 KB  
+**LOC:** 519  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/data-service.ts
@@ -470,8 +470,8 @@ Total files: 54
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 12.48 KB  
-**LOC:** 355  
+**Size:** 14.58 KB  
+**LOC:** 406  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/visual-themes.ts
