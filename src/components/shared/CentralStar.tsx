@@ -86,6 +86,9 @@ export function CentralStar({
     setHovered(true);
 
     if (meshRef.current) {
+      // Force update of world matrices for accurate position in nested groups
+      meshRef.current.updateWorldMatrix(true, false);
+      
       // Get world position of the mesh for accurate hover tracking
       const worldPosition = new THREE.Vector3();
       meshRef.current.getWorldPosition(worldPosition);

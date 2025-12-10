@@ -27,10 +27,11 @@ import { PlanetSurface3D, PlanetSurfaceOverlay } from './PlanetSurface';
 import OverlayLabels from './OverlayLabels';
 import '../styles/planet.css';
 
-// Planet surface view constants - optimized for tighter moon orbits and better framing
-const PLANET_SURFACE_POSITION = new THREE.Vector3(-3, 0, 0);
-const PLANET_CAMERA_OFFSET = new THREE.Vector3(2, 0, 6); // Moved closer for better planet framing
-const PLANET_CAMERA_LOOKAT_OFFSET = new THREE.Vector3(0.5, 0, 0); // Adjusted to center planet better in left column
+// Planet surface view constants - standardized for consistent positioning across all planets
+// All planets appear at the same position to ensure predictable camera framing
+const PLANET_SURFACE_POSITION = new THREE.Vector3(50, 20, 10); // Fixed 3D position for all planets (moved further left)
+const PLANET_CAMERA_OFFSET = new THREE.Vector3(5, 0, 10); // Camera positioned to frame planet on left
+const PLANET_CAMERA_LOOKAT_OFFSET = new THREE.Vector3(7.5, 0, 0); // Look directly at planet center
 
 /**
  * Particle shader for galaxy rendering
@@ -175,6 +176,18 @@ function GalaxyParticles({ galaxy, position, onClick, isActive, animationConfig,
         setHoveredObject(null);
       }}
     >
+      {/* Invisible sphere for easier clicking - transparent to avoid projection issues */}
+      <mesh
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+        renderOrder={-1}
+      >
+        <sphereGeometry args={[galaxyScale.maxRadius * 1.2, 16, 16]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
+      
       <points
         ref={meshRef}
         onClick={(e) => {
@@ -245,8 +258,8 @@ function SceneContent({ galaxies }: SceneContentProps) {
     const galaxyIds = galaxies.map(g => g.id);
     
     // Spacing must be > 2× GALAXY_SCALE.MAX_RADIUS to prevent overlap
-    // Current: MAX_RADIUS=22, so spacing must be > 44. Using 50 for safety margin.
-    const spacing = 50;
+    // Current: MAX_RADIUS=28, so spacing must be > 56. Using 65 for safety margin.
+    const spacing = 65;
     
     // Runtime validation: ensure spacing accommodates maximum galaxy diameter
     if (process.env.NODE_ENV !== 'production') {
@@ -442,9 +455,6 @@ function SceneContent({ galaxies }: SceneContentProps) {
         maxDistance={250}
         maxPolarAngle={Math.PI / 2}
       />
-      
-      {/* Overlay labels - portals to DOM outside Canvas */}
-      <OverlayLabels />
     </>
   );
 }
@@ -475,6 +485,9 @@ export default function UniverseScene({ galaxies }: UniverseSceneProps) {
       >
         <SceneContent galaxies={galaxies} />
       </Canvas>
+
+      {/* Overlay labels - now rendered outside Canvas as pure DOM */}
+      <OverlayLabels />
 
       {/* Planet surface overlay for markdown content */}
       {focusLevel === 'planet' && focusedPlanet && (

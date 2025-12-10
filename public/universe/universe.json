@@ -1,97 +1,76 @@
 {
   "galaxies": [
     {
-      "id": "milky-way",
-      "name": "Milky Way",
-      "description": "Our home galaxy, a barred spiral galaxy containing hundreds of billions of stars and countless worlds waiting to be explored.",
+      "id": "blog",
+      "name": "Blog",
+      "description": "A place to write about what I’m building, what I’m exploring, and how I think through hard problems.",
+      "theme": "purple-white",
+      "particleColor": "#0bb2ea",
+      "stars": [],
+      "solarSystems": []
+    },
+    {
+      "id": "projects",
+      "name": "Projects",
+      "description": "Selected engineering projects that highlight how I design, build, and iterate on systems.",
       "theme": "blue-white",
-      "particleColor": "#4A90E2",
-      "stars": [
-        {
-          "id": "polaris",
-          "name": "Polaris",
-          "theme": "yellow-white"
-        },
-        {
-          "id": "betelgeuse",
-          "name": "Betelgeuse",
-          "theme": "red-giant"
-        }
-      ],
+      "particleColor": "#d37e1d",
+      "stars": [],
       "solarSystems": [
         {
-          "id": "sol-system",
-          "name": "Sol System",
-          "theme": "yellow-star",
+          "id": "agent-foundry",
+          "name": "Agent Foundry",
+          "theme": "red-giant",
           "mainStar": {
-            "id": "sol",
-            "name": "Sol",
-            "theme": "yellow-dwarf"
+            "id": "forge-star",
+            "name": "Forge Star",
+            "theme": "red-giant"
           },
           "planets": [
             {
-              "id": "earth",
-              "name": "Earth",
+              "id": "the-horizon",
+              "name": "The Horizon",
               "theme": "blue-green",
-              "summary": "The third planet from Sol and the only known world to harbor life.",
-              "contentMarkdown": "# Earth\n\n**Earth** is the third planet from the Sun and the only astronomical object known to harbor life. About 29.2% of Earth's surface is land consisting of continents and islands. The remaining 70.8% is covered with water, mostly by oceans, seas, gulfs, and other salt-water bodies.\n\n## Key Features\n\n- **Atmosphere**: Rich in nitrogen and oxygen\n- **Life**: Diverse biosphere spanning millions of species\n- **Climate**: Temperate zones supporting complex ecosystems\n- **Geology**: Active tectonics and volcanic activity\n\n## History\n\nEarth formed approximately 4.5 billion years ago and is the densest planet in the Solar System. Life appeared on its surface within one billion years.",
-              "moons": [
-                {
-                  "id": "luna",
-                  "name": "Luna",
-                  "contentMarkdown": "# Luna (The Moon)\n\n**Luna**, commonly known as the Moon, is Earth's only natural satellite. It is the fifth-largest satellite in the Solar System.\n\n## Characteristics\n\n- Diameter: 3,474 km\n- Distance from Earth: ~384,400 km\n- Orbital period: 27.3 days\n- Surface: Cratered and dusty\n\n## Exploration\n\nThe Moon was first visited by humans in 1969 during the Apollo 11 mission."
-                }
-              ],
-              "publishedDate": "2024-12-01T00:00:00Z",
-              "author": "The Horizon Team",
-              "tags": [
-                "terrestrial",
-                "habitable",
-                "home-world"
-              ],
-              "externalLinks": [
-                {
-                  "title": "NASA Earth Observatory",
-                  "url": "https://earthobservatory.nasa.gov/",
-                  "description": "Satellite imagery and scientific data about Earth"
-                },
-                {
-                  "title": "Blue Marble",
-                  "url": "https://visibleearth.nasa.gov/collection/1484/blue-marble",
-                  "description": "Famous photographs of Earth from space"
-                }
-              ]
+              "summary": "The site you're currently on.",
+              "contentMarkdown": "# Description\n\n**The Horizon is the interactive universe you're exploring. It's a portfolio platform I designed to feel alive, navigable, and continuously evolving.**\n\nIt combines procedural rendering, structured content, and autonomous development workflows to create a space where I can:\n\n- share the engineering systems I'm building  \n- write about what I'm learning  \n- explore ideas visually instead of in flat lists  \n\nEvery galaxy, system, and planet represents a project, concept, or part of my work.  \nThis world will keep expanding as I grow — the Horizon is designed in a way where it is easy for it to evolve alongside me.\n",
+              "moons": [],
+              "layoutConfig": {
+                "planetRenderScale": 1.2,
+                "planetOffsetX": -30,
+                "contentPadding": 1.5
+              }
             },
             {
-              "id": "mars",
-              "name": "Mars",
-              "theme": "red",
-              "summary": "The red planet, fourth from Sol, with potential for future human colonization.",
-              "contentMarkdown": "# Mars\n\n**Mars** is the fourth planet from the Sun and the second-smallest planet in the Solar System. It is often called the \"Red Planet\" because iron oxide prevalent on its surface gives it a reddish appearance.\n\n## Features\n\n- **Atmosphere**: Thin, mostly carbon dioxide\n- **Surface**: Dry, dusty, and cold\n- **Geology**: Home to Olympus Mons, the largest volcano in the Solar System\n- **Polar Ice Caps**: Contains water ice and frozen CO₂\n\n## Exploration\n\nMars has been explored by numerous rovers and orbiters. Future missions aim to return samples and potentially establish human settlements.",
+              "id": "agent-foundry",
+              "name": "Agent Foundry",
+              "theme": "blue-green",
+              "summary": "The tool that allows you to explore the horizon.",
+              "contentMarkdown": "# Description\n\nAgent Foundry is one of the things I'm most proud of recently, its a pipeline that allows me to create working software from high level specifications completely autonomously while I work on other things. It's a multi stage LLM orchestration system that takes a description of a software tool and turns it into functional software. \n\n### Workflow\n**The flow is as follows:**\n\n- You have an idea for some software so you type up a spec for what you want made.\n- Pass that spec onto Agent Foundry and you have a fully documented and working prototype in a matter of hours.\n- From there you are free to explore the code, test out, and use the software however you like.\n- When you come up with something new to add you write up another spec, pass it to Agent Foundry and it takes care of the rest iterating on your currently implemented version to bring you the new features and refinements you've requested.",
               "moons": [
                 {
-                  "id": "phobos",
-                  "name": "Phobos",
-                  "contentMarkdown": "# Phobos\n\n**Phobos** is the larger and closer of Mars's two moons. It orbits Mars three times per day.\n\n## Details\n\n- Diameter: ~22.5 km\n- Irregular, heavily cratered shape\n- Orbits very close to Mars\n- Predicted to crash into Mars in ~50 million years"
+                  "id": "af-specs",
+                  "name": "AF Specs",
+                  "contentMarkdown": "# The Specs\n\nTo simplify use for me and any potential user in the future I designed a very simple spec system that I like to equate to a miniature programming language. Because LLMs are stochastic I can not guarantee that 2 identical inputs gives 2 identical outputs but throughout this project we work towards determinism in many ways, this is one.\n\n## How does it work?\n\n**Core Ideas:**\n- There are 5 simple keys that go into an Agent Foundry Spec.\n  - Purpose: A quoted string containing the reason for your spec.\n  - Vision: A quoted string detailing what you want to accomplish with this spec.\n  - Must, Don't, Nice: 3 Lists of quoted strings that detail what Must be accomplished, what not to do, and a few nice to have items that aren't entirely necessary.\n- With a spec written we can hand it off combined with contextual information about the project to generate a implementation plan.\n- There are benefits to having a less strict input for a user but this helps the system with consistency from the beginning."
                 },
                 {
-                  "id": "deimos",
-                  "name": "Deimos",
-                  "contentMarkdown": "# Deimos\n\n**Deimos** is the smaller and outer moon of Mars. Named after the Greek god of terror.\n\n## Details\n\n- Diameter: ~12.4 km\n- Smoother surface than Phobos\n- Takes about 30 hours to orbit Mars"
-                }
-              ],
-              "publishedDate": "2024-12-05T00:00:00Z",
-              "author": "The Horizon Team",
-              "tags": [
-                "terrestrial",
-                "exploration",
-                "colonization"
-              ],
-              "externalLinks": [
+                  "id": "af-plan",
+                  "name": "AF Plan",
+                  "contentMarkdown": "# The Plans\n\nThis is where the LLMs start to come into play, the very first is our planning agent. This agent receives the users spec surrounded by a bunch of context about the project which allows it to reason about how to turn the spec into a set of actionable items.\n\n## The Validation\n**These plans go through a determinism checkpoint, the system checks the emitted plan against a schema and will reject any plan that is invalid.**\n\n**This allows us to:**\n- Ensure a consistent input to the next stage of the Pipeline.\n- Have confidence in the plan, we are giving the LLM a set of complicated instructions and the output requirements are the smallest piece of this. Following the output requirements gives us higher confidence the rest of the instructions were followed well.\n- Identify where the system drifts, rejected plans are logged and used to refine prompts and learn more about what specs cause failures. Each rejection is a learning opportunity."
+                },
                 {
-                  "title": "Mars Exploration Program",
-                  "url": "https://mars.nasa.gov/",
-                  "description": "NASA's Mars exploration missions and discoveries"
+                  "id": "new-moon",
+                  "name": "New Moon",
+                  "contentMarkdown": "# New Moon\n\nAdd your description here..."
+                },
+                {
+                  "id": "new-moon",
+                  "name": "New Moon",
+                  "contentMarkdown": "# New Moon\n\nAdd your description here..."
+                },
+                {
+                  "id": "new-moon",
+                  "name": "New Moon",
+                  "contentMarkdown": "# New Moon\n\nAdd your description here..."
                 }
               ]
             }
@@ -100,54 +79,13 @@
       ]
     },
     {
-      "id": "andromeda",
-      "name": "Andromeda",
-      "description": "The nearest major galaxy to the Milky Way, destined to collide with our galaxy in about 4.5 billion years.",
-      "theme": "purple-white",
-      "particleColor": "#9B59B6",
-      "stars": [
-        {
-          "id": "alpheratz",
-          "name": "Alpheratz",
-          "theme": "blue-white"
-        }
-      ],
-      "solarSystems": [
-        {
-          "id": "kepler-system",
-          "name": "Kepler-442 System",
-          "theme": "orange-star",
-          "mainStar": {
-            "id": "kepler-442",
-            "name": "Kepler-442",
-            "theme": "orange-dwarf"
-          },
-          "planets": [
-            {
-              "id": "kepler-442b",
-              "name": "Kepler-442b",
-              "theme": "earth-like",
-              "summary": "A super-Earth exoplanet orbiting within the habitable zone of its star.",
-              "contentMarkdown": "# Kepler-442b\n\n**Kepler-442b** is a confirmed near-Earth-sized exoplanet orbiting within the habitable zone of Kepler-442, about 1,206 light-years from Earth.\n\n## Characteristics\n\n- **Type**: Super-Earth\n- **Mass**: ~2.3 Earth masses\n- **Radius**: ~1.34 Earth radii\n- **Habitability**: High Earth Similarity Index\n\n## Potential\n\nThis planet receives about 70% of the light Earth gets from the Sun, making it a prime candidate for harboring liquid water and potentially life.",
-              "moons": [],
-              "publishedDate": "2024-12-10T00:00:00Z",
-              "author": "The Horizon Team",
-              "tags": [
-                "exoplanet",
-                "habitable-zone",
-                "super-earth"
-              ],
-              "externalLinks": [
-                {
-                  "title": "Kepler Mission",
-                  "url": "https://www.nasa.gov/kepler",
-                  "description": "NASA's planet-hunting telescope mission"
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "id": "about",
+      "name": "About",
+      "description": "Who I am, what I build, and the principles that guide my work.",
+      "theme": "dark-blue",
+      "particleColor": "#2912d3",
+      "stars": [],
+      "solarSystems": []
     }
   ]
 }

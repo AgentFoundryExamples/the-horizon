@@ -22,7 +22,7 @@ import Modal from './Modal';
 
 interface SolarSystemEditorProps {
   solarSystem: SolarSystem;
-  onUpdate: (solarSystem: SolarSystem) => void;
+  onUpdate: (solarSystem: SolarSystem, originalId: string) => void;
   onClose: () => void;
 }
 
@@ -31,6 +31,7 @@ export default function SolarSystemEditor({
   onUpdate,
   onClose,
 }: SolarSystemEditorProps) {
+  const [originalSystemId] = useState(solarSystem.id || '');
   const [localSystem, setLocalSystem] = useState(solarSystem);
   const [editingPlanet, setEditingPlanet] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'info' | 'planets'>('info');
@@ -49,7 +50,7 @@ export default function SolarSystemEditor({
   };
 
   const handleSave = () => {
-    onUpdate(localSystem);
+    onUpdate(localSystem, originalSystemId);
   };
 
   const handleAddPlanet = () => {
@@ -70,11 +71,11 @@ export default function SolarSystemEditor({
     setEditingPlanet(newPlanet.id);
   };
 
-  const handleUpdatePlanet = (updatedPlanet: Planet) => {
+  const handleUpdatePlanet = (updatedPlanet: Planet, originalId: string) => {
     const updated = {
       ...localSystem,
       planets: (localSystem.planets || []).map((p) =>
-        p.id === updatedPlanet.id ? updatedPlanet : p
+        p.id === originalId ? updatedPlanet : p
       ),
     };
     setLocalSystem(updated);
@@ -240,8 +241,8 @@ export default function SolarSystemEditor({
             {editingPlanet && (
               <PlanetEditor
                 planet={(localSystem.planets || []).find((p) => p.id === editingPlanet)!}
-                onUpdate={(updated) => {
-                  handleUpdatePlanet(updated);
+                onUpdate={(updated, originalId) => {
+                  handleUpdatePlanet(updated, originalId);
                   setEditingPlanet(null); // Auto-close on save
                 }}
                 onClose={() => setEditingPlanet(null)}

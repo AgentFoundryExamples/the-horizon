@@ -22,11 +22,12 @@ import remarkGfm from 'remark-gfm';
 
 interface PlanetEditorProps {
   planet: Planet;
-  onUpdate: (planet: Planet) => void;
+  onUpdate: (planet: Planet, originalId: string) => void;
   onClose: () => void;
 }
 
 export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditorProps) {
+  const [originalPlanetId] = useState(planet.id || '');
   const [localPlanet, setLocalPlanet] = useState(planet);
   const [activeTab, setActiveTab] = useState<'info' | 'content' | 'moons' | 'layout'>('info');
   const [editingMoon, setEditingMoon] = useState<number | null>(null);
@@ -37,7 +38,7 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
   };
 
   const handleSave = () => {
-    onUpdate(localPlanet);
+    onUpdate(localPlanet, originalPlanetId);
   };
 
   const handleAddMoon = () => {

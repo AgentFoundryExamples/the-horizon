@@ -51,13 +51,13 @@ export const PLANET_SCALE = {
    * Size increment per moon
    * Adds visual variety while maintaining reasonable sizes
    */
-  MOON_MULTIPLIER: 0.1,
+  MOON_MULTIPLIER: 0.04,
   
   /**
    * Moon size multiplier relative to minimum planet size
    * Maintains visual hierarchy where moons are smaller than planets
    */
-  MOON_SIZE_RATIO: 0.4,
+  MOON_SIZE_RATIO: 0.15,
 } as const;
 
 /**
@@ -503,22 +503,24 @@ export const GALAXY_SCALE = {
    * Minimum galaxy radius in Three.js units
    * Used when there are many galaxies (50+)
    * Increased from 4 to 6 for better visibility and screen presence
+   * Further increased to 8 for improved click targets
    */
-  MIN_RADIUS: 6,
+  MIN_RADIUS: 8,
   
   /**
    * Maximum galaxy radius in Three.js units
    * Used when there are few galaxies (1-2)
    * Increased from 15 to 22 for improved focus and immersion
+   * Further increased to 28 for better click targets and visual presence
    */
-  MAX_RADIUS: 22,
+  MAX_RADIUS: 28,
   
   /**
    * Base galaxy radius for reference
    * Used as default when no scaling is applied
    * Adjusted proportionally to maintain balance
    */
-  BASE_RADIUS: 12,
+  BASE_RADIUS: 15,
   
   /**
    * Count threshold for minimum size

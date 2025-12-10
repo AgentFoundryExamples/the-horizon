@@ -100,6 +100,7 @@ export const useHoverStore = create<HoverStore>((set) => ({
       return;
     }
     
+    console.log('HoverStore: Setting hovered object:', object?.name, object?.type);
     set({ hoveredObject: object });
   },
 

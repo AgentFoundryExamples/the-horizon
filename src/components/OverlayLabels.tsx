@@ -2,121 +2,108 @@
 
 /**
  * OverlayLabels - DOM-based overlay for hover labels
- * Renders 2D labels that float above the 3D canvas using Drei's Html component
- * Now supports per-scene configuration for optimal readability at different zoom levels
+ * Renders labels in fixed viewport positions, outside the 3D canvas
+ * Now uses portal to render directly in DOM for consistent positioning across all views
  */
 
-import { Html } from '@react-three/drei';
 import { useHoverStore } from '@/lib/hover-store';
 import { useNavigationStore } from '@/lib/store';
 import { getLabelConfig } from '@/lib/label-config';
 import '../styles/overlay-labels.css';
 
 /**
- * OverlayLabels component - must be inside Canvas
- * Uses Drei's Html component to render DOM content in 3D space
- * Applies per-scene styling based on current focus level
+ * OverlayLabels component - renders as pure DOM overlay
+ * No longer uses Drei's Html component to avoid 3D positioning issues
  */
 export default function OverlayLabels() {
   const hoveredObject = useHoverStore((state) => state.hoveredObject);
   const labelsVisible = useHoverStore((state) => state.labelsVisible);
   const focusLevel = useNavigationStore((state) => state.focusLevel);
 
+  console.log('OverlayLabels render:', { hoveredObject: hoveredObject?.name, labelsVisible, focusLevel });
+
   // Don't render if no object is hovered or labels are hidden
   if (!hoveredObject || !labelsVisible) {
     return null;
   }
 
-  const { name, type, metadata, position } = hoveredObject;
+  // Don't show hover labels in planet view
+  if (focusLevel === 'planet') {
+    return null;
+  }
+
+  const { name, type, metadata } = hoveredObject;
 
   // Get per-scene label configuration
   const labelConfig = getLabelConfig(focusLevel);
 
-  // Defensive check: ensure position has valid coordinates before rendering
-  // This protects against edge cases where store validation might be bypassed
-  if (!position || 
-      typeof position.x !== 'number' || 
-      typeof position.y !== 'number' || 
-      typeof position.z !== 'number') {
-    console.warn('OverlayLabels: Invalid position structure, skipping render', position);
-    return null;
+  // Position label based on focus level - each view has custom positioning
+  let labelPosition;
+  if (focusLevel === 'universe') {
+    labelPosition = { top: '100px', left: '20px' };  // Universe view
+  } else if (focusLevel === 'galaxy') {
+    labelPosition = { top: '100px', left: '20px' };  // Galaxy view
+  } else if (focusLevel === 'solar-system') {
+    labelPosition = { top: '100px', left: '20px' };  // Solar system view
+  } else {
+    labelPosition = { top: '100px', left: '20px' };  // Fallback
   }
 
-  // Check for NaN or Infinity (safe now that we know they're numbers)
-  if (!isFinite(position.x) || 
-      !isFinite(position.y) || 
-      !isFinite(position.z)) {
-    console.warn('OverlayLabels: Position contains invalid numbers, skipping render', position);
-    return null;
-  }
+  console.log('Label position for', focusLevel, ':', labelPosition);
 
   return (
-    <Html
-      position={[position.x, position.y, position.z]}
-      center
-      distanceFactor={labelConfig.distanceFactor}
-      zIndexRange={[200, 0]}
-      sprite
-      occlude={false}
+    <div 
+      className="overlay-label" 
+      role="tooltip" 
+      aria-live="polite"
       style={{
+        position: 'fixed',
+        ...labelPosition,
         pointerEvents: 'none',
         userSelect: 'none',
+        zIndex: 1000,
       }}
-      // Clamp to viewport boundaries to prevent off-screen rendering
-      transform
-      wrapperClass="overlay-label-wrapper"
     >
       <div 
-        className="overlay-label" 
-        role="tooltip" 
-        aria-live="polite"
+        className={`overlay-label-content ${labelConfig.enableGlow ? 'with-glow' : 'no-glow'}`}
         style={{
-          // Apply per-scene offset
-          transform: `translate(-50%, calc(-100% - ${labelConfig.offsetY}px))`,
+          minWidth: labelConfig.minWidth,
+          maxWidth: labelConfig.maxWidth,
+          backgroundColor: labelConfig.backgroundOpacity !== undefined 
+            ? `rgba(0, 0, 0, ${labelConfig.backgroundOpacity})` 
+            : undefined,
+          borderColor: labelConfig.borderColor,
         }}
       >
         <div 
-          className={`overlay-label-content ${labelConfig.enableGlow ? 'with-glow' : 'no-glow'}`}
+          className="overlay-label-name"
           style={{
-            minWidth: labelConfig.minWidth,
-            maxWidth: labelConfig.maxWidth,
-            backgroundColor: labelConfig.backgroundOpacity !== undefined 
-              ? `rgba(0, 0, 0, ${labelConfig.backgroundOpacity})` 
-              : undefined,
-            borderColor: labelConfig.borderColor,
+            fontSize: labelConfig.fontSize,
+            // Map 'wrap' to 'normal' for valid CSS whiteSpace value
+            // Default to 'nowrap' if textWrap is undefined
+            whiteSpace: labelConfig.textWrap === 'wrap' ? 'normal' : 'nowrap',
           }}
-        >
-          <div 
-            className="overlay-label-name"
-            style={{
-              fontSize: labelConfig.fontSize,
-              // Map 'wrap' to 'normal' for valid CSS whiteSpace value
-              // Default to 'nowrap' if textWrap is undefined
-              whiteSpace: labelConfig.textWrap === 'wrap' ? 'normal' : 'nowrap',
-            }}
-          >{name}</div>
-          <div 
-            className="overlay-label-type"
-            style={{
-              fontSize: labelConfig.typeFontSize,
-            }}
-          >{type}</div>
-          {metadata?.description && (
-            <div className="overlay-label-description">{metadata.description}</div>
-          )}
-          {metadata?.planetCount !== undefined && (
-            <div className="overlay-label-meta">
-              {metadata.planetCount} {metadata.planetCount === 1 ? 'planet' : 'planets'}
-            </div>
-          )}
-          {metadata?.moonCount !== undefined && metadata.moonCount > 0 && (
-            <div className="overlay-label-meta">
-              {metadata.moonCount} {metadata.moonCount === 1 ? 'moon' : 'moons'}
-            </div>
-          )}
-        </div>
-        <div className="overlay-label-pointer" />
+        >{name}</div>
+        <div 
+          className="overlay-label-type"
+          style={{
+            fontSize: labelConfig.typeFontSize,
+          }}
+        >{type}</div>
+        {metadata?.description && (
+          <div className="overlay-label-description">{metadata.description}</div>
+        )}
+        {metadata?.planetCount !== undefined && (
+          <div className="overlay-label-meta">
+            {metadata.planetCount} {metadata.planetCount === 1 ? 'planet' : 'planets'}
+          </div>
+        )}
+        {metadata?.moonCount !== undefined && metadata.moonCount > 0 && (
+          <div className="overlay-label-meta">
+            {metadata.moonCount} {metadata.moonCount === 1 ? 'moon' : 'moons'}
+          </div>
+        )}
       </div>
-    </Html>
+    </div>
   );
 }

@@ -59,8 +59,9 @@
   height: 100vh;
   display: flex;
   flex-direction: row;
-  gap: var(--spacing-xl);
+  gap: var(--spacing-2xl); /* Increased gap for better separation */
   padding: var(--spacing-xl);
+  padding-left: 8rem; /* Fixed left padding to keep planet on screen consistently */
   box-sizing: border-box;
   z-index: 100;
   overflow: hidden; /* Prevent double scrollbars */
@@ -71,7 +72,7 @@
   --planet-render-scale: 1;
   --planet-offset-x: 0%;
   --planet-offset-y: 0%;
-  --content-padding: 2rem;
+  --content-padding: 1rem;
   --content-max-width: 800px;
 }
 
@@ -82,17 +83,17 @@
   min-width: 280px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* Align left for consistent positioning */
   position: relative;
   
-  /* Apply planet offset */
-  transform: translate(var(--planet-offset-x), var(--planet-offset-y));
+  /* Fixed positioning - no per-planet offsets for consistency */
+  /* All planets appear at the same position for predictable camera framing */
 }
 
 .planet-visual-label {
   position: absolute;
   bottom: var(--spacing-xl);
-  left: 50%;
+  left: 50%; /* Center within the visual column */
   /* 
    * Note: We intentionally do NOT apply var(--planet-render-scale) here.
    * The label should remain readable regardless of planet size.
@@ -117,6 +118,7 @@
 .planet-content-column {
   flex: 1;
   max-width: var(--content-max-width);
+  margin-left: var(--spacing-2xl); /* Push content box to the right */
   background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border);
   border-radius: 12px;

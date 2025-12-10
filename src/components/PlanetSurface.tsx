@@ -63,10 +63,10 @@ interface PlanetSurfaceProps {
 }
 
 // Moon orbit configuration constants
-const MOON_BASE_ORBIT_RADIUS = 4; // Base radius for first moon (units)
-const MOON_ORBIT_INCREMENT = 0.8; // Additional radius per moon index (units)
+const MOON_BASE_ORBIT_RADIUS = 1.5; // Base radius for first moon (units)
+const MOON_ORBIT_INCREMENT = 0.25; // Additional radius per moon index (units)
 const MOON_VERTICAL_OSCILLATION = 1; // Maximum vertical oscillation (units)
-const MOON_ORBITAL_SPEED = 0.2; // Orbital speed (radians/second)
+const MOON_ORBITAL_SPEED = 0.3; // Orbital speed (radians/second)
 
 /**
  * Moon sphere in the skybox

@@ -52,6 +52,7 @@ export function OrbitingPlanet({
 }: OrbitingPlanetProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const setHoveredObject = useHoverStore((state) => state.setHoveredObject);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useFrame((state) => {
     if (!meshRef.current) return;
@@ -88,7 +89,17 @@ export function OrbitingPlanet({
 
   const handlePointerOver = (e: any) => {
     e.stopPropagation();
+    
+    // Clear any pending timeout
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    
     if (meshRef.current) {
+      // Force update of world matrices for accurate position in nested groups
+      meshRef.current.updateWorldMatrix(true, false);
+      
       // Get world position of the mesh for accurate hover tracking
       const worldPosition = new THREE.Vector3();
       meshRef.current.getWorldPosition(worldPosition);
@@ -105,6 +116,8 @@ export function OrbitingPlanet({
         },
       };
 
+      console.log('Planet hover triggered:', planet.name, 'position:', worldPosition);
+      
       if (onHover) {
         onHover(hoveredObj);
       }
@@ -114,10 +127,16 @@ export function OrbitingPlanet({
 
   const handlePointerOut = (e: any) => {
     e.stopPropagation();
-    if (onHover) {
-      onHover(null);
-    }
-    setHoveredObject(null);
+    console.log('Planet pointer out:', planet.name);
+    
+    // Delay clearing the hover to keep label visible
+    hoverTimeoutRef.current = setTimeout(() => {
+      if (onHover) {
+        onHover(null);
+      }
+      setHoveredObject(null);
+      hoverTimeoutRef.current = null;
+    }, 150); // 150ms delay
   };
 
   const handleClick = (e: any) => {

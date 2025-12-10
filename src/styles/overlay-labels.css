@@ -13,19 +13,17 @@
 
 .overlay-label {
   pointer-events: none;
-  animation: labelFadeIn 0.2s ease-out;
+  animation: labelFadeInSimple 0.2s ease-out;
   user-select: none;
   /* Transform now applied via inline style for per-scene offset */
 }
 
-@keyframes labelFadeIn {
+@keyframes labelFadeInSimple {
   from {
     opacity: 0;
-    transform: translate(-50%, calc(-100% - 20px)) scale(0.9);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, calc(-100% - 20px)) scale(1);
   }
 }
 

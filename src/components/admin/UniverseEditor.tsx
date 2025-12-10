@@ -216,11 +216,11 @@ export default function UniverseEditor({
     setEditingGalaxy(newGalaxy.id);
   };
 
-  const handleUpdateGalaxy = (updatedGalaxy: Galaxy) => {
+  const handleUpdateGalaxy = (updatedGalaxy: Galaxy, originalId: string) => {
     onUpdate({
       ...universe,
       galaxies: universe.galaxies.map((g) =>
-        g.id === updatedGalaxy.id ? updatedGalaxy : g
+        g.id === originalId ? updatedGalaxy : g
       ),
     });
     // Auto-close the modal after successful update

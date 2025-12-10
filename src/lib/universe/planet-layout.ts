@@ -21,12 +21,13 @@ import type { PlanetLayoutConfig } from './types';
 /**
  * Default layout configuration for Planet Viewer
  * These values provide a balanced, portfolio-ready layout
+ * Note: planetOffsetX/Y removed for consistent positioning across all planets
  */
 export const DEFAULT_PLANET_LAYOUT: Required<PlanetLayoutConfig> = {
   planetColumnWidth: 30,
   planetRenderScale: 1.0,
-  planetOffsetX: 0,
-  planetOffsetY: 0,
+  planetOffsetX: 0, // Deprecated - kept for backward compatibility but no longer applied
+  planetOffsetY: 0, // Deprecated - kept for backward compatibility but no longer applied
   contentPadding: 2,
   contentMaxWidth: 800,
 };
@@ -135,6 +136,9 @@ export function validateLayoutConfig(config: PlanetLayoutConfig): string[] {
  * Generates CSS custom properties from layout configuration
  * These can be applied to the planet surface container
  * 
+ * Note: planetOffsetX/Y are no longer applied to ensure consistent positioning
+ * All planets now appear at the same 3D position for predictable camera framing
+ * 
  * @param config - Normalized layout configuration
  * @returns CSS custom properties object
  */
@@ -142,8 +146,7 @@ export function layoutConfigToCSS(config: Required<PlanetLayoutConfig>): Record<
   return {
     '--planet-column-width': `${config.planetColumnWidth}%`,
     '--planet-render-scale': `${config.planetRenderScale}`,
-    '--planet-offset-x': `${config.planetOffsetX}%`,
-    '--planet-offset-y': `${config.planetOffsetY}%`,
+    // planetOffsetX/Y intentionally omitted - all planets use fixed positioning
     '--content-padding': `${config.contentPadding}rem`,
     '--content-max-width': `${config.contentMaxWidth}px`,
   };

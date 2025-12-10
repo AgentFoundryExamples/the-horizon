@@ -22,7 +22,7 @@ import Modal from './Modal';
 
 interface GalaxyEditorProps {
   galaxy: Galaxy;
-  onUpdate: (galaxy: Galaxy) => void;
+  onUpdate: (galaxy: Galaxy, originalId: string) => void;
   onClose: () => void;
 }
 
@@ -33,18 +33,22 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
     ? galaxy 
     : { ...galaxy, id: '' };
   
+  // Track the original ID to allow ID updates while maintaining reference
+  const [originalGalaxyId] = useState(galaxy.id || '');
   const [localGalaxy, setLocalGalaxy] = useState(initialGalaxy);
   const [editingSystem, setEditingSystem] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'info' | 'systems' | 'stars'>('info');
   const [showAnimationPreview, setShowAnimationPreview] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  // Only allow auto-ID generation for brand new galaxies (no ID or empty string ID)
   const [idManuallyEdited, setIdManuallyEdited] = useState(Boolean(galaxy.id && galaxy.id.trim()));
+  const isExistingGalaxy = Boolean(galaxy.id && galaxy.id.trim());
 
   const handleChange = (field: keyof Galaxy, value: unknown) => {
     const updated = { ...localGalaxy, [field]: value };
     
-    // Auto-update ID when name changes, but only if ID hasn't been manually edited
-    if (field === 'name' && !idManuallyEdited && typeof value === 'string') {
+    // Auto-update ID when name changes, but ONLY for new galaxies (not existing ones)
+    if (field === 'name' && !idManuallyEdited && !isExistingGalaxy && typeof value === 'string') {
       updated.id = generateId(value);
     }
     
@@ -105,7 +109,7 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
       return;
     }
     
-    onUpdate(galaxyToValidate);
+    onUpdate(galaxyToValidate, originalGalaxyId);
   };
 
   const handleAddSolarSystem = () => {
@@ -129,11 +133,11 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
     setEditingSystem(newSystem.id);
   };
 
-  const handleUpdateSolarSystem = (updatedSystem: SolarSystem) => {
+  const handleUpdateSolarSystem = (updatedSystem: SolarSystem, originalId: string) => {
     const updated = {
       ...localGalaxy,
       solarSystems: (localGalaxy.solarSystems || []).map((s) =>
-        s.id === updatedSystem.id ? updatedSystem : s
+        s.id === originalId ? updatedSystem : s
       ),
     };
     setLocalGalaxy(updated);
@@ -374,8 +378,8 @@ export default function GalaxyEditor({ galaxy, onUpdate, onClose }: GalaxyEditor
             {editingSystem && (
               <SolarSystemEditor
                 solarSystem={(localGalaxy.solarSystems || []).find((s) => s.id === editingSystem)!}
-                onUpdate={(updated) => {
-                  handleUpdateSolarSystem(updated);
+                onUpdate={(updated, originalId) => {
+                  handleUpdateSolarSystem(updated, originalId);
                   setEditingSystem(null); // Auto-close on save
                 }}
                 onClose={() => setEditingSystem(null)}
