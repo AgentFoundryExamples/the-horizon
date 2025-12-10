@@ -64,19 +64,19 @@ export interface CelestialVisualTheme {
    * URL or path to diffuse texture (main surface color/pattern)
    * Falls back to solid color from theme if not provided
    */
-  diffuseTexture?: string;
+  diffuseTexture?: string | undefined;
   
   /**
    * URL or path to normal map texture (surface detail/bumps)
    * Enhances visual depth without geometry complexity
    */
-  normalTexture?: string;
+  normalTexture?: string | undefined;
   
   /**
    * URL or path to specular/roughness map (reflectivity)
    * Controls how light reflects off the surface
    */
-  specularTexture?: string;
+  specularTexture?: string | undefined;
   
   /**
    * Hex color for theme-colored glow/border effect
@@ -189,7 +189,7 @@ export interface StarHaloConfig {
    * URL or path to star surface texture
    * Adds detail to the star sphere (e.g., solar flares, spots)
    */
-  texture?: string;
+  texture?: string | undefined;
   
   /**
    * Hex color for star and halo (default: from theme)

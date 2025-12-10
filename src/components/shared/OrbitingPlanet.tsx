@@ -6,7 +6,7 @@
  */
 
 import { useRef, useMemo, useEffect, useState } from 'react';
-import { useFrame, useLoader } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { Planet } from '@/lib/universe/types';
 import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
@@ -61,39 +61,44 @@ export function OrbitingPlanet({
     return resolveCelestialTheme(planet.visualTheme, planet.theme);
   }, [planet.visualTheme, planet.theme]);
   
-  // Track texture loading state
-  const [texturesLoaded, setTexturesLoaded] = useState(false);
-  const [textureError, setTextureError] = useState(false);
+  // Shared texture loader instance for caching
+  const textureLoader = useMemo(() => new THREE.TextureLoader(), []);
   
   // Attempt to load textures if URLs provided
-  // Using try-catch pattern for graceful degradation
+  // Using shared loader for caching and error handling
   const diffuseMap = useMemo(() => {
     if (!visualTheme.diffuseTexture) return null;
     try {
-      const texture = new THREE.TextureLoader().load(
+      const texture = textureLoader.load(
         visualTheme.diffuseTexture,
-        () => setTexturesLoaded(true),
-        undefined,
-        () => setTextureError(true)
+        undefined, // onLoad callback not needed
+        undefined, // onProgress callback not needed
+        (error) => console.warn('Failed to load diffuse texture:', error)
       );
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
       return texture;
     } catch {
-      setTextureError(true);
+      console.warn('Error loading diffuse texture');
       return null;
     }
-  }, [visualTheme.diffuseTexture]);
+  }, [visualTheme.diffuseTexture, textureLoader]);
   
   const normalMap = useMemo(() => {
     if (!visualTheme.normalTexture) return null;
     try {
-      const texture = new THREE.TextureLoader().load(visualTheme.normalTexture);
+      const texture = textureLoader.load(
+        visualTheme.normalTexture,
+        undefined,
+        undefined,
+        (error) => console.warn('Failed to load normal texture:', error)
+      );
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
       return texture;
     } catch {
+      console.warn('Error loading normal texture');
       return null;
     }
-  }, [visualTheme.normalTexture]);
+  }, [visualTheme.normalTexture, textureLoader]);
 
   useFrame((state) => {
     if (!meshRef.current) return;

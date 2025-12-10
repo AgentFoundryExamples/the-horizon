@@ -102,7 +102,7 @@ export const STAR_HALO_PRESETS: Record<string, StarHaloConfig> = {
 export function resolveCelestialTheme(
   customTheme: CelestialVisualTheme | undefined,
   baseTheme: string
-): Required<CelestialVisualTheme> {
+): CelestialVisualTheme & { glowColor: string; glowIntensity: number; rotationSpeed: number } {
   // Start with preset if available
   const preset = customTheme?.preset || baseTheme;
   const presetConfig = CELESTIAL_THEME_PRESETS[preset] || CELESTIAL_THEME_PRESETS['rocky'];
@@ -110,9 +110,9 @@ export function resolveCelestialTheme(
   // Merge custom values over preset
   return {
     preset,
-    diffuseTexture: customTheme?.diffuseTexture || '',
-    normalTexture: customTheme?.normalTexture || '',
-    specularTexture: customTheme?.specularTexture || '',
+    diffuseTexture: customTheme?.diffuseTexture || undefined,
+    normalTexture: customTheme?.normalTexture || undefined,
+    specularTexture: customTheme?.specularTexture || undefined,
     glowColor: customTheme?.glowColor || presetConfig.glowColor || '#CCCCCC',
     glowIntensity: customTheme?.glowIntensity ?? presetConfig.glowIntensity ?? 0.3,
     rotationSpeed: customTheme?.rotationSpeed ?? presetConfig.rotationSpeed ?? 1.0,
@@ -130,14 +130,14 @@ export function resolveCelestialTheme(
 export function resolveStarHalo(
   customHalo: StarHaloConfig | undefined,
   starTheme: string
-): Required<StarHaloConfig> {
+): StarHaloConfig & { haloIntensity: number; color: string; haloRadius: number } {
   // Find matching preset or use default
   const presetConfig = STAR_HALO_PRESETS[starTheme] || STAR_HALO_PRESETS['yellow-dwarf'];
   
   // Merge custom values over preset
   return {
     haloIntensity: customHalo?.haloIntensity ?? presetConfig.haloIntensity ?? 50,
-    texture: customHalo?.texture || '',
+    texture: customHalo?.texture || undefined,
     color: customHalo?.color || presetConfig.color || '#FDB813',
     haloRadius: customHalo?.haloRadius ?? presetConfig.haloRadius ?? 1.5,
   };
