@@ -59,9 +59,11 @@
   height: 100vh;
   display: flex;
   flex-direction: row;
-  gap: var(--spacing-2xl); /* Increased gap for better separation */
-  padding: var(--spacing-xl);
-  padding-left: 8rem; /* Fixed left padding to keep planet on screen consistently */
+  align-items: center; /* Vertically center content */
+  gap: clamp(1rem, 2vw, 2rem); /* Reduced gap to bring content closer */
+  padding: clamp(1rem, 2vw, 2rem); /* Responsive padding */
+  padding-left: clamp(2rem, 5vw, 8rem); /* Responsive left padding */
+  padding-right: 1rem; /* Minimal right padding to keep content close to edge */
   box-sizing: border-box;
   z-index: 100;
   overflow: hidden; /* Prevent double scrollbars */
@@ -73,52 +75,63 @@
   --planet-offset-x: 0%;
   --planet-offset-y: 0%;
   --content-padding: 1rem;
-  --content-max-width: 800px;
+  --content-max-width: 900px;
 }
 
 /* Left column - 3D planet visualization */
 .planet-visual-column {
-  flex: 0 0 var(--planet-column-width);
-  max-width: 400px;
-  min-width: 280px;
+  flex: 0 0 auto; /* Don't use percentage-based flex basis */
+  width: min(400px, 35vw); /* Explicit width instead of flex basis */
+  max-width: min(400px, 35vw); /* Scale with viewport, cap at 400px */
+  min-width: clamp(200px, 20vw, 280px); /* Responsive minimum */
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Align left for consistent positioning */
+  justify-content: center; /* Center planet in its column */
   position: relative;
+  aspect-ratio: 1; /* Maintain square aspect for planet */
+  flex-shrink: 0; /* Prevent shrinking */
   
   /* Fixed positioning - no per-planet offsets for consistency */
   /* All planets appear at the same position for predictable camera framing */
 }
 
 .planet-visual-label {
-  position: absolute;
-  bottom: var(--spacing-xl);
-  left: 50%; /* Center within the visual column */
+  position: absolute; /* Absolute within planet column */
+  bottom: 0; /* Anchor to bottom of column */
+  left: 47%; /* Slightly left of center to align with planet */
+  transform: translate(-50%, 75%); /* Center label and push down 75% of its height */
   /* 
    * Note: We intentionally do NOT apply var(--planet-render-scale) here.
    * The label should remain readable regardless of planet size.
    * Scaling the label with the planet would make text tiny on small planets
    * and oversized on large planets, harming readability.
    */
-  transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.9);
   border: 2px solid rgba(74, 144, 226, 0.6);
   border-radius: 8px;
   padding: var(--spacing-sm) var(--spacing-md);
   color: var(--color-text-primary);
-  font-size: 1.125rem;
+  font-size: clamp(0.95rem, 1.5vw, 1.125rem); /* Responsive font size */
   font-weight: 600;
   text-align: center;
   pointer-events: none;
   backdrop-filter: blur(4px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  white-space: nowrap; /* Prevent label wrapping */
+  max-width: 90%; /* Relative to column width */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 10; /* Above planet in column */
 }
 
 /* Right column - Blog-style content area */
 .planet-content-column {
-  flex: 1;
-  max-width: var(--content-max-width);
-  margin-left: var(--spacing-2xl); /* Push content box to the right */
+  flex: 1 1 auto; /* Allow growth and shrinkage */
+  max-width: var(--content-max-width); /* Remove viewport constraint - just use content-max-width */
+  min-width: 0; /* Prevent flex overflow */
+  align-self: stretch; /* Full height of container */
+  margin-left: auto; /* Push to the right */
+  margin-right: 0; /* No right margin - touch the edge */
   background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border);
   border-radius: 12px;
@@ -546,19 +559,41 @@ a:focus-visible {
   }
 }
 
+/* Large desktop adjustments (≥ 1440px) */
+@media (min-width: 1440px) {
+  .planet-surface-container {
+    padding-left: max(8rem, 10vw);
+    padding-right: 1rem; /* Keep minimal right padding on large screens too */
+  }
+  
+  .planet-visual-column {
+    max-width: min(450px, 30vw);
+  }
+  
+  .planet-content-column {
+    max-width: var(--content-max-width); /* Remove viewport constraint on large screens */
+  }
+}
+
+/* Medium desktop/laptop (1025px - 1439px) - default styles apply */
+
 /* Tablet breakpoint (≤ 1024px) */
 @media (max-width: 1024px) {
   .planet-surface-container {
-    gap: var(--spacing-lg);
-    padding: var(--spacing-lg);
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    padding: clamp(1rem, 2vw, 1.5rem);
+    padding-left: clamp(1.5rem, 3vw, 4rem);
+    padding-right: clamp(1.5rem, 3vw, 4rem);
   }
 
   .planet-visual-column {
-    flex: 0 0 35%;
+    flex: 0 0 clamp(25%, 30vw, 35%);
+    max-width: min(350px, 35vw);
+    min-width: clamp(180px, 25vw, 250px);
   }
 
   .planet-content-column {
-    max-width: 650px;
+    max-width: min(650px, 65vw);
     padding: var(--spacing-xl);
   }
 
@@ -577,22 +612,28 @@ a:focus-visible {
 @media (max-width: 768px) {
   .planet-surface-container {
     flex-direction: column;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
+    gap: clamp(0.75rem, 2vh, 1rem);
+    padding: clamp(0.75rem, 2vw, 1rem);
+    padding-left: clamp(0.75rem, 2vw, 1rem);
+    padding-right: clamp(0.75rem, 2vw, 1rem);
     overflow-y: auto; /* Allow natural page scrolling */
     height: auto;
+    align-items: stretch; /* Full width for mobile */
   }
 
   .planet-visual-column {
     flex: 0 0 auto;
     max-width: 100%;
-    min-height: 200px;
+    min-width: 100%;
+    min-height: clamp(150px, 25vh, 250px);
+    aspect-ratio: auto; /* Remove aspect ratio on mobile */
     order: 1;
   }
 
   .planet-content-column {
     flex: 1;
     max-width: 100%;
+    min-width: 100%;
     order: 2;
     padding: var(--spacing-lg);
     overflow-y: visible; /* Content scrolls with page */
@@ -622,6 +663,13 @@ a:focus-visible {
   .external-link .link-description {
     display: block;
     width: 100%;
+  }
+
+  /* Adjust label position for mobile */
+  .planet-visual-label {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 1rem;
   }
 }
 
