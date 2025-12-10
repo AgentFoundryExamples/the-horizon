@@ -8,18 +8,19 @@ Includes classification of external dependencies as stdlib vs third-party.
 
 ## Statistics
 
-- **Total files**: 55
+- **Total files**: 56
 - **Intra-repo dependencies**: 47
-- **External stdlib dependencies**: 5
+- **External stdlib dependencies**: 6
 - **External third-party dependencies**: 21
 
 ## External Dependencies
 
 ### Standard Library / Core Modules
 
-Total: 5 unique modules
+Total: 6 unique modules
 
 - `crypto`
+- `fs`
 - `fs/promises`
 - `os`
 - `path`

@@ -122,8 +122,28 @@
       "children": [
         {
           "type": "directory",
+          "name": "__tests__",
+          "children": [
+            {
+              "type": "file",
+              "name": "dark-mode-css.test.ts"
+            }
+          ]
+        },
+        {
+          "type": "directory",
           "name": "app",
           "children": [
+            {
+              "type": "directory",
+              "name": "__tests__",
+              "children": [
+                {
+                  "type": "file",
+                  "name": "layout.test.tsx"
+                }
+              ]
+            },
             {
               "type": "directory",
               "name": "admin",

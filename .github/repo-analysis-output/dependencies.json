@@ -36,6 +36,18 @@
       }
     },
     {
+      "id": "src/__tests__/dark-mode-css.test.ts",
+      "path": "src/__tests__/dark-mode-css.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [
+          "fs",
+          "path"
+        ],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/app/api/admin/login/route.ts",
       "path": "src/app/api/admin/login/route.ts",
       "type": "file",
@@ -782,6 +794,7 @@
   "external_dependencies_summary": {
     "stdlib": [
       "crypto",
+      "fs",
       "fs/promises",
       "os",
       "path",
@@ -810,7 +823,7 @@
       "three",
       "zustand"
     ],
-    "stdlib_count": 5,
+    "stdlib_count": 6,
     "third-party_count": 21
   }
 }

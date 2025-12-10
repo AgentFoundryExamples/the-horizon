@@ -26,7 +26,11 @@
   └── universe
     └── universe.json
 ├── src
+  ├── __tests__
+    └── dark-mode-css.test.ts
   ├── app
+    ├── __tests__
+      └── layout.test.tsx
     ├── admin
       ├── login
         └── page.tsx

@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 55
+Total files: 56
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -31,6 +31,15 @@ Total files: 55
 **Summary:** JavaScript module for next.config  
 **Size:** 0.85 KB  
 **LOC:** 10  
+**TODOs/FIXMEs:** 0  
+
+## src/__tests__/dark-mode-css.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 3.39 KB  
+**LOC:** 59  
 **TODOs/FIXMEs:** 0  
 
 ## src/app/api/admin/login/route.ts

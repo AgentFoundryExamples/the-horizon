@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 55,
+  "total_files": 56,
   "files": [
     {
       "schema_version": "2.0",
@@ -41,6 +41,20 @@
       "metrics": {
         "size_bytes": 866,
         "loc": 10,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/__tests__/dark-mode-css.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 3474,
+        "loc": 59,
         "todo_count": 0
       }
     },
