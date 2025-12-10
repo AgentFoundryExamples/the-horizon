@@ -45,7 +45,7 @@
               "name": "Agent Foundry",
               "theme": "blue-green",
               "summary": "The tool that allows you to explore the horizon.",
-              "contentMarkdown": "# Description\n\nAgent Foundry is one of the things I'm most proud of recently, its a pipeline that allows me to create working software from high level specifications completely autonomously while I work on other things. It's a multi stage LLM orchestration system that takes a description of a software tool and turns it into functional software. \n\n### Workflow\n**The flow is as follows:**\n\n- You have an idea for some software so you type up a spec for what you want made.\n- Pass that spec onto Agent Foundry and you have a fully documented and working prototype in a matter of hours.\n- From there you are free to explore the code, test out, and use the software however you like.\n- When you come up with something new to add you write up another spec, pass it to Agent Foundry and it takes care of the rest iterating on your currently implemented version to bring you the new features and refinements you've requested.",
+              "contentMarkdown": "# Description\n\nAgent Foundry is one of the things I'm most proud of recently, its a pipeline that allows me to create working software from high level specifications completely autonomously while I work on other things. It's a multi stage LLM orchestration system that takes a description of a software tool and turns it into functional software. \n\n### Workflow\n**The flow is as follows:**\n\n- You have an idea for some software so you type up a spec for what you want made.\n- Pass that spec onto Agent Foundry and you have a fully documented and working prototype in a matter of hours.\n- From there you are free to explore the code, test out, and use the software however you like.\n- When you come up with something new to add you write up another spec, pass it to Agent Foundry and it takes care of the rest iterating on your currently implemented version to bring you the new features and refinements you've requested.\n\n[Example Projects](https://github.com/AgentFoundryExamples)",
               "moons": [
                 {
                   "id": "af-specs",
@@ -56,21 +56,6 @@
                   "id": "af-plan",
                   "name": "AF Plan",
                   "contentMarkdown": "# The Plans\n\nThis is where the LLMs start to come into play, the very first is our planning agent. This agent receives the users spec surrounded by a bunch of context about the project which allows it to reason about how to turn the spec into a set of actionable items.\n\n## The Validation\n**These plans go through a determinism checkpoint, the system checks the emitted plan against a schema and will reject any plan that is invalid.**\n\n**This allows us to:**\n- Ensure a consistent input to the next stage of the Pipeline.\n- Have confidence in the plan, we are giving the LLM a set of complicated instructions and the output requirements are the smallest piece of this. Following the output requirements gives us higher confidence the rest of the instructions were followed well.\n- Identify where the system drifts, rejected plans are logged and used to refine prompts and learn more about what specs cause failures. Each rejection is a learning opportunity."
-                },
-                {
-                  "id": "new-moon",
-                  "name": "New Moon",
-                  "contentMarkdown": "# New Moon\n\nAdd your description here..."
-                },
-                {
-                  "id": "new-moon",
-                  "name": "New Moon",
-                  "contentMarkdown": "# New Moon\n\nAdd your description here..."
-                },
-                {
-                  "id": "new-moon",
-                  "name": "New Moon",
-                  "contentMarkdown": "# New Moon\n\nAdd your description here..."
                 }
               ]
             }
