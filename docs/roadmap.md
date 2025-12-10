@@ -118,80 +118,15 @@ See [docs/content-authoring.md](./content-authoring.md#external-links) for link 
 
 ## Previous Release: v0.1.8 (December 9, 2025)
 
-This release implements a symmetric universe layout system that positions galaxies deterministically based on count, ensuring visual balance and aesthetic composition without manual coordinate tweaking.
+Symmetric universe layout system with deterministic galaxy positioning based on count, ensuring visual balance and aesthetic composition without manual coordinate tweaking.
 
-**Symmetric Universe Layout:**
+**Key Features:**
+- Count-based layout patterns (centered, mirrored, triangle, diamond, ring)
+- calculateGalaxyLayout() helper with validation and O(n) performance
+- Smooth position interpolation and camera focus integration
+- 20 unit tests covering all patterns and edge cases
 
-1. **Count-Based Layout Patterns**
-   - Single galaxy: Centered at origin for perfect focus
-   - Two galaxies: Horizontally mirrored for balanced left-right composition
-   - Three galaxies: Equilateral triangle centered at origin
-   - Four galaxies: Diamond (rotated square) on cardinal directions
-   - Five+ galaxies: Circular ring with even angular distribution
-   - Deterministic positioning ensures consistency across sessions
-
-2. **Layout Helper Function**
-   - `calculateGalaxyLayout()` in `src/lib/universe/layout.ts`
-   - Takes galaxy IDs and spacing, returns position map
-   - Validates spacing to prevent overlap (min 50 units for 44 unit max diameter)
-   - Helper functions for camera distance and spacing validation
-   - O(n) complexity, < 1ms calculation time for 100 galaxies
-
-3. **Integration and Transitions**
-   - Replaces grid-based positioning in `UniverseScene.tsx`
-   - useMemo caching prevents unnecessary recalculations
-   - Smooth position interpolation when galaxy count changes
-   - Camera focus respects symmetric coordinates
-   - No teleporting or popping during transitions
-
-4. **Comprehensive Testing**
-   - 20 unit tests covering all patterns and edge cases
-   - Tests for 0, 1, 2, 3, 4, and 5+ galaxy scenarios
-   - Validates spacing, symmetry, and deterministic behavior
-   - Tests very large counts (100+) for performance
-   - 100% test pass rate (748/755 total, 7 pre-existing crypto failures)
-
-**Documentation Updates:**
-
-- Added "Symmetric Universe Layout" section to `docs/visuals.md`
-- Detailed layout patterns with ASCII diagrams and geometry explanations
-- Implementation guide with code examples
-- Edge cases, performance considerations, and testing checklist
-- Updated `docs/roadmap.md` with v0.1.8 release notes
-
-**Why This Release:**
-
-Manual galaxy positioning created unbalanced compositions when galaxies were added or removed. The symmetric layout system:
-- Automatically adapts to galaxy count changes
-- Preserves visual balance and symmetry
-- Eliminates manual coordinate tweaking
-- Provides aesthetic patterns for all galaxy counts
-- Maintains performance with deterministic O(n) calculations
-
-**Technical Details:**
-- No new environment variables required
-- No migration steps needed
-- Build verified successful with no errors
-- All tests passing (748/755, same 7 pre-existing crypto failures)
-- Compatible with all v0.1.x releases
-
-**Deployment Notes:**
-- No environment variable changes
-- No redeployment required if already on v0.1.7
-- Galaxy positions will update automatically on first load
-- Existing camera transitions remain compatible
-
-**Verification Steps:**
-1. Load universe view with 1 galaxy - should be centered
-2. Load with 2 galaxies - should be mirrored left/right
-3. Load with 3 galaxies - should form upward-pointing triangle
-4. Load with 4 galaxies - should form diamond on N/S/E/W
-5. Load with 5+ galaxies - should form circular ring
-6. Add/remove galaxies - positions should transition smoothly
-7. Click sidebar item - camera should focus on correct position
-8. Check spacing - no galaxy overlap at any count
-
-See [docs/visuals.md](./visuals.md#symmetric-universe-layout-v018) for complete layout documentation.
+See [CHANGELOG.md](CHANGELOG.md#018---navigation--layout-overhaul-summary---2025-12-09) for complete release details.
 
 ---
 
@@ -1075,7 +1010,14 @@ See "Previous Release: v0.1.8" section above for complete details.
 
 ### v0.1.7 - Hover Label Stabilization and Breadcrumb UX (December 9, 2025)
 
-See "Current Release" section above for complete details.
+- **Hover Label Stabilization (ISS-1)**: Migrated to Drei Html component, preventing Canvas crashes
+- **Position Validation**: Multi-level validation with console warnings instead of crashes
+- **Breadcrumb Enhancements (ISS-2)**: Improved navigation context and visual refinements
+- **Accessibility**: Enhanced ARIA labels, keyboard navigation, and touch targets
+- **Documentation**: Complete hover label and breadcrumb documentation added
+- **Testing**: New manual testing scenarios (14-15) for both features
+
+See [CHANGELOG.md](CHANGELOG.md#017---hover-label-stabilization-and-breadcrumb-ux-enhancements---2025-12-09) for complete details.
 
 ### v0.1.6 - Documentation Completeness and Version Tracking (December 8, 2025)
 
@@ -1086,7 +1028,7 @@ See "Current Release" section above for complete details.
 - **Cross-References**: All documentation links validated and synchronized
 - **Version Management**: Version bumped from 0.1.5 to 0.1.6 with changelog entry
 
-See "Current Release" section above for complete details.
+See [CHANGELOG.md](CHANGELOG.md#016---documentation-completeness-and-version-tracking---2025-12-08) for complete details.
 
 ### v0.1.5 - GitHub Persistence Stabilization and UI Cleanup (December 8, 2025)
 
@@ -1097,7 +1039,7 @@ See "Current Release" section above for complete details.
 - **Debugging**: Clear workflow logging with SHA operations and file read tracking
 - **Stability**: Optimistic locking at both save and commit steps
 
-See "Current Release" section above for complete details.
+See [CHANGELOG.md](CHANGELOG.md#015---github-persistence-stabilization-and-ui-cleanup---2025-12-08) for complete details.
 
 ### v0.1.4 - Admin Workflow Documentation and Testing (December 8, 2025)
 
@@ -1108,7 +1050,7 @@ See "Current Release" section above for complete details.
 - **Prerequisites**: Clear guidance on required vs. optional configuration
 - **No Code Changes**: Pure documentation release, all tests passing
 
-See "Current Release" section above for complete details.
+See [CHANGELOG.md](CHANGELOG.md#014---admin-workflow-documentation-and-testing---2025-12-08) for complete details.
 
 ### v0.1.3 - Galaxy Scale and Visual Improvements (December 8, 2025)
 
