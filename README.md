@@ -6,12 +6,15 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 - 🌌 **Universe Data Schema**: Well-defined JSON structure for galaxies, solar systems, planets, and moons
 - 🎨 **3D Visualization**: Interactive 3D universe with shader-based particle galaxies
+- ✨ **Celestial Visual Themes**: Customizable glow effects, rotation speeds, and textures for planets/moons/stars
 - 🎬 **Cinematic Navigation**: Smooth camera transitions with spline-based paths and easing
 - 🪐 **Keplerian Orbits**: Realistic planetary motion using simplified orbital mechanics
 - 🎮 **Multi-Layer Exploration**: Traverse from universe → galaxy → solar system → planet views
 - 📝 **Markdown Content**: Rich content support using React Markdown with sanitization
+- 🔗 **External Links**: Secure management of external resources with admin workflow
+- 📦 **Collapsible Sections**: Organized content viewer with keyboard-accessible collapsible sections
 - 🌙 **Moon Navigation**: Explore planet surfaces and hop between moons with seamless transitions
-- ♿ **Accessibility**: Keyboard navigation, focus states, and reduced motion support
+- ♿ **Accessibility**: Keyboard navigation, focus states, ARIA labels, and reduced motion support
 - ✅ **TypeScript**: Fully typed data models with runtime validation
 - 🧪 **Tested**: Comprehensive unit tests for data loading and validation
 - 🚀 **Next.js 14**: Server-side rendering and static generation support
@@ -21,15 +24,15 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 For detailed release notes and version history, see [docs/CHANGELOG.md](docs/CHANGELOG.md).
 
-### Latest Release: v0.1.8 (December 9, 2025)
+### Latest Release: v0.1.9 (December 10, 2025)
 
-This release captures the scope of Part 1 improvements, including:
+This release delivers enhanced visual customization for celestial bodies, admin workflow for external link management, and collapsible content sections for improved content organization:
 
-- **Persistent Sidebar Navigation**: Context-aware entity lists with keyboard support
-- **Symmetric Universe Layout**: Deterministic galaxy positioning with aesthetic patterns
-- **Galaxy View Ring Alignment**: Precise orbital ring placement for solar systems and stars  
-- **Hover Label Stabilization**: Drei Html component integration preventing crashes
-- **Breadcrumb Navigation**: Full hierarchy display with WCAG 2.1 Level AA compliance
+- **Celestial Visual Themes**: Theme presets (rocky, gasGiant, icy, etc.), customizable glow effects, rotation speeds, and texture support
+- **External Links Management**: Admin workflow for adding/editing external resources with validation and duplicate detection
+- **Collapsible Content Viewer**: Reusable CollapsibleSection component with keyboard navigation and ARIA support
+- **Admin Enhancements**: Visual theme editor, external link CRUD, color picker, and real-time validation
+- **Viewer Improvements**: Related Resources section, collapsible moon lists, secure external link rendering
 
 See the [full changelog](docs/CHANGELOG.md) for complete details on all releases.
 

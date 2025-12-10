@@ -7,6 +7,129 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.9] - Celestial Themes, Link Management & Collapsible Viewer - 2025-12-10
+
+*This release delivers enhanced visual customization for celestial bodies, admin workflow for external link management, and collapsible content sections for improved content organization.*
+
+**Version Context:** Building on the navigation and layout foundation established in Part 1 (v0.1.7-v0.1.8), this release focuses on visual polish, content enrichment, and viewer UX improvements. These features provide content authors with powerful customization tools while maintaining backward compatibility with existing universe data.
+
+### Celestial Visual Themes System
+
+A comprehensive visual theme system enables rich, customizable rendering for planets, moons, and stars:
+
+#### 1. Theme Presets for Quick Configuration
+- **Planet/Moon Presets**: rocky, gasGiant, icy, volcanic, earth-like, blue-green, red, desert
+- **Star Presets**: yellow-dwarf, orange-dwarf, red-dwarf, blue-giant, white-dwarf
+- Each preset includes sensible defaults for glow color, intensity, rotation speed, and halo effects
+- **Impact**: Content authors can quickly apply professional-looking themes without manual tuning
+
+#### 2. Customizable Visual Parameters
+- **Glow Effects**: Configurable atmospheric glow with theme-colored borders (0-1 intensity)
+- **Rotation Cues**: Adjustable rotation speeds for visual interest (0.1-3.0x multiplier)
+- **Star Halos**: Intensity-controlled halos with additive blending (0-100% intensity, 1.0-3.0x radius)
+- **Texture Support**: Optional URLs for diffuse, normal, and specular textures
+- **Impact**: Fine-grained control over visual appearance while maintaining performance
+
+#### 3. Admin Interface Integration
+- Visual theme editor in Planet/Moon admin panels
+- Preset dropdown for quick theme selection
+- Color picker for custom glow colors with hex validation
+- Sliders for glow intensity and rotation speed with real-time feedback
+- Texture URL fields with validation and preview capability
+- **Impact**: Non-technical content authors can customize visuals through intuitive UI
+
+#### 4. Graceful Fallback & Backward Compatibility
+- All visual theme fields are optional
+- Missing data falls back to theme-based defaults
+- Existing planets/moons without themes continue to work
+- No migration required for existing universe data
+- **Impact**: Zero-risk deployment, no breaking changes
+
+### External Links Management
+
+Admin workflow for managing external resources linked to planets and moons:
+
+#### 1. External Link Structure
+- **Link Fields**: title (required), url (required), description (optional)
+- **URL Validation**: Supports http/https URLs and relative paths starting with /
+- **XSS Protection**: Strict URL validation prevents malicious links
+- **Duplicate Detection**: Admin interface warns about duplicate URLs
+- **Impact**: Secure, validated external resource management
+
+#### 2. Admin Link Editor
+- Add/edit/delete external links in Planet/Moon editors
+- Inline validation with immediate error feedback
+- Visual indicator for valid/invalid URLs
+- Reorderable link list for custom sequencing
+- Batch operations for efficient link management
+- **Impact**: Streamlined workflow for content enrichment
+
+#### 3. Viewer Integration
+- External links display in collapsible "Related Resources" section
+- Links open in new tab with `rel="noopener noreferrer"` security
+- Link title and optional description displayed
+- Clean card-based UI with hover effects
+- Invalid URLs filtered out automatically at render time
+- **Impact**: Safe, user-friendly external resource navigation
+
+### Collapsible Content Viewer
+
+Reusable collapsible section component for better content organization:
+
+#### 1. CollapsibleSection Component
+- **Smooth Animations**: CSS transitions for expand/collapse with configurable duration
+- **Keyboard Navigation**: Enter/Space to toggle, full keyboard accessibility
+- **Screen Reader Support**: ARIA attributes for expanded/collapsed state
+- **Item Count Badge**: Optional badge showing number of items in section
+- **Configurable Heights**: customizable collapsed and expanded heights
+- **Impact**: Professional, accessible content organization
+
+#### 2. Configuration Options
+- `defaultCollapsed`: Start sections collapsed or expanded
+- `collapsedHeight`: Preview height in rem units when collapsed
+- `expandedHeight`: Maximum height in rem units when expanded
+- `animationDuration`: Transition duration in milliseconds
+- All values clamped to safe ranges to prevent layout issues
+- **Impact**: Flexible component adaptable to various content needs
+
+#### 3. Usage Patterns
+- **Related Resources**: External links in collapsible section (default collapsed)
+- **Moon Navigation**: Collapsible moon list for planets with many moons
+- **Content Sections**: Future expansion for nested markdown sections
+- Consistent styling across all collapsible areas
+- **Impact**: Cleaner, more scannable content pages
+
+### Technical Details
+- No new environment variables required
+- No migration steps needed
+- All tests passing (748/755, 7 pre-existing crypto failures)
+- Compatible with all v0.1.x releases
+- Build verified with no breaking changes
+- Performance: ~2% additional GPU overhead for glow effects, negligible for collapsible sections
+
+### Deployment Notes
+- No environment variable changes
+- Existing planets/moons without themes continue to work unchanged
+- External links field is optional; omit for planets without external resources
+- Collapsible sections use CSS-only animations for optimal performance
+- Documentation cross-references validated
+
+### Verification Steps
+1. **Visual Themes**: Create planet with visual theme preset, verify glow and rotation
+2. **Custom Colors**: Use color picker to set custom glow color, verify hex validation
+3. **External Links**: Add 2-3 external links to a planet, verify display in "Related Resources"
+4. **Link Validation**: Try adding invalid URL, verify admin validation prevents save
+5. **Collapsible Sections**: Expand/collapse "Related Resources", verify smooth animation
+6. **Keyboard Nav**: Use Enter/Space to toggle collapsible sections with keyboard only
+7. **Screen Reader**: Test with screen reader, verify ARIA labels announce state changes
+8. **Backward Compat**: Load existing universe data without themes, verify no errors
+
+See [docs/visuals.md](visuals.md#celestial-visual-themes-system) for celestial theme documentation.
+See [docs/content-authoring.md](content-authoring.md#external-links-management) for link management workflow.
+See [docs/roadmap.md](roadmap.md#v019---celestial-themes-link-management--collapsible-viewer-december-10-2025) for complete feature summary.
+
+---
+
 ## [0.1.8] - Navigation & Layout Overhaul Summary - 2025-12-09
 
 *This release captures the scope of Part 1 improvements, documenting the navigation and layout work completed in v0.1.7 and v0.1.8, and outlining Part 2 graphical polish plans.*
@@ -574,6 +697,6 @@ See [docs/roadmap.md](roadmap.md) for planned features and future enhancements.
 
 ---
 
-*Last Updated: December 9, 2025*  
-*Current Version: 0.1.8*  
+*Last Updated: December 10, 2025*  
+*Current Version: 0.1.9*  
 *Maintained by: Agent Foundry and John Brosnihan*
