@@ -40,10 +40,10 @@ describe('CSS Dark Mode Enforcement', () => {
       const fullPath = path.join(process.cwd(), 'src/app/globals.css');
       const content = fs.readFileSync(fullPath, 'utf-8');
       
-      // Verify dark background
-      expect(content).toMatch(/background:\s*#000000/i);
-      // Verify light text
-      expect(content).toMatch(/color:\s*#ffffff/i);
+      // Verify dark background (handles background, background-color, #000, #000000, black)
+      expect(content).toMatch(/background(-color)?:\s*(#000000|#000|black)/i);
+      // Verify light text (handles color, #fff, #ffffff, white)
+      expect(content).toMatch(/color:\s*(#ffffff|#fff|white)/i);
     });
   });
 
