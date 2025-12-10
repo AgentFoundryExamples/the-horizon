@@ -1082,6 +1082,400 @@ Example moon structure:
 }
 ```
 
+## Visual Theme Configuration
+
+### Overview
+
+The Horizon provides a comprehensive visual theme system for customizing the appearance of celestial bodies. Planets, moons, and stars can have custom glow effects, rotation speeds, and optional textures for realistic rendering.
+
+**Key Benefits:**
+- **Quick Setup**: Theme presets provide instant visual results
+- **Fine Control**: Adjust every aspect of appearance
+- **Graceful Fallback**: Missing data uses sensible defaults
+- **No Code Changes**: All configuration through admin UI or JSON
+- **Performance-Conscious**: Optimizations ensure smooth rendering
+
+### Planet and Moon Visual Themes
+
+Each planet or moon can have an optional `visualTheme` field:
+
+```json
+{
+  "id": "mars",
+  "name": "Mars",
+  "theme": "red",
+  "visualTheme": {
+    "preset": "red",
+    "glowColor": "#E63946",
+    "glowIntensity": 0.25,
+    "rotationSpeed": 0.9,
+    "diffuseTexture": "/universe/assets/mars-surface.jpg",
+    "normalTexture": "/universe/assets/mars-normal.png"
+  }
+}
+```
+
+#### Visual Theme Fields
+
+| Field | Type | Range | Default | Description |
+|-------|------|-------|---------|-------------|
+| `preset` | string | - | From `theme` | Quick preset selection (rocky, gasGiant, icy, volcanic, etc.) |
+| `glowColor` | string | Hex color | From preset | Hex color for atmospheric glow (#RRGGBB) |
+| `glowIntensity` | number | 0-1 | 0.3 | Prominence of glow effect (0=none, 1=max) |
+| `rotationSpeed` | number | 0.1-3.0 | 1.0 | Rotation animation speed multiplier |
+| `diffuseTexture` | string | URL | - | Surface texture URL (optional) |
+| `normalTexture` | string | URL | - | Normal map URL for detail (optional) |
+| `specularTexture` | string | URL | - | Specular map URL (optional) |
+
+#### Available Presets
+
+| Preset | Best For | Glow Color | Intensity | Speed |
+|--------|----------|-----------|-----------|-------|
+| `rocky` | Terrestrial rocky planets | Brown (#8B7355) | 0.2 | 0.8x |
+| `gasGiant` | Jupiter-like gas planets | Orange (#FFA500) | 0.4 | 1.5x |
+| `icy` | Frozen worlds, icy moons | Light Blue (#B0E0E6) | 0.3 | 0.6x |
+| `volcanic` | Lava/volcanic planets | Red-Orange (#FF4500) | 0.5 | 1.0x |
+| `earth-like` | Habitable terrestrial | Blue (#4A90E2) | 0.35 | 1.0x |
+| `blue-green` | Ocean worlds | Teal (#2E86AB) | 0.3 | 1.0x |
+| `red` | Mars-like desert worlds | Red (#E63946) | 0.25 | 0.9x |
+| `desert` | Sandy desert worlds | Tan (#D4A574) | 0.2 | 0.7x |
+
+### Star Halo Configuration
+
+Stars (both solar system main stars and free-floating stars) can have optional `haloConfig`:
+
+```json
+{
+  "mainStar": {
+    "id": "alpha-centauri",
+    "name": "Alpha Centauri A",
+    "theme": "yellow-dwarf",
+    "haloConfig": {
+      "haloIntensity": 60,
+      "color": "#FDB813",
+      "haloRadius": 1.6,
+      "texture": "/universe/assets/star-surface.jpg"
+    }
+  }
+}
+```
+
+#### Star Halo Fields
+
+| Field | Type | Range | Default | Description |
+|-------|------|-------|---------|-------------|
+| `haloIntensity` | number | 0-100 | 50 | Prominence of star halo (0=none, 100=max) |
+| `color` | string | Hex color | From theme | Hex color for star and halo (#RRGGBB) |
+| `haloRadius` | number | 1.0-3.0 | 1.5 | Size of halo relative to star radius |
+| `texture` | string | URL | - | Star surface texture URL (optional) |
+
+#### Star Theme Presets
+
+| Preset | Best For | Color | Halo | Radius |
+|--------|----------|-------|------|--------|
+| `yellow-dwarf` | Sun-like stars (G-type) | Yellow (#FDB813) | 50% | 1.5x |
+| `orange-dwarf` | K-type main sequence | Orange (#FF8C00) | 45% | 1.4x |
+| `red-dwarf` | M-type red dwarfs | Red (#E63946) | 40% | 1.3x |
+| `blue-giant` | Massive hot stars | Blue (#4A90E2) | 70% | 1.8x |
+| `white-dwarf` | Dense stellar remnants | White (#FFFFFF) | 60% | 1.2x |
+
+### Using the Admin Editor
+
+#### Configuring Planet Visuals
+
+1. **Navigate to Planet Editor**:
+   - Go to `/admin` and log in
+   - Browse to the galaxy and solar system
+   - Click "Edit Planet" on the desired planet
+
+2. **Select the Visuals Tab**:
+   - Click the "Visuals" tab in the planet editor
+   - This tab is separate from Basic Info, Content, Moons, and Layout
+
+3. **Choose a Theme Preset**:
+   - Select from the dropdown (rocky, gasGiant, icy, volcanic, etc.)
+   - Preset automatically sets glow color, intensity, and rotation speed
+   - You can override preset values with custom settings
+
+4. **Adjust Glow Settings**:
+   - **Color Picker**: Click to visually select glow color
+   - **Hex Input**: Or type hex color directly (#RRGGBB)
+   - **Intensity Slider**: Drag to adjust glow prominence (0-100%)
+   - Preview value appears next to slider label
+
+5. **Configure Rotation**:
+   - **Speed Slider**: Drag to adjust rotation speed (0.1x-3.0x)
+   - Gas giants typically use faster speeds (1.5x-2x)
+   - Rocky planets typically use slower speeds (0.8x-1.0x)
+
+6. **Add Textures (Optional)**:
+   - **Diffuse Texture**: Main surface color/pattern
+   - **Normal Map**: Surface detail without geometry
+   - Leave empty for solid color rendering
+   - Use relative paths like `/universe/assets/texture.jpg`
+
+7. **Save Changes**:
+   - Click "Save Changes" to close the editor
+   - Click "💾 Save to Disk" to persist changes locally
+   - Click "🔀 Commit to GitHub" to publish changes
+
+#### Configuring Star Halos
+
+1. **Navigate to Solar System Editor**:
+   - Go to `/admin` → select galaxy → select solar system
+   - Click "Edit System"
+
+2. **Find Star Visual Effects Section**:
+   - Stay on the "System Info" tab
+   - Scroll to "Star Visual Effects" section
+   - This section is below the basic star info
+
+3. **Adjust Halo Settings**:
+   - **Intensity Slider**: Control halo prominence (0-100%)
+   - **Color Picker**: Override theme-based star color
+   - **Radius Slider**: Control halo spread (1x-3x)
+   - **Texture URL**: Add star surface detail (optional)
+
+4. **Save and Publish**:
+   - Same workflow as planet editor
+   - Changes apply to all views showing this star
+
+### Visual Theme Workflow
+
+#### Quick Start (Using Presets)
+
+```mermaid
+graph LR
+    A[Select Planet] --> B[Open Visuals Tab]
+    B --> C[Choose Preset]
+    C --> D[Save Changes]
+    D --> E[Persist to Disk]
+    E --> F[Commit to GitHub]
+    F --> G[Changes Live]
+```
+
+**Time Estimate**: 2-3 minutes per planet
+
+#### Advanced Customization
+
+```mermaid
+graph LR
+    A[Select Planet] --> B[Open Visuals Tab]
+    B --> C[Choose Preset]
+    C --> D[Customize Glow Color]
+    D --> E[Adjust Intensity]
+    E --> F[Set Rotation Speed]
+    F --> G[Optional: Add Textures]
+    G --> H[Save Changes]
+    H --> I[Persist to Disk]
+    I --> J[Commit to GitHub]
+```
+
+**Time Estimate**: 5-10 minutes per planet
+
+### Best Practices
+
+#### Choosing Presets
+
+**Match Planet Type to Preset:**
+- Rocky terrestrial planets → `rocky` or `red`
+- Gas giants → `gasGiant`
+- Icy moons → `icy`
+- Ocean worlds → `blue-green` or `earth-like`
+- Volcanic planets → `volcanic`
+
+**Consider Visual Consistency:**
+- Use similar presets for planets in the same system
+- Vary glow colors to distinguish between planets
+- Keep intensity within 0.2-0.5 range for most planets
+
+#### Glow Settings
+
+**Intensity Guidelines:**
+- **Low (0.1-0.2)**: Minimal atmosphere, rocky worlds
+- **Medium (0.3-0.4)**: Earth-like, gas giants
+- **High (0.5-0.7)**: Thick atmospheres, volcanic
+- **Very High (0.8-1.0)**: Special effects only (use sparingly)
+
+**Color Selection:**
+- Match planetary composition (icy=blue, volcanic=red)
+- Consider atmospheric content (oxygen=blue, methane=orange)
+- Ensure contrast with background and nearby planets
+
+#### Rotation Speed
+
+**Typical Values:**
+- **Slow (0.5x-0.8x)**: Rocky planets, moons
+- **Normal (0.9x-1.2x)**: Earth-like planets
+- **Fast (1.5x-2.0x)**: Gas giants
+- **Very Fast (2.5x-3.0x)**: Special cases only
+
+**Physical Justification:**
+- Jupiter rotates ~2.4x faster than Earth
+- Mercury rotates ~59x slower (use 0.1x for extreme slow)
+- Tidally locked moons should use very slow speeds (0.1x-0.3x)
+
+#### Texture Usage
+
+**When to Use Textures:**
+- Featured planets (Earth, Mars, Jupiter)
+- High-detail views (planet surface scenes)
+- When you have high-quality texture assets
+- Educational/realistic scenarios
+
+**When to Skip Textures:**
+- Minor moons and asteroids
+- Distant exoplanets
+- When prioritizing performance
+- When solid colors suffice
+
+**Texture Optimization:**
+- Use 1024x512 px for most planets
+- Compress to < 200KB per texture
+- Use JPEG for diffuse, PNG for normals
+- Test loading performance on mobile
+
+### Examples
+
+#### Earth Configuration
+
+```json
+{
+  "id": "earth",
+  "name": "Earth",
+  "theme": "earth-like",
+  "visualTheme": {
+    "preset": "earth-like",
+    "glowColor": "#4A90E2",
+    "glowIntensity": 0.35,
+    "rotationSpeed": 1.0,
+    "diffuseTexture": "/universe/assets/earth-diffuse.jpg",
+    "normalTexture": "/universe/assets/earth-normal.png"
+  }
+}
+```
+
+#### Jupiter Configuration
+
+```json
+{
+  "id": "jupiter",
+  "name": "Jupiter",
+  "theme": "gasGiant",
+  "visualTheme": {
+    "preset": "gasGiant",
+    "glowColor": "#FFA500",
+    "glowIntensity": 0.45,
+    "rotationSpeed": 1.8,
+    "diffuseTexture": "/universe/assets/jupiter-bands.jpg"
+  }
+}
+```
+
+#### Europa (Icy Moon) Configuration
+
+```json
+{
+  "id": "europa",
+  "name": "Europa",
+  "visualTheme": {
+    "preset": "icy",
+    "glowColor": "#B0E0E6",
+    "glowIntensity": 0.25,
+    "rotationSpeed": 0.4
+  }
+}
+```
+
+#### Sol (Star) Configuration
+
+```json
+{
+  "mainStar": {
+    "id": "sol",
+    "name": "Sol",
+    "theme": "yellow-dwarf",
+    "haloConfig": {
+      "haloIntensity": 55,
+      "color": "#FDB813",
+      "haloRadius": 1.6
+    }
+  }
+}
+```
+
+### Troubleshooting
+
+#### Glow Not Visible
+
+**Symptoms**: Planet/moon appears solid with no glow
+**Possible Causes**:
+- `glowIntensity` is 0
+- `glowColor` matches background
+- Camera is too far away
+
+**Solutions**:
+- Increase intensity slider to 0.3 or higher
+- Choose contrasting glow color
+- Zoom in or adjust camera position
+
+#### Rotation Too Fast/Slow
+
+**Symptoms**: Planet spins unrealistically
+**Possible Causes**:
+- `rotationSpeed` misconfigured
+- Animation config issues
+
+**Solutions**:
+- Adjust speed slider to reasonable range (0.8x-1.5x)
+- Check browser animation preferences
+- Reset to defaults and retry
+
+#### Textures Not Loading
+
+**Symptoms**: Planet shows solid color instead of texture
+**Possible Causes**:
+- Invalid URL
+- File not found
+- CORS issues (external URLs)
+
+**Solutions**:
+- Verify texture file exists in `public/` directory
+- Use relative paths: `/universe/assets/texture.jpg`
+- Check browser console for errors
+- System falls back gracefully to solid color
+
+#### Star Halo Too Bright/Dim
+
+**Symptoms**: Halo overwhelms scene or barely visible
+**Possible Causes**:
+- `haloIntensity` too high/low
+- `haloRadius` misconfigured
+
+**Solutions**:
+- Adjust intensity slider (40-60% for most stars)
+- Adjust radius slider (1.4x-1.6x typical)
+- Check scene lighting configuration
+
+### Performance Tips
+
+**Optimize for Mobile:**
+- Use preset defaults when possible
+- Skip textures for distant objects
+- Keep glow intensity moderate (0.2-0.4)
+- Limit number of high-intensity glows in view
+
+**Reduce Draw Calls:**
+- Share textures across similar planets
+- Use solid colors for background objects
+- Avoid excessive glow effects on minor bodies
+
+**Monitor Performance:**
+- Check frame rate in browser dev tools
+- Target: 60 FPS desktop, 30+ FPS mobile
+- Reduce texture resolution if needed
+- Disable glow on minor objects if struggling
+
 ## Asset Management
 
 ### Featured Images
