@@ -18,8 +18,10 @@ import {
   validateSolarSystem,
   validateGalaxy,
   validateUniverse,
+  validateExternalLink,
+  checkDuplicateLinks,
 } from '../types';
-import type { Moon, Planet, Star, SolarSystem, Galaxy, Universe } from '../types';
+import type { Moon, Planet, Star, SolarSystem, Galaxy, Universe, ExternalLink } from '../types';
 
 describe('Universe Type Validation', () => {
   describe('validateMoon', () => {
@@ -137,6 +139,312 @@ describe('Universe Type Validation', () => {
       const result = validatePlanet(planet, 'Test Planet');
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    it('should validate a planet with valid external links', () => {
+      const planet: Planet = {
+        id: 'earth',
+        name: 'Earth',
+        theme: 'blue-green',
+        summary: 'Home planet',
+        contentMarkdown: '# Earth',
+        moons: [],
+        externalLinks: [
+          {
+            title: 'NASA',
+            url: 'https://www.nasa.gov',
+            description: 'Space agency',
+          },
+          {
+            title: 'Wikipedia',
+            url: 'https://en.wikipedia.org/wiki/Earth',
+          },
+        ],
+      };
+
+      const result = validatePlanet(planet, 'Test Planet');
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should fail when external link has missing title', () => {
+      const planet: Planet = {
+        id: 'earth',
+        name: 'Earth',
+        theme: 'blue-green',
+        summary: 'Home planet',
+        contentMarkdown: '# Earth',
+        moons: [],
+        externalLinks: [
+          {
+            title: '',
+            url: 'https://www.nasa.gov',
+          },
+        ],
+      };
+
+      const result = validatePlanet(planet, 'Test Planet');
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.includes('Link title is required'))).toBe(true);
+    });
+
+    it('should fail when external link has missing URL', () => {
+      const planet: Planet = {
+        id: 'earth',
+        name: 'Earth',
+        theme: 'blue-green',
+        summary: 'Home planet',
+        contentMarkdown: '# Earth',
+        moons: [],
+        externalLinks: [
+          {
+            title: 'NASA',
+            url: '',
+          },
+        ],
+      };
+
+      const result = validatePlanet(planet, 'Test Planet');
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.includes('Link URL is required'))).toBe(true);
+    });
+
+    it('should fail when external link has invalid URL', () => {
+      const planet: Planet = {
+        id: 'earth',
+        name: 'Earth',
+        theme: 'blue-green',
+        summary: 'Home planet',
+        contentMarkdown: '# Earth',
+        moons: [],
+        externalLinks: [
+          {
+            title: 'Invalid',
+            url: 'not-a-valid-url',
+          },
+        ],
+      };
+
+      const result = validatePlanet(planet, 'Test Planet');
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.includes('not a valid URL'))).toBe(true);
+    });
+
+    it('should fail when external link has invalid protocol', () => {
+      const planet: Planet = {
+        id: 'earth',
+        name: 'Earth',
+        theme: 'blue-green',
+        summary: 'Home planet',
+        contentMarkdown: '# Earth',
+        moons: [],
+        externalLinks: [
+          {
+            title: 'FTP Link',
+            url: 'ftp://example.com',
+          },
+        ],
+      };
+
+      const result = validatePlanet(planet, 'Test Planet');
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.includes('http or https protocol'))).toBe(true);
+    });
+
+    it('should fail when external links have duplicate URLs', () => {
+      const planet: Planet = {
+        id: 'earth',
+        name: 'Earth',
+        theme: 'blue-green',
+        summary: 'Home planet',
+        contentMarkdown: '# Earth',
+        moons: [],
+        externalLinks: [
+          {
+            title: 'NASA',
+            url: 'https://www.nasa.gov',
+          },
+          {
+            title: 'NASA Duplicate',
+            url: 'https://www.nasa.gov',
+          },
+        ],
+      };
+
+      const result = validatePlanet(planet, 'Test Planet');
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.includes('Duplicate URL'))).toBe(true);
+    });
+
+    it('should detect duplicate URLs case-insensitively', () => {
+      const planet: Planet = {
+        id: 'earth',
+        name: 'Earth',
+        theme: 'blue-green',
+        summary: 'Home planet',
+        contentMarkdown: '# Earth',
+        moons: [],
+        externalLinks: [
+          {
+            title: 'NASA',
+            url: 'https://www.nasa.gov',
+          },
+          {
+            title: 'NASA Case',
+            url: 'HTTPS://WWW.NASA.GOV',
+          },
+        ],
+      };
+
+      const result = validatePlanet(planet, 'Test Planet');
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.includes('Duplicate URL'))).toBe(true);
+    });
+  });
+
+  describe('validateExternalLink', () => {
+    it('should validate a valid external link', () => {
+      const link: ExternalLink = {
+        title: 'NASA',
+        url: 'https://www.nasa.gov',
+        description: 'Space agency',
+      };
+
+      const result = validateExternalLink(link, 'Test Link');
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should validate a link without description', () => {
+      const link: ExternalLink = {
+        title: 'NASA',
+        url: 'https://www.nasa.gov',
+      };
+
+      const result = validateExternalLink(link, 'Test Link');
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should fail when title is missing', () => {
+      const link: ExternalLink = {
+        title: '',
+        url: 'https://www.nasa.gov',
+      };
+
+      const result = validateExternalLink(link, 'Test Link');
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Test Link: Link title is required');
+    });
+
+    it('should fail when URL is missing', () => {
+      const link: ExternalLink = {
+        title: 'NASA',
+        url: '',
+      };
+
+      const result = validateExternalLink(link, 'Test Link');
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Test Link: Link URL is required');
+    });
+
+    it('should fail when URL is invalid', () => {
+      const link: ExternalLink = {
+        title: 'Invalid',
+        url: 'not-a-url',
+      };
+
+      const result = validateExternalLink(link, 'Test Link');
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.includes('not a valid URL'))).toBe(true);
+    });
+
+    it('should fail when URL uses non-http protocol', () => {
+      const link: ExternalLink = {
+        title: 'FTP',
+        url: 'ftp://example.com',
+      };
+
+      const result = validateExternalLink(link, 'Test Link');
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.includes('http or https protocol'))).toBe(true);
+    });
+
+    it('should allow http protocol', () => {
+      const link: ExternalLink = {
+        title: 'HTTP Link',
+        url: 'http://example.com',
+      };
+
+      const result = validateExternalLink(link, 'Test Link');
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+  });
+
+  describe('checkDuplicateLinks', () => {
+    it('should return no errors for unique links', () => {
+      const links: ExternalLink[] = [
+        { title: 'NASA', url: 'https://www.nasa.gov' },
+        { title: 'ESA', url: 'https://www.esa.int' },
+        { title: 'SpaceX', url: 'https://www.spacex.com' },
+      ];
+
+      const errors = checkDuplicateLinks(links, 'Test');
+      expect(errors).toHaveLength(0);
+    });
+
+    it('should detect exact duplicate URLs', () => {
+      const links: ExternalLink[] = [
+        { title: 'NASA', url: 'https://www.nasa.gov' },
+        { title: 'NASA Again', url: 'https://www.nasa.gov' },
+      ];
+
+      const errors = checkDuplicateLinks(links, 'Test');
+      expect(errors).toHaveLength(1);
+      expect(errors[0]).toContain('Duplicate URL at index 1');
+      expect(errors[0]).toContain('first seen at index 0');
+    });
+
+    it('should detect case-insensitive duplicates', () => {
+      const links: ExternalLink[] = [
+        { title: 'NASA', url: 'https://www.nasa.gov' },
+        { title: 'NASA Upper', url: 'HTTPS://WWW.NASA.GOV' },
+      ];
+
+      const errors = checkDuplicateLinks(links, 'Test');
+      expect(errors).toHaveLength(1);
+      expect(errors[0]).toContain('Duplicate URL');
+    });
+
+    it('should detect multiple duplicates', () => {
+      const links: ExternalLink[] = [
+        { title: 'NASA', url: 'https://www.nasa.gov' },
+        { title: 'NASA 2', url: 'https://www.nasa.gov' },
+        { title: 'NASA 3', url: 'https://www.nasa.gov' },
+        { title: 'ESA', url: 'https://www.esa.int' },
+        { title: 'ESA 2', url: 'https://www.esa.int' },
+      ];
+
+      const errors = checkDuplicateLinks(links, 'Test');
+      expect(errors.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('should handle empty links array', () => {
+      const links: ExternalLink[] = [];
+      const errors = checkDuplicateLinks(links, 'Test');
+      expect(errors).toHaveLength(0);
+    });
+
+    it('should handle links with empty URLs', () => {
+      const links: ExternalLink[] = [
+        { title: 'NASA', url: 'https://www.nasa.gov' },
+        { title: 'Empty', url: '' },
+        { title: 'ESA', url: 'https://www.esa.int' },
+      ];
+
+      const errors = checkDuplicateLinks(links, 'Test');
+      expect(errors).toHaveLength(0);
     });
   });
 
