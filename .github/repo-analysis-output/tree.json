@@ -252,6 +252,10 @@
                 },
                 {
                   "type": "file",
+                  "name": "PlanetSurface-collapsible.test.tsx"
+                },
+                {
+                  "type": "file",
                   "name": "SceneHUD.test.tsx"
                 },
                 {
@@ -346,6 +350,10 @@
                   "children": [
                     {
                       "type": "file",
+                      "name": "CollapsibleSection.test.tsx"
+                    },
+                    {
+                      "type": "file",
                       "name": "planetary-system.test.ts"
                     }
                   ]
@@ -353,6 +361,10 @@
                 {
                   "type": "file",
                   "name": "CentralStar.tsx"
+                },
+                {
+                  "type": "file",
+                  "name": "CollapsibleSection.tsx"
                 },
                 {
                   "type": "file",
@@ -586,6 +598,10 @@
             },
             {
               "type": "file",
+              "name": "collapsible-config.ts"
+            },
+            {
+              "type": "file",
               "name": "crypto.ts"
             },
             {
@@ -618,6 +634,10 @@
           "type": "directory",
           "name": "styles",
           "children": [
+            {
+              "type": "file",
+              "name": "collapsible-section.css"
+            },
             {
               "type": "file",
               "name": "overlay-labels.css"

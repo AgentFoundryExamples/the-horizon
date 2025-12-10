@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 54
+Total files: 55
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -211,6 +211,15 @@ Total files: 54
 **Summary:** TypeScript core implementation  
 **Size:** 6.15 KB  
 **LOC:** 196  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/collapsible-config.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 2.98 KB  
+**LOC:** 78  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/crypto.ts

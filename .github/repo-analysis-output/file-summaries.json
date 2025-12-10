@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 54,
+  "total_files": 55,
   "files": [
     {
       "schema_version": "2.0",
@@ -321,6 +321,20 @@
       "metrics": {
         "size_bytes": 6295,
         "loc": 196,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/collapsible-config.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 3052,
+        "loc": 78,
         "todo_count": 0
       }
     },

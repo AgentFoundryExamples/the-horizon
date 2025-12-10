@@ -267,6 +267,15 @@
       }
     },
     {
+      "id": "src/lib/collapsible-config.ts",
+      "path": "src/lib/collapsible-config.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/crypto.ts",
       "path": "src/lib/crypto.ts",
       "type": "file",

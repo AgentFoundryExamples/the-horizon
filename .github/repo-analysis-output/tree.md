@@ -53,6 +53,7 @@
     ├── __tests__
       ├── ContextualWelcomeMessage.test.tsx
       ├── OverlayLabels.test.tsx
+      ├── PlanetSurface-collapsible.test.tsx
       ├── SceneHUD.test.tsx
       ├── Sidebar.test.tsx
       ├── SolarSystemView-orbits.test.tsx
@@ -75,8 +76,10 @@
       └── UniverseEditor.tsx
     ├── shared
       ├── __tests__
+        ├── CollapsibleSection.test.tsx
         └── planetary-system.test.ts
       ├── CentralStar.tsx
+      ├── CollapsibleSection.tsx
       ├── OrbitingPlanet.tsx
       └── PlanetarySystem.tsx
     ├── ContextualWelcomeMessage.tsx
@@ -132,6 +135,7 @@
     ├── animation.ts
     ├── auth.ts
     ├── camera.ts
+    ├── collapsible-config.ts
     ├── crypto.ts
     ├── github.ts
     ├── hover-store.ts
@@ -140,6 +144,7 @@
     ├── seeded-random.ts
     └── store.ts
   ├── styles
+    ├── collapsible-section.css
     ├── overlay-labels.css
     ├── planet.css
     └── sidebar.css
