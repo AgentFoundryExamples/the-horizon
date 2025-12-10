@@ -1,16 +1,23 @@
 /* Copyright 2025 John Brosnihan */
 
+/**
+ * Admin Interface Styles
+ * All colors reference the centralized DARK_PALETTE (src/lib/dark-palette.ts)
+ * CSS custom properties are used for semantic naming within admin context
+ */
+
 :root {
-  --admin-bg: #0a0a0f;
-  --admin-surface: #1a1a2e;
-  --admin-border: #2a2a3e;
-  --admin-text: #e0e0e0;
-  --admin-text-muted: #a0a0a0;
-  --admin-primary: #4A90E2;
-  --admin-primary-hover: #5ba0f2;
-  --admin-success: #4caf50;
-  --admin-error: #f44336;
-  --admin-warning: #ff9800;
+  /* Admin-specific dark palette colors */
+  --admin-bg: #0a0a0f; /* DARK_PALETTE.background.surface */
+  --admin-surface: #1a1a2e; /* DARK_PALETTE.background.surfaceElevated */
+  --admin-border: #2a2a3e; /* DARK_PALETTE.border.elevated */
+  --admin-text: #e0e0e0; /* Slightly darker than DARK_PALETTE.text.primary for admin readability */
+  --admin-text-muted: #a0a0a0; /* Similar to DARK_PALETTE.text.secondary */
+  --admin-primary: #4A90E2; /* DARK_PALETTE.accent.primary */
+  --admin-primary-hover: #5ba0f2; /* DARK_PALETTE.accent.hover */
+  --admin-success: #4caf50; /* DARK_PALETTE.semantic.success */
+  --admin-error: #f44336; /* DARK_PALETTE.semantic.error */
+  --admin-warning: #ff9800; /* DARK_PALETTE.semantic.warning */
   
   /* Z-index layering system */
   --z-nav: 100;
