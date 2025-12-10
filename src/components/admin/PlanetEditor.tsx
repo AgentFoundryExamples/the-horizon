@@ -162,7 +162,7 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
         return 'URL must use http or https protocol';
       }
       return null;
-    } catch {
+    } catch (error: unknown) {
       return 'Invalid URL format';
     }
   };
@@ -783,7 +783,7 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
         <>
           <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'rgba(74, 144, 226, 0.1)', borderRadius: '4px', border: '1px solid rgba(74, 144, 226, 0.3)' }}>
             <h4 style={{ marginTop: 0, marginBottom: '0.5rem', color: '#4A90E2' }}>External Links Management</h4>
-            <p style={{ margin: 0, fontSize: '0.9rem', color: '#AAAAAA' }}>
+            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--admin-text-muted)' }}>
               Add, edit, and organize external links for this planet. Links appear in the &quot;Related Resources&quot; section on the planet page.
               URLs must use http or https protocol and must be unique.
             </p>

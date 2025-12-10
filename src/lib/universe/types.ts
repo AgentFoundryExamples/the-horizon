@@ -296,7 +296,7 @@ export function validateExternalLink(link: ExternalLink, context: string): Valid
       if (!['http:', 'https:'].includes(url.protocol)) {
         errors.push(`${context}: Link URL must use http or https protocol`);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       errors.push(`${context}: Link URL is not a valid URL`);
     }
   }
