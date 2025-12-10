@@ -11,6 +11,7 @@ import * as THREE from 'three';
 import type { SolarSystem, Star } from '@/lib/universe/types';
 import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
 import type { getAnimationConfig } from '@/lib/animation';
+import { resolveStarHalo } from '@/lib/universe/visual-themes';
 
 interface CentralStarProps {
   // Either a solar system or a standalone star
@@ -53,6 +54,7 @@ export function CentralStar({
   enablePulse = false,
 }: CentralStarProps) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const haloRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const setHoveredObject = useHoverStore((state) => state.setHoveredObject);
 
@@ -60,10 +62,20 @@ export function CentralStar({
   const starId = solarSystem?.id || star?.id || 'unknown';
   const starName = solarSystem?.name || star?.name || 'Unknown Star';
   const starType = solarSystem ? 'solar-system' : 'star';
+  
+  // Get the actual star object (from solarSystem.mainStar or standalone star)
+  const starObject = solarSystem?.mainStar || star;
+  const starTheme = starObject?.theme || 'yellow-dwarf';
+  
+  // Resolve halo configuration with defaults
+  const haloConfig = useMemo(() => {
+    return resolveStarHalo(starObject?.haloConfig, starTheme);
+  }, [starObject?.haloConfig, starTheme]);
 
-  // Determine star color
+  // Determine star color (from halo config or fallback)
   const starColor = useMemo(() => {
     if (color) return color;
+    if (haloConfig.color) return haloConfig.color;
     if (star) {
       if (star.theme.includes('yellow')) return '#FDB813';
       if (star.theme.includes('red')) return '#E63946';
@@ -71,13 +83,21 @@ export function CentralStar({
       return '#FFFFFF';
     }
     return '#FDB813'; // Default yellow for solar system stars
-  }, [color, star]);
+  }, [color, star, haloConfig.color]);
+  
+  // Calculate halo intensity as a 0-1 value from 0-100 range
+  const haloIntensity = haloConfig.haloIntensity / 100;
 
   // Pulsing animation for standalone stars
   useFrame((state) => {
     if (meshRef.current && enablePulse && animationConfig?.rotation) {
       const scale = 1 + Math.sin(state.clock.getElapsedTime() * PULSE_FREQUENCY) * PULSE_AMPLITUDE * (animationConfig.intensity || 1);
       meshRef.current.scale.setScalar(scale);
+      
+      // Sync halo with pulsing
+      if (haloRef.current) {
+        haloRef.current.scale.setScalar(scale);
+      }
     }
   });
 
@@ -122,16 +142,31 @@ export function CentralStar({
 
   return (
     <group position={position}>
+      {/* Main star mesh */}
       <mesh
         ref={meshRef}
         onClick={handleClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
       >
-        <sphereGeometry args={[radius, 16, 16]} />
+        <sphereGeometry args={[radius, 32, 32]} />
         <meshBasicMaterial color={starColor} />
         <pointLight color={starColor} intensity={lightIntensity} distance={lightDistance} />
       </mesh>
+      
+      {/* Halo/glow effect */}
+      {haloIntensity > 0 && (
+        <mesh ref={haloRef}>
+          <sphereGeometry args={[radius * haloConfig.haloRadius, 32, 32]} />
+          <meshBasicMaterial
+            color={starColor}
+            transparent
+            opacity={haloIntensity * 0.4}
+            side={THREE.BackSide}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      )}
     </group>
   );
 }
