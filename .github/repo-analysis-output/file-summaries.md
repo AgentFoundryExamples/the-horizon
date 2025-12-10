@@ -236,8 +236,8 @@ Total files: 53
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 3.52 KB  
-**LOC:** 81  
+**Size:** 3.61 KB  
+**LOC:** 82  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/label-config.ts
@@ -245,7 +245,7 @@ Total files: 53
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 3.46 KB  
+**Size:** 3.56 KB  
 **LOC:** 102  
 **TODOs/FIXMEs:** 0  
 
@@ -452,8 +452,8 @@ Total files: 53
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 4.58 KB  
-**LOC:** 123  
+**Size:** 4.93 KB  
+**LOC:** 125  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/scale-constants.ts
@@ -461,8 +461,8 @@ Total files: 53
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 22.86 KB  
-**LOC:** 553  
+**Size:** 22.99 KB  
+**LOC:** 555  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/types.ts

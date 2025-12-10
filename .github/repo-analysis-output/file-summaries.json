@@ -361,8 +361,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 3609,
-        "loc": 81,
+        "size_bytes": 3693,
+        "loc": 82,
         "todo_count": 0
       }
     },
@@ -375,7 +375,7 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 3543,
+        "size_bytes": 3649,
         "loc": 102,
         "todo_count": 0
       }
@@ -697,8 +697,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 4690,
-        "loc": 123,
+        "size_bytes": 5049,
+        "loc": 125,
         "todo_count": 0
       }
     },
@@ -711,8 +711,8 @@
       "summary": "TypeScript core implementation",
       "summary_text": "TypeScript core implementation",
       "metrics": {
-        "size_bytes": 23411,
-        "loc": 553,
+        "size_bytes": 23542,
+        "loc": 555,
         "todo_count": 0
       }
     },
