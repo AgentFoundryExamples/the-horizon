@@ -285,14 +285,24 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
     return layoutConfigToCSS(layoutConfig);
   }, [layoutConfig]);
 
-  // Reset scroll position to top when navigating to a moon
+  // Reset scroll position to top when navigating or switching planets
   useEffect(() => {
-    if (currentMoonId && contentColumnRef.current) {
+    if (contentColumnRef.current) {
       contentColumnRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-      // Restore focus to content container for screen readers
-      contentColumnRef.current.focus();
+      
+      // Only set focus when navigating to a moon, not when returning to the planet
+      if (currentMoonId) {
+        // Restore focus to content container for screen readers
+        // Add null check to prevent errors if element is not focusable
+        try {
+          contentColumnRef.current.focus();
+        } catch (error) {
+          // Silently fail if focus is not possible (element may not be focusable)
+          console.debug('Unable to set focus on content column:', error);
+        }
+      }
     }
-  }, [currentMoonId]);
+  }, [currentMoonId, planet.id]);
 
   return (
     <div className="planet-surface-container" style={containerStyle as React.CSSProperties}>

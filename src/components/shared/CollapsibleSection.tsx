@@ -76,11 +76,12 @@ export default function CollapsibleSection({
     }
     
     // Scroll to top of content when expanding
-    // Use requestAnimationFrame for better timing
+    // Wait for transition to complete before scrolling for smoother experience
     if (newState && contentRef.current) {
-      requestAnimationFrame(() => {
+      const transitionDuration = normalizedConfig.transitionDuration;
+      setTimeout(() => {
         contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-      });
+      }, transitionDuration);
     }
   };
   

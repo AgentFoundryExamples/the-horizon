@@ -202,7 +202,7 @@ describe('PlanetSurfaceOverlay - Collapsible Sections Integration', () => {
   });
 
   describe('Scroll and Focus Management', () => {
-    it('should reset scroll position when navigating to moon', async () => {
+    it('should reset scroll position and set focus when navigating to moon', async () => {
       const planet = createMockPlanet({
         moons: [
           { id: 'moon-1', name: 'Moon Alpha', contentMarkdown: '# Moon Alpha' },
@@ -213,13 +213,57 @@ describe('PlanetSurfaceOverlay - Collapsible Sections Integration', () => {
         <PlanetSurfaceOverlay planet={planet} currentMoonId={null} />
       );
       
+      // Get the content column before re-rendering
+      const contentColumn = screen.getByLabelText('Planet content area');
+      const focusSpy = jest.spyOn(contentColumn, 'focus');
+      const scrollToSpy = jest.spyOn(contentColumn, 'scrollTo');
+      
       // Simulate navigating to a moon
       rerender(<PlanetSurfaceOverlay planet={planet} currentMoonId="moon-1" />);
       
-      // Check that content column exists and can receive focus
-      const contentColumn = screen.getByLabelText('Planet content area');
+      // Check that scrollTo and focus were called
+      expect(scrollToSpy).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
+      expect(focusSpy).toHaveBeenCalled();
+      
+      // Check that content column still exists and can receive focus
       expect(contentColumn).toBeInTheDocument();
       expect(contentColumn).toHaveAttribute('tabIndex', '-1');
+      
+      // Cleanup
+      focusSpy.mockRestore();
+      scrollToSpy.mockRestore();
+    });
+
+    it('should reset scroll when returning to planet without setting focus', () => {
+      const planet = createMockPlanet({
+        moons: [
+          { id: 'moon-1', name: 'Moon Alpha', contentMarkdown: '# Moon Alpha' },
+        ],
+      });
+      
+      const { rerender } = render(
+        <PlanetSurfaceOverlay planet={planet} currentMoonId="moon-1" />
+      );
+      
+      // Get the content column
+      const contentColumn = screen.getByLabelText('Planet content area');
+      const focusSpy = jest.spyOn(contentColumn, 'focus');
+      const scrollToSpy = jest.spyOn(contentColumn, 'scrollTo');
+      
+      // Clear the call history from initial render
+      focusSpy.mockClear();
+      scrollToSpy.mockClear();
+      
+      // Simulate returning to planet
+      rerender(<PlanetSurfaceOverlay planet={planet} currentMoonId={null} />);
+      
+      // Check that scrollTo was called but focus was not
+      expect(scrollToSpy).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
+      expect(focusSpy).not.toHaveBeenCalled();
+      
+      // Cleanup
+      focusSpy.mockRestore();
+      scrollToSpy.mockRestore();
     });
 
     it('should show back button when viewing moon', () => {
