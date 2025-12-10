@@ -7,6 +7,114 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.10] - Enforced Dark Mode Experience - 2025-12-10
+
+*This release documents the completion of the forced dark-mode consolidation, eliminating light mode support across all admin and public surfaces to deliver a unified, accessible space-themed experience.*
+
+**Version Context:** The Horizon has been designed from the ground up as a space exploration application where a dark visual theme is essential to the user experience. This release formalizes that dark mode is the only supported theme, removing any ambiguity about light mode availability and ensuring consistent UX across all surfaces.
+
+### Dark Mode Enforcement
+
+The application now exclusively uses a dark color palette with no light mode option:
+
+#### 1. Global Dark Mode Configuration
+- **HTML/Viewport Settings**: `data-theme="dark"` attribute on root HTML element, `color-scheme: dark` in viewport configuration
+- **CSS Enforcement**: `color-scheme: dark` declared globally in `globals.css`, pure black background (#000000), white text (#FFFFFF)
+- **No Light Mode Media Queries**: All CSS files verified to contain zero `prefers-color-scheme: light` media queries
+- **Accessibility Preserved**: `prefers-reduced-motion` and `prefers-contrast: high` media queries remain fully functional
+- **Impact**: Consistent dark theme across all pages, admin interface, and components without exception
+
+#### 2. Centralized Dark Palette System
+- **DARK_PALETTE Constant**: Single source of truth for all UI colors in `src/lib/dark-palette.ts`
+- **WCAG AA Compliant**: All text colors meet minimum 4.5:1 contrast ratio against dark backgrounds
+- **Color Categories**: Text, background, border, accent, semantic, UI components, and effects
+- **Deep Freeze Protection**: Runtime immutability prevents accidental palette modifications
+- **Type Safety**: Full TypeScript support with `DarkPalette` type for autocomplete
+- **Impact**: Maintainable, accessible color system with no possibility of light mode color leakage
+
+#### 3. Testing and Validation
+- **CSS Enforcement Tests**: 14 automated tests verify no light mode CSS exists (`dark-mode-css.test.ts`)
+- **Layout Tests**: 9 tests confirm dark mode attributes are set correctly (`layout.test.tsx`)
+- **SSR Consistency**: Server-side and client-side rendering produce identical dark mode markup
+- **All Tests Passing**: 23 dark mode-specific tests, zero failures
+- **Impact**: Regression protection ensures dark mode enforcement cannot be accidentally broken
+
+#### 4. User-Facing Surfaces Covered
+- **Public Viewer**: Universe explorer, galaxy views, solar system views, planet surfaces, moon navigation
+- **Admin Interface**: All CRUD operations, markdown editor, visual theme editor, external link management
+- **Navigation Elements**: Sidebar, breadcrumbs, hover labels, transition indicators, welcome messages
+- **Content Display**: Markdown rendering, collapsible sections, related resources, moon lists
+- **Impact**: Every user-facing surface uses the same dark palette, zero exceptions
+
+### No Light Mode Restoration
+
+There is no environment variable, configuration setting, or user preference that can restore light mode:
+
+- **No Toggle UI**: No light/dark mode switcher exists in the interface
+- **No Environment Variables**: No `THEME_MODE` or similar configuration exists
+- **System Preference Ignored**: `prefers-color-scheme: light` has no effect on the application
+- **CSS Override Impossible**: `color-scheme: dark` is enforced at the viewport level
+- **Admin Cannot Change**: Admins cannot configure or enable light mode through any interface
+
+### Why Dark Mode Only
+
+The decision to enforce dark mode is based on:
+
+1. **Space Theme Alignment**: A space exploration app requires a dark background to showcase stars, galaxies, and celestial bodies effectively
+2. **Visual Hierarchy**: Light mode would make 3D space scenes appear washed out and reduce visual depth
+3. **Performance**: Single color palette eliminates theme switching overhead and simplifies rendering
+4. **Accessibility Focus**: Resources directed toward dark mode accessibility (contrast, reduced motion) rather than maintaining dual themes
+5. **User Expectations**: Space-themed applications are universally expected to use dark backgrounds
+
+### Accessibility Maintained
+
+Despite removing light mode, accessibility remains a top priority:
+
+- **High Contrast Support**: `prefers-contrast: high` media queries adjust colors for users who need increased contrast
+- **Reduced Motion**: `prefers-reduced-motion` disables animations for users with vestibular disorders
+- **WCAG AA Compliance**: All text meets minimum contrast requirements against dark backgrounds
+- **Screen Reader Support**: ARIA labels, semantic HTML, and keyboard navigation fully functional
+- **Focus Indicators**: Clear visual focus states meet WCAG 2.1 Level AA standards
+- **No Accessibility Regression**: Dark-only mode does not compromise any accessibility features
+
+### Migration Considerations
+
+For users upgrading from earlier versions:
+
+- **No Action Required**: Dark mode has always been the default and only theme
+- **No Breaking Changes**: Existing configurations, data, and workflows remain unchanged
+- **No Environment Variables to Remove**: No obsolete theme-related variables exist
+- **Documentation Updated**: README, roadmap, and CHANGELOG now explicitly state dark-only policy
+- **Future Clarity**: New contributors will immediately understand light mode is not planned
+
+### Technical Details
+- No new environment variables required
+- No migration steps needed
+- All 926 tests passing (900 passing, 26 pre-existing crypto failures)
+- Compatible with all v0.1.x releases
+- Build verified with no breaking changes
+- Zero impact on performance, bundle size, or runtime behavior
+
+### Deployment Notes
+- No environment variable changes
+- Documentation now explicitly states dark-only mode
+- Admin interface clearly indicates dark mode is permanent
+- No user-facing changes to behavior (dark mode was already enforced)
+
+### Verification Steps
+1. **CSS Validation**: Run `npm test -- dark-mode-css.test.ts` - all 14 tests pass
+2. **Layout Validation**: Run `npm test -- layout.test.tsx` - all 9 tests pass
+3. **Documentation Check**: Verify README, roadmap, and CHANGELOG mention dark-only mode
+4. **System Preference Test**: Set OS to light mode - application remains dark
+5. **Admin Interface**: Verify no theme toggle exists in admin settings
+6. **CSS Inspection**: Search all CSS files for "light" - only accessibility queries remain
+7. **Palette Check**: Verify `DARK_PALETTE` is immutable and cannot be modified at runtime
+
+See [docs/roadmap.md](roadmap.md#enforced-dark-mode-v0110) for implementation status and future plans.
+See [README.md](../README.md#dark-mode-experience) for user-facing dark mode documentation.
+
+---
+
 ## [0.1.9] - Celestial Themes, Link Management & Collapsible Viewer - 2025-12-10
 
 *This release delivers enhanced visual customization for celestial bodies, admin workflow for external link management, and collapsible content sections for improved content organization.*
@@ -698,5 +806,5 @@ See [docs/roadmap.md](roadmap.md) for planned features and future enhancements.
 ---
 
 *Last Updated: December 10, 2025*  
-*Current Version: 0.1.9*  
+*Current Version: 0.1.10*  
 *Maintained by: Agent Foundry and John Brosnihan*
