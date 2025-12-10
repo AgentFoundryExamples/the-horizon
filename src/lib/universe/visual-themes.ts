@@ -107,15 +107,39 @@ export function resolveCelestialTheme(
   const preset = customTheme?.preset || baseTheme;
   const presetConfig = CELESTIAL_THEME_PRESETS[preset] || CELESTIAL_THEME_PRESETS['rocky'];
   
-  // Merge custom values over preset
+  // Validate and merge custom values over preset with proper type checking
+  const glowColor = validateHexColor(
+    customTheme?.glowColor,
+    presetConfig.glowColor || '#CCCCCC'
+  );
+  
+  const glowIntensity = validateNumber(
+    customTheme?.glowIntensity,
+    0,
+    1,
+    presetConfig.glowIntensity ?? 0.3
+  );
+  
+  const rotationSpeed = validateNumber(
+    customTheme?.rotationSpeed,
+    0.1,
+    3.0,
+    presetConfig.rotationSpeed ?? 1.0
+  );
+  
+  // Validate texture URLs for security
+  const diffuseTexture = validateTextureUrl(customTheme?.diffuseTexture);
+  const normalTexture = validateTextureUrl(customTheme?.normalTexture);
+  const specularTexture = validateTextureUrl(customTheme?.specularTexture);
+  
   return {
     preset,
-    diffuseTexture: customTheme?.diffuseTexture || undefined,
-    normalTexture: customTheme?.normalTexture || undefined,
-    specularTexture: customTheme?.specularTexture || undefined,
-    glowColor: customTheme?.glowColor || presetConfig.glowColor || '#CCCCCC',
-    glowIntensity: customTheme?.glowIntensity ?? presetConfig.glowIntensity ?? 0.3,
-    rotationSpeed: customTheme?.rotationSpeed ?? presetConfig.rotationSpeed ?? 1.0,
+    diffuseTexture,
+    normalTexture,
+    specularTexture,
+    glowColor,
+    glowIntensity,
+    rotationSpeed,
   };
 }
 
@@ -134,12 +158,34 @@ export function resolveStarHalo(
   // Find matching preset or use default
   const presetConfig = STAR_HALO_PRESETS[starTheme] || STAR_HALO_PRESETS['yellow-dwarf'];
   
-  // Merge custom values over preset
+  // Validate and merge custom values over preset with proper type checking
+  const haloIntensity = validateNumber(
+    customHalo?.haloIntensity,
+    0,
+    100,
+    presetConfig.haloIntensity ?? 50
+  );
+  
+  const color = validateHexColor(
+    customHalo?.color,
+    presetConfig.color || '#FDB813'
+  );
+  
+  const haloRadius = validateNumber(
+    customHalo?.haloRadius,
+    1.0,
+    3.0,
+    presetConfig.haloRadius ?? 1.5
+  );
+  
+  // Validate texture URL for security
+  const texture = validateTextureUrl(customHalo?.texture);
+  
   return {
-    haloIntensity: customHalo?.haloIntensity ?? presetConfig.haloIntensity ?? 50,
-    texture: customHalo?.texture || undefined,
-    color: customHalo?.color || presetConfig.color || '#FDB813',
-    haloRadius: customHalo?.haloRadius ?? presetConfig.haloRadius ?? 1.5,
+    haloIntensity,
+    texture,
+    color,
+    haloRadius,
   };
 }
 
@@ -181,4 +227,54 @@ export function validateHexColor(color: string | undefined, fallback: string): s
   // Check if valid hex color format
   const hexRegex = /^#([0-9A-F]{3}|[0-9A-F]{6})$/i;
   return hexRegex.test(color) ? color : fallback;
+}
+
+/**
+ * Validates a numeric value is within safe range
+ * Returns the value if valid, otherwise returns the fallback
+ */
+export function validateNumber(value: unknown, min: number, max: number, fallback: number): number {
+  if (typeof value !== 'number' || isNaN(value) || !isFinite(value)) {
+    return fallback;
+  }
+  return Math.max(min, Math.min(max, value));
+}
+
+/**
+ * Validates a texture URL for security (SSRF protection)
+ * Only allows relative paths or same-origin URLs
+ */
+export function validateTextureUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  
+  // Allow relative paths starting with /
+  if (url.startsWith('/')) {
+    // Basic path traversal protection
+    if (url.includes('..')) {
+      console.warn('Path traversal attempt detected in texture URL:', url);
+      return undefined;
+    }
+    return url;
+  }
+  
+  // For absolute URLs, only allow http/https and check if same origin
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+      console.warn('Invalid protocol in texture URL:', url);
+      return undefined;
+    }
+    // In browser environment, check same origin
+    if (typeof window !== 'undefined') {
+      const currentOrigin = window.location.origin;
+      if (parsedUrl.origin !== currentOrigin) {
+        console.warn('Cross-origin texture URL blocked:', url);
+        return undefined;
+      }
+    }
+    return url;
+  } catch (e) {
+    console.warn('Invalid texture URL:', url);
+    return undefined;
+  }
 }

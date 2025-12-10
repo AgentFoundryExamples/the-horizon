@@ -68,37 +68,45 @@ export function OrbitingPlanet({
   // Using shared loader for caching and error handling
   const diffuseMap = useMemo(() => {
     if (!visualTheme.diffuseTexture) return null;
-    try {
-      const texture = textureLoader.load(
-        visualTheme.diffuseTexture,
-        undefined, // onLoad callback not needed
-        undefined, // onProgress callback not needed
-        (error) => console.warn('Failed to load diffuse texture:', error)
-      );
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      return texture;
-    } catch {
-      console.warn('Error loading diffuse texture');
-      return null;
-    }
-  }, [visualTheme.diffuseTexture, textureLoader]);
+    
+    const texture = textureLoader.load(
+      visualTheme.diffuseTexture,
+      undefined, // onLoad
+      undefined, // onProgress
+      (error) => {
+        console.warn(`Failed to load diffuse texture for planet ${planet.id}:`, error);
+      }
+    );
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+  }, [visualTheme.diffuseTexture, textureLoader, planet.id]);
   
   const normalMap = useMemo(() => {
     if (!visualTheme.normalTexture) return null;
-    try {
-      const texture = textureLoader.load(
-        visualTheme.normalTexture,
-        undefined,
-        undefined,
-        (error) => console.warn('Failed to load normal texture:', error)
-      );
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      return texture;
-    } catch {
-      console.warn('Error loading normal texture');
-      return null;
-    }
-  }, [visualTheme.normalTexture, textureLoader]);
+    
+    const texture = textureLoader.load(
+      visualTheme.normalTexture,
+      undefined,
+      undefined,
+      (error) => {
+        console.warn(`Failed to load normal texture for planet ${planet.id}:`, error);
+      }
+    );
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+  }, [visualTheme.normalTexture, textureLoader, planet.id]);
+  
+  // Cleanup textures on unmount or when URLs change
+  useEffect(() => {
+    return () => {
+      if (diffuseMap) {
+        diffuseMap.dispose();
+      }
+      if (normalMap) {
+        normalMap.dispose();
+      }
+    };
+  }, [diffuseMap, normalMap]);
 
   useFrame((state) => {
     if (!meshRef.current) return;
@@ -201,25 +209,8 @@ export function OrbitingPlanet({
     }
   };
 
-  // Determine color based on theme (fallback if no texture)
-  const color = useMemo(() => {
-    // If we have a glow color from theme, use that
-    if (visualTheme.glowColor && visualTheme.glowColor !== '#CCCCCC') {
-      return visualTheme.glowColor;
-    }
-    
-    // Otherwise use traditional theme mapping
-    switch (planet.theme) {
-      case 'blue-green':
-        return '#2E86AB';
-      case 'red':
-        return '#E63946';
-      case 'earth-like':
-        return '#4A90E2';
-      default:
-        return '#CCCCCC';
-    }
-  }, [planet.theme, visualTheme.glowColor]);
+  // Use the resolved glow color directly (already validated and has fallback)
+  const color = visualTheme.glowColor;
 
   return (
     <group>

@@ -19,6 +19,7 @@ import { Planet, Moon } from '@/lib/universe/types';
 import { generateId } from '@/lib/universe/mutate';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { CELESTIAL_THEME_PRESETS, validateHexColor, clampGlowIntensity, clampRotationSpeed } from '@/lib/universe/visual-themes';
 
 interface PlanetEditorProps {
   planet: Planet;
@@ -403,10 +404,29 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
             </label>
             <select
               value={localPlanet.visualTheme?.preset || ''}
-              onChange={(e) => handleChange('visualTheme', {
-                ...(localPlanet.visualTheme || {}),
-                preset: e.target.value || undefined,
-              })}
+              onChange={(e) => {
+                const presetName = e.target.value || undefined;
+                const preset = presetName ? CELESTIAL_THEME_PRESETS[presetName] : undefined;
+                
+                // Apply preset values when selected
+                if (preset) {
+                  handleChange('visualTheme', {
+                    preset: presetName,
+                    glowColor: preset.glowColor,
+                    glowIntensity: preset.glowIntensity,
+                    rotationSpeed: preset.rotationSpeed,
+                    // Preserve any existing texture URLs
+                    diffuseTexture: localPlanet.visualTheme?.diffuseTexture,
+                    normalTexture: localPlanet.visualTheme?.normalTexture,
+                    specularTexture: localPlanet.visualTheme?.specularTexture,
+                  });
+                } else {
+                  handleChange('visualTheme', {
+                    ...(localPlanet.visualTheme || {}),
+                    preset: undefined,
+                  });
+                }
+              }}
             >
               <option value="">Default (from base theme)</option>
               <option value="rocky">Rocky</option>
@@ -434,19 +454,25 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               <input
                 type="color"
                 value={localPlanet.visualTheme?.glowColor || '#CCCCCC'}
-                onChange={(e) => handleChange('visualTheme', {
-                  ...(localPlanet.visualTheme || {}),
-                  glowColor: e.target.value,
-                })}
+                onChange={(e) => {
+                  const validColor = validateHexColor(e.target.value, '#CCCCCC');
+                  handleChange('visualTheme', {
+                    ...(localPlanet.visualTheme || {}),
+                    glowColor: validColor,
+                  });
+                }}
                 style={{ width: '60px', height: '40px', cursor: 'pointer', border: '2px solid var(--admin-border)', borderRadius: '4px' }}
               />
               <input
                 type="text"
                 value={localPlanet.visualTheme?.glowColor || ''}
-                onChange={(e) => handleChange('visualTheme', {
-                  ...(localPlanet.visualTheme || {}),
-                  glowColor: e.target.value,
-                })}
+                onChange={(e) => {
+                  const validColor = validateHexColor(e.target.value, localPlanet.visualTheme?.glowColor || '#CCCCCC');
+                  handleChange('visualTheme', {
+                    ...(localPlanet.visualTheme || {}),
+                    glowColor: validColor,
+                  });
+                }}
                 placeholder="#CCCCCC"
                 style={{ flex: 1 }}
               />
@@ -469,10 +495,13 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               max="1"
               step="0.05"
               value={localPlanet.visualTheme?.glowIntensity ?? 0.3}
-              onChange={(e) => handleChange('visualTheme', {
-                ...(localPlanet.visualTheme || {}),
-                glowIntensity: parseFloat(e.target.value),
-              })}
+              onChange={(e) => {
+                const value = clampGlowIntensity(parseFloat(e.target.value));
+                handleChange('visualTheme', {
+                  ...(localPlanet.visualTheme || {}),
+                  glowIntensity: value,
+                });
+              }}
               style={{ width: '100%' }}
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#888' }}>
@@ -497,10 +526,13 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
               max="3.0"
               step="0.1"
               value={localPlanet.visualTheme?.rotationSpeed ?? 1.0}
-              onChange={(e) => handleChange('visualTheme', {
-                ...(localPlanet.visualTheme || {}),
-                rotationSpeed: parseFloat(e.target.value),
-              })}
+              onChange={(e) => {
+                const value = clampRotationSpeed(parseFloat(e.target.value));
+                handleChange('visualTheme', {
+                  ...(localPlanet.visualTheme || {}),
+                  rotationSpeed: value,
+                });
+              }}
               style={{ width: '100%' }}
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#888' }}>

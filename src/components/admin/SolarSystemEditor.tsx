@@ -15,10 +15,11 @@
 'use client';
 
 import { useState } from 'react';
-import { SolarSystem, Planet } from '@/lib/universe/types';
+import { SolarSystem, Planet, StarHaloConfig } from '@/lib/universe/types';
 import { generateId } from '@/lib/universe/mutate';
 import PlanetEditor from './PlanetEditor';
 import Modal from './Modal';
+import { validateHexColor, clampHaloIntensity, clampHaloRadius } from '@/lib/universe/visual-themes';
 
 interface SolarSystemEditorProps {
   solarSystem: SolarSystem;
@@ -45,6 +46,20 @@ export default function SolarSystemEditor({
     const updated = {
       ...localSystem,
       mainStar: { ...localSystem.mainStar, [field]: value },
+    };
+    setLocalSystem(updated);
+  };
+  
+  const handleHaloConfigChange = (field: keyof StarHaloConfig, value: number | string | undefined) => {
+    const updated = {
+      ...localSystem,
+      mainStar: {
+        ...localSystem.mainStar,
+        haloConfig: {
+          ...(localSystem.mainStar.haloConfig || {}),
+          [field]: value,
+        },
+      },
     };
     setLocalSystem(updated);
   };
@@ -198,17 +213,8 @@ export default function SolarSystemEditor({
               step="5"
               value={localSystem.mainStar.haloConfig?.haloIntensity ?? 50}
               onChange={(e) => {
-                const updated = {
-                  ...localSystem,
-                  mainStar: {
-                    ...localSystem.mainStar,
-                    haloConfig: {
-                      ...(localSystem.mainStar.haloConfig || {}),
-                      haloIntensity: parseInt(e.target.value),
-                    },
-                  },
-                };
-                setLocalSystem(updated);
+                const value = clampHaloIntensity(parseInt(e.target.value));
+                handleHaloConfigChange('haloIntensity', value);
               }}
               style={{ width: '100%' }}
             />
@@ -233,17 +239,8 @@ export default function SolarSystemEditor({
                 type="color"
                 value={localSystem.mainStar.haloConfig?.color || '#FDB813'}
                 onChange={(e) => {
-                  const updated = {
-                    ...localSystem,
-                    mainStar: {
-                      ...localSystem.mainStar,
-                      haloConfig: {
-                        ...(localSystem.mainStar.haloConfig || {}),
-                        color: e.target.value,
-                      },
-                    },
-                  };
-                  setLocalSystem(updated);
+                  const validColor = validateHexColor(e.target.value, '#FDB813');
+                  handleHaloConfigChange('color', validColor);
                 }}
                 style={{ width: '60px', height: '40px', cursor: 'pointer', border: '2px solid var(--admin-border)', borderRadius: '4px' }}
               />
@@ -251,17 +248,8 @@ export default function SolarSystemEditor({
                 type="text"
                 value={localSystem.mainStar.haloConfig?.color || ''}
                 onChange={(e) => {
-                  const updated = {
-                    ...localSystem,
-                    mainStar: {
-                      ...localSystem.mainStar,
-                      haloConfig: {
-                        ...(localSystem.mainStar.haloConfig || {}),
-                        color: e.target.value,
-                      },
-                    },
-                  };
-                  setLocalSystem(updated);
+                  const validColor = validateHexColor(e.target.value, localSystem.mainStar.haloConfig?.color || '#FDB813');
+                  handleHaloConfigChange('color', validColor);
                 }}
                 placeholder="#FDB813"
                 style={{ flex: 1 }}
@@ -283,17 +271,7 @@ export default function SolarSystemEditor({
               type="text"
               value={localSystem.mainStar.haloConfig?.texture || ''}
               onChange={(e) => {
-                const updated = {
-                  ...localSystem,
-                  mainStar: {
-                    ...localSystem.mainStar,
-                    haloConfig: {
-                      ...(localSystem.mainStar.haloConfig || {}),
-                      texture: e.target.value,
-                    },
-                  },
-                };
-                setLocalSystem(updated);
+                handleHaloConfigChange('texture', e.target.value || undefined);
               }}
               placeholder="/universe/assets/sun-texture.jpg"
             />
@@ -316,17 +294,8 @@ export default function SolarSystemEditor({
               step="0.1"
               value={localSystem.mainStar.haloConfig?.haloRadius ?? 1.5}
               onChange={(e) => {
-                const updated = {
-                  ...localSystem,
-                  mainStar: {
-                    ...localSystem.mainStar,
-                    haloConfig: {
-                      ...(localSystem.mainStar.haloConfig || {}),
-                      haloRadius: parseFloat(e.target.value),
-                    },
-                  },
-                };
-                setLocalSystem(updated);
+                const value = clampHaloRadius(parseFloat(e.target.value));
+                handleHaloConfigChange('haloRadius', value);
               }}
               style={{ width: '100%' }}
             />
