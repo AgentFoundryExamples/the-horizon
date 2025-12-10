@@ -86,9 +86,11 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
 
   // Link management functions
   const handleAddLink = () => {
+    // Generate a unique default URL to avoid immediate duplicate detection
+    const timestamp = Date.now();
     const newLink: ExternalLink = {
       title: 'New Link',
-      url: 'https://example.com',
+      url: `https://example.com/link-${timestamp}`,
       description: '',
     };
 
@@ -136,18 +138,21 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
 
     [links[index], links[newIndex]] = [links[newIndex], links[index]];
     
-    const updated = {
-      ...localPlanet,
+    // Use callback form of setState to avoid race conditions
+    setLocalPlanet(prev => ({
+      ...prev,
       externalLinks: links,
-    };
-    setLocalPlanet(updated);
+    }));
 
-    // Update editing index if needed
-    if (editingLink === index) {
-      setEditingLink(newIndex);
-    } else if (editingLink === newIndex) {
-      setEditingLink(index);
-    }
+    // Update editing index using callback form to ensure correct state
+    setEditingLink(currentEditingLink => {
+      if (currentEditingLink === index) {
+        return newIndex;
+      } else if (currentEditingLink === newIndex) {
+        return index;
+      }
+      return currentEditingLink;
+    });
   };
 
   // URL validation helper

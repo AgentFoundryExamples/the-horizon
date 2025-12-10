@@ -283,16 +283,20 @@ export function validateMoon(moon: Moon, context: string): ValidationResult {
 export function validateExternalLink(link: ExternalLink, context: string): ValidationResult {
   const errors: string[] = [];
   
-  if (!link.title || link.title.trim().length === 0) {
+  // Trim and validate title
+  const trimmedTitle = link.title?.trim();
+  if (!trimmedTitle || trimmedTitle.length === 0) {
     errors.push(`${context}: Link title is required`);
   }
   
-  if (!link.url || link.url.trim().length === 0) {
+  // Trim and validate URL
+  const trimmedUrl = link.url?.trim();
+  if (!trimmedUrl || trimmedUrl.length === 0) {
     errors.push(`${context}: Link URL is required`);
   } else {
     // Validate URL format and protocol
     try {
-      const url = new URL(link.url);
+      const url = new URL(trimmedUrl);
       if (!['http:', 'https:'].includes(url.protocol)) {
         errors.push(`${context}: Link URL must use http or https protocol`);
       }
@@ -306,6 +310,7 @@ export function validateExternalLink(link: ExternalLink, context: string): Valid
 
 /**
  * Checks for duplicate URLs in a list of external links
+ * Skips validation for empty URLs to avoid false positives
  */
 export function checkDuplicateLinks(links: ExternalLink[], context: string): string[] {
   const errors: string[] = [];
@@ -313,7 +318,8 @@ export function checkDuplicateLinks(links: ExternalLink[], context: string): str
   
   links.forEach((link, index) => {
     const normalizedUrl = link.url?.trim().toLowerCase();
-    if (normalizedUrl) {
+    // Only check for duplicates if URL is not empty
+    if (normalizedUrl && normalizedUrl.length > 0) {
       const firstIndex = seenUrls.get(normalizedUrl);
       if (firstIndex !== undefined) {
         errors.push(`${context}: Duplicate URL at index ${index}: "${link.url}" (first seen at index ${firstIndex})`);
