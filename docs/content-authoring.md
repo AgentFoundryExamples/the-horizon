@@ -45,14 +45,43 @@ The dark theme color palette has been validated for WCAG AA compliance:
 - Users always experience the dark interface regardless of system settings
 - This ensures the 3D universe visualization remains optimal for all users
 
+### Centralized Dark Palette
+
+All UI colors are defined in **`src/lib/dark-palette.ts`** - the single source of truth for the application's color scheme. This module exports the `DARK_PALETTE` constant with semantic tokens for:
+
+- Text colors (primary, secondary, muted)
+- Background colors (primary, secondary, surface)
+- Border colors
+- Accent colors (primary, hover, translucent variants)
+- Semantic colors (success, error, warning, info)
+- UI component colors (buttons, inputs, tooltips)
+- Special effects (overlays, glows, shadows)
+
+**Example usage:**
+
+```typescript
+import { DARK_PALETTE } from '@/lib/dark-palette';
+
+// ✅ Good - uses centralized token
+const textColor = DARK_PALETTE.text.primary;
+const accentColor = DARK_PALETTE.accent.primary;
+
+// ❌ Avoid - hardcoded color
+const textColor = '#FFFFFF';
+```
+
+For complete palette documentation, see [docs/visuals.md](./visuals.md#dark-only-palette-system).
+
 ### For Contributors
 
 When adding new content or components:
-- Use only dark mode color values from the existing palette
+- **Use centralized palette tokens** from `DARK_PALETTE` instead of hardcoded colors
 - Do not add `prefers-color-scheme: light` media queries
+- Do not add theme switching logic or runtime feature flags
 - Test color contrast against dark backgrounds only
 - Ensure all text meets WCAG AA standards (4.5:1 for normal text, 3:1 for large text)
 - Verify contrast ratios using tools like WebAIM Contrast Checker or browser DevTools
+- Add new colors to `dark-palette.ts` if needed, with proper documentation
 
 ## Redesigned Admin Interface (v0.1.3+)
 

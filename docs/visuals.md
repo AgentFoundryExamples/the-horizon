@@ -6,6 +6,249 @@ This document describes the 3D scene controls, camera animations, navigation UI,
 
 ---
 
+## Dark-Only Palette System
+
+### Overview
+
+**The Horizon enforces a dark-only color palette globally.** There is no light mode, no theme switching, and no runtime feature flags for appearance. This design decision ensures:
+
+- **Visual Consistency**: All users experience the same carefully crafted dark aesthetic
+- **Performance**: Eliminates theme switching overhead and reduces CSS complexity
+- **Design Integrity**: Dark backgrounds enhance the visibility of stars, galaxies, and glowing celestial objects
+- **Accessibility**: Dark theme maintains WCAG AA contrast ratios with optimized color choices
+
+### Centralized Color Constants
+
+All UI colors are defined in a single source of truth: `src/lib/dark-palette.ts`
+
+This module exports the `DARK_PALETTE` constant, which provides semantic color tokens for:
+- Text (primary, secondary, muted)
+- Backgrounds (primary, secondary, surface)
+- Borders (primary, secondary, elevated)
+- Accent colors (primary, hover, translucent variants)
+- Semantic colors (success, error, warning, info)
+- UI components (buttons, inputs, modals, tooltips)
+- Special effects (overlays, glows, shadows)
+
+**Example Usage:**
+
+```typescript
+import { DARK_PALETTE } from '@/lib/dark-palette';
+
+const buttonStyle = {
+  backgroundColor: DARK_PALETTE.accent.primary,
+  color: DARK_PALETTE.text.primary,
+  borderColor: DARK_PALETTE.border.primary,
+};
+```
+
+### Color Palette Reference
+
+#### Text Colors
+| Token | Value | Contrast | Usage |
+|-------|-------|----------|-------|
+| `text.primary` | #FFFFFF | 21:1 | Headings, primary text |
+| `text.secondary` | #AAAAAA | 11.05:1 | Body text, descriptions |
+| `text.muted` | #888888 | 6.54:1 | Metadata, timestamps |
+
+#### Background Colors
+| Token | Value | Usage |
+|-------|-------|-------|
+| `background.primary` | #000000 | Main app background |
+| `background.secondary` | rgba(0,0,0,0.9) | Overlays, modals |
+| `background.surface` | #0a0a0f | Cards, panels |
+| `background.surfaceElevated` | #1a1a2e | Modals, raised elements |
+
+#### Accent Colors
+| Token | Value | Contrast | Usage |
+|-------|-------|----------|-------|
+| `accent.primary` | #4A90E2 | 7.33:1 | Links, buttons, focus |
+| `accent.hover` | #5ba0f2 | - | Hover states |
+| `accent.active` | #357ABD | - | Active/pressed states |
+| `accent.transparent*` | rgba(...) | - | Overlays, backgrounds |
+
+### Extending the Dark Palette
+
+When adding new visual elements, follow these guidelines:
+
+#### 1. Use Existing Tokens First
+Before adding new colors, check if an existing token fits your use case:
+
+```typescript
+// ✅ Good - reuses existing semantic color
+const errorBorder = DARK_PALETTE.semantic.error;
+
+// ❌ Avoid - hardcoded duplicate color
+const errorBorder = '#f44336';
+```
+
+#### 2. Add New Tokens for New Patterns
+If you need a genuinely new color, add it to the appropriate section in `dark-palette.ts`:
+
+```typescript
+export const DARK_PALETTE = {
+  // ... existing tokens
+  ui: {
+    // ... existing UI tokens
+    /** New component-specific token */
+    planetLabelBackground: 'rgba(0, 0, 0, 0.9)',
+    planetLabelBorder: 'rgba(74, 144, 226, 0.6)',
+  },
+} as const;
+```
+
+#### 3. Maintain Accessibility
+All new colors must meet WCAG AA contrast requirements:
+- Normal text: 4.5:1 minimum
+- Large text: 3:1 minimum
+- UI components: 3:1 minimum
+
+Use tools like [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/) to validate.
+
+#### 4. Document New Tokens
+Add JSDoc comments explaining the token's purpose and usage:
+
+```typescript
+/** 
+ * Background for planet surface labels
+ * Used in PlanetSurface component for the floating name label
+ */
+planetLabelBackground: 'rgba(0, 0, 0, 0.9)',
+```
+
+### Migration from Hardcoded Colors
+
+When updating existing components, follow this pattern:
+
+**Before:**
+```typescript
+const style = {
+  color: '#FFFFFF',
+  backgroundColor: 'rgba(0, 0, 0, 0.9)',
+  borderColor: '#4A90E2',
+};
+```
+
+**After:**
+```typescript
+import { DARK_PALETTE } from '@/lib/dark-palette';
+
+const style = {
+  color: DARK_PALETTE.text.primary,
+  backgroundColor: DARK_PALETTE.background.secondary,
+  borderColor: DARK_PALETTE.accent.primary,
+};
+```
+
+### CSS Variable Integration
+
+For components using CSS files, CSS variables are defined in `:root` but reference the centralized palette:
+
+```css
+:root {
+  /* Reference centralized dark palette */
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #AAAAAA;
+  --color-primary: #4A90E2;
+  --color-bg-primary: rgba(0, 0, 0, 0.9);
+  --color-border: #444;
+}
+```
+
+These should match the values in `DARK_PALETTE` to maintain consistency.
+
+### Things to Avoid
+
+#### ❌ Do Not Add Theme Toggles
+```typescript
+// ❌ Never add theme switching logic
+const getColor = (isDark: boolean) => isDark ? '#000' : '#FFF';
+```
+
+#### ❌ Do Not Use Light Mode Media Queries
+```css
+/* ❌ Never add light mode queries */
+@media (prefers-color-scheme: light) {
+  body { background: white; }
+}
+```
+
+#### ❌ Do Not Hardcode Colors Directly
+```typescript
+// ❌ Avoid hardcoding colors
+const style = { color: '#FFFFFF' };
+
+// ✅ Use palette tokens
+const style = { color: DARK_PALETTE.text.primary };
+```
+
+#### ❌ Do Not Create Duplicate Tokens
+```typescript
+// ❌ Avoid duplicating existing colors
+export const MY_BLUE = '#4A90E2'; // Already exists as accent.primary
+
+// ✅ Reuse existing token
+import { DARK_PALETTE } from '@/lib/dark-palette';
+const myBlue = DARK_PALETTE.accent.primary;
+```
+
+### Accessibility Validation
+
+All palette colors have been validated for WCAG AA compliance:
+
+**Text Contrast Ratios:**
+- Primary text (#FFFFFF on #000000): 21:1 (AAA)
+- Secondary text (#AAAAAA on #000000): 11.05:1 (AAA)
+- Muted text (#888888 on #000000): 6.54:1 (AA)
+- Accent primary (#4A90E2 on #000000): 7.33:1 (AA)
+
+**Focus States:**
+- Focus outlines use `accent.primary` with 3px width
+- Minimum touch target size: 44×44px (WCAG 2.5.5)
+- Visible focus indicators on all interactive elements
+
+**High Contrast Support:**
+For users with `prefers-contrast: high`, increase border widths and opacity values:
+
+```css
+@media (prefers-contrast: high) {
+  .overlay-label-content {
+    border: 2px solid #4A90E2; /* Increased from 1px */
+    background: rgba(0, 0, 0, 0.95); /* Increased opacity */
+  }
+}
+```
+
+### Testing Your Colors
+
+When adding new visual elements:
+
+1. **Visual Test**: View on actual dark background in browser
+2. **Contrast Test**: Use [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
+3. **Accessibility Test**: Enable screen reader and verify labels
+4. **Device Test**: Check on mobile, tablet, and desktop
+5. **Browser Test**: Verify in Chrome, Firefox, Safari
+
+### Color Decision Tree
+
+```mermaid
+graph TD
+    A[Need a color?] --> B{Exists in palette?}
+    B -->|Yes| C[Use existing token]
+    B -->|No| D{Similar color exists?}
+    D -->|Yes| E[Use similar token or create alias]
+    D -->|No| F[Add to palette]
+    F --> G{Meets WCAG AA?}
+    G -->|Yes| H[Document usage]
+    G -->|No| I[Adjust until compliant]
+    I --> F
+    C --> J[Implement]
+    E --> J
+    H --> J
+```
+
+---
+
 ## Celestial Visual Themes System
 
 ### Overview
