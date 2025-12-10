@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Universe } from '@/lib/universe/types';
@@ -27,11 +27,7 @@ export default function AdminPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  useEffect(() => {
-    fetchUniverse();
-  }, []);
-
-  const fetchUniverse = async () => {
+  const fetchUniverse = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/universe');
       if (response.status === 401) {
@@ -62,7 +58,11 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    fetchUniverse();
+  }, [fetchUniverse]);
 
   const handleLogout = async () => {
     try {

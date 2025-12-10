@@ -74,7 +74,7 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
         Math.sin(angle) * radius
       );
     });
-  }, [galaxy.solarSystems?.map(s => s.id).join(',')]);
+  }, [galaxy.solarSystems]);
 
   // Layout free-floating stars on outer ring
   const starPositions = useMemo(() => {
@@ -92,7 +92,7 @@ export default function GalaxyView({ galaxy, position }: GalaxyViewProps) {
         Math.sin(angle) * radius
       );
     });
-  }, [galaxy.id, galaxy.stars?.map(s => s.id).join(',')]);
+  }, [galaxy.id, galaxy.stars]);
 
   // Reset original positions when galaxy changes to avoid using stale data
   useEffect(() => {

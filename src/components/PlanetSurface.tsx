@@ -22,6 +22,7 @@
 import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import NextImage from 'next/image';
 import type { Planet, Moon, SolarSystem } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
 import MarkdownContent from './MarkdownContent';
@@ -360,7 +361,13 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
         {/* Featured image */}
         {featuredImage && (
           <div className="planet-featured-media">
-            <img src={featuredImage} alt={`Featured image for ${title}`} />
+            <NextImage 
+              src={featuredImage} 
+              alt={`Featured image for ${title}`}
+              width={800}
+              height={450}
+              style={{ width: '100%', height: 'auto' }}
+            />
           </div>
         )}
 
