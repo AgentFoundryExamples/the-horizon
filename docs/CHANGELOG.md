@@ -102,7 +102,7 @@ Reusable collapsible section component for better content organization:
 ### Technical Details
 - No new environment variables required
 - No migration steps needed
-- All tests passing (748/755, 7 pre-existing crypto failures)
+- All tests passing (900/926, 26 pre-existing crypto failures)
 - Compatible with all v0.1.x releases
 - Build verified with no breaking changes
 - Performance: ~2% additional GPU overhead for glow effects, negligible for collapsible sections
@@ -125,7 +125,7 @@ Reusable collapsible section component for better content organization:
 8. **Backward Compat**: Load existing universe data without themes, verify no errors
 
 See [docs/visuals.md](visuals.md#celestial-visual-themes-system) for celestial theme documentation.
-See [docs/content-authoring.md](content-authoring.md#external-links-management) for link management workflow.
+See [docs/content-authoring.md](content-authoring.md#external-links) for link management workflow.
 See [docs/roadmap.md](roadmap.md#v019---celestial-themes-link-management--collapsible-viewer-december-10-2025) for complete feature summary.
 
 ---

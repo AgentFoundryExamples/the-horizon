@@ -89,7 +89,7 @@ Building on the navigation foundation from Part 1:
 **Technical Details:**
 - No new environment variables required
 - No migration steps needed
-- All tests passing (748/755, 7 pre-existing crypto failures)
+- All tests passing (900/926, 26 pre-existing crypto failures)
 - Compatible with all v0.1.x releases
 - Build verified with no breaking changes
 - Performance: ~2% GPU overhead for glows, negligible for collapsible sections
@@ -115,8 +115,6 @@ See [docs/visuals.md](./visuals.md#celestial-visual-themes-system) for celestial
 See [docs/content-authoring.md](./content-authoring.md#external-links-management) for link workflow.
 
 ---
-
-## Previous Release: v0.1.8 (December 9, 2025)
 
 ## Previous Release: v0.1.8 (December 9, 2025)
 
