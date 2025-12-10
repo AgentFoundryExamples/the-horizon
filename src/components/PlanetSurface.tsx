@@ -25,6 +25,7 @@ import * as THREE from 'three';
 import type { Planet, Moon, SolarSystem } from '@/lib/universe/types';
 import { useNavigationStore } from '@/lib/store';
 import MarkdownContent from './MarkdownContent';
+import CollapsibleSection from './shared/CollapsibleSection';
 import { calculateMoonSize } from '@/lib/universe/scale-constants';
 import { normalizePlanetLayout, layoutConfigToCSS } from '@/lib/universe/planet-layout';
 import { resolveCelestialTheme } from '@/lib/universe/visual-themes';
@@ -258,6 +259,7 @@ interface PlanetSurfaceOverlayProps {
 
 export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOverlayProps) {
   const { navigateToMoon } = useNavigationStore();
+  const contentColumnRef = useRef<HTMLDivElement>(null);
 
   // Determine which content to show
   const currentMoon = currentMoonId ? planet.moons?.find((m) => m.id === currentMoonId) : null;
@@ -283,6 +285,25 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
     return layoutConfigToCSS(layoutConfig);
   }, [layoutConfig]);
 
+  // Reset scroll position to top when navigating or switching planets
+  useEffect(() => {
+    if (contentColumnRef.current) {
+      contentColumnRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Only set focus when navigating to a moon, not when returning to the planet
+      if (currentMoonId) {
+        // Restore focus to content container for screen readers
+        // Add null check to prevent errors if element is not focusable
+        try {
+          contentColumnRef.current.focus();
+        } catch (error) {
+          // Silently fail if focus is not possible (element may not be focusable)
+          console.debug('Unable to set focus on content column:', error);
+        }
+      }
+    }
+  }, [currentMoonId, planet.id]);
+
   return (
     <div className="planet-surface-container" style={containerStyle as React.CSSProperties}>
       {/* Left column - Planet visualization placeholder */}
@@ -293,7 +314,12 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
       </div>
 
       {/* Right column - Content */}
-      <div className="planet-content-column">
+      <div 
+        ref={contentColumnRef}
+        className="planet-content-column"
+        tabIndex={-1}
+        aria-label="Planet content area"
+      >
         {/* Title and metadata header */}
         <div className="planet-content-header">
           <h1 className="planet-title">{title}</h1>
@@ -343,10 +369,13 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
           <MarkdownContent content={content} />
         </div>
 
-        {/* External links section */}
+        {/* External links section - collapsible */}
         {externalLinks.length > 0 && (
-          <div className="planet-external-links">
-            <h3 className="section-title">Related Resources</h3>
+          <CollapsibleSection
+            title="Related Resources"
+            itemCount={externalLinks.length}
+            config={{ defaultCollapsed: true, collapsedHeight: 5, expandedHeight: 20 }}
+          >
             <div className="external-links-list">
               {externalLinks.map((link, index) => (
                 <a
@@ -364,13 +393,16 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
                 </a>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
         )}
 
-        {/* Moon navigation */}
+        {/* Moon navigation - collapsible */}
         {!currentMoon && planet.moons && planet.moons.length > 0 && (
-          <div className="planet-moons-section">
-            <h3 className="section-title">Moons</h3>
+          <CollapsibleSection
+            title="Moons"
+            itemCount={planet.moons.length}
+            config={{ defaultCollapsed: true, collapsedHeight: 5, expandedHeight: 25 }}
+          >
             <div className="moons-button-group">
               {planet.moons.map((moon) => (
                 <button
@@ -382,7 +414,7 @@ export function PlanetSurfaceOverlay({ planet, currentMoonId }: PlanetSurfaceOve
                 </button>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
         )}
 
         {/* Back to planet button when viewing moon */}

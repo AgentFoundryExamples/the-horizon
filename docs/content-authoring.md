@@ -2580,6 +2580,240 @@ import { TOOLTIP_POSITIONING } from '@/lib/tooltip-constants';
 
 See [visuals.md](./visuals.md#standardized-hover-label-system) for complete technical documentation.
 
+## Collapsible Moons and Links Panels
+
+The planet content viewer uses collapsible sections for moons and external links to prevent content overflow and maintain readability of primary content. This feature was introduced in v0.1.8+ to handle planets with large moon collections or many external resources.
+
+### Overview
+
+When viewing a planet, the **Moons** and **Related Resources** (external links) sections appear as compact, collapsible panels that:
+
+- Start collapsed by default, occupying <15% of the content viewer height
+- Display an item count badge showing the number of moons or links
+- Expand into scrollable lists when clicked
+- Provide independent overflow handling to keep dozens of items accessible
+- Preserve the primary markdown content area at all times
+
+### User Interaction
+
+**Expanding/Collapsing:**
+- Click the section header to toggle between collapsed and expanded states
+- The arrow icon (▶/▼) indicates current state
+- Item count badge shows the number of moons or links at a glance
+
+**Navigation:**
+- When expanded, sections become scrollable lists with their own scrollbar
+- Clicking a moon navigates to that moon's content and resets scroll to top
+- Focus automatically returns to the content container for screen reader users
+- External links open in new tabs with proper security attributes
+
+**Keyboard Accessibility:**
+- Use **Tab** to focus the collapsible section header
+- Press **Enter** or **Space** to expand/collapse
+- Press **Escape** to collapse an expanded section
+- All moon buttons and links remain keyboard-accessible when expanded
+
+### Content Author Guidelines
+
+When creating planets with many moons or external links:
+
+**Recommended Limits:**
+- **Moons**: Up to 100 moons are supported smoothly
+- **External Links**: Up to 50 links recommended for best UX
+- No hard limits enforced, but performance may degrade beyond these values
+
+**Best Practices:**
+
+1. **Moon Organization**
+   - Name moons clearly and consistently
+   - Consider alphabetical or thematic ordering in `universe.json`
+   - Add descriptive content for each moon to justify their presence
+
+2. **External Links**
+   - Only include relevant, high-quality resources
+   - Provide descriptive titles and descriptions for each link
+   - Verify all URLs are valid and use HTTPS when possible
+   - Avoid duplicate URLs (validation will catch these)
+
+3. **Content Balance**
+   - Primary planet content should remain the focus
+   - Moons are for extended/related content, not replacements
+   - External links supplement rather than substitute original content
+
+**Example - Planet with Many Moons:**
+
+```json
+{
+  "id": "saturn",
+  "name": "Saturn",
+  "moons": [
+    {
+      "id": "titan",
+      "name": "Titan",
+      "contentMarkdown": "# Titan\n\nSaturn's largest moon..."
+    },
+    {
+      "id": "enceladus",
+      "name": "Enceladus",
+      "contentMarkdown": "# Enceladus\n\nAn icy moon with geysers..."
+    }
+    // ... up to 100+ moons
+  ],
+  "externalLinks": [
+    {
+      "title": "NASA Saturn Mission",
+      "url": "https://nasa.gov/saturn",
+      "description": "Official mission data and imagery"
+    }
+    // ... more links
+  ]
+}
+```
+
+### Behavior Details
+
+**Collapsed State:**
+- Maximum height: 5rem (configurable)
+- Shows section title and item count
+- Content is hidden but remains in DOM for SEO
+- Takes up approximately 10-12% of viewer height
+
+**Expanded State:**
+- Maximum height: 25rem for moons, 20rem for links (configurable)
+- Scrollable with custom-styled scrollbar
+- Smooth transition animation (300ms)
+- Independent scroll management (doesn't affect main content)
+
+**Edge Cases:**
+
+1. **Zero Items**
+   - Sections with 0 moons or links are completely hidden
+   - No empty collapsible panels appear
+
+2. **Moon Navigation**
+   - Viewing a moon hides the moons section (you're inside one)
+   - "Back to Planet" button appears to return
+   - Scroll position resets to top when navigating
+
+3. **Rapid Toggling**
+   - Animation respects reduced-motion preferences
+   - Multiple rapid clicks are debounced by browser
+   - No layout thrashing occurs
+
+4. **Planet Switching**
+   - Collapsible state resets to default (collapsed) on new planet
+   - Scroll positions reset appropriately
+   - No state leakage between different planets
+
+### Responsive Behavior
+
+**Desktop (>1024px):**
+- Collapsed height: 5rem
+- Expanded height: 25rem (moons), 20rem (links)
+- Full-width buttons with descriptions visible
+
+**Tablet (768-1024px):**
+- Same heights as desktop
+- Touch targets increased to 48px minimum
+- Descriptions may wrap on smaller links
+
+**Mobile (<768px):**
+- Collapsed height: 4rem
+- Expanded height: 20rem
+- Simplified layout with stacked link descriptions
+- Touch targets increased to 52px for finger interaction
+
+### Accessibility Features
+
+**Screen Reader Support:**
+- Proper ARIA labels (`aria-expanded`, `aria-controls`, `aria-hidden`)
+- Region roles for semantic structure
+- Item count announced as "X items"
+- Focus management on navigation events
+
+**Keyboard Navigation:**
+- All interactions available via keyboard
+- Visible focus indicators
+- Escape key to collapse
+- Tab order follows visual hierarchy
+
+**Visual Accessibility:**
+- High contrast borders and text
+- Clear visual state indicators (icon direction)
+- Respects `prefers-reduced-motion` setting
+- 21:1 contrast ratio for text
+
+### Configuration (Advanced)
+
+Developers can customize collapsible behavior in the `CollapsibleSection` component:
+
+```typescript
+<CollapsibleSection
+  title="Moons"
+  itemCount={planet.moons.length}
+  config={{
+    defaultCollapsed: true,
+    collapsedHeight: 5,      // rem units, range: 3-8
+    expandedHeight: 25,      // rem units, range: 15-40
+    transitionDuration: 300, // ms, range: 150-500
+    showItemCount: true
+  }}
+>
+  {/* content */}
+</CollapsibleSection>
+```
+
+**Configuration Options:**
+- `defaultCollapsed`: Whether section starts collapsed (default: true)
+- `collapsedHeight`: Max height when collapsed in rem (default: 5)
+- `expandedHeight`: Max height when expanded in rem (default: 25)
+- `transitionDuration`: Animation duration in ms (default: 300)
+- `showItemCount`: Show/hide item count badge (default: true)
+
+Values are automatically clamped to safe ranges to prevent layout breaking.
+
+### Troubleshooting
+
+**Moons section doesn't appear:**
+- Verify planet has `moons` array in `universe.json`
+- Check that moon objects have required fields (`id`, `name`, `contentMarkdown`)
+- Confirm you're viewing the planet (not a moon)
+
+**Links section doesn't appear:**
+- Verify planet has `externalLinks` array
+- Check that all links have valid URLs (http/https)
+- Review browser console for validation errors
+
+**Scrolling issues:**
+- Try collapsing and re-expanding the section
+- Ensure browser zoom is at 100%
+- Check for browser extensions interfering with scroll
+
+**Performance with 100+ items:**
+- Consider splitting content across multiple related planets
+- Ensure moon content is appropriately sized
+- Monitor browser developer tools for performance warnings
+
+---
+
+### Technical Details
+
+For developers implementing new object types, tooltips are standardized via:
+
+```typescript
+import SceneTooltip from '@/components/SceneTooltip';
+import { TOOLTIP_POSITIONING } from '@/lib/tooltip-constants';
+
+<SceneTooltip
+  visible={isHovered}
+  worldPosition={objectPosition}
+  distanceFactor={TOOLTIP_POSITIONING.DISTANCE_FACTOR_MEDIUM}
+  content={object.name}
+/>
+```
+
+See [visuals.md](./visuals.md#standardized-hover-label-system) for complete technical documentation.
+
 ---
 
 **Need Help?** Open an issue on GitHub or check the main [README](../README.md) for contact information.
