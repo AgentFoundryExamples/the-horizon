@@ -32,17 +32,6 @@ describe('RootLayout - Dark Mode Enforcement', () => {
       expect(htmlElement).toHaveAttribute('data-theme', 'dark');
     });
 
-    it('should render html element with inline colorScheme style', () => {
-      const { container } = render(
-        <RootLayout>
-          <div>Test Content</div>
-        </RootLayout>
-      );
-
-      const htmlElement = container.querySelector('html');
-      expect(htmlElement).toHaveStyle({ colorScheme: 'dark' });
-    });
-
     it('should render html element with lang="en" attribute', () => {
       const { container } = render(
         <RootLayout>
@@ -79,9 +68,8 @@ describe('RootLayout - Dark Mode Enforcement', () => {
 
       const htmlElement = container.querySelector('html');
       
-      // All three methods of forcing dark mode should be present
+      // Both methods of forcing dark mode should be present
       expect(htmlElement).toHaveAttribute('data-theme', 'dark');
-      expect(htmlElement).toHaveStyle({ colorScheme: 'dark' });
       expect(viewport.colorScheme).toBe('dark');
     });
 
@@ -122,7 +110,7 @@ describe('RootLayout - Dark Mode Enforcement', () => {
 
       // Both renders should have identical dark mode attributes
       expect(html1?.getAttribute('data-theme')).toBe(html2?.getAttribute('data-theme'));
-      expect(html1?.style.colorScheme).toBe(html2?.style.colorScheme);
+      expect(html1?.getAttribute('data-theme')).toBe('dark');
     });
   });
 });
