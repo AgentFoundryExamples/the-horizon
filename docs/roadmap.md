@@ -112,7 +112,7 @@ Building on the navigation foundation from Part 1:
 8. Load existing data without themes - verify no errors
 
 See [docs/visuals.md](./visuals.md#celestial-visual-themes-system) for celestial theme documentation.
-See [docs/content-authoring.md](./content-authoring.md#external-links-management) for link workflow.
+See [docs/content-authoring.md](./content-authoring.md#external-links) for link workflow.
 
 ---
 
