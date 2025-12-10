@@ -15,10 +15,11 @@
 'use client';
 
 import { useState } from 'react';
-import { SolarSystem, Planet } from '@/lib/universe/types';
+import { SolarSystem, Planet, StarHaloConfig } from '@/lib/universe/types';
 import { generateId } from '@/lib/universe/mutate';
 import PlanetEditor from './PlanetEditor';
 import Modal from './Modal';
+import { validateHexColor, clampHaloIntensity, clampHaloRadius } from '@/lib/universe/visual-themes';
 
 interface SolarSystemEditorProps {
   solarSystem: SolarSystem;
@@ -45,6 +46,20 @@ export default function SolarSystemEditor({
     const updated = {
       ...localSystem,
       mainStar: { ...localSystem.mainStar, [field]: value },
+    };
+    setLocalSystem(updated);
+  };
+  
+  const handleHaloConfigChange = (field: keyof StarHaloConfig, value: number | string | undefined) => {
+    const updated = {
+      ...localSystem,
+      mainStar: {
+        ...localSystem.mainStar,
+        haloConfig: {
+          ...(localSystem.mainStar.haloConfig || {}),
+          [field]: value,
+        },
+      },
     };
     setLocalSystem(updated);
   };
@@ -180,6 +195,117 @@ export default function SolarSystemEditor({
               onChange={(e) => handleMainStarChange('theme', e.target.value)}
               placeholder="e.g., yellow-dwarf, orange-dwarf"
             />
+          </div>
+
+          <h4 style={{ marginTop: '1.5rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--admin-border)' }}>Star Visual Effects</h4>
+
+          <div className="form-group">
+            <label>
+              Halo Intensity
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Current: {(localSystem.mainStar.haloConfig?.haloIntensity ?? 50)}%
+              </span>
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              value={localSystem.mainStar.haloConfig?.haloIntensity ?? 50}
+              onChange={(e) => {
+                const value = clampHaloIntensity(parseInt(e.target.value));
+                handleHaloConfigChange('haloIntensity', value);
+              }}
+              style={{ width: '100%' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#888' }}>
+              <span>No halo (0%)</span>
+              <span>Maximum halo (100%)</span>
+            </div>
+            <span className="form-hint">
+              Controls the prominence of the star&apos;s glow/halo effect
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Halo Color
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Overrides theme-based color if set
+              </span>
+            </label>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <input
+                type="color"
+                value={localSystem.mainStar.haloConfig?.color || '#FDB813'}
+                onChange={(e) => {
+                  const validColor = validateHexColor(e.target.value, '#FDB813');
+                  handleHaloConfigChange('color', validColor);
+                }}
+                style={{ width: '60px', height: '40px', cursor: 'pointer', border: '2px solid var(--admin-border)', borderRadius: '4px' }}
+              />
+              <input
+                type="text"
+                value={localSystem.mainStar.haloConfig?.color || ''}
+                onChange={(e) => {
+                  const validColor = validateHexColor(e.target.value, localSystem.mainStar.haloConfig?.color || '#FDB813');
+                  handleHaloConfigChange('color', validColor);
+                }}
+                placeholder="#FDB813"
+                style={{ flex: 1 }}
+              />
+            </div>
+            <span className="form-hint">
+              Leave empty to use color from star theme. Yellow stars default to #FDB813.
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Star Texture URL (Optional)
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Advanced: Surface detail
+              </span>
+            </label>
+            <input
+              type="text"
+              value={localSystem.mainStar.haloConfig?.texture || ''}
+              onChange={(e) => {
+                handleHaloConfigChange('texture', e.target.value || undefined);
+              }}
+              placeholder="/universe/assets/sun-texture.jpg"
+            />
+            <span className="form-hint">
+              URL or path to star surface texture (e.g., solar flares, spots). Leave empty for solid color.
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Halo Radius Multiplier
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Current: {(localSystem.mainStar.haloConfig?.haloRadius ?? 1.5).toFixed(1)}x
+              </span>
+            </label>
+            <input
+              type="range"
+              min="1.0"
+              max="3.0"
+              step="0.1"
+              value={localSystem.mainStar.haloConfig?.haloRadius ?? 1.5}
+              onChange={(e) => {
+                const value = clampHaloRadius(parseFloat(e.target.value));
+                handleHaloConfigChange('haloRadius', value);
+              }}
+              style={{ width: '100%' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#888' }}>
+              <span>Tight (1x)</span>
+              <span>Spread (3x)</span>
+            </div>
+            <span className="form-hint">
+              Controls the size of the halo relative to the star&apos;s radius
+            </span>
           </div>
         </>
       )}

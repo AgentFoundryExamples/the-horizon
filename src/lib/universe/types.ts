@@ -49,6 +49,54 @@ export interface AdminHashTracking {
   localDiskHash: string;
 }
 
+/**
+ * Visual theme configuration for celestial bodies (planets/moons)
+ * Controls rendering appearance including textures, materials, and effects
+ */
+export interface CelestialVisualTheme {
+  /**
+   * Preset theme type (e.g., 'rocky', 'gasGiant', 'icy', 'volcanic', 'earth-like')
+   * Used to select default visual parameters when custom values not provided
+   */
+  preset?: string;
+  
+  /**
+   * URL or path to diffuse texture (main surface color/pattern)
+   * Falls back to solid color from theme if not provided
+   */
+  diffuseTexture?: string | undefined;
+  
+  /**
+   * URL or path to normal map texture (surface detail/bumps)
+   * Enhances visual depth without geometry complexity
+   */
+  normalTexture?: string | undefined;
+  
+  /**
+   * URL or path to specular/roughness map (reflectivity)
+   * Controls how light reflects off the surface
+   */
+  specularTexture?: string | undefined;
+  
+  /**
+   * Hex color for theme-colored glow/border effect
+   * Default: derived from main theme color
+   */
+  glowColor?: string;
+  
+  /**
+   * Intensity of glow effect (0-1, default: 0.3)
+   * Higher values create more prominent halos
+   */
+  glowIntensity?: number;
+  
+  /**
+   * Rotation speed multiplier (default: 1.0)
+   * Controls texture/rotation animation speed
+   */
+  rotationSpeed?: number;
+}
+
 export interface Moon {
   id: string;
   name: string;
@@ -56,6 +104,7 @@ export interface Moon {
   publishedDate?: string; // ISO 8601 date string (optional)
   tags?: string[]; // Array of tags for categorization (optional)
   featuredImage?: string; // URL or path to featured image (optional)
+  visualTheme?: CelestialVisualTheme; // Visual rendering configuration (optional)
 }
 
 export interface Planet {
@@ -71,6 +120,7 @@ export interface Planet {
   externalLinks?: ExternalLink[]; // Links to related resources (optional)
   featuredImage?: string; // URL or path to featured image (optional)
   layoutConfig?: PlanetLayoutConfig; // Layout customization (optional)
+  visualTheme?: CelestialVisualTheme; // Visual rendering configuration (optional)
 }
 
 export interface ExternalLink {
@@ -124,10 +174,41 @@ export interface PlanetLayoutConfig {
   contentMaxWidth?: number;
 }
 
+/**
+ * Halo and visual configuration for stars
+ * Controls rendering of star surfaces, halos, and lighting effects
+ */
+export interface StarHaloConfig {
+  /**
+   * Halo intensity/strength (0-100, default: 50)
+   * Controls prominence of the glow/halo around the star
+   */
+  haloIntensity?: number;
+  
+  /**
+   * URL or path to star surface texture
+   * Adds detail to the star sphere (e.g., solar flares, spots)
+   */
+  texture?: string | undefined;
+  
+  /**
+   * Hex color for star and halo (default: from theme)
+   * Overrides theme-based coloring if provided
+   */
+  color?: string;
+  
+  /**
+   * Halo radius multiplier (default: 1.5)
+   * Controls size of glow relative to star radius
+   */
+  haloRadius?: number;
+}
+
 export interface Star {
   id: string;
   name: string;
   theme: string;
+  haloConfig?: StarHaloConfig; // Visual halo configuration (optional)
 }
 
 export interface SolarSystem {

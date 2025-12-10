@@ -5,11 +5,12 @@
  * Used by both GalaxyView and SolarSystemView with different scale parameters
  */
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { Planet } from '@/lib/universe/types';
 import { useHoverStore, type HoveredObject } from '@/lib/hover-store';
+import { resolveCelestialTheme } from '@/lib/universe/visual-themes';
 
 interface OrbitingPlanetProps {
   planet: Planet;
@@ -51,8 +52,61 @@ export function OrbitingPlanet({
   size,
 }: OrbitingPlanetProps) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const glowRef = useRef<THREE.Mesh>(null);
   const setHoveredObject = useHoverStore((state) => state.setHoveredObject);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Resolve visual theme with defaults
+  const visualTheme = useMemo(() => {
+    return resolveCelestialTheme(planet.visualTheme, planet.theme);
+  }, [planet.visualTheme, planet.theme]);
+  
+  // Shared texture loader instance for caching
+  const textureLoader = useMemo(() => new THREE.TextureLoader(), []);
+  
+  // Attempt to load textures if URLs provided
+  // Using shared loader for caching and error handling
+  const diffuseMap = useMemo(() => {
+    if (!visualTheme.diffuseTexture) return null;
+    
+    const texture = textureLoader.load(
+      visualTheme.diffuseTexture,
+      undefined, // onLoad
+      undefined, // onProgress
+      (error) => {
+        console.warn(`Failed to load diffuse texture for planet ${planet.id}:`, error);
+      }
+    );
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+  }, [visualTheme.diffuseTexture, textureLoader, planet.id]);
+  
+  const normalMap = useMemo(() => {
+    if (!visualTheme.normalTexture) return null;
+    
+    const texture = textureLoader.load(
+      visualTheme.normalTexture,
+      undefined,
+      undefined,
+      (error) => {
+        console.warn(`Failed to load normal texture for planet ${planet.id}:`, error);
+      }
+    );
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+  }, [visualTheme.normalTexture, textureLoader, planet.id]);
+  
+  // Cleanup textures on unmount or when URLs change
+  useEffect(() => {
+    return () => {
+      if (diffuseMap) {
+        diffuseMap.dispose();
+      }
+      if (normalMap) {
+        normalMap.dispose();
+      }
+    };
+  }, [diffuseMap, normalMap]);
 
   useFrame((state) => {
     if (!meshRef.current) return;
@@ -85,6 +139,15 @@ export function OrbitingPlanet({
     meshRef.current.position.x = Math.cos(angle) * radius;
     meshRef.current.position.y = Math.sin(angle) * radius * Math.sin(inclination);
     meshRef.current.position.z = Math.sin(angle) * radius * Math.cos(inclination);
+    
+    // Apply rotation for visual interest (rotation cue)
+    meshRef.current.rotation.y += 0.001 * visualTheme.rotationSpeed;
+    
+    // Sync glow position with planet
+    if (glowRef.current) {
+      glowRef.current.position.copy(meshRef.current.position);
+      glowRef.current.rotation.copy(meshRef.current.rotation);
+    }
   });
 
   const handlePointerOver = (e: any) => {
@@ -146,29 +209,40 @@ export function OrbitingPlanet({
     }
   };
 
-  // Determine color based on theme
-  const color = useMemo(() => {
-    switch (planet.theme) {
-      case 'blue-green':
-        return '#2E86AB';
-      case 'red':
-        return '#E63946';
-      case 'earth-like':
-        return '#4A90E2';
-      default:
-        return '#CCCCCC';
-    }
-  }, [planet.theme]);
+  // Use the resolved glow color directly (already validated and has fallback)
+  const color = visualTheme.glowColor;
 
   return (
-    <mesh
-      ref={meshRef}
-      onClick={handleClick}
-      onPointerOver={handlePointerOver}
-      onPointerOut={handlePointerOut}
-    >
-      <sphereGeometry args={[size, 16, 16]} />
-      <meshStandardMaterial color={color} />
-    </mesh>
+    <group>
+      {/* Main planet mesh */}
+      <mesh
+        ref={meshRef}
+        onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+      >
+        <sphereGeometry args={[size, 32, 32]} />
+        <meshStandardMaterial 
+          color={color}
+          map={diffuseMap}
+          normalMap={normalMap}
+          metalness={0.1}
+          roughness={0.8}
+        />
+      </mesh>
+      
+      {/* Theme-colored glow/border effect */}
+      {visualTheme.glowIntensity > 0 && (
+        <mesh ref={glowRef}>
+          <sphereGeometry args={[size * 1.05, 32, 32]} />
+          <meshBasicMaterial
+            color={visualTheme.glowColor}
+            transparent
+            opacity={visualTheme.glowIntensity * 0.3}
+            side={THREE.BackSide}
+          />
+        </mesh>
+      )}
+    </group>
   );
 }

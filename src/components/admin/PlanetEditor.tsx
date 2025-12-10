@@ -19,6 +19,7 @@ import { Planet, Moon } from '@/lib/universe/types';
 import { generateId } from '@/lib/universe/mutate';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { CELESTIAL_THEME_PRESETS, validateHexColor, clampGlowIntensity, clampRotationSpeed } from '@/lib/universe/visual-themes';
 
 interface PlanetEditorProps {
   planet: Planet;
@@ -29,7 +30,7 @@ interface PlanetEditorProps {
 export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditorProps) {
   const [originalPlanetId] = useState(planet.id || '');
   const [localPlanet, setLocalPlanet] = useState(planet);
-  const [activeTab, setActiveTab] = useState<'info' | 'content' | 'moons' | 'layout'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'content' | 'moons' | 'layout' | 'visuals'>('info');
   const [editingMoon, setEditingMoon] = useState<number | null>(null);
 
   const handleChange = (field: keyof Planet, value: unknown) => {
@@ -116,6 +117,12 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
           className={`btn btn-small ${activeTab === 'layout' ? '' : 'btn-secondary'}`}
         >
           Layout
+        </button>
+        <button
+          onClick={() => setActiveTab('visuals')}
+          className={`btn btn-small ${activeTab === 'visuals' ? '' : 'btn-secondary'}`}
+        >
+          Visuals
         </button>
       </div>
 
@@ -373,6 +380,224 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
             </button>
             <span className="form-hint" style={{ display: 'block', marginTop: '0.5rem' }}>
               Removes all custom layout settings and uses the default configuration.
+            </span>
+          </div>
+        </>
+      )}
+
+      {activeTab === 'visuals' && (
+        <>
+          <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'rgba(74, 144, 226, 0.1)', borderRadius: '4px', border: '1px solid rgba(74, 144, 226, 0.3)' }}>
+            <h4 style={{ marginTop: 0, marginBottom: '0.5rem', color: '#4A90E2' }}>Visual Theme Configuration</h4>
+            <p style={{ margin: 0, fontSize: '0.9rem', color: '#AAAAAA' }}>
+              Customize the planet&apos;s appearance with theme presets, glow effects, and rotation settings.
+              All values are optional and will fallback to theme-based defaults.
+            </p>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Theme Preset
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Quick preset selection for common planet types
+              </span>
+            </label>
+            <select
+              value={localPlanet.visualTheme?.preset || ''}
+              onChange={(e) => {
+                const presetName = e.target.value || undefined;
+                const preset = presetName ? CELESTIAL_THEME_PRESETS[presetName] : undefined;
+                
+                // Apply preset values when selected
+                if (preset) {
+                  handleChange('visualTheme', {
+                    preset: presetName,
+                    glowColor: preset.glowColor,
+                    glowIntensity: preset.glowIntensity,
+                    rotationSpeed: preset.rotationSpeed,
+                    // Preserve any existing texture URLs
+                    diffuseTexture: localPlanet.visualTheme?.diffuseTexture,
+                    normalTexture: localPlanet.visualTheme?.normalTexture,
+                    specularTexture: localPlanet.visualTheme?.specularTexture,
+                  });
+                } else {
+                  handleChange('visualTheme', {
+                    ...(localPlanet.visualTheme || {}),
+                    preset: undefined,
+                  });
+                }
+              }}
+            >
+              <option value="">Default (from base theme)</option>
+              <option value="rocky">Rocky</option>
+              <option value="gasGiant">Gas Giant</option>
+              <option value="icy">Icy</option>
+              <option value="volcanic">Volcanic</option>
+              <option value="earth-like">Earth-like</option>
+              <option value="blue-green">Blue-Green</option>
+              <option value="red">Red</option>
+              <option value="desert">Desert</option>
+            </select>
+            <span className="form-hint">
+              Presets provide sensible defaults for glow color, intensity, and rotation speed
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Glow Color
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Hex color for theme-colored border/glow effect
+              </span>
+            </label>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <input
+                type="color"
+                value={localPlanet.visualTheme?.glowColor || '#CCCCCC'}
+                onChange={(e) => {
+                  const validColor = validateHexColor(e.target.value, '#CCCCCC');
+                  handleChange('visualTheme', {
+                    ...(localPlanet.visualTheme || {}),
+                    glowColor: validColor,
+                  });
+                }}
+                style={{ width: '60px', height: '40px', cursor: 'pointer', border: '2px solid var(--admin-border)', borderRadius: '4px' }}
+              />
+              <input
+                type="text"
+                value={localPlanet.visualTheme?.glowColor || ''}
+                onChange={(e) => {
+                  const validColor = validateHexColor(e.target.value, localPlanet.visualTheme?.glowColor || '#CCCCCC');
+                  handleChange('visualTheme', {
+                    ...(localPlanet.visualTheme || {}),
+                    glowColor: validColor,
+                  });
+                }}
+                placeholder="#CCCCCC"
+                style={{ flex: 1 }}
+              />
+            </div>
+            <span className="form-hint">
+              Leave empty to use color from theme preset. Changes apply to planet glow effect.
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Glow Intensity
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Current: {((localPlanet.visualTheme?.glowIntensity ?? 0.3) * 100).toFixed(0)}%
+              </span>
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={localPlanet.visualTheme?.glowIntensity ?? 0.3}
+              onChange={(e) => {
+                const value = clampGlowIntensity(parseFloat(e.target.value));
+                handleChange('visualTheme', {
+                  ...(localPlanet.visualTheme || {}),
+                  glowIntensity: value,
+                });
+              }}
+              style={{ width: '100%' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#888' }}>
+              <span>No glow (0%)</span>
+              <span>Maximum glow (100%)</span>
+            </div>
+            <span className="form-hint">
+              Controls the prominence of the planet&apos;s atmospheric glow effect
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Rotation Speed
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Current: {(localPlanet.visualTheme?.rotationSpeed ?? 1.0).toFixed(1)}x
+              </span>
+            </label>
+            <input
+              type="range"
+              min="0.1"
+              max="3.0"
+              step="0.1"
+              value={localPlanet.visualTheme?.rotationSpeed ?? 1.0}
+              onChange={(e) => {
+                const value = clampRotationSpeed(parseFloat(e.target.value));
+                handleChange('visualTheme', {
+                  ...(localPlanet.visualTheme || {}),
+                  rotationSpeed: value,
+                });
+              }}
+              style={{ width: '100%' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#888' }}>
+              <span>Slow (0.1x)</span>
+              <span>Normal (1x)</span>
+              <span>Fast (3x)</span>
+            </div>
+            <span className="form-hint">
+              Multiplier for planet rotation speed. Gas giants typically rotate faster.
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Diffuse Texture URL (Optional)
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Advanced: Surface texture
+              </span>
+            </label>
+            <input
+              type="text"
+              value={localPlanet.visualTheme?.diffuseTexture || ''}
+              onChange={(e) => handleChange('visualTheme', {
+                ...(localPlanet.visualTheme || {}),
+                diffuseTexture: e.target.value,
+              })}
+              placeholder="/universe/assets/earth-texture.jpg"
+            />
+            <span className="form-hint">
+              URL or path to surface texture. Leave empty for solid color rendering.
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label>
+              Normal Map URL (Optional)
+              <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                Advanced: Surface detail
+              </span>
+            </label>
+            <input
+              type="text"
+              value={localPlanet.visualTheme?.normalTexture || ''}
+              onChange={(e) => handleChange('visualTheme', {
+                ...(localPlanet.visualTheme || {}),
+                normalTexture: e.target.value,
+              })}
+              placeholder="/universe/assets/earth-normal.jpg"
+            />
+            <span className="form-hint">
+              Normal map for surface detail. Enhances visual depth without geometry complexity.
+            </span>
+          </div>
+
+          <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(255, 200, 0, 0.1)', borderRadius: '4px', border: '1px solid rgba(255, 200, 0, 0.3)' }}>
+            <h4 style={{ marginTop: 0, marginBottom: '0.5rem', color: '#FFC800' }}>Reset to Defaults</h4>
+            <button
+              onClick={() => handleChange('visualTheme', undefined)}
+              className="btn btn-secondary"
+              style={{ marginTop: '0.5rem' }}
+            >
+              Clear Visual Theme
+            </button>
+            <span className="form-hint" style={{ display: 'block', marginTop: '0.5rem' }}>
+              Removes all custom visual settings and uses theme-based defaults.
             </span>
           </div>
         </>

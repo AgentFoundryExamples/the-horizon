@@ -27,6 +27,7 @@ import { useNavigationStore } from '@/lib/store';
 import MarkdownContent from './MarkdownContent';
 import { calculateMoonSize } from '@/lib/universe/scale-constants';
 import { normalizePlanetLayout, layoutConfigToCSS } from '@/lib/universe/planet-layout';
+import { resolveCelestialTheme } from '@/lib/universe/visual-themes';
 
 /**
  * Validate and sanitize URL to prevent XSS and malicious URLs
@@ -73,7 +74,13 @@ const MOON_ORBITAL_SPEED = 0.3; // Orbital speed (radians/second)
  */
 function MoonSphere({ moon, index, onClick }: { moon: Moon; index: number; onClick: () => void }) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const glowRef = useRef<THREE.Mesh>(null);
   const moonSize = calculateMoonSize();
+  
+  // Resolve moon visual theme (moons can have their own themes or inherit defaults)
+  const visualTheme = useMemo(() => {
+    return resolveCelestialTheme(moon.visualTheme, 'icy'); // Default to icy for moons
+  }, [moon.visualTheme]);
 
   useFrame((state) => {
     if (!meshRef.current) return;
@@ -93,13 +100,37 @@ function MoonSphere({ moon, index, onClick }: { moon: Moon; index: number; onCli
     // Vertical oscillation for natural movement
     meshRef.current.position.y = Math.sin(time * 0.3 + index) * MOON_VERTICAL_OSCILLATION;
     meshRef.current.position.z = Math.sin(angle) * radius;
+    
+    // Apply rotation
+    meshRef.current.rotation.y += 0.001 * visualTheme.rotationSpeed;
+    
+    // Sync glow with moon
+    if (glowRef.current) {
+      glowRef.current.position.copy(meshRef.current.position);
+      glowRef.current.rotation.copy(meshRef.current.rotation);
+    }
   });
 
   return (
-    <mesh ref={meshRef} onClick={onClick}>
-      <sphereGeometry args={[moonSize, 16, 16]} />
-      <meshStandardMaterial color="#AAAAAA" />
-    </mesh>
+    <group>
+      <mesh ref={meshRef} onClick={onClick}>
+        <sphereGeometry args={[moonSize, 16, 16]} />
+        <meshStandardMaterial color={visualTheme.glowColor} />
+      </mesh>
+      
+      {/* Glow effect for moon */}
+      {visualTheme.glowIntensity > 0 && (
+        <mesh ref={glowRef}>
+          <sphereGeometry args={[moonSize * 1.05, 16, 16]} />
+          <meshBasicMaterial
+            color={visualTheme.glowColor}
+            transparent
+            opacity={visualTheme.glowIntensity * 0.3}
+            side={THREE.BackSide}
+          />
+        </mesh>
+      )}
+    </group>
   );
 }
 
@@ -109,11 +140,17 @@ function MoonSphere({ moon, index, onClick }: { moon: Moon; index: number; onCli
 export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurfaceProps) {
   const { navigateToMoon } = useNavigationStore();
   const planetRef = useRef<THREE.Mesh>(null);
+  const glowRef = useRef<THREE.Mesh>(null);
 
   // Get layout configuration for this planet
   const layoutConfig = useMemo(() => {
     return normalizePlanetLayout(planet.layoutConfig);
   }, [planet.layoutConfig]);
+  
+  // Resolve planet visual theme
+  const visualTheme = useMemo(() => {
+    return resolveCelestialTheme(planet.visualTheme, planet.theme);
+  }, [planet.visualTheme, planet.theme]);
 
   // Apply scale to planet mesh only when it changes (not in useFrame)
   useEffect(() => {
@@ -125,8 +162,13 @@ export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurface
 
   useFrame(() => {
     if (planetRef.current) {
-      // Gentle rotation (scale is handled in useEffect above)
-      planetRef.current.rotation.y += 0.001;
+      // Rotation with configurable speed
+      planetRef.current.rotation.y += 0.001 * visualTheme.rotationSpeed;
+      
+      // Sync glow
+      if (glowRef.current) {
+        glowRef.current.rotation.copy(planetRef.current.rotation);
+      }
     }
   });
 
@@ -136,17 +178,22 @@ export function PlanetSurface3D({ planet, solarSystem, position }: PlanetSurface
       <mesh ref={planetRef}>
         <sphereGeometry args={[1.2, 32, 32]} />
         <meshStandardMaterial
-          color={
-            planet.theme === 'blue-green'
-              ? '#2E86AB'
-              : planet.theme === 'red'
-              ? '#E63946'
-              : planet.theme === 'earth-like'
-              ? '#4A90E2'
-              : '#CCCCCC'
-          }
+          color={visualTheme.glowColor}
         />
       </mesh>
+      
+      {/* Glow effect for planet */}
+      {visualTheme.glowIntensity > 0 && (
+        <mesh ref={glowRef}>
+          <sphereGeometry args={[1.2 * 1.05, 32, 32]} />
+          <meshBasicMaterial
+            color={visualTheme.glowColor}
+            transparent
+            opacity={visualTheme.glowIntensity * 0.3}
+            side={THREE.BackSide}
+          />
+        </mesh>
+      )}
 
       {/* Ambient lighting for planet */}
       <ambientLight intensity={0.4} />
