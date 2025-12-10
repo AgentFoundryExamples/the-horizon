@@ -55,7 +55,7 @@ Despite dark-only mode, accessibility features remain robust:
 **Technical Details:**
 - No new environment variables required
 - No migration steps needed
-- All 926 tests passing (900 passing, 26 pre-existing crypto failures)
+- 900 of 926 total tests passing (26 pre-existing crypto failures unrelated to this release)
 - Compatible with all v0.1.x releases
 - Zero performance or bundle size impact
 

@@ -90,7 +90,7 @@ For users upgrading from earlier versions:
 ### Technical Details
 - No new environment variables required
 - No migration steps needed
-- All 926 tests passing (900 passing, 26 pre-existing crypto failures)
+- 900 of 926 total tests passing (26 pre-existing crypto failures unrelated to this release)
 - Compatible with all v0.1.x releases
 - Build verified with no breaking changes
 - Zero impact on performance, bundle size, or runtime behavior
