@@ -7,7 +7,23 @@
       "theme": "purple-white",
       "particleColor": "#0bb2ea",
       "stars": [],
-      "solarSystems": []
+      "solarSystems": [
+        {
+          "id": "starting-out",
+          "name": "Starting Out",
+          "theme": "blue-giant",
+          "mainStar": {
+            "id": "first-posts",
+            "name": "First Posts",
+            "theme": "blue-giant",
+            "haloConfig": {
+              "haloIntensity": 30,
+              "haloRadius": 1.3
+            }
+          },
+          "planets": []
+        }
+      ]
     },
     {
       "id": "projects",
@@ -24,10 +40,10 @@
           "mainStar": {
             "id": "forge-star",
             "name": "Forge Star",
-            "theme": "red-giant",
+            "theme": "red-dwarf",
             "haloConfig": {
               "color": "#d70909",
-              "haloRadius": 1.1,
+              "haloRadius": 1.2,
               "haloIntensity": 60
             }
           },
@@ -111,7 +127,28 @@
             "name": "The Origin",
             "theme": "orange-dwarf"
           },
-          "planets": []
+          "planets": [
+            {
+              "id": "who-am-i",
+              "name": "Who Am I",
+              "theme": "Icy",
+              "summary": "A little bit more about me.",
+              "contentMarkdown": "# Hello\n\nMy name is John Brosnihan, this is a little bit more about me.\n\n## My story\n\nI grew up in Massachusetts and when I was 13 my family moved to Austin, Texas. Thats where I've lived since, besides a brief stretch when I went to college at Stevens Institute of Technology in Hoboken, New Jersey. My degree is a B.S. in Computer Science with minors in Math and Electrical Engineering. I love technology and the power it unlocks from inside our homes, the ability it has to connect the world and power our daily lives is truly incredible. Besides that I love space(if you can't tell from the site theme) the feeling of looking up and just imagining what else is out there is one of my favorite things in the world. Something about it makes you feel so small yet so appreciative for what we have it's incredible.",
+              "moons": [
+                {
+                  "id": "appreciation",
+                  "name": "Appreciation",
+                  "contentMarkdown": "# A few notes of appreciation\n\nI would like to just use this space to acknowledge the people in my life that make everything possible for me.\n\n1. My family for being consistently supportive of me in everything I do.\n2. My friends for keeping my life interesting, I truly never know whats coming next."
+                }
+              ],
+              "visualTheme": {
+                "preset": "icy",
+                "glowColor": "#B0E0E6",
+                "glowIntensity": 0.3,
+                "rotationSpeed": 0.6
+              }
+            }
+          ]
         }
       ]
     }
