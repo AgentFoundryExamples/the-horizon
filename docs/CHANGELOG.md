@@ -110,7 +110,7 @@ For users upgrading from earlier versions:
 6. **CSS Inspection**: Search all CSS files for "light" - only accessibility queries remain
 7. **Palette Check**: Verify `DARK_PALETTE` is immutable and cannot be modified at runtime
 
-See [docs/roadmap.md](roadmap.md#enforced-dark-mode-v0110) for implementation status and future plans.
+See [docs/roadmap.md](roadmap.md#current-release-v0110-december-2025) for implementation status and future plans.
 See [README.md](../README.md#dark-mode-experience) for user-facing dark mode documentation.
 
 ---
