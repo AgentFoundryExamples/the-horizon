@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { useNavigationStore } from '@/lib/store';
 import { useHoverStore } from '@/lib/hover-store';
+import { DARK_PALETTE } from '@/lib/dark-palette';
 import type { Galaxy } from '@/lib/universe/types';
 import type { FocusLevel } from '@/lib/store';
 
@@ -74,7 +75,7 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
       border: 'none',
       padding: '0.25rem 0.5rem',
       margin: '-0.25rem -0.5rem',
-      color: isActive ? '#FFFFFF' : (isHovered ? '#FFFFFF' : '#CCCCCC'),
+      color: isActive ? DARK_PALETTE.text.primary : (isHovered ? DARK_PALETTE.text.primary : DARK_PALETTE.text.secondary),
       fontWeight: isActive ? ('bold' as const) : ('normal' as const),
       fontSize: '0.9rem',
       cursor: isDisabled ? 'default' : 'pointer',
@@ -83,7 +84,7 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
       borderRadius: '4px',
       transition: 'all 0.2s',
       opacity: isTransitioning ? 0.5 : 1,
-      outline: isFocused && !isActive ? '2px solid #4A90E2' : 'none',
+      outline: isFocused && !isActive ? `2px solid ${DARK_PALETTE.accent.primary}` : 'none',
       outlineOffset: isFocused && !isActive ? '2px' : '0',
     };
   };
@@ -126,7 +127,7 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
           alignItems: 'center',
           gap: '0.5rem',
           fontSize: '0.9rem',
-          color: '#CCCCCC',
+          color: DARK_PALETTE.text.secondary,
         }}
       >
         {/* Universe breadcrumb - always clickable unless at universe level */}
@@ -193,7 +194,7 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
             {/* Planet breadcrumb - currently active, not clickable */}
             <span 
               style={{ 
-                color: '#FFFFFF', 
+                color: DARK_PALETTE.text.primary, 
                 fontWeight: 'bold',
                 padding: '0.25rem 0.5rem',
               }}
@@ -213,8 +214,8 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
             disabled={isTransitioning}
             style={{
               padding: '0.5rem 1rem',
-              backgroundColor: isTransitioning ? '#444444' : '#4A90E2',
-              color: '#FFFFFF',
+              backgroundColor: isTransitioning ? DARK_PALETTE.border.primary : DARK_PALETTE.accent.primary,
+              color: DARK_PALETTE.text.primary,
               border: 'none',
               borderRadius: '4px',
               cursor: isTransitioning ? 'not-allowed' : 'pointer',
@@ -225,12 +226,12 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
             }}
             onMouseEnter={(e) => {
               if (!isTransitioning) {
-                e.currentTarget.style.backgroundColor = '#357ABD';
+                e.currentTarget.style.backgroundColor = DARK_PALETTE.accent.active;
               }
             }}
             onMouseLeave={(e) => {
               if (!isTransitioning) {
-                e.currentTarget.style.backgroundColor = '#4A90E2';
+                e.currentTarget.style.backgroundColor = DARK_PALETTE.accent.primary;
               }
             }}
           >
@@ -243,8 +244,8 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
           onClick={toggleLabelsVisibility}
           style={{
             padding: '0.5rem 1rem',
-            backgroundColor: labelsVisible ? '#4A90E2' : '#666666',
-            color: '#FFFFFF',
+            backgroundColor: labelsVisible ? DARK_PALETTE.accent.primary : '#666666',
+            color: DARK_PALETTE.text.primary,
             border: 'none',
             borderRadius: '4px',
             cursor: 'pointer',
@@ -253,10 +254,10 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
             transition: 'all 0.3s',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = labelsVisible ? '#357ABD' : '#555555';
+            e.currentTarget.style.backgroundColor = labelsVisible ? DARK_PALETTE.accent.active : '#555555';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = labelsVisible ? '#4A90E2' : '#666666';
+            e.currentTarget.style.backgroundColor = labelsVisible ? DARK_PALETTE.accent.primary : '#666666';
           }}
           title={labelsVisible ? 'Hide hover labels' : 'Show hover labels'}
           aria-label={labelsVisible ? 'Hide hover labels' : 'Show hover labels'}
@@ -280,11 +281,11 @@ export default function SceneHUD({ galaxies }: SceneHUDProps) {
             left: '50%',
             transform: 'translate(-50%, -50%)',
             padding: '1.5rem 2.5rem',
-            backgroundColor: 'rgba(0, 0, 0, 0.85)',
-            border: '2px solid rgba(74, 144, 226, 0.6)',
+            backgroundColor: DARK_PALETTE.background.tertiary,
+            border: `2px solid ${DARK_PALETTE.accent.transparent60}`,
             borderRadius: '12px',
             fontSize: '1.2rem',
-            color: '#FFFFFF',
+            color: DARK_PALETTE.text.primary,
             fontWeight: '500',
             letterSpacing: '0.05em',
             textAlign: 'center',
