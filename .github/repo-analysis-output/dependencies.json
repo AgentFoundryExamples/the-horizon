@@ -87,7 +87,6 @@
           "@/lib/crypto",
           "@/lib/github",
           "@/lib/universe/mutate",
-          "@/lib/universe/persist",
           "next/server"
         ]
       }

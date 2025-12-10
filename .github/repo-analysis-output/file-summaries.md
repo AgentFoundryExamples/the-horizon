@@ -65,8 +65,8 @@ Total files: 55
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 18.26 KB  
-**LOC:** 375  
+**Size:** 11.83 KB  
+**LOC:** 247  
 **TODOs/FIXMEs:** 0  
 
 ## src/components/shared/__tests__/planetary-system.test.ts
@@ -299,8 +299,8 @@ Total files: 55
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 12.59 KB  
-**LOC:** 281  
+**Size:** 12.94 KB  
+**LOC:** 288  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/__tests__/data-service.test.ts
@@ -452,8 +452,8 @@ Total files: 55
 **Role:** implementation  
 **Role Justification:** general implementation file (default classification)  
 **Summary:** TypeScript core implementation  
-**Size:** 5.14 KB  
-**LOC:** 96  
+**Size:** 5.45 KB  
+**LOC:** 103  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/universe/planet-layout.ts
