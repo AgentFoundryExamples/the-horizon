@@ -1547,6 +1547,201 @@ External links provide references to related resources:
 - Limit to 3-5 links per planet to avoid overwhelming readers
 - Choose authoritative, reliable sources
 
+### Managing Links in the Admin UI
+
+The admin interface provides a dedicated "Links" tab in the Planet Editor for managing external links. This workflow allows you to add, edit, reorder, and delete links without manual JSON editing.
+
+#### Accessing the Link Editor
+
+1. Navigate to `/admin` and log in
+2. Browse to the galaxy and solar system containing your planet
+3. Click "Edit Planet" to open the Planet Editor
+4. Click the "Links" tab (shows count of current links)
+
+#### Adding a New Link
+
+1. Click the "+ Add Link" button at the bottom
+2. A new link appears with default values:
+   - Title: "New Link"
+   - URL: "https://example.com"
+   - Description: (empty)
+3. Click "Edit" to expand the link editor
+4. Fill in the required fields:
+   - **Title** (required): Short descriptive name
+   - **URL** (required): Full URL with http:// or https://
+   - **Description** (optional): Brief context about the resource
+5. Preview shows how the link will appear on the planet page
+6. Click "Collapse" when done editing
+
+#### Editing Existing Links
+
+1. Find the link you want to edit in the list
+2. Click "Edit" to expand the editor
+3. Modify any field (title, URL, description)
+4. Changes are automatically validated in real-time
+5. Click "Collapse" or edit another link to finish
+
+#### Reordering Links
+
+Links appear in the order they're defined. To change the order:
+
+1. Use the ↑ (up arrow) button to move a link up
+2. Use the ↓ (down arrow) button to move a link down
+3. The first link cannot move up, and the last cannot move down
+4. Order changes are reflected immediately in the list
+
+#### Deleting Links
+
+1. Find the link you want to remove
+2. Click "Delete" (red button)
+3. Confirm the deletion in the popup dialog
+4. The link is removed immediately
+
+#### Link Validation
+
+The editor performs real-time validation:
+
+**Title Validation:**
+- Required field (cannot be empty)
+- Red border appears if title is missing
+- Error message: "Title is required"
+
+**URL Validation:**
+- Required field (cannot be empty)
+- Must be a valid URL format
+- Must use http:// or https:// protocol
+- Error messages:
+  - "URL is required" (if empty)
+  - "Invalid URL format" (if malformed)
+  - "URL must use http or https protocol" (if using ftp://, etc.)
+
+**Duplicate Detection:**
+- URLs are compared case-insensitively
+- Duplicate URLs show a ⚠ warning icon
+- Error message: "This URL is already used in another link"
+- You cannot save with duplicate URLs
+
+**Visual Error Indicators:**
+- Red border around invalid fields
+- ⚠ icon next to link title if there are errors
+- "(Duplicate)" label on duplicate URLs
+- Inline error messages below problematic fields
+
+#### Saving Link Changes
+
+After editing links:
+
+1. Click "Save Changes" to close the Planet Editor
+2. Click "💾 Save to Disk" to persist changes locally
+3. Click "🔀 Commit to GitHub" to publish changes
+
+Your link edits are included in the planet data and saved with all other planet changes.
+
+#### Empty State
+
+If a planet has no links:
+- A helpful empty state message appears
+- Prompt: "Add external links to provide references and related resources for this planet"
+- Click "+ Add Link" to create your first link
+
+#### Link Preview
+
+Each link editor includes a preview section showing how the link will appear:
+- **Bold title** at the top
+- **Clickable URL** in blue with underline
+- **Description** (if provided) in muted gray text
+- Opens in a new tab when clicked (for testing)
+
+#### Best Practices for Link Management
+
+**Choosing Links:**
+- Prioritize authoritative sources (NASA, ESA, scientific institutions)
+- Include primary sources of information
+- Add mission pages, image galleries, or data repositories
+- Avoid commercial or promotional links
+
+**Writing Titles:**
+- Use official names: "NASA Mars Exploration" not "Mars stuff"
+- Keep it short: 3-6 words ideal
+- Be descriptive: "Hubble Space Telescope Images" not just "Images"
+- Avoid special characters or emojis
+
+**Writing Descriptions:**
+- One sentence is sufficient
+- Explain what the link provides
+- Good: "High-resolution satellite imagery and scientific data"
+- Avoid: "Click here to see cool stuff"
+
+**URL Management:**
+- Always use HTTPS when available (more secure)
+- Use permanent links, not temporary pages
+- Avoid URL shorteners (bit.ly, etc.)
+- Test URLs before saving to ensure they work
+
+**Organization:**
+- Order links by importance (most relevant first)
+- Group related links together
+- Place official sources before community resources
+- Keep the total count to 3-5 for readability
+
+#### Troubleshooting
+
+**"This URL is already used in another link":**
+- Check if you accidentally added the same URL twice
+- URLs are compared case-insensitively (https://NASA.gov = https://nasa.gov)
+- Remove the duplicate or change one URL
+- You cannot save until duplicates are resolved
+
+**"URL must use http or https protocol":**
+- Make sure URL starts with http:// or https://
+- FTP, mailto, tel, and other protocols are not allowed
+- Add the protocol if missing: use "https://example.com" not "example.com"
+
+**"Invalid URL format":**
+- Check for typos in the URL
+- Ensure proper formatting: scheme://domain.tld/path
+- Common mistakes: missing "https://", extra spaces, special characters
+
+**Preview link doesn't work:**
+- URL validation may not catch all invalid URLs
+- Test the URL in your browser separately
+- Some sites may block embedding (this doesn't affect the published link)
+- The preview opens in a new tab for testing
+
+**Changes not appearing on the planet page:**
+- Make sure you clicked "Save Changes" in the Planet Editor
+- Click "💾 Save to Disk" to persist changes locally
+- Click "🔀 Commit to GitHub" to publish changes
+- Refresh your browser after committing
+
+#### Example Workflow
+
+Complete workflow for adding links to Earth:
+
+```
+1. Navigate to /admin → Login
+2. Browse to Milky Way → Sol System
+3. Click "Edit Planet" on Earth
+4. Click "Links" tab
+5. Click "+ Add Link"
+6. Click "Edit" on the new link
+7. Fill in:
+   - Title: "NASA Earth Observatory"
+   - URL: "https://earthobservatory.nasa.gov/"
+   - Description: "Satellite imagery and scientific data about Earth"
+8. Click "Collapse"
+9. Click "+ Add Link" again
+10. Fill in second link:
+    - Title: "Blue Marble Photos"
+    - URL: "https://visibleearth.nasa.gov/collection/1484/blue-marble"
+    - Description: "Famous photographs of Earth from space"
+11. Use ↑↓ arrows to reorder if needed
+12. Click "Save Changes"
+13. Click "💾 Save to Disk"
+14. Click "🔀 Commit to GitHub"
+15. View the planet page to see your links
+```
+
 ## Styling Guidelines
 
 ### Blog-Quality Typography

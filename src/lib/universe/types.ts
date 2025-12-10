@@ -278,6 +278,61 @@ export function validateMoon(moon: Moon, context: string): ValidationResult {
 }
 
 /**
+ * Validates an external link object
+ */
+export function validateExternalLink(link: ExternalLink, context: string): ValidationResult {
+  const errors: string[] = [];
+  
+  // Trim and validate title
+  const trimmedTitle = link.title?.trim();
+  if (!trimmedTitle || trimmedTitle.length === 0) {
+    errors.push(`${context}: Link title is required`);
+  }
+  
+  // Trim and validate URL
+  const trimmedUrl = link.url?.trim();
+  if (!trimmedUrl || trimmedUrl.length === 0) {
+    errors.push(`${context}: Link URL is required`);
+  } else {
+    // Validate URL format and protocol
+    try {
+      const url = new URL(trimmedUrl);
+      if (!['http:', 'https:'].includes(url.protocol)) {
+        errors.push(`${context}: Link URL must use http or https protocol`);
+      }
+    } catch (error: unknown) {
+      errors.push(`${context}: Link URL is not a valid URL`);
+    }
+  }
+  
+  return { valid: errors.length === 0, errors };
+}
+
+/**
+ * Checks for duplicate URLs in a list of external links
+ * Skips validation for empty URLs to avoid false positives
+ */
+export function checkDuplicateLinks(links: ExternalLink[], context: string): string[] {
+  const errors: string[] = [];
+  const seenUrls = new Map<string, number>();
+  
+  links.forEach((link, index) => {
+    const normalizedUrl = link.url?.trim().toLowerCase();
+    // Only check for duplicates if URL is not empty
+    if (normalizedUrl && normalizedUrl.length > 0) {
+      const firstIndex = seenUrls.get(normalizedUrl);
+      if (firstIndex !== undefined) {
+        errors.push(`${context}: Duplicate URL at index ${index}: "${link.url}" (first seen at index ${firstIndex})`);
+      } else {
+        seenUrls.set(normalizedUrl, index);
+      }
+    }
+  });
+  
+  return errors;
+}
+
+/**
  * Validates a Planet object
  */
 export function validatePlanet(planet: Planet, context: string): ValidationResult {
@@ -306,6 +361,17 @@ export function validatePlanet(planet: Planet, context: string): ValidationResul
       const moonValidation = validateMoon(moon, `${context} > Moon[${index}] (${moon.name || 'unnamed'})`);
       errors.push(...moonValidation.errors);
     });
+  }
+  
+  // Validate external links if present
+  if (planet.externalLinks && planet.externalLinks.length > 0) {
+    planet.externalLinks.forEach((link, index) => {
+      const linkValidation = validateExternalLink(link, `${context} > Link[${index}]`);
+      errors.push(...linkValidation.errors);
+    });
+    
+    // Check for duplicate URLs
+    errors.push(...checkDuplicateLinks(planet.externalLinks, context));
   }
   
   return { valid: errors.length === 0, errors };

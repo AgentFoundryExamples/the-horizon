@@ -15,7 +15,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Planet, Moon } from '@/lib/universe/types';
+import { Planet, Moon, ExternalLink } from '@/lib/universe/types';
 import { generateId } from '@/lib/universe/mutate';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -30,8 +30,9 @@ interface PlanetEditorProps {
 export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditorProps) {
   const [originalPlanetId] = useState(planet.id || '');
   const [localPlanet, setLocalPlanet] = useState(planet);
-  const [activeTab, setActiveTab] = useState<'info' | 'content' | 'moons' | 'layout' | 'visuals'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'content' | 'moons' | 'links' | 'layout' | 'visuals'>('info');
   const [editingMoon, setEditingMoon] = useState<number | null>(null);
+  const [editingLink, setEditingLink] = useState<number | null>(null);
 
   const handleChange = (field: keyof Planet, value: unknown) => {
     const updated = { ...localPlanet, [field]: value };
@@ -83,6 +84,105 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
     }
   };
 
+  // Link management functions
+  const handleAddLink = () => {
+    // Generate a unique default URL to avoid immediate duplicate detection
+    const timestamp = Date.now();
+    const newLink: ExternalLink = {
+      title: 'New Link',
+      url: `https://example.com/link-${timestamp}`,
+      description: '',
+    };
+
+    const updated = {
+      ...localPlanet,
+      externalLinks: [...(localPlanet.externalLinks || []), newLink],
+    };
+    setLocalPlanet(updated);
+    setEditingLink((localPlanet.externalLinks || []).length);
+  };
+
+  const handleUpdateLink = (index: number, field: keyof ExternalLink, value: string) => {
+    const updated = {
+      ...localPlanet,
+      externalLinks: (localPlanet.externalLinks || []).map((link, i) =>
+        i === index ? { ...link, [field]: value } : link
+      ),
+    };
+    setLocalPlanet(updated);
+  };
+
+  const handleDeleteLink = (index: number) => {
+    if (!confirm('Are you sure you want to delete this link?')) {
+      return;
+    }
+
+    const updated = {
+      ...localPlanet,
+      externalLinks: (localPlanet.externalLinks || []).filter((_, i) => i !== index),
+    };
+    setLocalPlanet(updated);
+    
+    if (editingLink === index) {
+      setEditingLink(null);
+    }
+  };
+
+  const handleMoveLink = (index: number, direction: 'up' | 'down') => {
+    const links = [...(localPlanet.externalLinks || [])];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    if (newIndex < 0 || newIndex >= links.length) {
+      return;
+    }
+
+    [links[index], links[newIndex]] = [links[newIndex], links[index]];
+    
+    // Use callback form of setState to avoid race conditions
+    setLocalPlanet(prev => ({
+      ...prev,
+      externalLinks: links,
+    }));
+
+    // Update editing index using callback form to ensure correct state
+    setEditingLink(currentEditingLink => {
+      if (currentEditingLink === index) {
+        return newIndex;
+      } else if (currentEditingLink === newIndex) {
+        return index;
+      }
+      return currentEditingLink;
+    });
+  };
+
+  // URL validation helper
+  const validateLinkUrl = (url: string): string | null => {
+    if (!url || url.trim().length === 0) {
+      return 'URL is required';
+    }
+
+    try {
+      const urlObj = new URL(url);
+      if (!['http:', 'https:'].includes(urlObj.protocol)) {
+        return 'URL must use http or https protocol';
+      }
+      return null;
+    } catch (error: unknown) {
+      return 'Invalid URL format';
+    }
+  };
+
+  // Check for duplicate URLs
+  const isDuplicateUrl = (url: string, currentIndex: number): boolean => {
+    const links = localPlanet.externalLinks || [];
+    const normalizedUrl = url.trim().toLowerCase();
+    
+    return links.some((link, index) => 
+      index !== currentIndex && 
+      link.url.trim().toLowerCase() === normalizedUrl
+    );
+  };
+
   return (
     <div>
       <div className="breadcrumb" style={{ marginBottom: '1.5rem' }}>
@@ -111,6 +211,12 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
           className={`btn btn-small ${activeTab === 'moons' ? '' : 'btn-secondary'}`}
         >
           Moons ({localPlanet.moons?.length || 0})
+        </button>
+        <button
+          onClick={() => setActiveTab('links')}
+          className={`btn btn-small ${activeTab === 'links' ? '' : 'btn-secondary'}`}
+        >
+          Links ({localPlanet.externalLinks?.length || 0})
         </button>
         <button
           onClick={() => setActiveTab('layout')}
@@ -674,6 +780,172 @@ export default function PlanetEditor({ planet, onUpdate, onClose }: PlanetEditor
           </div>
           <button onClick={handleAddMoon} className="btn" style={{ marginTop: '1rem' }}>
             + Add Moon
+          </button>
+        </>
+      )}
+
+      {activeTab === 'links' && (
+        <>
+          <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'rgba(74, 144, 226, 0.1)', borderRadius: '4px', border: '1px solid rgba(74, 144, 226, 0.3)' }}>
+            <h4 style={{ marginTop: 0, marginBottom: '0.5rem', color: '#4A90E2' }}>External Links Management</h4>
+            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--admin-text-muted)' }}>
+              Add, edit, and organize external links for this planet. Links appear in the &quot;Related Resources&quot; section on the planet page.
+              URLs must use http or https protocol and must be unique.
+            </p>
+          </div>
+
+          {(localPlanet.externalLinks || []).length === 0 && (
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--admin-text-muted)', background: 'var(--admin-bg)', borderRadius: '4px', border: '1px dashed var(--admin-border)' }}>
+              <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>No links yet</p>
+              <p style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>Add external links to provide references and related resources for this planet</p>
+            </div>
+          )}
+
+          <div className="entity-list">
+            {(localPlanet.externalLinks || []).map((link, index) => {
+              const urlError = validateLinkUrl(link.url);
+              const isDuplicate = isDuplicateUrl(link.url, index);
+              const hasError = urlError || isDuplicate;
+
+              return (
+                <div key={index}>
+                  <div className="entity-item">
+                    <div className="entity-info">
+                      <h4>
+                        {link.title || 'Untitled Link'}
+                        {hasError && <span style={{ color: 'var(--admin-danger)', marginLeft: '0.5rem', fontSize: '0.9rem' }}>⚠</span>}
+                      </h4>
+                      <p style={{ wordBreak: 'break-all' }}>
+                        {link.url || 'No URL'}
+                        {isDuplicate && <span style={{ color: 'var(--admin-danger)', fontSize: '0.85rem', marginLeft: '0.5rem' }}>(Duplicate)</span>}
+                      </p>
+                    </div>
+                    <div className="entity-actions" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <button
+                        onClick={() => handleMoveLink(index, 'up')}
+                        disabled={index === 0}
+                        className="btn btn-small btn-secondary"
+                        title="Move up"
+                      >
+                        ↑
+                      </button>
+                      <button
+                        onClick={() => handleMoveLink(index, 'down')}
+                        disabled={index === (localPlanet.externalLinks || []).length - 1}
+                        className="btn btn-small btn-secondary"
+                        title="Move down"
+                      >
+                        ↓
+                      </button>
+                      <button
+                        onClick={() => setEditingLink(editingLink === index ? null : index)}
+                        className="btn btn-small btn-secondary"
+                      >
+                        {editingLink === index ? 'Collapse' : 'Edit'}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteLink(index)}
+                        className="btn btn-small btn-danger"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+
+                  {editingLink === index && (
+                    <div style={{ padding: '1rem', background: 'var(--admin-bg)', marginTop: '0.5rem', borderRadius: '4px' }}>
+                      <div className="form-group">
+                        <label>
+                          Link Title *
+                          <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                            Short descriptive title (e.g., &quot;NASA Earth Observatory&quot;)
+                          </span>
+                        </label>
+                        <input
+                          type="text"
+                          value={link.title}
+                          onChange={(e) => handleUpdateLink(index, 'title', e.target.value)}
+                          placeholder="e.g., NASA Earth Observatory"
+                          className={!link.title?.trim() ? 'error' : ''}
+                        />
+                        {!link.title?.trim() && (
+                          <span className="form-hint" style={{ color: 'var(--admin-danger)' }}>
+                            Title is required
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="form-group">
+                        <label>
+                          URL *
+                          <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                            Must use http:// or https:// protocol
+                          </span>
+                        </label>
+                        <input
+                          type="url"
+                          value={link.url}
+                          onChange={(e) => handleUpdateLink(index, 'url', e.target.value)}
+                          placeholder="https://example.com"
+                          className={hasError ? 'error' : ''}
+                        />
+                        {urlError && (
+                          <span className="form-hint" style={{ color: 'var(--admin-danger)' }}>
+                            {urlError}
+                          </span>
+                        )}
+                        {!urlError && isDuplicate && (
+                          <span className="form-hint" style={{ color: 'var(--admin-danger)' }}>
+                            This URL is already used in another link
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="form-group">
+                        <label>
+                          Description (Optional)
+                          <span className="form-hint" style={{ marginLeft: '0.5rem' }}>
+                            Brief context about this resource
+                          </span>
+                        </label>
+                        <textarea
+                          value={link.description || ''}
+                          onChange={(e) => handleUpdateLink(index, 'description', e.target.value)}
+                          rows={2}
+                          placeholder="e.g., Satellite imagery and scientific data about Earth"
+                        />
+                      </div>
+
+                      <div style={{ padding: '0.75rem', background: 'rgba(74, 144, 226, 0.1)', borderRadius: '4px', border: '1px solid rgba(74, 144, 226, 0.3)', marginTop: '1rem' }}>
+                        <h4 style={{ marginTop: 0, marginBottom: '0.5rem', fontSize: '0.9rem', color: '#4A90E2' }}>Preview</h4>
+                        <div style={{ fontSize: '0.9rem' }}>
+                          <strong>{link.title || 'Untitled Link'}</strong>
+                          <br />
+                          <a
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: '#4A90E2', textDecoration: 'underline', wordBreak: 'break-all' }}
+                          >
+                            {link.url || 'No URL'}
+                          </a>
+                          {link.description && (
+                            <>
+                              <br />
+                              <span style={{ color: '#888888' }}>{link.description}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <button onClick={handleAddLink} className="btn" style={{ marginTop: '1rem' }}>
+            + Add Link
           </button>
         </>
       )}

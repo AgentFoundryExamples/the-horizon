@@ -163,6 +163,7 @@ The Horizon includes a password-protected admin interface for editing universe c
 - ⚡ Edge Runtime compatible for serverless deployments
 - ✏️ CRUD operations for galaxies, solar systems, planets, and moons
 - 📝 Built-in markdown editor with live preview
+- 🔗 External link management with validation and duplicate detection
 - 🔄 GitHub integration for automatic commits and pull requests
 - ✅ Real-time validation against the universe schema
 - 🔐 Optimistic locking to prevent concurrent edit conflicts
