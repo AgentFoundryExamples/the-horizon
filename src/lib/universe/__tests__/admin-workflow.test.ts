@@ -13,7 +13,14 @@
 // limitations under the License.
 /**
  * Tests for admin API persistence workflow
- * Ensures GET/PATCH/POST endpoints work correctly without data loss
+ * 
+ * @deprecated These tests cover the legacy two-step save workflow (save-to-disk + commit)
+ * which has been replaced with direct GitHub commits for Vercel compatibility.
+ * 
+ * The persistUniverseToFile function is kept for local development only.
+ * Production admin interface now commits directly to GitHub without disk persistence.
+ * 
+ * Tests remain to ensure the persist function works correctly for local development.
  */
 
 import { persistUniverseToFile } from '../persist';

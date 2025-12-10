@@ -54,11 +54,11 @@ Configure the following environment variables in Vercel:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `NODE_ENV` | Environment mode | `production` |
-| `ADMIN_VERBOSE_LOGGING` | Enable detailed workflow logging for admin operations (useful for debugging GitHub persistence issues). Set to `true` to enable. | `false` (enabled in development) |
+| `ADMIN_VERBOSE_LOGGING` | Enable detailed workflow logging for admin operations (useful for debugging GitHub integration). Set to `true` to enable. | `false` (enabled in development) |
 
 **Note on SESSION_SECRET**: If not provided, the system will fall back to using `ADMIN_PASSWORD` as the session secret (not recommended for production). For better security, always set a separate `SESSION_SECRET`.
 
-**Note on ADMIN_VERBOSE_LOGGING**: When enabled, provides detailed step-by-step logging of the save/commit workflow including SHA fetch operations, file reads, and validation steps. Recommended for troubleshooting GitHub integration issues. Automatically enabled in development mode.
+**Note on ADMIN_VERBOSE_LOGGING**: When enabled, provides detailed step-by-step logging of the commit workflow including SHA fetch operations, validation steps, and GitHub API interactions. Recommended for troubleshooting GitHub integration issues. Automatically enabled in development mode.
 
 #### Staging vs Production Environments
 
@@ -245,91 +245,93 @@ The admin interface includes multiple layers of security protection:
 
 ## How Admin Changes Work
 
-Understanding the two-step workflow helps troubleshoot issues:
+The admin interface commits changes directly to GitHub:
 
-> **Note**: This workflow was restored in v0.1.2 (ISS-4) after critical fixes to the save and commit operations. The workflow was further stabilized in v0.1.5 to always fetch fresh SHA from GitHub immediately before committing, preventing "file has changed" errors. Enhanced verbose logging is available via `ADMIN_VERBOSE_LOGGING=true` environment variable.
+> **Note**: As of v0.2.0, the admin interface commits changes directly to GitHub without intermediate disk persistence. This ensures compatibility with Vercel and other serverless platforms that have read-only filesystems. Enhanced verbose logging is available via `ADMIN_VERBOSE_LOGGING=true` environment variable.
 
 ```mermaid
 graph TD
-    A[Admin Edits in Browser] --> B[Step 1: Save to Disk]
-    B --> C[PATCH /api/admin/universe]
-    C --> D[Validate & Write to universe.json]
-    D --> E{Success?}
-    E -->|No| F[Error: Check Logs]
-    E -->|Yes| G[Changes Saved Locally]
-    G --> H[Step 2: Commit to GitHub]
-    H --> I[Enter Commit Message]
-    I --> J{Create PR?}
-    J -->|Yes| K[POST /api/admin/universe]
-    K --> L[Fetch Fresh SHA from GitHub]
-    L --> M{SHA Conflict?}
-    M -->|Yes| N[Return 409 Conflict with Retry Guidance]
-    M -->|No| O[Create Branch]
-    O --> P[Commit File]
-    P --> Q[Create PR]
-    Q --> R[Manual Review & Merge]
-    R --> S[Vercel Redeploys Automatically]
-    J -->|No| T[POST /api/admin/universe]
-    T --> U[Fetch Fresh SHA from GitHub]
-    U --> V{SHA Conflict?}
-    V -->|Yes| N
-    V -->|No| W[Commit to Main]
-    W --> S
-    S --> X[Changes Live on Site]
-    N --> Y[User: Refresh, Re-apply, Save, Commit]
-    Y --> H
+    A[Admin Edits in Browser] --> B[Enter Commit Message]
+    B --> C{Choose Action}
+    C -->|Commit to Main| D[POST /api/admin/universe]
+    C -->|Create PR| E[POST /api/admin/universe]
+    D --> F[Validate Universe Data]
+    E --> F
+    F --> G{Valid?}
+    G -->|No| H[Return Validation Errors]
+    G -->|Yes| I[Serialize Content]
+    I --> J[Fetch Fresh SHA from GitHub]
+    J --> K{SHA Conflict?}
+    K -->|Yes| L[Return 409 Conflict]
+    K -->|No| M{Create PR?}
+    M -->|Yes| N[Create Branch]
+    N --> O[Commit to Branch]
+    O --> P[Create Pull Request]
+    P --> Q[Manual Review & Merge]
+    M -->|No| R[Commit to Main]
+    R --> S[Vercel Redeploys]
+    Q --> T[Merge PR]
+    T --> S
+    S --> U[Changes Live]
+    L --> V[Refresh & Retry]
+    V --> A
 ```
 
-### Two-Step Save Workflow
+### Direct-to-GitHub Workflow
 
-The admin interface uses a **two-step workflow** for safety and reliability:
+The admin interface commits changes directly to GitHub without intermediate disk persistence:
 
-**Step 1: Save to Disk (PATCH /api/admin/universe)**
+**Commit to Main Branch (POST /api/admin/universe)**
 1. Admin makes changes in the browser
-2. Clicks "💾 Save to Disk"
-3. System validates the universe data
-4. Writes changes to `public/universe/universe.json`
-5. Returns success with new hash for optimistic locking
-6. **Changes are persisted locally but NOT yet in GitHub**
+2. Clicks "✓ Save to GitHub"
+3. Enters a commit message
+4. System validates the universe data
+5. Serializes the content
+6. **Fetches fresh SHA from GitHub** to prevent stale file errors
+7. Checks for conflicts with GitHub HEAD
+8. Commits directly to main branch via GitHub API
+9. Vercel automatically redeploys with new changes
+10. **Changes go live immediately**
 
-**Step 2: Commit to GitHub (POST /api/admin/universe)**
-1. Admin enters a commit message
-2. Chooses to create a PR or commit directly
-3. System reads the saved file from disk
-4. Validates the content again
-5. **Fetches fresh SHA from GitHub** to prevent stale file errors
-6. Checks for conflicts between local content and GitHub HEAD
-7. Pushes to GitHub via API if no conflicts detected
-8. Returns detailed error with retry guidance if conflict occurs
+**Create Pull Request (POST /api/admin/universe)**
+1. Admin makes changes in the browser
+2. Clicks "🔀 Create Pull Request"
+3. Enters a PR message
+4. System validates the universe data
+5. Serializes the content
+6. **Fetches fresh SHA from GitHub**
+7. Creates a new branch (e.g., `admin-edit-1234567890`)
+8. Commits changes to the new branch
+9. Creates a pull request for team review
+10. After PR is merged, Vercel redeploys automatically
 
-**Why Two Steps?**
-- **Safety**: Validate changes before they reach version control
-- **Iteration**: Make multiple edits and save incrementally
-- **Review**: Create PRs for team review before merging
-- **Recovery**: Disk-saved changes persist even if session ends
-- **Testing**: Test changes locally before committing
-- **Reliability**: Always fetch fresh SHA to prevent stale file errors
+**Why This Approach?**
+- **Vercel Compatible**: Works with read-only serverless filesystems
+- **Simpler**: Direct commits without intermediate file writes
+- **Reliable**: Fresh SHA fetched before each commit
+- **Flexible**: Choose between direct commits or PR workflow
+- **Fast**: Changes go live as soon as Vercel redeploys
+- **Safe**: Optimistic locking prevents concurrent edit conflicts
 
 **Conflict Resolution**
-If you get a "Conflict detected" error when committing:
+If you get a "Conflict detected" error:
 1. Someone else committed to GitHub since you loaded the editor
 2. Refresh the admin page to load the latest version
 3. Re-apply your changes to the fresh content
-4. Click "💾 Save to Disk" to persist your changes
-5. Click "Commit to GitHub" again to retry
+4. Click "✓ Save to GitHub" or "🔀 Create Pull Request" to retry
 
 The system automatically prevents stale SHA errors by fetching the latest file metadata from GitHub right before committing.
 
 ### Logging and Debugging
 
-The admin save workflow includes comprehensive logging for troubleshooting:
+The admin commit workflow includes comprehensive logging for troubleshooting:
 
-**Verbose Logging Mode (v0.1.5+)**
+**Verbose Logging Mode**
 
 Enable detailed workflow logging by setting `ADMIN_VERBOSE_LOGGING=true` environment variable. This provides:
 - Step-by-step workflow execution logs with clear separators
 - SHA fetch operations with hash previews for debugging
-- File read operations with byte counts and content validation
+- Content validation with byte counts
 - Detailed GitHub API interaction logs
 - Optimistic lock verification details
 
@@ -338,62 +340,61 @@ Verbose logging is automatically enabled in development mode (`NODE_ENV=developm
 **Standard Server Logs** (visible in server console or deployment logs):
 ```
 [GET /api/admin/universe] Request received - fetching universe data
-[GET /api/admin/universe] Loaded local file, galaxies: 2
-[PATCH /api/admin/universe] Request received - saving to disk
-[PATCH /api/admin/universe] Payload parsed - galaxies: 2
-[PATCH /api/admin/universe] Validating universe data...
-[PATCH /api/admin/universe] Validation passed
-[persistUniverseToFile] Persisting to: public/universe/universe.json
-[persistUniverseToFile] Serialized universe, size: 5578 bytes
-[persistUniverseToFile] Success - file persisted
-[PATCH /api/admin/universe] Success - new hash: a1b2c3d4...
+[GET /api/admin/universe] Loaded from GitHub, hash: a1b2c3d4..., galaxies: 2
 [POST /api/admin/universe] Request received - committing to GitHub
-[POST /api/admin/universe] Reading from file: public/universe/universe.json
-[POST /api/admin/universe] File read successfully, size: 5578 bytes
-[POST /api/admin/universe] GitHub push successful
+[POST /api/admin/universe] Payload parsed - galaxies: 2
+[POST /api/admin/universe] Validating universe data...
+[POST /api/admin/universe] Validation passed
+[POST /api/admin/universe] Serialized, size: 5578 bytes
+[POST /api/admin/universe] Pushing to GitHub...
+[pushUniverseChanges] Starting commit workflow
+[pushUniverseChanges] Fetching current SHA from GitHub...
+[pushUniverseChanges] Direct commit to main branch...
+[pushUniverseChanges] Commit successful to main
+[POST /api/admin/universe] SUCCESS: GitHub push successful
 ```
 
 **Verbose Logs with ADMIN_VERBOSE_LOGGING=true**:
 ```
 [POST /api/admin/universe] ========================================
 [POST /api/admin/universe] Request received - committing to GitHub
-[POST /api/admin/universe] Workflow: Step 2 of 2 (Step 1 was PATCH to save to disk)
-[POST /api/admin/universe] Step 1: Reading from persisted file: public/universe/universe.json
-[POST /api/admin/universe] File read successfully, size: 5578 bytes
-[POST /api/admin/universe] File is authoritative source for commit
-[POST /api/admin/universe] Step 2: Validating persisted data...
+[POST /api/admin/universe] Workflow: Direct commit (no disk persistence)
+[POST /api/admin/universe] Payload: { commitMessage: "Add new galaxy...", createPR: false, galaxies: 2 }
+[POST /api/admin/universe] Step 1: Validating universe data...
 [POST /api/admin/universe] Validation passed
-[POST /api/admin/universe] Step 3: Checking for race conditions...
-[POST /api/admin/universe] No race conditions detected
-[POST /api/admin/universe] Step 4: Pushing to GitHub...
-[POST /api/admin/universe] Note: GitHub layer will fetch fresh SHA to prevent conflicts
+[POST /api/admin/universe] Step 2: Serializing universe data...
+[POST /api/admin/universe] Serialized, size: 5578 bytes
+[POST /api/admin/universe] Step 3: Pushing to GitHub...
+[POST /api/admin/universe] Note: GitHub layer will verify gitBaseHash matches current GitHub HEAD
 [pushUniverseChanges] Starting commit workflow
+[pushUniverseChanges] Content size: 5578 bytes
+[pushUniverseChanges] Create PR: false
 [pushUniverseChanges] Fetching current SHA from GitHub...
 [pushUniverseChanges] Current GitHub SHA: abc12345...
-[pushUniverseChanges] Creating branch and PR workflow...
-[pushUniverseChanges] Branch created successfully
-[pushUniverseChanges] Re-fetching SHA after branch creation...
-[pushUniverseChanges] Fresh SHA after branch creation: abc12345...
-[pushUniverseChanges] Committing to new branch...
-[pushUniverseChanges] Commit successful, SHA: def67890...
-[pushUniverseChanges] Creating pull request...
-[pushUniverseChanges] Pull request created: https://...
+[pushUniverseChanges] Content to commit hash: def67890...
+[pushUniverseChanges] Verifying optimistic lock with gitBaseHash: abc12345...
+[pushUniverseChanges] Current GitHub content hash: abc12345...
+[pushUniverseChanges] Optimistic lock verified - GitHub matches baseline
+[pushUniverseChanges] Content differs from GitHub HEAD - proceeding with commit
+[pushUniverseChanges] Direct commit to main branch...
+[pushUniverseChanges] Re-fetching SHA immediately before commit...
+[pushUniverseChanges] Final SHA before commit: abc12345...
+[pushUniverseChanges] Committing to main...
+[pushUniverseChanges] Commit successful to main
+[pushUniverseChanges] New content hash after commit: def67890...
 [POST /api/admin/universe] SUCCESS: GitHub push successful
 [POST /api/admin/universe] ========================================
 ```
 
 **Log Filtering**: Use grep to filter logs by operation:
 ```bash
-# View all admin save operations
-grep "\[PATCH /api/admin/universe\]" logs.txt
+# View all admin operations
+grep "\[.*admin.*\]" logs.txt
 
-# View all GitHub commit operations
+# View GitHub commit operations
 grep "\[POST /api/admin/universe\]" logs.txt
 
-# View file persistence operations
-grep "\[persistUniverseToFile\]" logs.txt
-
-# View GitHub SHA fetch operations (v0.1.5+)
+# View GitHub API interactions
 grep "\[pushUniverseChanges\]" logs.txt
 
 # View all verbose workflow logs

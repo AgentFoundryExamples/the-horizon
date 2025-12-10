@@ -26,25 +26,23 @@ import InlineNotification from './InlineNotification';
 interface UniverseEditorProps {
   universe: Universe;
   gitBaseHash: string;
-  localDiskHash: string;
-  onUpdate: (universe: Universe, newLocalHash?: string, newGitBaseHash?: string) => void;
+  onUpdate: (universe: Universe, newGitBaseHash?: string) => void;
 }
 
 export default function UniverseEditor({
   universe,
   gitBaseHash,
-  localDiskHash,
   onUpdate,
 }: UniverseEditorProps) {
   const router = useRouter();
   const [editingGalaxy, setEditingGalaxy] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [committing, setCommitting] = useState(false);
+  const [creatingPR, setCreatingPR] = useState(false);
   const [notification, setNotification] = useState<{ type: NotificationType; message: string } | null>(null);
   const [saveNotification, setSaveNotification] = useState<{ type: NotificationType; message: string } | null>(null);
-  const [commitNotification, setCommitNotification] = useState<{ type: NotificationType; message: string } | null>(null);
+  const [prNotification, setPRNotification] = useState<{ type: NotificationType; message: string } | null>(null);
   const [commitMessage, setCommitMessage] = useState('');
-  const [createPR, setCreatePR] = useState(false);
+  const [prMessage, setPRMessage] = useState('');
   const [retrying, setRetrying] = useState(false);
 
   // Stable callbacks for notification close handlers to prevent timer resets
@@ -52,24 +50,31 @@ export default function UniverseEditor({
     setSaveNotification(null);
   }, []);
 
-  const handleCloseCommitNotification = useCallback(() => {
-    setCommitNotification(null);
+  const handleClosePRNotification = useCallback(() => {
+    setPRNotification(null);
   }, []);
 
-  const handleSaveToFile = async () => {
+  const handleSaveToGitHub = async () => {
+    if (!commitMessage.trim()) {
+      setSaveNotification({ type: 'error', message: 'Commit message is required. Please describe your changes.' });
+      return;
+    }
+
     setSaving(true);
     setSaveNotification(null);
     setRetrying(false);
 
     try {
       const response = await fetch('/api/admin/universe', {
-        method: 'PATCH',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           universe,
-          currentHash: localDiskHash,
+          commitMessage,
+          createPR: false, // Direct commit to main branch
+          gitBaseHash,
         }),
       });
 
@@ -78,17 +83,17 @@ export default function UniverseEditor({
       if (response.ok && data.success) {
         setSaveNotification({
           type: 'success',
-          message: 'Changes saved successfully! Your edits are now persisted locally.',
+          message: 'Changes committed to GitHub successfully! Your updates are now live.',
         });
-        // Update local disk hash to the new hash from the server
-        // gitBaseHash remains unchanged - it only updates after commit or refresh
+        setCommitMessage('');
+        // Update gitBaseHash to the new hash from GitHub
         if (data.hash) {
           onUpdate(universe, data.hash);
         }
       } else if (response.status === 409) {
         setSaveNotification({
           type: 'error',
-          message: data.message || 'Conflict detected: The file has been modified. Please refresh, re-apply your changes, save, and then commit again.',
+          message: data.error || data.message || 'Conflict detected: The file was modified in GitHub. Please refresh and try again.',
         });
         setRetrying(true);
       } else if (response.status === 401) {
@@ -96,14 +101,13 @@ export default function UniverseEditor({
           type: 'error',
           message: 'Unauthorized. Please log in again.',
         });
-        // Redirect to login after 5 seconds to give users time to read the message
         setTimeout(() => {
           router.push('/admin/login');
         }, 5000);
       } else {
         setSaveNotification({
           type: 'error',
-          message: data.error || data.message || 'Failed to save changes. Please try again.',
+          message: data.error || data.message || 'Failed to commit changes. Please try again.',
         });
       }
     } catch (err) {
@@ -118,14 +122,14 @@ export default function UniverseEditor({
     }
   };
 
-  const handleCommit = async () => {
-    if (!commitMessage.trim()) {
-      setCommitNotification({ type: 'error', message: 'Commit message is required. Please describe your changes.' });
+  const handleCreatePR = async () => {
+    if (!prMessage.trim()) {
+      setPRNotification({ type: 'error', message: 'PR message is required. Please describe your changes.' });
       return;
     }
 
-    setCommitting(true);
-    setCommitNotification(null);
+    setCreatingPR(true);
+    setPRNotification(null);
     setRetrying(false);
 
     try {
@@ -135,43 +139,36 @@ export default function UniverseEditor({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          commitMessage,
-          createPR,
-          gitBaseHash, // Immutable GitHub baseline for optimistic locking against remote changes
+          universe,
+          commitMessage: prMessage,
+          createPR: true, // Create pull request
+          gitBaseHash,
         }),
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
-        const prMessage = createPR && data.prUrl
+        const prUrlMessage = data.prUrl
           ? ` View your pull request: ${data.prUrl}`
           : '';
-        setCommitNotification({
+        setPRNotification({
           type: 'success',
-          message: createPR
-            ? `Pull request created successfully!${prMessage}`
-            : 'Changes committed to GitHub successfully. Your updates are now live.',
+          message: `Pull request created successfully!${prUrlMessage}`,
         });
-        setCommitMessage('');
-        // After successful commit, update both hashes to match GitHub
-        // Both should now reflect the committed state
+        setPRMessage('');
+        // Update gitBaseHash after PR creation
         if (data.hash) {
-          onUpdate(universe, data.hash, data.hash);
-        } else {
-          // If no hash is returned, we can't be sure of the new baseline.
-          // Log a warning and don't update hashes - user should refresh if needed.
-          console.warn('Commit successful, but no new hash returned from server. Hashes may be out of sync.');
-          onUpdate(universe);
+          onUpdate(universe, data.hash);
         }
       } else if (response.status === 409) {
-        setCommitNotification({
+        setPRNotification({
           type: 'error',
-          message: data.error || data.message || 'Conflict detected: The file was modified in GitHub. Please refresh, re-apply your changes, save, and try committing again.',
+          message: data.error || data.message || 'Conflict detected: The file was modified in GitHub. Please refresh and try again.',
         });
         setRetrying(true);
       } else if (response.status === 401) {
-        setCommitNotification({
+        setPRNotification({
           type: 'error',
           message: 'Unauthorized. Please log in again.',
         });
@@ -179,20 +176,20 @@ export default function UniverseEditor({
           router.push('/admin/login');
         }, 5000);
       } else {
-        setCommitNotification({
+        setPRNotification({
           type: 'error',
-          message: data.error || data.message || 'Failed to commit changes. Please try again.',
+          message: data.error || data.message || 'Failed to create pull request. Please try again.',
         });
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      setCommitNotification({
+      setPRNotification({
         type: 'error',
         message: `Network error: Unable to connect to the server. ${errorMessage}`,
       });
       setRetrying(true);
     } finally {
-      setCommitting(false);
+      setCreatingPR(false);
     }
   };
 
@@ -345,31 +342,49 @@ export default function UniverseEditor({
       </Modal>
 
       <div className="admin-card">
-        <h3>💾 Save Changes</h3>
+        <h3>✓ Save to GitHub</h3>
         <p style={{ marginBottom: '1rem', color: 'var(--admin-text-muted)' }}>
-          Save your edits to disk. Your changes will be persisted locally and ready for commit.
+          Commit your changes directly to the main branch. Changes go live immediately.
         </p>
         
+        <div className="form-group">
+          <label htmlFor="commitMessage">Commit Message *</label>
+          <input
+            type="text"
+            id="commitMessage"
+            value={commitMessage}
+            onChange={(e) => setCommitMessage(e.target.value)}
+            placeholder="e.g., Add new Andromeda galaxy with 3 solar systems"
+            required
+            className={!commitMessage.trim() && saving ? 'error' : ''}
+          />
+          {!commitMessage.trim() && (
+            <span className="form-hint" style={{ color: 'var(--admin-warning)' }}>
+              A commit message is required to describe your changes
+            </span>
+          )}
+        </div>
+
         <div className="action-section">
           <button
-            onClick={handleSaveToFile}
+            onClick={handleSaveToGitHub}
             className="btn"
-            disabled={saving}
+            disabled={saving || !commitMessage.trim()}
           >
             {saving ? (
               <>
                 <span className="loading-spinner"></span>
-                Saving...
+                Committing...
               </>
             ) : (
-              '💾 Save to Disk'
+              '✓ Commit to Main Branch'
             )}
           </button>
           
           {saving && (
             <InlineNotification
               type="pending"
-              message="Saving changes to disk..."
+              message="Committing changes to GitHub..."
               autoClose={false}
             />
           )}
@@ -380,50 +395,38 @@ export default function UniverseEditor({
               message={saveNotification.message}
               onClose={handleCloseSaveNotification}
               autoClose={saveNotification.type === 'success'}
-              autoCloseDelay={5000}
+              autoCloseDelay={7000}
             />
           )}
           
           <span className="form-hint" style={{ display: 'block', marginTop: saveNotification || saving ? '0.25rem' : '0.5rem' }}>
-            Saves changes to local universe.json without committing to GitHub
+            Changes are committed directly to main branch and deployed automatically
           </span>
         </div>
       </div>
 
       <div className="admin-card">
-        <h3>🔀 Commit to GitHub</h3>
+        <h3>🔀 Create Pull Request</h3>
         <p style={{ marginBottom: '1rem', color: 'var(--admin-text-muted)' }}>
-          After saving locally, commit your changes to GitHub to make them live.
+          Create a pull request for team review before merging changes.
         </p>
 
         <div className="form-group">
-          <label htmlFor="commitMessage">Commit Message *</label>
+          <label htmlFor="prMessage">Pull Request Message *</label>
           <input
             type="text"
-            id="commitMessage"
-            value={commitMessage}
-            onChange={(e) => setCommitMessage(e.target.value)}
-            placeholder="e.g., Add new Andromeda galaxy with 3 solar systems"
+            id="prMessage"
+            value={prMessage}
+            onChange={(e) => setPRMessage(e.target.value)}
+            placeholder="e.g., Add new Andromeda galaxy for review"
             required
-            className={!commitMessage.trim() && committing ? 'error' : ''}
+            className={!prMessage.trim() && creatingPR ? 'error' : ''}
           />
-          {!commitMessage.trim() && (
+          {!prMessage.trim() && (
             <span className="form-hint" style={{ color: 'var(--admin-warning)' }}>
-              A commit message is required to describe your changes
+              A message is required to describe your pull request
             </span>
           )}
-        </div>
-
-        <div className="form-group">
-          <label>
-            <input
-              type="checkbox"
-              checked={createPR}
-              onChange={(e) => setCreatePR(e.target.checked)}
-              style={{ marginRight: '0.5rem' }}
-            />
-            Create Pull Request (recommended for team review)
-          </label>
           <span className="form-hint">
             Creates a new branch and pull request for review before merging
           </span>
@@ -431,36 +434,34 @@ export default function UniverseEditor({
 
         <div className="action-section">
           <button
-            onClick={handleCommit}
+            onClick={handleCreatePR}
             className="btn"
-            disabled={committing || !commitMessage.trim()}
+            disabled={creatingPR || !prMessage.trim()}
           >
-            {committing ? (
+            {creatingPR ? (
               <>
                 <span className="loading-spinner"></span>
-                Committing...
+                Creating PR...
               </>
-            ) : createPR ? (
-              '🔀 Create Pull Request'
             ) : (
-              '✓ Commit to Main Branch'
+              '🔀 Create Pull Request'
             )}
           </button>
           
-          {committing && (
+          {creatingPR && (
             <InlineNotification
               type="pending"
-              message="Committing changes to GitHub..."
+              message="Creating pull request..."
               autoClose={false}
             />
           )}
           
-          {commitNotification && (
+          {prNotification && (
             <InlineNotification
-              type={commitNotification.type}
-              message={commitNotification.message}
-              onClose={handleCloseCommitNotification}
-              autoClose={commitNotification.type === 'success'}
+              type={prNotification.type}
+              message={prNotification.message}
+              onClose={handleClosePRNotification}
+              autoClose={prNotification.type === 'success'}
               autoCloseDelay={7000}
             />
           )}

@@ -17,7 +17,6 @@ import { sha256 } from '@/lib/crypto';
 import { isAuthenticated } from '@/lib/auth';
 import { fetchCurrentUniverse, pushUniverseChanges } from '@/lib/github';
 import { parseAndValidateUniverse, serializeUniverse } from '@/lib/universe/mutate';
-import { persistUniverseToFile } from '@/lib/universe/persist';
 import universeData from '@/../public/universe/universe.json';
 import fs from 'fs/promises';
 import path from 'path';
@@ -174,125 +173,17 @@ export async function GET(request: NextRequest) {
   }
 }
 
-/**
- * PATCH /api/admin/universe
- * Saves universe changes to local file without committing to GitHub
- */
-export async function PATCH(request: NextRequest) {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    console.error('[PATCH /api/admin/universe] Authentication failed');
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 }
-    );
-  }
 
-  console.log('[PATCH /api/admin/universe] Request received - saving to disk');
-
-  try {
-    const { universe, currentHash } = await request.json();
-    console.log('[PATCH /api/admin/universe] Payload parsed - galaxies:', universe?.galaxies?.length || 0);
-
-    if (!universe) {
-      console.error('[PATCH /api/admin/universe] No universe data in payload');
-      return NextResponse.json(
-        { error: 'Universe data is required' },
-        { status: 400 }
-      );
-    }
-
-    // Optimistic locking: verify current hash if provided
-    if (currentHash) {
-      const hashPreview = currentHash?.substring(0, 8) || 'unknown';
-      console.log('[PATCH /api/admin/universe] Checking optimistic lock with hash:', hashPreview + '...');
-      const targetPath = process.env.UNIVERSE_DATA_PATH || 'public/universe/universe.json';
-      const absolutePath = path.resolve(process.cwd(), targetPath);
-      
-      try {
-        const currentContent = await fs.readFile(absolutePath, 'utf-8');
-        const actualHash = await sha256(currentContent);
-        
-        if (actualHash !== currentHash) {
-          console.warn('[PATCH /api/admin/universe] Conflict detected - hash mismatch');
-          return NextResponse.json(
-            {
-              error: 'Conflict detected',
-              message: 'The file has been modified by another user. Please refresh and try again.',
-            },
-            { status: 409 }
-          );
-        }
-        console.log('[PATCH /api/admin/universe] Hash verification passed');
-      } catch (error) {
-        // If file doesn't exist yet, allow the save to proceed
-        console.warn('[PATCH /api/admin/universe] Universe file does not exist yet, proceeding with initial save');
-      }
-    }
-
-    // Validate universe data
-    console.log('[PATCH /api/admin/universe] Validating universe data...');
-    const { errors } = parseAndValidateUniverse(JSON.stringify(universe));
-    if (errors.length > 0) {
-      console.error('[PATCH /api/admin/universe] Validation failed:', errors.join(', '));
-      return NextResponse.json(
-        { error: 'Validation failed', validationErrors: errors },
-        { status: 400 }
-      );
-    }
-    console.log('[PATCH /api/admin/universe] Validation passed');
-
-    // Persist to local file
-    console.log('[PATCH /api/admin/universe] Persisting to file system...');
-    const result = await persistUniverseToFile(universe);
-
-    if (result.success) {
-      console.log('[PATCH /api/admin/universe] File write successful');
-      
-      // Calculate new hash from the persisted file to ensure synchronization
-      const targetPath = process.env.UNIVERSE_DATA_PATH || 'public/universe/universe.json';
-      const absolutePath = path.resolve(process.cwd(), targetPath);
-      const persistedContent = await fs.readFile(absolutePath, 'utf-8');
-      const hash = await sha256(persistedContent);
-
-      const hashPreview = hash?.substring(0, 8) || 'unknown';
-      console.log('[PATCH /api/admin/universe] Success - new local disk hash:', hashPreview + '...');
-      return NextResponse.json({
-        success: true,
-        message: 'Universe data saved successfully',
-        hash, // This is the new localDiskHash - gitBaseHash should remain unchanged in client
-      });
-    } else {
-      console.error('[PATCH /api/admin/universe] Persist failed:', result.error);
-      return NextResponse.json(
-        {
-          success: false,
-          error: result.error,
-          message: 'Failed to save universe data to disk',
-        },
-        { status: 500 }
-      );
-    }
-  } catch (error) {
-    console.error('[PATCH /api/admin/universe] Unexpected error:', error);
-    return NextResponse.json(
-      { error: 'Failed to save universe data', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
-  }
-}
 
 /**
  * POST /api/admin/universe
- * Commits universe changes to GitHub (reads from persisted file)
+ * Commits universe changes directly to GitHub
  * 
- * This endpoint implements a two-step workflow:
- * 1. PATCH saves changes to local file system
- * 2. POST reads from file system and commits to GitHub
+ * This endpoint validates and commits changes directly to GitHub without
+ * intermediate disk persistence (required for Vercel's read-only filesystem).
  * 
  * The workflow ensures:
  * - Changes are validated before GitHub commit
- * - File content on disk is authoritative source
  * - Fresh GitHub SHA is fetched before commit to prevent conflicts
  * - Optimistic locking prevents concurrent edit issues
  */
@@ -308,12 +199,25 @@ export async function POST(request: NextRequest) {
 
   logVerbose('[POST /api/admin/universe] ========================================');
   console.log('[POST /api/admin/universe] Request received - committing to GitHub');
-  logVerbose('[POST /api/admin/universe] Workflow: Step 2 of 2 (Step 1 was PATCH to save to disk)');
+  logVerbose('[POST /api/admin/universe] Workflow: Direct commit (no disk persistence)');
 
   try {
-    const { commitMessage, createPR, gitBaseHash } = await request.json();
+    const { universe, commitMessage, createPR, gitBaseHash } = await request.json();
     const messagePreview = commitMessage?.substring(0, 50) || '';
-    logVerbose('[POST /api/admin/universe] Payload:', { commitMessage: messagePreview, createPR, hasGitBaseHash: !!gitBaseHash });
+    logVerbose('[POST /api/admin/universe] Payload:', { 
+      commitMessage: messagePreview, 
+      createPR, 
+      hasGitBaseHash: !!gitBaseHash,
+      galaxies: universe?.galaxies?.length || 0 
+    });
+
+    if (!universe) {
+      console.error('[POST /api/admin/universe] No universe data in payload');
+      return NextResponse.json(
+        { error: 'Universe data is required' },
+        { status: 400 }
+      );
+    }
 
     if (!commitMessage) {
       console.error('[POST /api/admin/universe] No commit message provided');
@@ -323,32 +227,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Read content from the persisted file to prevent data loss
-    // This ensures we're committing exactly what was saved to disk
-    const targetPath = process.env.UNIVERSE_DATA_PATH || 'public/universe/universe.json';
-    const absolutePath = path.resolve(process.cwd(), targetPath);
-    
-    logVerbose('[POST /api/admin/universe] Step 1: Reading from persisted file:', targetPath);
-    let content: string;
-    try {
-      content = await fs.readFile(absolutePath, 'utf-8');
-      logVerbose('[POST /api/admin/universe] File read successfully, size:', content.length, 'bytes');
-      logVerbose('[POST /api/admin/universe] File is authoritative source for commit');
-    } catch (error) {
-      console.error('[POST /api/admin/universe] Failed to read persisted file:', error);
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'No saved data found',
-          message: 'Please save your changes to disk before committing',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Validate the persisted data
-    logVerbose('[POST /api/admin/universe] Step 2: Validating persisted data...');
-    const { errors } = parseAndValidateUniverse(content);
+    // Validate the universe data
+    logVerbose('[POST /api/admin/universe] Step 1: Validating universe data...');
+    const { errors } = parseAndValidateUniverse(JSON.stringify(universe));
     if (errors.length > 0) {
       console.error('[POST /api/admin/universe] Validation failed:', errors.join(', '));
       return NextResponse.json(
@@ -358,41 +239,13 @@ export async function POST(request: NextRequest) {
     }
     logVerbose('[POST /api/admin/universe] Validation passed');
 
-    /**
-     * Log local disk state before committing (diagnostic only)
-     * 
-     * This function logs if the local disk file has diverged from the gitBaseHash.
-     * In the normal save→commit workflow, the hashes WILL differ because:
-     * 1. User loaded editor with gitBaseHash from GitHub
-     * 2. User made edits and saved to disk (updates local file, gitBaseHash unchanged)
-     * 3. User commits (we're here - local file has changes, gitBaseHash is still original)
-     * 
-     * We log the difference but DON'T fail because:
-     * - The divergence is expected and intentional in the save→commit workflow
-     * - The GitHub layer will fetch fresh SHA and detect actual remote conflicts
-     * - This check is primarily for diagnostics and debugging
-     */
-    const logLocalStateBeforeCommit = async (
-      localContent: string,
-      expectedGitBaseHash: string | undefined
-    ): Promise<void> => {
-      logVerbose('[POST /api/admin/universe] Step 3: Logging local state before commit...');
-      const onDiskHash = await sha256(localContent);
-      
-      if (expectedGitBaseHash && onDiskHash !== expectedGitBaseHash) {
-        logVerbose('[POST /api/admin/universe] Note: Local disk hash differs from gitBaseHash');
-        logVerbose('[POST /api/admin/universe] GitBaseHash:', expectedGitBaseHash.substring(0, 8) + '...');
-        logVerbose('[POST /api/admin/universe] OnDiskHash:', onDiskHash.substring(0, 8) + '...');
-        logVerbose('[POST /api/admin/universe] This is EXPECTED in save→commit workflow (user saved changes locally)');
-      } else {
-        logVerbose('[POST /api/admin/universe] Local disk hash matches gitBaseHash or no hash provided');
-      }
-    };
-
-    await logLocalStateBeforeCommit(content, gitBaseHash);
+    // Serialize universe data
+    logVerbose('[POST /api/admin/universe] Step 2: Serializing universe data...');
+    const content = serializeUniverse(universe);
+    logVerbose('[POST /api/admin/universe] Serialized, size:', content.length, 'bytes');
 
     // Push to GitHub
-    logVerbose('[POST /api/admin/universe] Step 4: Pushing to GitHub...');
+    logVerbose('[POST /api/admin/universe] Step 3: Pushing to GitHub...');
     logVerbose('[POST /api/admin/universe] Note: GitHub layer will verify gitBaseHash matches current GitHub HEAD');
     const result = await pushUniverseChanges(
       content,

@@ -58,6 +58,13 @@ function validateFilePath(filePath: string): boolean {
 
 /**
  * Persists universe data to local file system (server-side only)
+ * 
+ * @deprecated This function is deprecated and will not work on Vercel or other
+ * serverless platforms with read-only filesystems. Universe changes should be
+ * committed directly to GitHub using pushUniverseChanges() instead.
+ * 
+ * This function is kept for local development and testing purposes only.
+ * 
  * @param universe - The universe data to persist
  * @param filePath - Path to the universe.json file (default from env or public/universe/universe.json)
  * @returns Promise<{ success: boolean; error?: string }>
