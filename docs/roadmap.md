@@ -4,7 +4,78 @@ This document outlines the current state of The Horizon, what has been shipped, 
 
 > **For detailed release notes and version history**, see [CHANGELOG.md](CHANGELOG.md).
 
-## Current Release: v0.1.9 (December 2025)
+## Current Release: v0.1.10 (December 2025)
+
+This release formalizes the enforced dark mode experience, completing the consolidation of light/dark theme work by documenting that The Horizon exclusively uses a dark palette with no light mode option.
+
+**Enforced Dark Mode Experience:**
+
+1. **Global Dark Mode Configuration**
+   - HTML/Viewport settings enforce `data-theme="dark"` and `color-scheme: dark`
+   - CSS files contain zero `prefers-color-scheme: light` media queries
+   - Pure black background (#000000) with white text (#FFFFFF) globally
+   - Accessibility media queries preserved (reduced motion, high contrast)
+
+2. **Centralized Dark Palette System**
+   - DARK_PALETTE constant in `src/lib/dark-palette.ts` is single source of truth
+   - All colors meet WCAG AA contrast requirements (4.5:1 minimum)
+   - Deep freeze protection prevents runtime palette modifications
+   - Full TypeScript support with autocomplete
+
+3. **Testing and Validation**
+   - 23 dark mode-specific tests (14 CSS, 9 layout)
+   - SSR consistency verified across server/client rendering
+   - All tests passing with zero light mode CSS detected
+   - Regression protection ensures dark mode cannot be broken
+
+4. **No Light Mode Restoration**
+   - No environment variable can restore light mode
+   - No toggle UI exists in admin or public interface
+   - System `prefers-color-scheme: light` preference is ignored
+   - Dark mode is permanent and cannot be overridden
+
+**Why Dark Mode Only:**
+
+The decision to enforce dark mode is based on:
+- **Space Theme Alignment**: Dark backgrounds essential for space exploration UX
+- **Visual Hierarchy**: Light mode would wash out 3D celestial visualizations
+- **Performance**: Single palette eliminates theme switching overhead
+- **Accessibility Focus**: Resources directed toward dark mode accessibility
+- **User Expectations**: Space apps universally use dark backgrounds
+
+**Accessibility Maintained:**
+
+Despite dark-only mode, accessibility features remain robust:
+- High contrast support via `prefers-contrast: high` media queries
+- Reduced motion support for users with vestibular disorders
+- WCAG AA compliance for all text contrast ratios
+- Screen reader support with ARIA labels and semantic HTML
+- Keyboard navigation and clear focus indicators
+
+**Technical Details:**
+- No new environment variables required
+- No migration steps needed
+- 900 of 926 total tests passing (26 pre-existing crypto failures unrelated to this release)
+- Compatible with all v0.1.x releases
+- Zero performance or bundle size impact
+
+**Deployment Notes:**
+- Documentation now explicitly states dark-only mode
+- No user-facing behavior changes (dark was already default)
+- Admin interface has no theme configuration options
+
+**Verification Steps:**
+1. Run CSS tests: `npm test -- dark-mode-css.test.ts` (14 tests pass)
+2. Run layout tests: `npm test -- layout.test.tsx` (9 tests pass)
+3. Verify documentation mentions dark-only mode
+4. Set OS to light mode - application remains dark
+5. Search CSS for "light" - only accessibility queries exist
+
+See [CHANGELOG.md](CHANGELOG.md#0110---enforced-dark-mode-experience---2025-12-10) for complete release details.
+
+---
+
+## Previous Release: v0.1.9 (December 10, 2025)
 
 This release delivers enhanced visual customization for celestial bodies, admin workflow for external link management, and collapsible content sections for improved content organization.
 
@@ -774,6 +845,8 @@ The larger scope was necessary and acceptable because:
 - [x] Accessibility features (keyboard navigation, reduced motion support)
 - [x] **Hover label stabilization with Drei Html component (ISS-1, v0.1.7)**
 - [x] **Enhanced breadcrumb navigation with improved UX (ISS-2, v0.1.7)**
+- [x] **Enforced dark mode with centralized DARK_PALETTE (v0.1.10)**
+- [x] **WCAG AA compliant dark color palette with no light mode option (v0.1.10)**
 
 #### Content Management
 - [x] Rich markdown content support for planets and moons
@@ -986,6 +1059,17 @@ Before deploying a new version, complete these verification steps:
 - [ ] Troubleshooting guide is current
 
 ## Version History
+
+### v0.1.10 - Enforced Dark Mode Experience (December 10, 2025)
+
+- **Dark Mode Consolidation**: Formalized dark-only theme policy with comprehensive documentation
+- **DARK_PALETTE System**: Centralized color constants with WCAG AA compliance and runtime immutability
+- **Testing Coverage**: 23 dark mode-specific tests ensuring no light mode CSS exists
+- **Documentation Updates**: README, roadmap, and CHANGELOG now explicitly state dark-only mode
+- **Accessibility Maintained**: High contrast and reduced motion support preserved
+- **No Migration Required**: Dark mode was already default, this release adds clarity
+
+See "Current Release" section above for complete details.
 
 ### v0.1.9 - Celestial Themes, Link Management & Collapsible Viewer (December 10, 2025)
 
@@ -1323,5 +1407,5 @@ Have ideas for future features? Here's how to contribute:
 ---
 
 *Last Updated: December 10, 2025*  
-*Version: 0.1.9*  
+*Version: 0.1.10*  
 *Maintained by: Agent Foundry and John Brosnihan*

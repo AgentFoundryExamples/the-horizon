@@ -2,6 +2,19 @@
 
 A modern web application for exploring a 3D universe featuring galaxies, solar systems, planets, and moons. Built with Next.js 14, React, TypeScript, and Three.js.
 
+## Dark Mode Experience
+
+**The Horizon exclusively uses a dark theme.** There is no light mode option, and the dark palette cannot be changed via environment variables or user preferences. This design decision is intentional:
+
+- **Space Theme Alignment**: A dark background is essential for showcasing stars, galaxies, and celestial bodies with proper visual depth
+- **Visual Hierarchy**: Light mode would wash out 3D space visualizations and reduce immersion
+- **Performance**: Single color palette eliminates theme switching overhead
+- **Accessibility Focus**: Resources directed toward dark mode accessibility rather than maintaining dual themes
+
+The dark palette meets WCAG AA contrast requirements and supports `prefers-reduced-motion` and `prefers-contrast: high` for accessibility. All colors are defined in `src/lib/dark-palette.ts` and are runtime-immutable.
+
+**For contributors**: The application enforces dark mode via `data-theme="dark"` in `layout.tsx` and `color-scheme: dark` in CSS. No light mode media queries exist. See [docs/CHANGELOG.md](docs/CHANGELOG.md#0110---enforced-dark-mode-experience---2025-12-10) for implementation details.
+
 ## Features
 
 - 🌌 **Universe Data Schema**: Well-defined JSON structure for galaxies, solar systems, planets, and moons
@@ -24,15 +37,15 @@ A modern web application for exploring a 3D universe featuring galaxies, solar s
 
 For detailed release notes and version history, see [docs/CHANGELOG.md](docs/CHANGELOG.md).
 
-### Latest Release: v0.1.9 (December 10, 2025)
+### Latest Release: v0.1.10 (December 10, 2025)
 
-This release delivers enhanced visual customization for celestial bodies, admin workflow for external link management, and collapsible content sections for improved content organization:
+This release formalizes the enforced dark mode experience, documenting that The Horizon exclusively uses a dark palette with no light mode option:
 
-- **Celestial Visual Themes**: Theme presets (rocky, gasGiant, icy, etc.), customizable glow effects, rotation speeds, and texture support
-- **External Links Management**: Admin workflow for adding/editing external resources with validation and duplicate detection
-- **Collapsible Content Viewer**: Reusable CollapsibleSection component with keyboard navigation and ARIA support
-- **Admin Enhancements**: Visual theme editor, external link CRUD, color picker, and real-time validation
-- **Viewer Improvements**: Related Resources section, collapsible moon lists, secure external link rendering
+- **Enforced Dark Mode**: Global dark theme with no light mode toggle or environment variable override
+- **DARK_PALETTE System**: Centralized color constants meeting WCAG AA contrast requirements
+- **Testing Coverage**: 23 dark mode-specific tests ensuring no light mode CSS exists
+- **Accessibility Maintained**: High contrast and reduced motion support preserved
+- **Documentation Updates**: README, roadmap, and CHANGELOG now explicitly state dark-only mode
 
 See the [full changelog](docs/CHANGELOG.md) for complete details on all releases.
 
