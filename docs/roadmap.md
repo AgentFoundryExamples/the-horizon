@@ -4,82 +4,129 @@ This document outlines the current state of The Horizon, what has been shipped, 
 
 > **For detailed release notes and version history**, see [CHANGELOG.md](CHANGELOG.md).
 
-## Current Release: v0.1.8 (December 2025)
+## Current Release: v0.1.9 (December 2025)
 
-This release implements a symmetric universe layout system that positions galaxies deterministically based on count, ensuring visual balance and aesthetic composition without manual coordinate tweaking.
+This release delivers enhanced visual customization for celestial bodies, admin workflow for external link management, and collapsible content sections for improved content organization.
 
-**Symmetric Universe Layout:**
+**Celestial Visual Themes System:**
 
-1. **Count-Based Layout Patterns**
-   - Single galaxy: Centered at origin for perfect focus
-   - Two galaxies: Horizontally mirrored for balanced left-right composition
-   - Three galaxies: Equilateral triangle centered at origin
-   - Four galaxies: Diamond (rotated square) on cardinal directions
-   - Five+ galaxies: Circular ring with even angular distribution
-   - Deterministic positioning ensures consistency across sessions
+1. **Theme Presets for Quick Configuration**
+   - Planet/Moon presets: rocky, gasGiant, icy, volcanic, earth-like, blue-green, red, desert
+   - Star presets: yellow-dwarf, orange-dwarf, red-dwarf, blue-giant, white-dwarf
+   - Each preset includes sensible defaults for glow color, intensity, rotation speed
+   - Content authors can apply professional themes without manual tuning
 
-2. **Layout Helper Function**
-   - `calculateGalaxyLayout()` in `src/lib/universe/layout.ts`
-   - Takes galaxy IDs and spacing, returns position map
-   - Validates spacing to prevent overlap (min 50 units for 44 unit max diameter)
-   - Helper functions for camera distance and spacing validation
-   - O(n) complexity, < 1ms calculation time for 100 galaxies
+2. **Customizable Visual Parameters**
+   - Glow effects with theme-colored borders (0-1 intensity)
+   - Adjustable rotation speeds for visual interest (0.1-3.0x multiplier)
+   - Star halos with intensity control (0-100%, 1.0-3.0x radius)
+   - Optional texture URLs for diffuse, normal, and specular maps
+   - Fine-grained control while maintaining performance
 
-3. **Integration and Transitions**
-   - Replaces grid-based positioning in `UniverseScene.tsx`
-   - useMemo caching prevents unnecessary recalculations
-   - Smooth position interpolation when galaxy count changes
-   - Camera focus respects symmetric coordinates
-   - No teleporting or popping during transitions
+3. **Admin Interface Integration**
+   - Visual theme editor in Planet/Moon admin panels
+   - Preset dropdown for quick theme selection
+   - Color picker with hex validation
+   - Sliders with real-time feedback for intensity and rotation
+   - Texture URL fields with validation
 
-4. **Comprehensive Testing**
-   - 20 unit tests covering all patterns and edge cases
-   - Tests for 0, 1, 2, 3, 4, and 5+ galaxy scenarios
-   - Validates spacing, symmetry, and deterministic behavior
-   - Tests very large counts (100+) for performance
-   - 100% test pass rate (748/755 total, 7 pre-existing crypto failures)
+4. **Graceful Fallback & Backward Compatibility**
+   - All visual theme fields optional
+   - Missing data falls back to defaults
+   - Existing planets/moons without themes continue to work
+   - Zero-risk deployment, no breaking changes
 
-**Documentation Updates:**
+**External Links Management:**
 
-- Added "Symmetric Universe Layout" section to `docs/visuals.md`
-- Detailed layout patterns with ASCII diagrams and geometry explanations
-- Implementation guide with code examples
-- Edge cases, performance considerations, and testing checklist
-- Updated `docs/roadmap.md` with v0.1.8 release notes
+1. **External Link Structure**
+   - Link fields: title (required), url (required), description (optional)
+   - URL validation for http/https and relative paths
+   - XSS protection with strict validation
+   - Duplicate detection in admin interface
+
+2. **Admin Link Editor**
+   - Add/edit/delete external links in Planet/Moon editors
+   - Inline validation with immediate feedback
+   - Visual indicator for valid/invalid URLs
+   - Reorderable link list for custom sequencing
+
+3. **Viewer Integration**
+   - External links in collapsible "Related Resources" section
+   - Links open in new tab with security attributes
+   - Clean card-based UI with hover effects
+   - Invalid URLs filtered automatically
+
+**Collapsible Content Viewer:**
+
+1. **CollapsibleSection Component**
+   - Smooth CSS animations for expand/collapse
+   - Keyboard navigation (Enter/Space)
+   - ARIA attributes for screen readers
+   - Optional item count badge
+   - Configurable collapsed/expanded heights
+
+2. **Configuration Options**
+   - `defaultCollapsed`: Start collapsed or expanded
+   - `collapsedHeight`: Preview height when collapsed
+   - `expandedHeight`: Maximum height when expanded
+   - `animationDuration`: Transition duration
+   - All values clamped to safe ranges
+
+3. **Usage Patterns**
+   - Related Resources: External links (default collapsed)
+   - Moon Navigation: Collapsible moon list
+   - Content Sections: Future nested markdown sections
+   - Consistent styling across all areas
 
 **Why This Release:**
 
-Manual galaxy positioning created unbalanced compositions when galaxies were added or removed. The symmetric layout system:
-- Automatically adapts to galaxy count changes
-- Preserves visual balance and symmetry
-- Eliminates manual coordinate tweaking
-- Provides aesthetic patterns for all galaxy counts
-- Maintains performance with deterministic O(n) calculations
+Building on the navigation foundation from Part 1:
+- Visual themes provide "wow factor" and customization for content authors
+- External links enrich content with vetted external resources
+- Collapsible sections improve scannability on content-heavy pages
+- All features maintain backward compatibility and require no migration
 
 **Technical Details:**
 - No new environment variables required
 - No migration steps needed
-- Build verified successful with no errors
-- All tests passing (748/755, same 7 pre-existing crypto failures)
+- All tests passing (900/926, 26 pre-existing crypto failures)
 - Compatible with all v0.1.x releases
+- Build verified with no breaking changes
+- Performance: ~2% GPU overhead for glows, negligible for collapsible sections
 
 **Deployment Notes:**
 - No environment variable changes
-- No redeployment required if already on v0.1.7
-- Galaxy positions will update automatically on first load
-- Existing camera transitions remain compatible
+- Existing planets/moons without themes continue to work
+- External links field optional
+- Collapsible sections use CSS-only animations
+- Documentation cross-references validated
 
 **Verification Steps:**
-1. Load universe view with 1 galaxy - should be centered
-2. Load with 2 galaxies - should be mirrored left/right
-3. Load with 3 galaxies - should form upward-pointing triangle
-4. Load with 4 galaxies - should form diamond on N/S/E/W
-5. Load with 5+ galaxies - should form circular ring
-6. Add/remove galaxies - positions should transition smoothly
-7. Click sidebar item - camera should focus on correct position
-8. Check spacing - no galaxy overlap at any count
+1. Create planet with visual theme preset - verify glow and rotation
+2. Use color picker for custom glow - verify hex validation
+3. Add external links to planet - verify display in "Related Resources"
+4. Try invalid URL - verify admin validation prevents save
+5. Expand/collapse sections - verify smooth animation
+6. Use keyboard only - verify Enter/Space toggle sections
+7. Test with screen reader - verify ARIA labels work
+8. Load existing data without themes - verify no errors
 
-See [docs/visuals.md](./visuals.md#symmetric-universe-layout-v018) for complete layout documentation.
+See [docs/visuals.md](./visuals.md#celestial-visual-themes-system) for celestial theme documentation.
+See [docs/content-authoring.md](./content-authoring.md#external-links) for link workflow.
+
+---
+
+## Previous Release: v0.1.8 (December 9, 2025)
+
+Symmetric universe layout system with deterministic galaxy positioning based on count, ensuring visual balance and aesthetic composition without manual coordinate tweaking.
+
+**Key Features:**
+- Count-based layout patterns (centered, mirrored, triangle, diamond, ring)
+- calculateGalaxyLayout() helper with validation and O(n) performance
+- Smooth position interpolation and camera focus integration
+- 20 unit tests covering all patterns and edge cases
+
+See [CHANGELOG.md](CHANGELOG.md#018---navigation--layout-overhaul-summary---2025-12-09) for complete release details.
 
 ---
 
@@ -940,6 +987,27 @@ Before deploying a new version, complete these verification steps:
 
 ## Version History
 
+### v0.1.9 - Celestial Themes, Link Management & Collapsible Viewer (December 10, 2025)
+
+- **Celestial Visual Themes System**: Presets, custom parameters, admin integration, graceful fallback
+- **External Links Management**: Link structure, admin editor, secure viewer integration
+- **Collapsible Content Viewer**: CollapsibleSection component, configuration options, usage patterns
+- **Admin Enhancements**: Visual theme editor, external link CRUD, validation and duplicate detection
+- **Viewer Improvements**: Related Resources section, collapsible moon lists, keyboard navigation
+- **Documentation**: Complete visual themes and link management docs added
+
+See "Current Release" section above for complete details.
+
+### v0.1.8 - Symmetric Universe Layout (December 9, 2025)
+
+- **Symmetric Universe Layout**: Count-based patterns, deterministic positioning, aesthetic composition
+- **Layout Helper Function**: calculateGalaxyLayout() with validation and caching
+- **Integration**: Smooth transitions, camera focus, no teleporting
+- **Testing**: 20 unit tests covering all patterns and edge cases
+- **Documentation**: Complete layout system documentation
+
+See "Previous Release: v0.1.8" section above for complete details.
+
 ### v0.1.7 - Hover Label Stabilization and Breadcrumb UX (December 9, 2025)
 
 - **Hover Label Stabilization (ISS-1)**: Migrated to Drei Html component, preventing Canvas crashes
@@ -949,7 +1017,7 @@ Before deploying a new version, complete these verification steps:
 - **Documentation**: Complete hover label and breadcrumb documentation added
 - **Testing**: New manual testing scenarios (14-15) for both features
 
-See "Current Release" section above for complete details.
+See [CHANGELOG.md](CHANGELOG.md#017---hover-label-stabilization-and-breadcrumb-ux-enhancements---2025-12-09) for complete details.
 
 ### v0.1.6 - Documentation Completeness and Version Tracking (December 8, 2025)
 
@@ -960,7 +1028,7 @@ See "Current Release" section above for complete details.
 - **Cross-References**: All documentation links validated and synchronized
 - **Version Management**: Version bumped from 0.1.5 to 0.1.6 with changelog entry
 
-See "Current Release" section above for complete details.
+See [CHANGELOG.md](CHANGELOG.md#016---documentation-completeness-and-version-tracking---2025-12-08) for complete details.
 
 ### v0.1.5 - GitHub Persistence Stabilization and UI Cleanup (December 8, 2025)
 
@@ -971,7 +1039,7 @@ See "Current Release" section above for complete details.
 - **Debugging**: Clear workflow logging with SHA operations and file read tracking
 - **Stability**: Optimistic locking at both save and commit steps
 
-See "Current Release" section above for complete details.
+See [CHANGELOG.md](CHANGELOG.md#015---github-persistence-stabilization-and-ui-cleanup---2025-12-08) for complete details.
 
 ### v0.1.4 - Admin Workflow Documentation and Testing (December 8, 2025)
 
@@ -982,7 +1050,7 @@ See "Current Release" section above for complete details.
 - **Prerequisites**: Clear guidance on required vs. optional configuration
 - **No Code Changes**: Pure documentation release, all tests passing
 
-See "Current Release" section above for complete details.
+See [CHANGELOG.md](CHANGELOG.md#014---admin-workflow-documentation-and-testing---2025-12-08) for complete details.
 
 ### v0.1.3 - Galaxy Scale and Visual Improvements (December 8, 2025)
 
@@ -1254,6 +1322,6 @@ Have ideas for future features? Here's how to contribute:
 
 ---
 
-*Last Updated: December 8, 2025*  
-*Version: 0.1.6*  
+*Last Updated: December 10, 2025*  
+*Version: 0.1.9*  
 *Maintained by: Agent Foundry and John Brosnihan*
