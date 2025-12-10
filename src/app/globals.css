@@ -1,3 +1,9 @@
+/**
+ * Global styles for The Horizon
+ * Color values reference the centralized DARK_PALETTE (src/lib/dark-palette.ts)
+ * All colors are hardcoded for the dark-only theme - no light mode support
+ */
+
 * {
   box-sizing: border-box;
   padding: 0;
@@ -8,12 +14,12 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  color-scheme: dark;
+  color-scheme: dark; /* Force dark mode globally */
 }
 
 body {
-  color: #ffffff;
-  background: #000000;
+  color: #ffffff; /* DARK_PALETTE.text.primary */
+  background: #000000; /* DARK_PALETTE.background.primary */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -34,8 +40,8 @@ a {
 .transition-indicator-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(74, 144, 226, 0.3);
-  border-top-color: #4A90E2;
+  border: 2px solid rgba(74, 144, 226, 0.3); /* DARK_PALETTE.accent.transparent30 */
+  border-top-color: #4A90E2; /* DARK_PALETTE.accent.primary */
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -69,7 +75,7 @@ a {
   .transition-indicator-spinner {
     animation: none;
     /* Show a simple circle instead of spinning */
-    border: 2px solid rgba(74, 144, 226, 0.6);
+    border: 2px solid rgba(74, 144, 226, 0.6); /* DARK_PALETTE.accent.transparent60 */
   }
 }
 
@@ -80,8 +86,8 @@ a {
   left: 50%;
   transform: translateX(-50%);
   padding: 1rem 2rem;
-  background-color: rgba(0, 0, 0, 0.8);
-  border: 2px solid rgba(74, 144, 226, 0.5);
+  background-color: rgba(0, 0, 0, 0.8); /* Similar to DARK_PALETTE.background.secondary */
+  border: 2px solid rgba(74, 144, 226, 0.5); /* DARK_PALETTE.accent.transparent50 */
   border-radius: 12px;
   max-width: 90%;
   width: auto;
@@ -95,14 +101,14 @@ a {
 .welcome-message-title {
   font-size: clamp(1.5rem, 4vw, 2.5rem);
   margin-bottom: 0.5rem;
-  color: #4A90E2;
+  color: #4A90E2; /* DARK_PALETTE.accent.primary */
   font-weight: bold;
   letter-spacing: 0.05em;
 }
 
 .welcome-message-text {
   font-size: clamp(0.8rem, 1.8vw, 1rem);
-  color: #CCCCCC;
+  color: #CCCCCC; /* Similar to DARK_PALETTE.text.secondary (#AAAAAA) */
   line-height: 1.5;
   margin: 0;
 }
