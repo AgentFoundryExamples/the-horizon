@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0",
-  "total_files": 56,
+  "total_files": 58,
   "files": [
     {
       "schema_version": "2.0",
@@ -186,6 +186,20 @@
     },
     {
       "schema_version": "2.0",
+      "path": "src/lib/__tests__/dark-palette.test.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 10627,
+        "loc": 187,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
       "path": "src/lib/__tests__/github-optimistic-locking.test.ts",
       "language": "TypeScript",
       "role": "implementation",
@@ -363,6 +377,20 @@
       "metrics": {
         "size_bytes": 3363,
         "loc": 57,
+        "todo_count": 0
+      }
+    },
+    {
+      "schema_version": "2.0",
+      "path": "src/lib/dark-palette.ts",
+      "language": "TypeScript",
+      "role": "implementation",
+      "role_justification": "general implementation file (default classification)",
+      "summary": "TypeScript core implementation",
+      "summary_text": "TypeScript core implementation",
+      "metrics": {
+        "size_bytes": 7501,
+        "loc": 212,
         "todo_count": 0
       }
     },

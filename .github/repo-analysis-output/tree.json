@@ -468,6 +468,10 @@
                 },
                 {
                   "type": "file",
+                  "name": "dark-palette.test.ts"
+                },
+                {
+                  "type": "file",
                   "name": "github-optimistic-locking.test.ts"
                 },
                 {
@@ -623,6 +627,10 @@
             {
               "type": "file",
               "name": "crypto.ts"
+            },
+            {
+              "type": "file",
+              "name": "dark-palette.ts"
             },
             {
               "type": "file",

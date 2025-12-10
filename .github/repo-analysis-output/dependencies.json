@@ -160,6 +160,15 @@
       }
     },
     {
+      "id": "src/lib/__tests__/dark-palette.test.ts",
+      "path": "src/lib/__tests__/dark-palette.test.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
       "id": "src/lib/__tests__/github-optimistic-locking.test.ts",
       "path": "src/lib/__tests__/github-optimistic-locking.test.ts",
       "type": "file",
@@ -289,6 +298,15 @@
     {
       "id": "src/lib/crypto.ts",
       "path": "src/lib/crypto.ts",
+      "type": "file",
+      "external_dependencies": {
+        "stdlib": [],
+        "third-party": []
+      }
+    },
+    {
+      "id": "src/lib/dark-palette.ts",
+      "path": "src/lib/dark-palette.ts",
       "type": "file",
       "external_dependencies": {
         "stdlib": [],
@@ -617,6 +635,10 @@
     {
       "source": "src/lib/__tests__/crypto.test.ts",
       "target": "src/lib/crypto.ts"
+    },
+    {
+      "source": "src/lib/__tests__/dark-palette.test.ts",
+      "target": "src/lib/dark-palette.ts"
     },
     {
       "source": "src/lib/__tests__/github-optimistic-locking.test.ts",

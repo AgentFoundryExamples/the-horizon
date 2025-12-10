@@ -103,6 +103,7 @@
       ├── auth.test.ts
       ├── camera.test.ts
       ├── crypto.test.ts
+      ├── dark-palette.test.ts
       ├── github-optimistic-locking.test.ts
       ├── github.test.ts
       ├── hover-labels-integration.test.ts
@@ -141,6 +142,7 @@
     ├── camera.ts
     ├── collapsible-config.ts
     ├── crypto.ts
+    ├── dark-palette.ts
     ├── github.ts
     ├── hover-store.ts
     ├── label-config.ts

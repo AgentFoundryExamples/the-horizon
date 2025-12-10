@@ -4,7 +4,7 @@ Heuristic summaries of source files based on filenames, extensions, and paths.
 
 Schema Version: 2.0
 
-Total files: 56
+Total files: 58
 
 ## jest.config.js
 **Language:** JavaScript  
@@ -123,6 +123,15 @@ Total files: 56
 **LOC:** 75  
 **TODOs/FIXMEs:** 0  
 
+## src/lib/__tests__/dark-palette.test.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 10.38 KB  
+**LOC:** 187  
+**TODOs/FIXMEs:** 0  
+
 ## src/lib/__tests__/github-optimistic-locking.test.ts
 **Language:** TypeScript  
 **Role:** implementation  
@@ -238,6 +247,15 @@ Total files: 56
 **Summary:** TypeScript core implementation  
 **Size:** 3.28 KB  
 **LOC:** 57  
+**TODOs/FIXMEs:** 0  
+
+## src/lib/dark-palette.ts
+**Language:** TypeScript  
+**Role:** implementation  
+**Role Justification:** general implementation file (default classification)  
+**Summary:** TypeScript core implementation  
+**Size:** 7.33 KB  
+**LOC:** 212  
 **TODOs/FIXMEs:** 0  
 
 ## src/lib/github.ts
