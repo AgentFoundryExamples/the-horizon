@@ -151,24 +151,6 @@
           ]
         }
       ]
-    },
-    {
-      "id": "new-galaxy-1765422125048",
-      "name": "New Galaxy",
-      "description": "A newly discovered galaxy",
-      "theme": "blue-white",
-      "particleColor": "#4A90E2",
-      "stars": [],
-      "solarSystems": []
-    },
-    {
-      "id": "new-galaxy-1765422200714",
-      "name": "New Galaxy",
-      "description": "A newly discovered galaxy",
-      "theme": "blue-white",
-      "particleColor": "#4A90E2",
-      "stars": [],
-      "solarSystems": []
     }
   ]
 }
