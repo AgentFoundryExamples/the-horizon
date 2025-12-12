@@ -21,7 +21,22 @@
               "haloRadius": 1.3
             }
           },
-          "planets": []
+          "planets": [
+            {
+              "id": "first-post",
+              "name": "First Post",
+              "theme": "blue-green",
+              "summary": "Very first post",
+              "contentMarkdown": "# Welcome to the Horizon\nI wanted something uniquely me for my portfolio site, and after a long time of ideas floating around in the background while I worked on other things, the idea and the capability to build this site finally aligned.\n\nSpace has always represented something incredible to me. It’s an infinite, unexplored frontier that anyone can look up at and have their own interpretation of what else might be out there. It represents how much further we still can go, and that there is always something beyond what we currently understand.\n\nI may never go to space in my lifetime, but what it represents to me is far more impactful. It reminds me to try new things, to step outside my comfort zone, and to keep learning. It’s a constant reminder that there is always more to explore, and that the world is far bigger than any one person.\n\nThat’s why I designed this site with this theme. It reflects how I think, how I build, and how I approach new challenges. The Horizon represents curiosity, growth, and the drive to keep pushing forward.",
+              "moons": [],
+              "visualTheme": {
+                "preset": "desert",
+                "glowColor": "#D4A574",
+                "glowIntensity": 0.1,
+                "rotationSpeed": 0.7
+              }
+            }
+          ]
         }
       ]
     },
@@ -125,7 +140,11 @@
           "mainStar": {
             "id": "the-origin",
             "name": "The Origin",
-            "theme": "orange-dwarf"
+            "theme": "orange-dwarf",
+            "haloConfig": {
+              "haloIntensity": 25,
+              "haloRadius": 1.4
+            }
           },
           "planets": [
             {
